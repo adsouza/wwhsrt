@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "revision": 10,
+  "role": "User-defined regional camera presets for the Equal Earth map prototype",
+  "orientation": "Use the game document viewport: portrait when height > width; otherwise landscape. Do not infer orientation from the map rectangle or a width breakpoint.",
+  "padding_screen_px": { "horizontal": 26, "vertical": 21 },
+  "legacy_aliases": { "oceania": "south-east-asia" },
+  "portrait_limits": { "southern_metro_id": "melbourne", "northern_metro_id": "saint_petersburg", "cushion_degrees": 3 },
+  "initial_views": {
+    "portrait": { "id": "americas", "label": "Americas", "available_in": ["portrait"], "metro_ids": ["buenos_aires", "toronto", "san_francisco", "rio_de_janeiro"] }
+  },
+  "portrait_timezone_defaults": {
+    "offset_basis": "Device-local standard UTC offset in minutes east of UTC, approximated by the smaller January/July offset in the current year; daylight saving does not move the boundary.",
+    "fallback_view": "americas",
+    "rules": [
+      { "id": "dhaka-edge", "label": "Dhaka-edge overview", "available_in": ["portrait"], "min_utc_offset_minutes": 0, "max_utc_offset_minutes": 330, "include_min": true, "fit": "portrait-limit-edge", "edge": "east", "metro_ids": ["dhaka"] },
+      { "id": "karachi-edge", "label": "Karachi-edge overview", "available_in": ["portrait"], "min_utc_offset_minutes": 330, "max_utc_offset_minutes": 540, "include_min": false, "fit": "portrait-limit-edge", "edge": "west", "metro_ids": ["karachi"] }
+    ]
+  },
+  "regions": [
+    {
+      "id": "europe", "label": "Frangistan",
+      "landscape": { "metro_ids": ["moscow", "saint_petersburg", "madrid"] },
+      "portrait": { "metro_ids": ["madrid", "milan", "randstad"] }
+    },
+    {
+      "id": "south-asia", "label": "South Asia",
+      "landscape": { "metro_ids": ["bengaluru", "dhaka", "lahore", "riyadh"] },
+      "portrait": { "fit": "metro-points", "align_y": "north", "metro_ids": ["bengaluru", "dhaka", "lahore", "karachi"] }
+    },
+    {
+      "id": "east-asia", "label": "East Asia", "fit": "metro-points", "exclude_metro_ids": ["dhaka"],
+      "landscape": { "metro_ids": ["shenyang", "chengdu", "hong_kong", "tokyo"] },
+      "portrait": { "metro_ids": ["shenyang", "chengdu", "hong_kong", "tokyo", "yangon"] }
+    },
+    {
+      "id": "africa",
+      "landscape": { "label": "Africa (East+West)", "metro_ids": ["khartoum", "luanda", "abidjan", "dar_es_salaam"] },
+      "portrait": { "label": "Africa+Arabia", "fit": "metro-points", "exclude_metro_ids": ["karachi"], "metro_ids": ["abidjan", "johannesburg", "tehran", "dubai"] }
+    },
+    { "id": "mashreq", "label": "Mashreq", "available_in": ["landscape"], "metro_ids": ["alexandria", "tehran", "riyadh", "dubai"] },
+    { "id": "north-america", "label": "North America", "available_in": ["landscape"], "portrait_default": "north-america-east", "metro_ids": ["toronto", "new_york", "mexico_city", "san_francisco"] },
+    { "id": "north-america-east", "label": "Eastern North America", "available_in": ["portrait"], "landscape_parent": "north-america", "metro_ids": ["toronto", "miami", "atlanta", "new_york"] },
+    { "id": "north-america-west", "label": "Western North America", "fit": "metro-points", "available_in": ["portrait"], "landscape_parent": "north-america", "metro_ids": ["san_francisco", "mexico_city", "houston"] },
+    {
+      "id": "south-america", "label": "South America",
+      "landscape": { "metro_ids": ["lima", "buenos_aires", "rio_de_janeiro"] },
+      "portrait": { "metro_ids": ["bogota", "lima", "buenos_aires", "rio_de_janeiro"] }
+    },
+    { "id": "south-east-asia", "label": "SouthEast Asia", "metro_ids": ["ho_chi_minh", "singapore", "yangon"] }
+  ]
+}

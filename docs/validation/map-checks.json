@@ -1,0 +1,370 @@
+{
+  "date": "2026-11-08",
+  "browser": "153.0.8010.12",
+  "projection": "Equal Earth",
+  "checks": [
+    "portrait starts at hidden Americas bounds with all four anchor labels; World absent from DOM; dropdown has only specific regions; manual +/- and wheel zoom remain usable",
+    "93 playable records retain raw values and all meet the 5M minimum; Phoenix retained at exactly 5M; Brasília/Manila/Taipei excluded; display suffix removed; portrait preview defaults correctly; 177 sourced country geometries; all markers match Equal Earth forward projection",
+    "regional zoom uses camera scaling; marker sizes and raw records stay fixed; metro inspection shows source values; world reset; overlapping metro disambiguation",
+    "narrow layouts, resize persistence, and labels remain at readable pixel sizes",
+    "dark appearance and reduced-motion regional navigation",
+    "portrait latitude limits apply to buttons, edge-focused wheel zoom, touch pinch, north/south pan, metro focus, animation frames, invalid saved cameras, and narrow/wide portrait resize; zoom-out disables at the floor",
+    "landscape World transitions to portrait Americas; old saved World cameras migrate; current manual portrait cameras restore and resize without resetting",
+    "all 16 requested landscape/portrait anchor sets, visible anchor labels, tight projected bounds/anchor fits, Dhaka and Karachi camera exclusions, closer portrait South Asia/Western North America, Lahore top alignment, orientation-specific menus, Mashreq camera-preserving portrait transition, height-only resize, current-orientation state restore, square viewport, remembered North America side, and legacy Oceania migration",
+    "timezone portrait defaults: UTC0 to +05:30 inclusive Dhaka east; greater than +05:30 through +09:00 Karachi west; fractional offsets, aliases, summer/winter stability, unknown/outside fallback, maximum zoom-out, edge metro labels, outward metro exclusion at 320/390/1000px, and saved-view precedence"
+  ],
+  "maxMarkerProjectionErrorPx": 0.000011660506648430561,
+  "orientationCases": [
+    {
+      "orientation": "landscape",
+      "region": "mashreq",
+      "anchors": [
+        "alexandria",
+        "tehran",
+        "riyadh",
+        "dubai"
+      ],
+      "bounds": [
+        29.9187,
+        24.7136,
+        55.2708,
+        35.6892
+      ]
+    },
+    {
+      "orientation": "landscape",
+      "region": "north-america",
+      "anchors": [
+        "toronto",
+        "new_york",
+        "mexico_city",
+        "san_francisco"
+      ],
+      "bounds": [
+        -122.4194,
+        19.4326,
+        -74.006,
+        43.6532
+      ]
+    },
+    {
+      "orientation": "landscape",
+      "region": "europe",
+      "anchors": [
+        "moscow",
+        "saint_petersburg",
+        "madrid"
+      ],
+      "bounds": [
+        -3.7038,
+        40.4168,
+        37.6173,
+        59.9311
+      ]
+    },
+    {
+      "orientation": "landscape",
+      "region": "africa",
+      "anchors": [
+        "khartoum",
+        "luanda",
+        "abidjan",
+        "dar_es_salaam"
+      ],
+      "bounds": [
+        -4.0083,
+        -8.839,
+        39.2083,
+        15.5007
+      ]
+    },
+    {
+      "orientation": "landscape",
+      "region": "south-asia",
+      "anchors": [
+        "bengaluru",
+        "dhaka",
+        "lahore",
+        "riyadh"
+      ],
+      "bounds": [
+        46.6753,
+        12.9716,
+        90.4125,
+        31.5204
+      ]
+    },
+    {
+      "orientation": "landscape",
+      "region": "east-asia",
+      "anchors": [
+        "shenyang",
+        "chengdu",
+        "hong_kong",
+        "tokyo"
+      ],
+      "bounds": [
+        104.0668,
+        22.3193,
+        139.7514,
+        41.8057
+      ]
+    },
+    {
+      "orientation": "landscape",
+      "region": "south-america",
+      "anchors": [
+        "lima",
+        "buenos_aires",
+        "rio_de_janeiro"
+      ],
+      "bounds": [
+        -77.0428,
+        -34.6037,
+        -43.1729,
+        -12.0463
+      ]
+    },
+    {
+      "orientation": "landscape",
+      "region": "south-east-asia",
+      "anchors": [
+        "ho_chi_minh",
+        "singapore",
+        "yangon"
+      ],
+      "bounds": [
+        96.1951,
+        1.3521,
+        106.6297,
+        16.8661
+      ]
+    },
+    {
+      "orientation": "portrait",
+      "region": "europe",
+      "anchors": [
+        "madrid",
+        "milan",
+        "randstad"
+      ],
+      "bounds": [
+        -3.7038,
+        40.4168,
+        9.19,
+        52.3676
+      ]
+    },
+    {
+      "orientation": "portrait",
+      "region": "africa",
+      "anchors": [
+        "abidjan",
+        "johannesburg",
+        "tehran",
+        "dubai"
+      ],
+      "bounds": [
+        -4.0083,
+        -26.2041,
+        55.2708,
+        35.6892
+      ]
+    },
+    {
+      "orientation": "portrait",
+      "region": "south-asia",
+      "anchors": [
+        "bengaluru",
+        "dhaka",
+        "lahore",
+        "karachi"
+      ],
+      "bounds": [
+        67.0011,
+        12.9716,
+        90.4125,
+        31.5204
+      ]
+    },
+    {
+      "orientation": "portrait",
+      "region": "east-asia",
+      "anchors": [
+        "shenyang",
+        "chengdu",
+        "hong_kong",
+        "tokyo",
+        "yangon"
+      ],
+      "bounds": [
+        96.1951,
+        16.8661,
+        139.7514,
+        41.8057
+      ]
+    },
+    {
+      "orientation": "portrait",
+      "region": "south-america",
+      "anchors": [
+        "bogota",
+        "lima",
+        "buenos_aires",
+        "rio_de_janeiro"
+      ],
+      "bounds": [
+        -77.0428,
+        -34.6037,
+        -43.1729,
+        4.711
+      ]
+    },
+    {
+      "orientation": "portrait",
+      "region": "north-america-east",
+      "anchors": [
+        "toronto",
+        "miami",
+        "atlanta",
+        "new_york"
+      ],
+      "bounds": [
+        -84.388,
+        25.7617,
+        -74.006,
+        43.6532
+      ]
+    },
+    {
+      "orientation": "portrait",
+      "region": "north-america-west",
+      "anchors": [
+        "san_francisco",
+        "mexico_city",
+        "houston"
+      ],
+      "bounds": [
+        -122.4194,
+        19.4326,
+        -95.3698,
+        37.7749
+      ]
+    },
+    {
+      "orientation": "portrait",
+      "region": "south-east-asia",
+      "anchors": [
+        "ho_chi_minh",
+        "singapore",
+        "yangon"
+      ],
+      "bounds": [
+        96.1951,
+        1.3521,
+        106.6297,
+        16.8661
+      ]
+    }
+  ],
+  "portraitFraming": [
+    {
+      "region": "south-asia",
+      "scaleRatio": 1.19306476817021,
+      "lahoreY": 21
+    },
+    {
+      "region": "north-america-west",
+      "scaleRatio": 1.6157712065355652,
+      "lahoreY": null
+    }
+  ],
+  "portraitLatitudeLimits": {
+    "south": -40.8136,
+    "north": 62.9311,
+    "cushionDegrees": 3,
+    "animationFrames": 210,
+    "violations": 0
+  },
+  "timezoneDefaults": [
+    {
+      "timezoneId": "America/New_York",
+      "standardUtcOffsetMinutes": -300,
+      "view": "americas",
+      "date": "2026-07-15"
+    },
+    {
+      "timezoneId": "Atlantic/Reykjavik",
+      "standardUtcOffsetMinutes": 0,
+      "view": "dhaka-edge",
+      "date": "2026-01-15"
+    },
+    {
+      "timezoneId": "Europe/London",
+      "standardUtcOffsetMinutes": 0,
+      "view": "dhaka-edge",
+      "date": "2026-01-15"
+    },
+    {
+      "timezoneId": "Europe/London",
+      "standardUtcOffsetMinutes": 0,
+      "view": "dhaka-edge",
+      "date": "2026-07-15"
+    },
+    {
+      "timezoneId": "Asia/Calcutta",
+      "standardUtcOffsetMinutes": 330,
+      "view": "dhaka-edge",
+      "date": "2026-07-15"
+    },
+    {
+      "timezoneId": "Asia/Kolkata",
+      "standardUtcOffsetMinutes": 330,
+      "view": "dhaka-edge",
+      "date": "2026-01-15"
+    },
+    {
+      "timezoneId": "Asia/Kathmandu",
+      "standardUtcOffsetMinutes": 345,
+      "view": "karachi-edge",
+      "date": "2026-01-15"
+    },
+    {
+      "timezoneId": "Asia/Dhaka",
+      "standardUtcOffsetMinutes": 360,
+      "view": "karachi-edge",
+      "date": "2026-07-15"
+    },
+    {
+      "timezoneId": "Asia/Yangon",
+      "standardUtcOffsetMinutes": 390,
+      "view": "karachi-edge",
+      "date": "2026-01-15"
+    },
+    {
+      "timezoneId": "Asia/Shanghai",
+      "standardUtcOffsetMinutes": 480,
+      "view": "karachi-edge",
+      "date": "2026-01-15"
+    },
+    {
+      "timezoneId": "Asia/Tokyo",
+      "standardUtcOffsetMinutes": 540,
+      "view": "karachi-edge",
+      "date": "2026-07-15"
+    },
+    {
+      "timezoneId": "Australia/Darwin",
+      "standardUtcOffsetMinutes": 570,
+      "view": "americas",
+      "date": "2026-07-15"
+    },
+    {
+      "timezoneId": "Atlantic/Azores",
+      "standardUtcOffsetMinutes": -60,
+      "view": "americas",
+      "date": "2026-07-15"
+    }
+  ],
+  "passed": true
+}

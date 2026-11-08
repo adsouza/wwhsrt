@@ -1,0 +1,12 @@
+{
+  "role": "Prototype basemap only; no rail infrastructure or terrain qualification",
+  "source_url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_0_countries.geojson",
+  "license": "Public domain",
+  "terms_url": "https://www.naturalearthdata.com/about/terms-of-use/",
+  "snapshot_date": "2026-11-08",
+  "source_commit": null,
+  "source_sha256": "6866c877d39cba9c357620878839b336d569f8c662d3cfab4cb1dbe2d39c977f",
+  "processed_sha256": "4f05a1bde52ba09cd560c8c896d3e9afd50885bd093b34a0f0af643f1d634c02",
+  "processing": "Retain NAME and original geometry; drop other properties; compact JSON",
+  "feature_count": 177
+}

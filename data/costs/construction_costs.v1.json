@@ -1,0 +1,1032 @@
+{
+  "schema_version": 1,
+  "cost_model_version": "hsr-construction-2024usd-v1",
+  "researched_on": "2026-11-08",
+  "money_basis": "constant 2024 USD at historical market FX; screening comparisons only where source basis is mixed/proxy",
+  "route_unit": "route_km for a complete double-track railway, not track_km",
+  "baseline_scope": "new 300 km/h rural at-grade double-track civil works and track plus standard electrification/train-control/communications; excludes property, stations, depots, rolling stock, indirects, contingency, financing and tax",
+  "sources": {
+    "WB_CN": {
+      "title": "World Bank, China’s High-Speed Rail Development (2019), pp. 39–41 and 49",
+      "url": "https://documents1.worldbank.org/curated/en/933411559841476316/pdf/Chinas-High-Speed-Rail-Development.pdf"
+    },
+    "ECA": {
+      "title": "European Court of Auditors, Special Report 19/2018, Table 5",
+      "url": "https://op.europa.eu/webpub/eca/special-reports/high-speed-rail-19-2018/en/"
+    },
+    "PWC": {
+      "title": "DfT/HS2, international benchmarking study (2016), pp. 13–16",
+      "url": "https://assets.publishing.service.gov.uk/media/5fb7de78e90e077ee0856f00/high-speed-rail-international-benchmarking-study-document.pdf",
+      "inspection": "Original civil-asset charts on printed page 15 rendered and inspected."
+    },
+    "IN_PARL": {
+      "title": "India Parliament, 23 July 2025, Question 54",
+      "url": "https://sansad.in/getFile/loksabhaquestions/annex/185/AS54_7WACnw.pdf?source=pqals"
+    },
+    "JP_MLIT": {
+      "title": "Japan MLIT, March 2019 project reevaluations, Nishi Kyushu row",
+      "url": "https://www.mlit.go.jp/tec/hyouka/public/kisha/190329h30/pdf/06.pdf",
+      "inspection": "Original Nishi Kyushu table on PDF page 78 rendered and inspected."
+    },
+    "JP_JRTT": {
+      "title": "JRTT, Shinkansen project specifications, Nishi Kyushu",
+      "url": "https://www.jrtt.go.jp/english/construction/shinkansen.html"
+    },
+    "KR": {
+      "title": "Korea National Railway, Honam phase 1 project profile",
+      "url": "https://www.kr.or.kr/sub/info.do?m=05010202"
+    },
+    "MA_FIN": {
+      "title": "Morocco Ministry of Finance, January 2016 review of 2015 infrastructure, printed p. 11",
+      "url": "https://www.finances.gov.ma/Maliya%20tawassol/file_160216_153707547.pdf",
+      "inspection": "Relevant original PDF page rendered and inspected; 2015-status budget."
+    },
+    "MA_AFD": {
+      "title": "AFD, Tangier–Kenitra project description",
+      "url": "https://www.afd.fr/fr/projets/le-train-le-plus-rapide-dafrique"
+    },
+    "ID_GOV": {
+      "title": "Indonesian government news, 17 October 2025, reported investment",
+      "url": "https://inp.polri.go.id/artikel/president-prabowo-to-issue-presidential-decree-to-settle-high-speed-rail-debt-luhut"
+    },
+    "ID_KCIC": {
+      "title": "KCIC, 6 May 2024, route specification",
+      "url": "https://kcic.co.id/kcic-siaran-pers/informasi-kereta-whoosh-makin-mudah-kcic-hadirkan-contact-center-via-telepon-hingga-whatsapp/"
+    },
+    "SA": {
+      "title": "Saudi Ministry of Media, Saudipedia, Haramain project",
+      "url": "https://saudipedia.com/en/haramain-high-speed-railway"
+    },
+    "TZ": {
+      "title": "African Development Bank, December 2023 project approval",
+      "url": "https://www.afdb.org/en/news-and-events/press-releases/african-development-bank-approves-69641-million-financing-burundi-and-tanzania-build-650-kilometers-rail-infrastructure-develop-central-corridor-network-67028",
+      "inspection": "Indexed AfDB approval excerpt supplies exact budget/length; full press page unavailable to reader. A separate AfDB booklet repeats approximately USD4bn and 651km; this is not an independent project audit."
+    },
+    "TZ_CHECK": {
+      "title": "AfDB, 2025 business opportunities booklet, Tanzania–Burundi rail",
+      "url": "https://bos.afdb.org/documents/presentation/BOS%20Abidjan%202025%20Booklet.pdf"
+    },
+    "UY": {
+      "title": "Presidency of Uruguay, 5 June 2019, Ferrocarril Central",
+      "url": "https://www.gub.uy/presidencia/comunicacion/noticias/astori-ferrocarril-central-busca-corregir-error-historico-garrafal-cometio"
+    },
+    "BR": {
+      "title": "Brazil ANTT, Voto DFQ 82/2024, sections 3.2–3.3",
+      "url": "https://portal.antt.gov.br/documents/498202/0/Voto%2BDFQ%2B-%2B082.pdf/866c2a45-023a-c040-746c-508f4ab3f5ec?t=1729522360270"
+    },
+    "AE": {
+      "title": "Etihad Rail, Package A award, 13 March 2019",
+      "url": "https://corporate.etihadrail.ae/en/newsroom/press/etihad-rail-launches-package-a-of-stage-two-to-connect-ghuweifat-and-ruwais"
+    },
+    "AU": {
+      "title": "Australian Government, Inland Rail independent review (2023), pp. 11 and 52",
+      "url": "https://www.infrastructure.gov.au/sites/default/files/documents/independent-review-of-inland-rail-report.pdf"
+    },
+    "UK": {
+      "title": "UK NAO, HS1 completed cost and scope, 2024 lessons report, Appendix 1",
+      "url": "https://www.nao.org.uk/wp-content/uploads/2024/02/delivering-value-from-government-investment.pdf"
+    },
+    "US": {
+      "title": "California HSR Authority, August 2025 supplemental report, Tables 1.5 and B.2",
+      "url": "https://hsr.ca.gov/wp-content/uploads/2025/08/2025-Project-Update-Report-SUP-FINAL-081925-A11Y.pdf",
+      "inspection": "Original authority report read through web text, Tables 1.5 and B.2; direct local download returned a non-PDF response."
+    },
+    "EG_EXCLUDE": {
+      "title": "Siemens, Egypt contract announcement, 28 May 2022",
+      "url": "https://press.siemens.com/global/en/pressrelease/siemens-mobility-finalizes-contract-2000-km-high-speed-rail-system-egypt"
+    }
+  },
+  "normalization": {
+    "formula": "(reported_cost / lcu_per_usd / route_km) * CPI_2024 / CPI_price_year / 1e6",
+    "cpi": {
+      "source": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=CPIAUCNS&cosd=2007-01-01&coed=2024-12-31",
+      "series": "CPIAUCNS",
+      "annual_mean": {
+        "2007": 207.342,
+        "2008": 215.303,
+        "2009": 214.537,
+        "2010": 218.056,
+        "2011": 224.939,
+        "2012": 229.594,
+        "2013": 232.957,
+        "2014": 236.736,
+        "2015": 237.017,
+        "2016": 240.007,
+        "2017": 245.12,
+        "2018": 251.107,
+        "2019": 255.657,
+        "2020": 258.811,
+        "2021": 270.97,
+        "2022": 292.655,
+        "2023": 304.702,
+        "2024": 313.689
+      }
+    },
+    "fx_lcu_per_usd": {
+      "FRA_2018": {
+        "lcu_per_usd": 0.846772667108111,
+        "source": "https://api.worldbank.org/v2/country/FRA/indicator/PA.NUS.FCRF?date=2018&format=json"
+      },
+      "GBR_2007": {
+        "lcu_per_usd": 0.499771666666666,
+        "source": "https://api.worldbank.org/v2/country/GBR/indicator/PA.NUS.FCRF?date=2007&format=json"
+      },
+      "JPN_2019": {
+        "lcu_per_usd": 109.009665900863,
+        "source": "https://api.worldbank.org/v2/country/JPN/indicator/PA.NUS.FCRF?date=2019&format=json"
+      },
+      "KOR_2015": {
+        "lcu_per_usd": 1130.9525,
+        "source": "https://api.worldbank.org/v2/country/KOR/indicator/PA.NUS.FCRF?date=2015&format=json"
+      },
+      "AUS_2022": {
+        "lcu_per_usd": 1.44166445896521,
+        "source": "https://api.worldbank.org/v2/country/AUS/indicator/PA.NUS.FCRF?date=2022&format=json"
+      },
+      "AUS_2012": {
+        "lcu_per_usd": 0.965801030658707,
+        "source": "https://api.worldbank.org/v2/country/AUS/indicator/PA.NUS.FCRF?date=2012&format=json"
+      },
+      "BRA_2020": {
+        "lcu_per_usd": 5.1551787875128,
+        "source": "https://api.worldbank.org/v2/country/BRA/indicator/PA.NUS.FCRF?date=2020&format=json"
+      },
+      "ARE_2019": {
+        "lcu_per_usd": 3.6725,
+        "source": "https://api.worldbank.org/v2/country/ARE/indicator/PA.NUS.FCRF?date=2019&format=json"
+      },
+      "IND_2017": {
+        "lcu_per_usd": 65.1215686450659,
+        "source": "https://api.worldbank.org/v2/country/IND/indicator/PA.NUS.FCRF?date=2017&format=json"
+      },
+      "MAR_2015": {
+        "lcu_per_usd": 9.7643482795011,
+        "source": "https://api.worldbank.org/v2/country/MAR/indicator/PA.NUS.FCRF?date=2015&format=json"
+      },
+      "SAU_2018": {
+        "lcu_per_usd": 3.75,
+        "source": "https://api.worldbank.org/v2/country/SAU/indicator/PA.NUS.FCRF?date=2018&format=json"
+      }
+    },
+    "warning": "CPI is a broad common-dollar screen, not a rail construction index or PPP model. Proxy-year cases are approximate, and YOE/partial contracts are not normalized."
+  },
+  "observations": [
+    {
+      "id": "E01",
+      "project": "China 350 km/h network sample",
+      "evidence_kind": "HSR constructed sample average",
+      "reported_cost": 20600000.0,
+      "currency": "USD",
+      "route_km": 1,
+      "normalization_year": 2017,
+      "price_basis_status": "explicit_2017_normalization_in_source",
+      "fx_key": null,
+      "reported_million_currency_per_route_km": 20.6,
+      "screening_million_2024_usd_per_route_km": 26.362571,
+      "source_ids": [
+        "WB_CN"
+      ],
+      "scope_notes": "Double track with electrification, signaling and facilities; mixed terrain. Unit average, not a flat-earth rate."
+    },
+    {
+      "id": "E02",
+      "project": "China 250 km/h network sample",
+      "evidence_kind": "HSR constructed sample average",
+      "reported_cost": 16900000.0,
+      "currency": "USD",
+      "route_km": 1,
+      "normalization_year": 2017,
+      "price_basis_status": "explicit_2017_normalization_in_source",
+      "fx_key": null,
+      "reported_million_currency_per_route_km": 16.9,
+      "screening_million_2024_usd_per_route_km": 21.627546,
+      "source_ids": [
+        "WB_CN"
+      ],
+      "scope_notes": "Same broad infrastructure scope; useful for checking speed-class effects, not a paired identical-alignment experiment."
+    },
+    {
+      "id": "E03",
+      "project": "France LGV Est",
+      "evidence_kind": "HSR audit completed line",
+      "reported_cost": 6712000000.0,
+      "currency": "EUR",
+      "route_km": 406,
+      "normalization_year": 2018,
+      "price_basis_status": "mixed_nominal_spend_2018_audit_proxy_only",
+      "fx_key": "FRA_2018",
+      "reported_million_currency_per_route_km": 16.53202,
+      "screening_million_2024_usd_per_route_km": 24.389312,
+      "source_ids": [
+        "ECA"
+      ],
+      "scope_notes": "Nominal figures at audit, not a uniform 2018 price base. Screening conversion only; retain project-scope and new/upgraded differences."
+    },
+    {
+      "id": "E04",
+      "project": "France Rhin–Rhône",
+      "evidence_kind": "HSR audit completed line",
+      "reported_cost": 2588000000.0,
+      "currency": "EUR",
+      "route_km": 138,
+      "normalization_year": 2018,
+      "price_basis_status": "mixed_nominal_spend_2018_audit_proxy_only",
+      "fx_key": "FRA_2018",
+      "reported_million_currency_per_route_km": 18.753623,
+      "screening_million_2024_usd_per_route_km": 27.666793,
+      "source_ids": [
+        "ECA"
+      ],
+      "scope_notes": "Nominal figures at audit, not a uniform 2018 price base. Screening conversion only; retain project-scope and new/upgraded differences."
+    },
+    {
+      "id": "E05",
+      "project": "Spain Madrid–Barcelona–French border",
+      "evidence_kind": "HSR audit completed line",
+      "reported_cost": 12109000000.0,
+      "currency": "EUR",
+      "route_km": 797,
+      "normalization_year": 2018,
+      "price_basis_status": "mixed_nominal_spend_2018_audit_proxy_only",
+      "fx_key": "FRA_2018",
+      "reported_million_currency_per_route_km": 15.193225,
+      "screening_million_2024_usd_per_route_km": 22.414218,
+      "source_ids": [
+        "ECA"
+      ],
+      "scope_notes": "Nominal figures at audit, not a uniform 2018 price base. Screening conversion only; retain project-scope and new/upgraded differences."
+    },
+    {
+      "id": "E06",
+      "project": "Germany Berlin–Munich",
+      "evidence_kind": "HSR audit mixed new/upgraded line",
+      "reported_cost": 14682000000.0,
+      "currency": "EUR",
+      "route_km": 671,
+      "normalization_year": 2018,
+      "price_basis_status": "mixed_nominal_spend_2018_audit_proxy_only",
+      "fx_key": "FRA_2018",
+      "reported_million_currency_per_route_km": 21.880775,
+      "screening_million_2024_usd_per_route_km": 32.280209,
+      "source_ids": [
+        "ECA"
+      ],
+      "scope_notes": "Nominal figures at audit, not a uniform 2018 price base. Screening conversion only; retain project-scope and new/upgraded differences."
+    },
+    {
+      "id": "E07",
+      "project": "Germany Stuttgart–Munich",
+      "evidence_kind": "HSR audit estimate for incomplete line",
+      "reported_cost": 13273000000.0,
+      "currency": "EUR",
+      "route_km": 267,
+      "normalization_year": 2018,
+      "price_basis_status": "mixed_nominal_spend_2018_audit_proxy_only",
+      "fx_key": "FRA_2018",
+      "reported_million_currency_per_route_km": 49.71161,
+      "screening_million_2024_usd_per_route_km": 73.338407,
+      "source_ids": [
+        "ECA"
+      ],
+      "scope_notes": "Nominal figures at audit, not a uniform 2018 price base. Screening conversion only; retain project-scope and new/upgraded differences."
+    },
+    {
+      "id": "E08",
+      "project": "Italy Turin–Salerno",
+      "evidence_kind": "HSR audit completed line",
+      "reported_cost": 32169000000.0,
+      "currency": "EUR",
+      "route_km": 1007,
+      "normalization_year": 2018,
+      "price_basis_status": "mixed_nominal_spend_2018_audit_proxy_only",
+      "fx_key": "FRA_2018",
+      "reported_million_currency_per_route_km": 31.945382,
+      "screening_million_2024_usd_per_route_km": 47.128295,
+      "source_ids": [
+        "ECA"
+      ],
+      "scope_notes": "Nominal figures at audit, not a uniform 2018 price base. Screening conversion only; retain project-scope and new/upgraded differences."
+    },
+    {
+      "id": "E09",
+      "project": "India Mumbai–Ahmedabad",
+      "evidence_kind": "HSR original budget reported while under construction",
+      "reported_cost": 1080000000000.0,
+      "currency": "INR",
+      "route_km": 508,
+      "normalization_year": 2017,
+      "price_basis_status": "original_approval_year_proxy_not_2025_actual",
+      "fx_key": "IND_2017",
+      "reported_million_currency_per_route_km": 2125.984252,
+      "screening_million_2024_usd_per_route_km": 41.778778,
+      "source_ids": [
+        "IN_PARL"
+      ],
+      "scope_notes": "Budget reiterated in July 2025. Not expenditure-to-complete or a current-price tender; stations and trainsets are within broad project scope."
+    },
+    {
+      "id": "E10",
+      "project": "Japan Nishi Kyushu",
+      "evidence_kind": "HSR 2019 project estimate",
+      "reported_cost": 620000000000.0,
+      "currency": "JPY",
+      "route_km": 66,
+      "normalization_year": 2019,
+      "price_basis_status": "2019_reassessment_proxy",
+      "fx_key": "JPN_2019",
+      "reported_million_currency_per_route_km": 9393.939394,
+      "screening_million_2024_usd_per_route_km": 105.736358,
+      "source_ids": [
+        "JP_MLIT",
+        "JP_JRTT"
+      ],
+      "scope_notes": "66 route-km versus 67 construction-km; use route denominator. JRTT engineering mix has approximately 61% tunnels; not a rural surface cost."
+    },
+    {
+      "id": "E11",
+      "project": "Korea Honam phase 1",
+      "evidence_kind": "HSR reported historical phase budget",
+      "reported_cost": 8119000000000.0,
+      "currency": "KRW",
+      "route_km": 182.3,
+      "normalization_year": 2015,
+      "price_basis_status": "2015_opening_year_proxy_price_base_unspecified",
+      "fx_key": "KOR_2015",
+      "reported_million_currency_per_route_km": 44536.478332,
+      "screening_million_2024_usd_per_route_km": 52.118427,
+      "source_ids": [
+        "KR"
+      ],
+      "scope_notes": "Use phase-1-only amount and length. Owner page is updated; historical amount lacks a uniform stated price year. Rough comparison only."
+    },
+    {
+      "id": "E12",
+      "project": "Morocco Tangier–Kenitra / Al Boraq package",
+      "evidence_kind": "HSR 2015 revised project budget",
+      "reported_cost": 22900000000.0,
+      "currency": "MAD",
+      "route_km": 200,
+      "normalization_year": 2015,
+      "price_basis_status": "2015_budget_report_proxy",
+      "fx_key": "MAR_2015",
+      "reported_million_currency_per_route_km": 114.5,
+      "screening_million_2024_usd_per_route_km": 15.519653,
+      "source_ids": [
+        "MA_FIN",
+        "MA_AFD"
+      ],
+      "scope_notes": "200 km of new HSR, not the longer Casablanca through-service distance. 2015-status package budget in January 2016 review includes facilities; not audited final cost."
+    },
+    {
+      "id": "E13",
+      "project": "Indonesia Jakarta–Bandung",
+      "evidence_kind": "HSR reported total investment",
+      "reported_cost": 7270000000.0,
+      "currency": "USD",
+      "route_km": 142.3,
+      "normalization_year": 2023,
+      "price_basis_status": "2023_opening_year_proxy_total_reported_2025",
+      "fx_key": null,
+      "reported_million_currency_per_route_km": 51.089248,
+      "screening_million_2024_usd_per_route_km": 52.596094,
+      "source_ids": [
+        "ID_GOV",
+        "ID_KCIC"
+      ],
+      "scope_notes": "Owner supplies route length; government news reports investment. Exact outturn spending profile/basis unavailable; mixed structures and facilities."
+    },
+    {
+      "id": "E14",
+      "project": "Saudi Arabia Haramain",
+      "evidence_kind": "HSR reported construction total",
+      "reported_cost": 60000000000.0,
+      "currency": "SAR",
+      "route_km": 450,
+      "normalization_year": 2018,
+      "price_basis_status": "2018_service_start_proxy",
+      "fx_key": "SAU_2018",
+      "reported_million_currency_per_route_km": 133.333333,
+      "screening_million_2024_usd_per_route_km": 44.416869,
+      "source_ids": [
+        "SA"
+      ],
+      "scope_notes": "Use source-consistent rounded 450 km, not 453 km from other inventories. Price and package breakdown unspecified."
+    },
+    {
+      "id": "E15",
+      "project": "Tanzania–Burundi corridor",
+      "evidence_kind": "conventional electrified railway project estimate",
+      "reported_cost": 3930000000.0,
+      "currency": "USD",
+      "route_km": 651,
+      "normalization_year": 2023,
+      "price_basis_status": "2023_approval_year_proxy",
+      "fx_key": null,
+      "reported_million_currency_per_route_km": 6.036866,
+      "screening_million_2024_usd_per_route_km": 6.21492,
+      "source_ids": [
+        "TZ",
+        "TZ_CHECK"
+      ],
+      "scope_notes": "Full estimated project cost, not the 696.41m AfDB financing contribution. Scope and track assumptions require explicit extrapolation."
+    },
+    {
+      "id": "E16",
+      "project": "Uruguay Ferrocarril Central",
+      "evidence_kind": "conventional reconstruction initial estimate",
+      "reported_cost": 839000000.0,
+      "currency": "USD",
+      "route_km": 273,
+      "normalization_year": 2019,
+      "price_basis_status": "2019_announcement_proxy",
+      "fx_key": null,
+      "reported_million_currency_per_route_km": 3.07326,
+      "screening_million_2024_usd_per_route_km": 3.770864,
+      "source_ids": [
+        "UY"
+      ],
+      "scope_notes": "Initial rail investment excludes separately reported 97m associated roads. Reconstructing an existing corridor is not greenfield HSR."
+    },
+    {
+      "id": "E17",
+      "project": "Brazil FICO Mara Rosa–Agua Boa",
+      "evidence_kind": "conventional greenfield contractual estimate",
+      "reported_cost": 2538765494.03,
+      "currency": "BRL",
+      "route_km": 365,
+      "normalization_year": 2020,
+      "price_basis_status": "explicit_october_2020_base",
+      "fx_key": "BRA_2020",
+      "reported_million_currency_per_route_km": 6.955522,
+      "screening_million_2024_usd_per_route_km": 1.635319,
+      "source_ids": [
+        "BR"
+      ],
+      "scope_notes": "80 km/h freight specification; infrastructure and track with environmental/design/land costs, REIDI benefit. Not an HSR cost."
+    },
+    {
+      "id": "E18",
+      "project": "UAE Etihad Rail Stage Two Package A",
+      "evidence_kind": "conventional double-track civil-and-track award",
+      "reported_cost": 1500000000.0,
+      "currency": "AED",
+      "route_km": 139,
+      "normalization_year": 2019,
+      "price_basis_status": "2019_award_year_proxy",
+      "fx_key": "ARE_2019",
+      "reported_million_currency_per_route_km": 10.791367,
+      "screening_million_2024_usd_per_route_km": 3.605423,
+      "source_ids": [
+        "AE"
+      ],
+      "scope_notes": "Civil/track package, not a complete electrified HSR system; do not treat its narrow scope as an all-in cost."
+    },
+    {
+      "id": "E19",
+      "project": "Australia Inland Rail",
+      "evidence_kind": "conventional freight program forecast",
+      "reported_cost": 31400000000.0,
+      "currency": "AUD",
+      "route_km": 1700,
+      "normalization_year": 2022,
+      "price_basis_status": "2022_cost_update_proxy_includes_escalation",
+      "fx_key": "AUS_2022",
+      "reported_million_currency_per_route_km": 18.470588,
+      "screening_million_2024_usd_per_route_km": 13.732825,
+      "source_ids": [
+        "AU"
+      ],
+      "scope_notes": "Mixed new works and upgrades; over 70% brownfield. Forecast includes scope/risk/escalation; screening conversion is especially approximate."
+    },
+    {
+      "id": "E20",
+      "project": "UK HS1",
+      "evidence_kind": "HSR nominal multi-year completed outturn",
+      "reported_cost": 6163000000.0,
+      "currency": "GBP",
+      "route_km": 109,
+      "normalization_year": 2007,
+      "price_basis_status": "2007_last_opening_proxy_for_mixed_outturn",
+      "fx_key": "GBR_2007",
+      "reported_million_currency_per_route_km": 56.541284,
+      "screening_million_2024_usd_per_route_km": 171.161485,
+      "source_ids": [
+        "UK"
+      ],
+      "scope_notes": "Line and depot scope; excludes Underground station remodelling. Do not convert with report year 2024 as if fresh construction."
+    },
+    {
+      "id": "E21",
+      "project": "US California Merced–Bakersfield",
+      "evidence_kind": "HSR P65 forecast",
+      "reported_cost": 36750000000.0,
+      "currency": "USD",
+      "route_km": 275.197824,
+      "normalization_year": null,
+      "price_basis_status": "year_of_expenditure_not_normalized",
+      "fx_key": null,
+      "reported_million_currency_per_route_km": 133.5403,
+      "screening_million_2024_usd_per_route_km": null,
+      "source_ids": [
+        "US"
+      ],
+      "scope_notes": "171 route miles. Table B.2 is YOE with contingency and broad program scope; no invented single-year deflation to 2024."
+    },
+    {
+      "id": "E22",
+      "project": "Egypt Siemens share — excluded as total cost",
+      "evidence_kind": "partial supplier contract including equipment and maintenance",
+      "reported_cost": 8100000000.0,
+      "currency": "EUR",
+      "route_km": 2000,
+      "normalization_year": null,
+      "price_basis_status": "excluded_partial_contract",
+      "fx_key": null,
+      "reported_million_currency_per_route_km": 4.05,
+      "screening_million_2024_usd_per_route_km": null,
+      "source_ids": [
+        "EG_EXCLUDE"
+      ],
+      "scope_notes": "Siemens share, including trains/depots/15-year maintenance. Not the full civil construction cost; excluded from baseline calibration."
+    }
+  ],
+  "conventional_extrapolation_formula": "(C * scope_retained - included_systems) / terrain_divisor * greenfield * target_track * geometry + added_systems; round upward to next 2m for adopted game prior",
+  "conventional_extrapolations": [
+    {
+      "id": "C_EAST_AFRICA",
+      "observation_id": "E15",
+      "source_cost_million_2024_usd_per_km": 6.21492,
+      "scope_retained_fraction": 0.85,
+      "included_systems_allowance_to_remove_million_per_km": 0.8,
+      "source_terrain_divisor": 1.2,
+      "greenfield_factor": 1,
+      "target_track_factor": 1.6,
+      "high_speed_geometry_factor": 1.4,
+      "added_target_systems_million_per_km": 3,
+      "computed_baseline_million_2024_usd_per_km": 11.367673,
+      "adopted_baseline_million_2024_usd_per_km": 12,
+      "parameter_status": "All conversion adjustments are explicit design assumptions, not measured universal engineering factors."
+    },
+    {
+      "id": "C_LATIN_AMERICA",
+      "observation_id": "E16",
+      "source_cost_million_2024_usd_per_km": 3.770864,
+      "scope_retained_fraction": 0.85,
+      "included_systems_allowance_to_remove_million_per_km": 0,
+      "source_terrain_divisor": 1,
+      "greenfield_factor": 1.4,
+      "target_track_factor": 1.6,
+      "high_speed_geometry_factor": 1.4,
+      "added_target_systems_million_per_km": 3,
+      "computed_baseline_million_2024_usd_per_km": 13.051615,
+      "adopted_baseline_million_2024_usd_per_km": 14,
+      "parameter_status": "All conversion adjustments are explicit design assumptions, not measured universal engineering factors."
+    },
+    {
+      "id": "C_BRAZIL",
+      "observation_id": "E17",
+      "source_cost_million_2024_usd_per_km": 1.635319,
+      "scope_retained_fraction": 0.9,
+      "included_systems_allowance_to_remove_million_per_km": 0,
+      "source_terrain_divisor": 1,
+      "greenfield_factor": 1,
+      "target_track_factor": 1.6,
+      "high_speed_geometry_factor": 1.5,
+      "added_target_systems_million_per_km": 3,
+      "computed_baseline_million_2024_usd_per_km": 6.532289,
+      "adopted_baseline_million_2024_usd_per_km": 8,
+      "parameter_status": "All conversion adjustments are explicit design assumptions, not measured universal engineering factors."
+    },
+    {
+      "id": "C_OCEANIA",
+      "observation_id": "E19",
+      "source_cost_million_2024_usd_per_km": 13.732825,
+      "scope_retained_fraction": 0.75,
+      "included_systems_allowance_to_remove_million_per_km": 0,
+      "source_terrain_divisor": 1,
+      "greenfield_factor": 1,
+      "target_track_factor": 1.6,
+      "high_speed_geometry_factor": 1.25,
+      "added_target_systems_million_per_km": 3,
+      "computed_baseline_million_2024_usd_per_km": 23.599238,
+      "adopted_baseline_million_2024_usd_per_km": 24,
+      "parameter_status": "All conversion adjustments are explicit design assumptions, not measured universal engineering factors."
+    }
+  ],
+  "systems_allowance_million_2024_usd_per_route_km": 3,
+  "systems_allowance_status": "Authored common systems allowance, not an observed world equipment price. Prevents lower local wage rates from discounting the whole package.",
+  "engineering_formula": "rate = speed_factor * (systems_allowance + (regional_B - systems_allowance) * engineering_factor)",
+  "speed_factors": {
+    "250": 0.9,
+    "300": 1.0,
+    "350": 1.1
+  },
+  "engineering_factors": {
+    "flat_surface": 1,
+    "rolling_hill_surface": 1.5,
+    "rugged_mountain_surface": 4,
+    "standard_bridge_viaduct": 2.5,
+    "ordinary_mountain_tunnel": 5,
+    "major_deep_base_tunnel": 8,
+    "eligible_underwater_tunnel": 12
+  },
+  "engineering_factor_status": "Modeled initial factors informed by asset benchmarks, not measured universal ratios; project override for unusual structures.",
+  "profiles": [
+    {
+      "id": "china",
+      "name": "China",
+      "country_labels": [
+        "China",
+        "Hong Kong"
+      ],
+      "baseline_million_2024_usd_per_route_km": 10,
+      "sensitivity_low": 8,
+      "sensitivity_high": 14,
+      "evidence_class": "H",
+      "evidence_ids": [
+        "E01",
+        "E02"
+      ],
+      "rationale": "Benchmark-informed decomposed prior; Hong Kong uses this rural base with explicit urban/underground quantities, not mainland project averages at city sites.",
+      "default_design_management_fraction": 0.15,
+      "default_contingency_fraction": 0.2
+    },
+    {
+      "id": "india",
+      "name": "India",
+      "country_labels": [
+        "India"
+      ],
+      "baseline_million_2024_usd_per_route_km": 12,
+      "sensitivity_low": 9,
+      "sensitivity_high": 18,
+      "evidence_class": "H-plan",
+      "evidence_ids": [
+        "E09"
+      ],
+      "rationale": "Elevated original-budget comparator; remove structure/package effects before using a rural prior.",
+      "default_design_management_fraction": 0.15,
+      "default_contingency_fraction": 0.2
+    },
+    {
+      "id": "japan",
+      "name": "Japan",
+      "country_labels": [
+        "Japan"
+      ],
+      "baseline_million_2024_usd_per_route_km": 20,
+      "sensitivity_low": 14,
+      "sensitivity_high": 30,
+      "evidence_class": "H-plan",
+      "evidence_ids": [
+        "E10"
+      ],
+      "rationale": "Tunnel-heavy estimate checks reconstructed total; does not imply all Japanese surface track costs 100m/km.",
+      "default_design_management_fraction": 0.15,
+      "default_contingency_fraction": 0.2
+    },
+    {
+      "id": "korea_taiwan",
+      "name": "Korea / Taiwan analogue",
+      "country_labels": [
+        "South Korea",
+        "Taiwan"
+      ],
+      "baseline_million_2024_usd_per_route_km": 15,
+      "sensitivity_low": 11,
+      "sensitivity_high": 24,
+      "evidence_class": "H/X",
+      "evidence_ids": [
+        "E11",
+        "E01"
+      ],
+      "rationale": "Korean benchmark-informed prior; Taiwan is a declared transfer, not a Taiwan-specific fit.",
+      "default_design_management_fraction": 0.15,
+      "default_contingency_fraction": 0.2
+    },
+    {
+      "id": "southeast_asia",
+      "name": "Southeast Asia",
+      "country_labels": [
+        "Indonesia",
+        "Malaysia",
+        "Singapore",
+        "Thailand",
+        "Vietnam",
+        "Philippines",
+        "Myanmar"
+      ],
+      "baseline_million_2024_usd_per_route_km": 14,
+      "sensitivity_low": 9,
+      "sensitivity_high": 23,
+      "evidence_class": "H/X",
+      "evidence_ids": [
+        "E13",
+        "E01"
+      ],
+      "rationale": "Indonesia plus China supply-chain reference; other countries are explicit transfers; urban approaches cost separately.",
+      "default_design_management_fraction": 0.15,
+      "default_contingency_fraction": 0.2
+    },
+    {
+      "id": "other_south_asia",
+      "name": "Other South Asia",
+      "country_labels": [
+        "Pakistan",
+        "Bangladesh"
+      ],
+      "baseline_million_2024_usd_per_route_km": 12,
+      "sensitivity_low": 8,
+      "sensitivity_high": 21,
+      "evidence_class": "X",
+      "evidence_ids": [
+        "E09",
+        "E15"
+      ],
+      "rationale": "India/East Africa analogy; no direct comparable national cost fit in this research.",
+      "default_design_management_fraction": 0.15,
+      "default_contingency_fraction": 0.2
+    },
+    {
+      "id": "iberia",
+      "name": "Iberia",
+      "country_labels": [
+        "Spain",
+        "Portugal"
+      ],
+      "baseline_million_2024_usd_per_route_km": 12,
+      "sensitivity_low": 9,
+      "sensitivity_high": 18,
+      "evidence_class": "H/X",
+      "evidence_ids": [
+        "E05"
+      ],
+      "rationale": "Spain informs the prior; Portugal is transferred. Terrain and property premiums are separate.",
+      "default_design_management_fraction": 0.15,
+      "default_contingency_fraction": 0.2
+    },
+    {
+      "id": "france_benelux",
+      "name": "France / Benelux",
+      "country_labels": [
+        "France",
+        "Netherlands",
+        "Belgium",
+        "Luxembourg"
+      ],
+      "baseline_million_2024_usd_per_route_km": 14,
+      "sensitivity_low": 10,
+      "sensitivity_high": 22,
+      "evidence_class": "H/X",
+      "evidence_ids": [
+        "E03",
+        "E04"
+      ],
+      "rationale": "French audited lines inform the rural prior; Benelux transfer excludes local urban/water works.",
+      "default_design_management_fraction": 0.15,
+      "default_contingency_fraction": 0.2
+    },
+    {
+      "id": "central_europe",
+      "name": "Central Europe / Italy",
+      "country_labels": [
+        "Germany",
+        "Italy",
+        "Austria",
+        "Switzerland"
+      ],
+      "baseline_million_2024_usd_per_route_km": 18,
+      "sensitivity_low": 12,
+      "sensitivity_high": 30,
+      "evidence_class": "H/X",
+      "evidence_ids": [
+        "E06",
+        "E07",
+        "E08"
+      ],
+      "rationale": "Mixed audited lines bound the prior; Swiss/Austrian assignments are analogues; do not bake Alps tunnels into surface B.",
+      "default_design_management_fraction": 0.15,
+      "default_contingency_fraction": 0.2
+    },
+    {
+      "id": "uk",
+      "name": "United Kingdom",
+      "country_labels": [
+        "United Kingdom"
+      ],
+      "baseline_million_2024_usd_per_route_km": 28,
+      "sensitivity_low": 18,
+      "sensitivity_high": 45,
+      "evidence_class": "H",
+      "evidence_ids": [
+        "E20"
+      ],
+      "rationale": "Higher delivery-cost prior with wide scope uncertainty; HS1 urban and station costs are not reused as flat B.",
+      "default_design_management_fraction": 0.2,
+      "default_contingency_fraction": 0.25
+    },
+    {
+      "id": "eurasia_transfer",
+      "name": "Turkey / Iran / Iraq / Russia analogue",
+      "country_labels": [
+        "Turkey",
+        "Iran",
+        "Iraq",
+        "Russia"
+      ],
+      "baseline_million_2024_usd_per_route_km": 14,
+      "sensitivity_low": 8,
+      "sensitivity_high": 27,
+      "evidence_class": "X",
+      "evidence_ids": [
+        "E01",
+        "E05"
+      ],
+      "rationale": "Broad Eurasian transfer only; no claim of equal local productivity, stable exchange rates, or current procurement access.",
+      "default_design_management_fraction": 0.15,
+      "default_contingency_fraction": 0.25
+    },
+    {
+      "id": "gulf",
+      "name": "Gulf",
+      "country_labels": [
+        "Saudi Arabia",
+        "United Arab Emirates"
+      ],
+      "baseline_million_2024_usd_per_route_km": 14,
+      "sensitivity_low": 9,
+      "sensitivity_high": 23,
+      "evidence_class": "H/C",
+      "evidence_ids": [
+        "E14",
+        "E18"
+      ],
+      "rationale": "Haramain full-package and Etihad narrow civil award bracket inference; no averaging incompatible scopes.",
+      "default_design_management_fraction": 0.15,
+      "default_contingency_fraction": 0.2
+    },
+    {
+      "id": "north_africa",
+      "name": "North Africa",
+      "country_labels": [
+        "Egypt",
+        "Morocco",
+        "Algeria",
+        "Tunisia"
+      ],
+      "baseline_million_2024_usd_per_route_km": 10,
+      "sensitivity_low": 7,
+      "sensitivity_high": 17,
+      "evidence_class": "H/X",
+      "evidence_ids": [
+        "E12"
+      ],
+      "rationale": "Morocco informs low-surface prior; other countries transferred; Egypt Siemens contract explicitly excluded.",
+      "default_design_management_fraction": 0.15,
+      "default_contingency_fraction": 0.2
+    },
+    {
+      "id": "east_africa",
+      "name": "East Africa",
+      "country_labels": [
+        "Ethiopia",
+        "Kenya",
+        "Tanzania",
+        "Uganda",
+        "Burundi",
+        "Rwanda"
+      ],
+      "baseline_million_2024_usd_per_route_km": 12,
+      "sensitivity_low": 8,
+      "sensitivity_high": 21,
+      "evidence_class": "C",
+      "evidence_ids": [
+        "E15",
+        "C_EAST_AFRICA"
+      ],
+      "rationale": "Explicit conventional-electrified to HSR extrapolation; not a locally observed HSR cost.",
+      "default_design_management_fraction": 0.15,
+      "default_contingency_fraction": 0.25
+    },
+    {
+      "id": "west_central_africa",
+      "name": "West / Central Africa",
+      "country_labels": [
+        "Nigeria",
+        "Angola",
+        "Democratic Republic of the Congo",
+        "Ivory Coast",
+        "Sudan"
+      ],
+      "baseline_million_2024_usd_per_route_km": 14,
+      "sensitivity_low": 9,
+      "sensitivity_high": 25,
+      "evidence_class": "X",
+      "evidence_ids": [
+        "C_EAST_AFRICA"
+      ],
+      "rationale": "East Africa extrapolation times 7/6 delivery/logistics assumption; not observed country differences.",
+      "default_design_management_fraction": 0.15,
+      "default_contingency_fraction": 0.3
+    },
+    {
+      "id": "southern_africa",
+      "name": "Southern Africa",
+      "country_labels": [
+        "South Africa",
+        "Namibia",
+        "Botswana"
+      ],
+      "baseline_million_2024_usd_per_route_km": 16,
+      "sensitivity_low": 10,
+      "sensitivity_high": 27,
+      "evidence_class": "X",
+      "evidence_ids": [
+        "C_EAST_AFRICA"
+      ],
+      "rationale": "East Africa extrapolation times 4/3 as an initial transfer; requires country calibration; no urban rapid-rail total relabeled as rural HSR.",
+      "default_design_management_fraction": 0.15,
+      "default_contingency_fraction": 0.25
+    },
+    {
+      "id": "brazil",
+      "name": "Brazil",
+      "country_labels": [
+        "Brazil"
+      ],
+      "baseline_million_2024_usd_per_route_km": 8,
+      "sensitivity_low": 6,
+      "sensitivity_high": 16,
+      "evidence_class": "C",
+      "evidence_ids": [
+        "E17",
+        "C_BRAZIL"
+      ],
+      "rationale": "Low freight contract anchor uplifted to a double-track electrified HSR prior; wide sensitivity for scope and delivery.",
+      "default_design_management_fraction": 0.15,
+      "default_contingency_fraction": 0.25
+    },
+    {
+      "id": "other_latin_america",
+      "name": "Other Latin America",
+      "country_labels": [
+        "Argentina",
+        "Chile",
+        "Colombia",
+        "Peru",
+        "Mexico",
+        "Uruguay"
+      ],
+      "baseline_million_2024_usd_per_route_km": 14,
+      "sensitivity_low": 9,
+      "sensitivity_high": 24,
+      "evidence_class": "C/X",
+      "evidence_ids": [
+        "E16",
+        "C_LATIN_AMERICA"
+      ],
+      "rationale": "Uruguay reconstruction extrapolation; country assignments are transfers. Mexico excluded from US/Canada grouping.",
+      "default_design_management_fraction": 0.15,
+      "default_contingency_fraction": 0.25
+    },
+    {
+      "id": "north_america",
+      "name": "US / Canada",
+      "country_labels": [
+        "United States",
+        "Canada"
+      ],
+      "baseline_million_2024_usd_per_route_km": 30,
+      "sensitivity_low": 20,
+      "sensitivity_high": 50,
+      "evidence_class": "H-plan/X",
+      "evidence_ids": [
+        "E21",
+        "E20"
+      ],
+      "rationale": "US delivery-cost prior, checked against broad California forecast; Canada transferred; YOE forecast not falsely converted into 2024 actuals.",
+      "default_design_management_fraction": 0.2,
+      "default_contingency_fraction": 0.25
+    },
+    {
+      "id": "oceania",
+      "name": "Australia / New Zealand",
+      "country_labels": [
+        "Australia",
+        "New Zealand"
+      ],
+      "baseline_million_2024_usd_per_route_km": 24,
+      "sensitivity_low": 16,
+      "sensitivity_high": 40,
+      "evidence_class": "C/X",
+      "evidence_ids": [
+        "E19",
+        "C_OCEANIA"
+      ],
+      "rationale": "Australian freight-program extrapolation; New Zealand transferred. Mixed brownfield forecast is not an at-grade actual.",
+      "default_design_management_fraction": 0.2,
+      "default_contingency_fraction": 0.25
+    }
+  ],
+  "sensitivity_policy": "Bounds are design scenarios, not confidence intervals or a random draw. Deterministic point values apply to all players; corridor calibration may select a reviewed override."
+}

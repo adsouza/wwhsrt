@@ -1,0 +1,25 @@
+{
+  "date": "2026-11-08",
+  "browser": "153.0.8010.12",
+  "platform": "darwin/arm64",
+  "scope": "Actual Go/WASM + ebitenui v0.7.3 + Ebitengine v2.10.5; synthetic browser inputs, not physical mobile devices",
+  "checks": [
+    "real canvas widgets; pointer changes forecast; keyboard editing and platform select-all adapter; invalid fleet disables Apply; apply acknowledgment; hint dismissal preserves draft",
+    "320, 390, 768, 1280, 1920 logical widths; inputs survive reflow; footer and navigation fit outside clipped scrolling region",
+    "wheel scrolling; actual monthly report widgets render in both compositions",
+    "2x device scale: native-resolution rasterization with unchanged logical 44px targets",
+    "touch-emulated 120ms tap; numeric mobile input proxy focused; typing reaches Go state; application-owned one-finger scroll"
+  ],
+  "mobileInputProxy": {
+    "id": "tempInput",
+    "mode": "numeric"
+  },
+  "accessibility": {
+    "semanticButtons": 0,
+    "labeledInputs": 0,
+    "canvases": 1
+  },
+  "wasmSha256": "44bc7fa9d2cc980349eb7d1e9b9e7b06831dfd92e7956d202b930236e243d446",
+  "wasmBytes": 21714796,
+  "passed": true
+}

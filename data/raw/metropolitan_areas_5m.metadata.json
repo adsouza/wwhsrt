@@ -1,0 +1,65 @@
+{
+  "dataset_id": "user_metropolitan_areas_5m_2026_11_08",
+  "file": "metropolitan_areas_5m.json",
+  "sha256": "408e7f31ddb5beafa014e6d4021f13b904c46801c5b23d99de6fc2ff9a257443",
+  "received_date": "2026-11-08",
+  "provenance": {
+    "provider": "user-supplied attachment",
+    "original_path": "/Users/adsouza/Downloads/metropolitan_areas_5m.json",
+    "upstream_sources": null,
+    "redistribution_license": null
+  },
+  "intended_use": "Candidate major-metro anchors for map prototyping and demand-model calibration; supplement with smaller corridor cities.",
+  "status": "Structural checks passed; estimates and metropolitan boundaries not independently verified.",
+  "record_count": 96,
+  "population": {
+    "unit": "people",
+    "reference_year": null,
+    "geographic_definition": "Metropolitan labels supplied per row; harmonization and non-overlap not yet verified."
+  },
+  "gdp": {
+    "field": "gdp_usd_billion",
+    "currency": "USD",
+    "scale": 1000000000,
+    "estimated": true,
+    "reference_year": null,
+    "price_year": null,
+    "nominal_or_ppp": null,
+    "methodology": null
+  },
+  "coordinates": {
+    "latitude_field": "lat",
+    "longitude_field": "lng",
+    "unit": "degrees",
+    "crs": null,
+    "role": "Representative metro map marker; not a surveyed station location."
+  },
+  "structural_checks": {
+    "required_fields_present": true,
+    "unique_normalized_ids": true,
+    "unique_normalized_names": true,
+    "unique_coordinate_pairs": true,
+    "positive_integer_populations": true,
+    "positive_finite_gdp": true,
+    "finite_coordinates_in_range": true
+  },
+  "strict_population_gt_5000000": {
+    "matching_count": 94,
+    "exceptions_retained": [
+      {
+        "id": "phoenix",
+        "population": 5000000
+      },
+      {
+        "id": "brasilia",
+        "population": 4800000
+      }
+    ]
+  },
+  "qualification_gaps": [
+    "Population and GDP reference years and upstream sources are absent.",
+    "Nominal/PPP GDP basis, price year, and estimation methodology are absent.",
+    "Coordinates pass range checks; geographic accuracy and CRS are not independently verified.",
+    "Metro boundary overlap, completeness of the global above-5M population, and compatibility between GDP and population coverage are not verified."
+  ]
+}
