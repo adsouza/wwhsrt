@@ -1,0 +1,20 @@
+{
+  "id": "fixture-scenario-v1",
+  "role": "Contract-test fixture, not a playable/qualified scenario",
+  "start_month": {
+    "year": 2025,
+    "month": 1
+  },
+  "campaign_months": 360,
+  "cities": [
+    {
+      "id": "city_a",
+      "name": "Example A"
+    },
+    {
+      "id": "city_b",
+      "name": "Example B"
+    }
+  ],
+  "alignments": []
+}

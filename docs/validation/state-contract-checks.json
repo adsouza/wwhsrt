@@ -1,0 +1,17 @@
+{
+  "date": "2026-11-08",
+  "scope": "Reference JSON schema and SQLite transaction contract via Python sqlite3; not the production Go adapter or domain restore validator",
+  "sqliteVersion": "3.45.3",
+  "jsonschemaVersion": "4.23.0",
+  "schemaSHA256": "1dbe278f3b5e94cedb2e2d633ced5a9dac2a2abf4309868cebf515f6b6b0e3b0",
+  "sqlSHA256": "eaa93070b5e9ed5a2d499590a35f67d7f289ab5582dc0e4a469698df995c61e1",
+  "checks": [
+    "generated JSON schema/example and fixture bundle hashes",
+    "missing/unknown fields, null arrays, month bounds, wide-number syntax, future version",
+    "SQLite v1 bootstrap, configured durability, atomic rollback at state/receipt boundaries, CAS and actor/key deduplication",
+    "close/reopen preserves receipts; durable rejection does not change game payload",
+    "locked-month failure retains lock/checkpoint; resolved world, deadline and completion receipt commit together and retry once",
+    "SQLite backup preserves consistent world/receipts/identity rows; integrity and foreign-key checks"
+  ],
+  "passed": true
+}

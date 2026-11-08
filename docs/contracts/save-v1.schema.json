@@ -1,0 +1,1560 @@
+{
+  "$defs": {
+    "Auction": {
+      "additionalProperties": false,
+      "properties": {
+        "closes": {
+          "$ref": "#/$defs/GameMonth"
+        },
+        "id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "reserve_price": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "sale_price": {
+          "anyOf": [
+            {
+              "maxLength": 20,
+              "pattern": "^(0|-?[1-9][0-9]*)$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "section_ids": {
+          "items": {
+            "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "status": {
+          "enum": [
+            "listed",
+            "sold",
+            "unsold",
+            "withdrawn"
+          ],
+          "type": "string"
+        },
+        "winner": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "section_ids",
+        "reserve_price",
+        "closes",
+        "status",
+        "winner",
+        "sale_price"
+      ],
+      "type": "object"
+    },
+    "Bid": {
+      "additionalProperties": false,
+      "properties": {
+        "auction_id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "company_id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "maximum": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "reservation_id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "auction_id",
+        "company_id",
+        "maximum",
+        "reservation_id"
+      ],
+      "type": "object"
+    },
+    "CashEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "category": {
+          "type": "string"
+        },
+        "company_id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "delta": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "month": {
+          "$ref": "#/$defs/GameMonth"
+        },
+        "reference_id": {
+          "type": "string"
+        },
+        "sequence": {
+          "maxLength": 20,
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "transfer_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "sequence",
+        "company_id",
+        "month",
+        "category",
+        "delta",
+        "reference_id",
+        "transfer_id"
+      ],
+      "type": "object"
+    },
+    "Company": {
+      "additionalProperties": false,
+      "properties": {
+        "cash": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "home_city": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "opening_cash": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "restructuring_ends": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GameMonth"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "status": {
+          "enum": [
+            "active",
+            "restructuring",
+            "bankrupt"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "status",
+        "home_city",
+        "opening_cash",
+        "cash",
+        "restructuring_ends"
+      ],
+      "type": "object"
+    },
+    "CompanyPlan": {
+      "additionalProperties": false,
+      "properties": {
+        "company_id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "effective_month": {
+          "$ref": "#/$defs/GameMonth"
+        },
+        "revision": {
+          "maxLength": 20,
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "services": {
+          "items": {
+            "$ref": "#/$defs/ServiceSpec"
+          },
+          "type": "array"
+        },
+        "standing_policy": {
+          "$ref": "#/$defs/StandingPolicy"
+        }
+      },
+      "required": [
+        "company_id",
+        "revision",
+        "effective_month",
+        "services",
+        "standing_policy"
+      ],
+      "type": "object"
+    },
+    "CompanyReport": {
+      "additionalProperties": false,
+      "properties": {
+        "closing_asset_value": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "closing_cash": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "closing_reserved": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "company_id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "first_cash_sequence": {
+          "maxLength": 20,
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "last_cash_sequence": {
+          "maxLength": 20,
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "non_cash_cost": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "opening_cash": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "operating_result": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "outstanding_debt": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "company_id",
+        "opening_cash",
+        "closing_cash",
+        "operating_result",
+        "non_cash_cost",
+        "closing_asset_value",
+        "outstanding_debt",
+        "closing_reserved",
+        "first_cash_sequence",
+        "last_cash_sequence"
+      ],
+      "type": "object"
+    },
+    "Concession": {
+      "additionalProperties": false,
+      "properties": {
+        "company_id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "expires": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GameMonth"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "jurisdiction_ref": {
+          "type": "string"
+        },
+        "terms_ref": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "company_id",
+        "jurisdiction_ref",
+        "terms_ref",
+        "expires"
+      ],
+      "type": "object"
+    },
+    "DataRef": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "sha256"
+      ],
+      "type": "object"
+    },
+    "GameMonth": {
+      "additionalProperties": false,
+      "properties": {
+        "month": {
+          "maximum": 12,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "year": {
+          "maximum": 9999,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "year",
+        "month"
+      ],
+      "type": "object"
+    },
+    "Grant": {
+      "additionalProperties": false,
+      "properties": {
+        "awarded": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "company_id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "disbursed": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "offer_ref": {
+          "type": "string"
+        },
+        "project_id": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "company_id",
+        "offer_ref",
+        "project_id",
+        "awarded",
+        "disbursed"
+      ],
+      "type": "object"
+    },
+    "Installment": {
+      "additionalProperties": false,
+      "properties": {
+        "amount": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "due": {
+          "$ref": "#/$defs/GameMonth"
+        },
+        "paid": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "due",
+        "amount",
+        "paid"
+      ],
+      "type": "object"
+    },
+    "Lease": {
+      "additionalProperties": false,
+      "properties": {
+        "arrears": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "company_id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "contract_ref": {
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "monthly_payment": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "next_due": {
+          "$ref": "#/$defs/GameMonth"
+        },
+        "remaining_months": {
+          "maximum": 65535,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "trainset_ids": {
+          "items": {
+            "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "company_id",
+        "contract_ref",
+        "trainset_ids",
+        "monthly_payment",
+        "arrears",
+        "next_due",
+        "remaining_months"
+      ],
+      "type": "object"
+    },
+    "Loan": {
+      "additionalProperties": false,
+      "properties": {
+        "annual_rate_bps": {
+          "maximum": 4294967295,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "company_id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "contract_ref": {
+          "type": "string"
+        },
+        "credit_limit": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "interest_arrears": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "next_due": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GameMonth"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "outstanding": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "principal_arrears": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "remaining_months": {
+          "maximum": 65535,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "scheduled_payment": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "company_id",
+        "contract_ref",
+        "outstanding",
+        "credit_limit",
+        "annual_rate_bps",
+        "scheduled_payment",
+        "principal_arrears",
+        "interest_arrears",
+        "next_due",
+        "remaining_months"
+      ],
+      "type": "object"
+    },
+    "MonthReport": {
+      "additionalProperties": false,
+      "properties": {
+        "companies": {
+          "items": {
+            "$ref": "#/$defs/CompanyReport"
+          },
+          "type": "array"
+        },
+        "month": {
+          "$ref": "#/$defs/GameMonth"
+        },
+        "services": {
+          "items": {
+            "$ref": "#/$defs/ServiceReport"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "month",
+        "companies",
+        "services"
+      ],
+      "type": "object"
+    },
+    "Node": {
+      "additionalProperties": false,
+      "properties": {
+        "city_id": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "geometry_ref": {
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "station",
+            "junction"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "city_id",
+        "geometry_ref"
+      ],
+      "type": "object"
+    },
+    "OperatingDay": {
+      "additionalProperties": false,
+      "properties": {
+        "month": {
+          "$ref": "#/$defs/GameMonth"
+        },
+        "services": {
+          "items": {
+            "$ref": "#/$defs/ReplayService"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "month",
+        "services"
+      ],
+      "type": "object"
+    },
+    "Ownership": {
+      "additionalProperties": false,
+      "properties": {
+        "company_id": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "kind": {
+          "enum": [
+            "public",
+            "company",
+            "estate"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "company_id"
+      ],
+      "type": "object"
+    },
+    "PayloadV1": {
+      "additionalProperties": false,
+      "properties": {
+        "rules": {
+          "$ref": "#/$defs/RulesRef"
+        },
+        "state_revision": {
+          "maxLength": 20,
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "world": {
+          "$ref": "#/$defs/WorldV1"
+        }
+      },
+      "required": [
+        "state_revision",
+        "rules",
+        "world"
+      ],
+      "type": "object"
+    },
+    "Project": {
+      "additionalProperties": false,
+      "properties": {
+        "alignment_ref": {
+          "type": "string"
+        },
+        "company_id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "installments": {
+          "items": {
+            "$ref": "#/$defs/Installment"
+          },
+          "type": "array"
+        },
+        "kind": {
+          "enum": [
+            "new_line",
+            "alignment_upgrade",
+            "station_upgrade"
+          ],
+          "type": "string"
+        },
+        "ready": {
+          "$ref": "#/$defs/GameMonth"
+        },
+        "section_ids": {
+          "items": {
+            "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "started": {
+          "$ref": "#/$defs/GameMonth"
+        },
+        "station_ids": {
+          "items": {
+            "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "status": {
+          "enum": [
+            "committed",
+            "building",
+            "completed",
+            "cancelled"
+          ],
+          "type": "string"
+        },
+        "total_cost": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "company_id",
+        "kind",
+        "alignment_ref",
+        "section_ids",
+        "station_ids",
+        "started",
+        "ready",
+        "status",
+        "total_cost",
+        "installments"
+      ],
+      "type": "object"
+    },
+    "RNGState": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "type": "string"
+        },
+        "words": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "algorithm",
+        "words"
+      ],
+      "type": "object"
+    },
+    "ReplayService": {
+      "additionalProperties": false,
+      "properties": {
+        "departure_minutes": {
+          "items": {
+            "maximum": 65535,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "type": "array"
+        },
+        "leg_seconds": {
+          "items": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "type": "array"
+        },
+        "path": {
+          "items": {
+            "$ref": "#/$defs/Traversal"
+          },
+          "type": "array"
+        },
+        "service_id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "service_id",
+        "path",
+        "leg_seconds",
+        "departure_minutes"
+      ],
+      "type": "object"
+    },
+    "Reservation": {
+      "additionalProperties": false,
+      "properties": {
+        "amount": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "company_id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "construction",
+            "auction"
+          ],
+          "type": "string"
+        },
+        "target_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "company_id",
+        "kind",
+        "target_id",
+        "amount"
+      ],
+      "type": "object"
+    },
+    "RulesRef": {
+      "additionalProperties": false,
+      "properties": {
+        "allocation": {
+          "type": "string"
+        },
+        "balance": {
+          "$ref": "#/$defs/DataRef"
+        },
+        "demand": {
+          "type": "string"
+        },
+        "rng": {
+          "type": "string"
+        },
+        "scenario": {
+          "$ref": "#/$defs/DataRef"
+        },
+        "simulation": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "scenario",
+        "balance",
+        "simulation",
+        "demand",
+        "allocation",
+        "rng"
+      ],
+      "type": "object"
+    },
+    "SaveV1": {
+      "additionalProperties": false,
+      "properties": {
+        "created_at_utc": {
+          "format": "date-time",
+          "pattern": "Z$",
+          "type": "string"
+        },
+        "format": {
+          "const": "wwhsrt-save",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/PayloadV1"
+        },
+        "payload_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": 1,
+          "maximum": 65535,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "format",
+        "schema_version",
+        "created_at_utc",
+        "payload_sha256",
+        "payload"
+      ],
+      "type": "object"
+    },
+    "ServiceReport": {
+      "additionalProperties": false,
+      "properties": {
+        "granted_return_trips_per_day": {
+          "maximum": 65535,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "operating_cost": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "passenger_metres": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "passengers": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "requested_return_trips_per_day": {
+          "maximum": 65535,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "revenue": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "service_id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "spec": {
+          "$ref": "#/$defs/ServiceSpec"
+        },
+        "train_metres": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "service_id",
+        "spec",
+        "requested_return_trips_per_day",
+        "granted_return_trips_per_day",
+        "passengers",
+        "passenger_metres",
+        "train_metres",
+        "revenue",
+        "operating_cost"
+      ],
+      "type": "object"
+    },
+    "ServiceSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "company_id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "fare": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "path": {
+          "items": {
+            "$ref": "#/$defs/Traversal"
+          },
+          "type": "array"
+        },
+        "return_trips_per_day": {
+          "maximum": 65535,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "stops": {
+          "items": {
+            "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "suspended": {
+          "type": "boolean"
+        },
+        "trainset_ids": {
+          "items": {
+            "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "company_id",
+        "path",
+        "stops",
+        "trainset_ids",
+        "return_trips_per_day",
+        "fare",
+        "suspended"
+      ],
+      "type": "object"
+    },
+    "StandingPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "approved_credit_ref": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "minimum_free_cash": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "withdraw_eligible_bids": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "minimum_free_cash",
+        "withdraw_eligible_bids",
+        "approved_credit_ref"
+      ],
+      "type": "object"
+    },
+    "Station": {
+      "additionalProperties": false,
+      "properties": {
+        "book_value": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "node_id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "owner": {
+          "$ref": "#/$defs/Ownership"
+        },
+        "status": {
+          "enum": [
+            "construction",
+            "operational",
+            "closed"
+          ],
+          "type": "string"
+        },
+        "train_calls_per_day": {
+          "maximum": 4294967295,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "node_id",
+        "status",
+        "owner",
+        "train_calls_per_day",
+        "book_value"
+      ],
+      "type": "object"
+    },
+    "StationAccess": {
+      "additionalProperties": false,
+      "properties": {
+        "company_id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "station_id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "terms_ref": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "station_id",
+        "company_id",
+        "terms_ref"
+      ],
+      "type": "object"
+    },
+    "TrackSection": {
+      "additionalProperties": false,
+      "properties": {
+        "access": {
+          "enum": [
+            "regulated_open",
+            "owner_only"
+          ],
+          "type": "string"
+        },
+        "alignment_ref": {
+          "type": "string"
+        },
+        "book_value": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "engineering_ref": {
+          "type": "string"
+        },
+        "from": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "owner": {
+          "$ref": "#/$defs/Ownership"
+        },
+        "return_pairs_per_day": {
+          "maximum": 4294967295,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "speed_limit_kph": {
+          "maximum": 65535,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "status": {
+          "enum": [
+            "construction",
+            "operational",
+            "closed"
+          ],
+          "type": "string"
+        },
+        "to": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "track_class_ref": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "from",
+        "to",
+        "alignment_ref",
+        "engineering_ref",
+        "track_class_ref",
+        "owner",
+        "access",
+        "status",
+        "speed_limit_kph",
+        "return_pairs_per_day",
+        "book_value"
+      ],
+      "type": "object"
+    },
+    "TrainOrder": {
+      "additionalProperties": false,
+      "properties": {
+        "company_id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "installments": {
+          "items": {
+            "$ref": "#/$defs/Installment"
+          },
+          "type": "array"
+        },
+        "ready": {
+          "$ref": "#/$defs/GameMonth"
+        },
+        "status": {
+          "enum": [
+            "ordered",
+            "delivered",
+            "cancelled"
+          ],
+          "type": "string"
+        },
+        "total_cost": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "trainset_ids": {
+          "items": {
+            "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "company_id",
+        "trainset_ids",
+        "status",
+        "ready",
+        "total_cost",
+        "installments"
+      ],
+      "type": "object"
+    },
+    "Trainset": {
+      "additionalProperties": false,
+      "properties": {
+        "book_value": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "company_id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "home_station": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "lease_id": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "model_ref": {
+          "type": "string"
+        },
+        "ready": {
+          "$ref": "#/$defs/GameMonth"
+        },
+        "status": {
+          "enum": [
+            "delivery",
+            "operational",
+            "relocation",
+            "retired"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "company_id",
+        "model_ref",
+        "home_station",
+        "status",
+        "ready",
+        "book_value",
+        "lease_id"
+      ],
+      "type": "object"
+    },
+    "Traversal": {
+      "additionalProperties": false,
+      "properties": {
+        "forward": {
+          "type": "boolean"
+        },
+        "section_id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "section_id",
+        "forward"
+      ],
+      "type": "object"
+    },
+    "WorldV1": {
+      "additionalProperties": false,
+      "properties": {
+        "auctions": {
+          "items": {
+            "$ref": "#/$defs/Auction"
+          },
+          "type": "array"
+        },
+        "bids": {
+          "items": {
+            "$ref": "#/$defs/Bid"
+          },
+          "type": "array"
+        },
+        "campaign_months": {
+          "maximum": 65535,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "cash_journal": {
+          "items": {
+            "$ref": "#/$defs/CashEntry"
+          },
+          "type": "array"
+        },
+        "companies": {
+          "items": {
+            "$ref": "#/$defs/Company"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "type": "array"
+        },
+        "concessions": {
+          "items": {
+            "$ref": "#/$defs/Concession"
+          },
+          "type": "array"
+        },
+        "grants": {
+          "items": {
+            "$ref": "#/$defs/Grant"
+          },
+          "type": "array"
+        },
+        "id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "latest_replay": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OperatingDay"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "leases": {
+          "items": {
+            "$ref": "#/$defs/Lease"
+          },
+          "type": "array"
+        },
+        "loans": {
+          "items": {
+            "$ref": "#/$defs/Loan"
+          },
+          "type": "array"
+        },
+        "month": {
+          "$ref": "#/$defs/GameMonth"
+        },
+        "network_revision": {
+          "maxLength": 20,
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "next_id": {
+          "maxLength": 20,
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "nodes": {
+          "items": {
+            "$ref": "#/$defs/Node"
+          },
+          "type": "array"
+        },
+        "orders": {
+          "items": {
+            "$ref": "#/$defs/TrainOrder"
+          },
+          "type": "array"
+        },
+        "plans": {
+          "items": {
+            "$ref": "#/$defs/CompanyPlan"
+          },
+          "type": "array"
+        },
+        "projects": {
+          "items": {
+            "$ref": "#/$defs/Project"
+          },
+          "type": "array"
+        },
+        "reports": {
+          "items": {
+            "$ref": "#/$defs/MonthReport"
+          },
+          "type": "array"
+        },
+        "reservations": {
+          "items": {
+            "$ref": "#/$defs/Reservation"
+          },
+          "type": "array"
+        },
+        "rng_state": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RNGState"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sections": {
+          "items": {
+            "$ref": "#/$defs/TrackSection"
+          },
+          "type": "array"
+        },
+        "seed": {
+          "maxLength": 20,
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "services": {
+          "items": {
+            "$ref": "#/$defs/ServiceSpec"
+          },
+          "type": "array"
+        },
+        "start_month": {
+          "$ref": "#/$defs/GameMonth"
+        },
+        "station_access": {
+          "items": {
+            "$ref": "#/$defs/StationAccess"
+          },
+          "type": "array"
+        },
+        "stations": {
+          "items": {
+            "$ref": "#/$defs/Station"
+          },
+          "type": "array"
+        },
+        "trainsets": {
+          "items": {
+            "$ref": "#/$defs/Trainset"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "month",
+        "campaign_months",
+        "start_month",
+        "seed",
+        "next_id",
+        "network_revision",
+        "companies",
+        "nodes",
+        "stations",
+        "station_access",
+        "sections",
+        "projects",
+        "trainsets",
+        "orders",
+        "services",
+        "plans",
+        "loans",
+        "leases",
+        "grants",
+        "concessions",
+        "auctions",
+        "bids",
+        "reservations",
+        "cash_journal",
+        "reports",
+        "latest_replay",
+        "rng_state"
+      ],
+      "type": "object"
+    }
+  },
+  "$ref": "#/$defs/SaveV1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "World-wide HSR portable save v1 (unreleased design contract)"
+}

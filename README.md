@@ -12,6 +12,8 @@ The [game design specification](docs/DESIGN.md) records the current design, conf
 
 The [architecture](ARCHITECTURE.md) describes system boundaries, offline/server execution, data preparation, presentation, and persistence. The [testing guide](TESTING.md) separates current runnable prototype checks from planned implementation and release gates.
 
+The [state and storage contract](docs/STATE_AND_STORAGE.md) defines concrete Go reference types, JSON save v1 and schema, SQLite server transactions, recovery, and migrations only when a released format actually changes.
+
 The [interaction and UX specification](docs/UX.md) defines map-centered decisions, contextual learning during ordinary play, and complete phone workflows that expand into simultaneous map, planning, and comparison views on larger displays.
 
 The [world-data notes](data/README.md) describe the supplied 96-metro seed, its population/GDP estimates, and its role alongside smaller corridor cities.

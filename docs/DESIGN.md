@@ -700,6 +700,8 @@ Bundle all runtime scenario inputs. Offline play requires no API key, network co
 
 ### Saves
 
+The [state and storage contract](STATE_AND_STORAGE.md) defines compile-checked Go reference types, the complete structural save-v1 schema, a checked example, the server SQL schema, and restore/migration rules. Choose embedded SQLite for the dedicated server, storing whole-world JSON, scheduling state and operation receipts transactionally. This is a selected implementation design; production adapters and full semantic restore validation are still to build. There is no released game-save format to migrate yet.
+
 Use versioned JSON snapshots behind an application-owned persistence port, with filesystem and IndexedDB adapters. Include scenario/data hashes, balance version, algorithm versions, date, company ledgers and commitments, infrastructure ownership/access status, auctions and protected bids, projects, fleet, services, RNG state if used, and enough of the latest report to restore its operating-day view. Server storage additionally owns schedule/phase records, acknowledged planning revisions, and resolution identities; authentication credentials are stored separately and never exposed through a player save download.
 
 Manual checkpoints, quick save, and three rolling autosaves follow the same wire format. Autosave after each successful month, serialize writes, and announce completion only after durable commit. Failed saves preserve the previously committed slot and show a recoverable error. Browser users can export/import a portable save because browser storage may not be permanent.

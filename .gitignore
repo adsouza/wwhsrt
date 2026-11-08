@@ -28,6 +28,9 @@ go.work.sum
 # env file
 .env
 
+# Local dedicated-server state (database, rollback journal, lock and backups)
+/server-data/
+
 # Editor/IDE
 # .idea/
 # .vscode/

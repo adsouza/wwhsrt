@@ -17,6 +17,7 @@ Use the [architecture](ARCHITECTURE.md) for system boundaries, [game design veri
 | Area | Runnable check / evidence | What it establishes |
 | --- | --- | --- |
 | Metro inputs | Python structural checks in [data/README.md](data/README.md#reproduce-the-metro-structural-checks) | Raw hash/schema, identity/ranges, derived selection, and current 5M minimum; not accuracy of demographic estimates |
+| State/save contracts | Focused Go package under [docs/contracts](docs/contracts), [Python checker](tools/check-state-contracts.py), [results](docs/validation/state-contract-checks.json) | Compile-checked type shapes, schema/fixture coherence, numeric precision/integrity checks, SQLite transaction/retry/backup contract; not a production restore validator or Go SQL adapter |
 | Map prototype | [tools/check-map-preview.cjs](tools/check-map-preview.cjs), [results](docs/validation/map-checks.json) | Equal Earth projection, source values, 93 markers, responsive framing, region exclusions, latitude cushion, gestures, saved views, and timezone defaults |
 | Actual ebitenui renderer | [tools/ebitenui-spike/check-browser.cjs](tools/ebitenui-spike/check-browser.cjs), [results](docs/validation/ebitenui-checks.json) | Real Go/WASM widgets, selected pointer/keyboard/touch-emulated paths, layout, scrolling, reports, and high DPI |
 | Native rendering spike | Build instructions below and [spike notes](tools/ebitenui-spike/README.md) | The macOS arm64 target compiled during the recorded investigation; its window was not exercised |
@@ -38,6 +39,21 @@ Also inspect touched Markdown links, code examples, and claims against the ownin
 Run the standard-library Python block in [data/README.md](data/README.md#reproduce-the-metro-structural-checks). For catalog or camera changes, also run the map checker against a preview containing the updated embedded data. Check that the embedded catalogs/manifests match their repository records; editing a JSON file alone does not update the current HTML prototype.
 
 Keep the raw 96-record attachment unchanged. Current derived output contains 93 major metros, retains Phoenix at exactly 5M, and excludes Brasília at 4.8M as well as the Manila/Taipei scope exclusions. Camera changes must not alter source coordinates or identities. Cost changes need reconciliation of the relevant observations, units, regional assignment, and engineering/overhead arithmetic against the [cost research](docs/CONSTRUCTION_COSTS.md); a JSON parse alone is insufficient.
+
+### State and save contracts
+
+From the repository root, run only the reference package (the root still has no game Go module):
+
+```sh
+GO111MODULE=off GOWORK=off GOMEMLIMIT=768MiB GOMAXPROCS=2 go test -p 1 ./docs/contracts -count=1
+python3 tools/check-state-contracts.py
+```
+
+The Python checker needs `jsonschema` as pinned in [tools/requirements-state-contracts.txt](tools/requirements-state-contracts.txt); install that file in a virtual environment if it is not already available. SQLite comes from Python's standard library. These focused checks do not download or qualify the selected production Go SQLite driver.
+
+The [structural JSON Schema](docs/contracts/save-v1.schema.json) is generated from the reference DTOs. After an intentional unreleased-contract change, regenerate it and the example using the same focused Go command with `-update-contracts`, review those outputs, then rerun without that flag and run the Python checker. Do not use regeneration to hide an unintended compatibility change after v1 is released. The [state/storage design](docs/STATE_AND_STORAGE.md) defines when real migrations become necessary.
+
+The reference codec is deliberately partial: complete required-field/schema checks and full domain/bundle validation remain gates for the production restore path. SQL fault tests use Python SQLite and injected transaction errors; abrupt-process/power-loss behavior, the real Go driver, process ownership, browser/native adapters, and complete server recovery still need qualification.
 
 ### Map preview
 

@@ -2,6 +2,12 @@
 
 **Date:** 2026-11-08. Prototype evidence, not release qualification or a completed game.
 
+## State and storage contracts
+
+The [state/storage design](../STATE_AND_STORAGE.md) selects SQLite for the dedicated server and defines portable save v1. The focused Go reference checks compile its type declarations, compare generated schema/example output, and exercise wide-integer round trips, checksum/version handling and duplicate/trailing JSON rejection.
+
+The [Python contract checker](../../tools/check-state-contracts.py) and [results](state-contract-checks.json) cover the structural schema, fixture bundle hashes, SQLite bootstrap/settings, transaction rollback, compare-and-swap conflicts, idempotency receipts, reopen, locked-month atomicity and backup consistency. This uses Python's SQLite, not a production Go adapter. The reference decoder does not yet implement the full structural/domain restore pipeline. No crash-process/power-loss, authentication, network, native/browser storage, or full-game persistence qualification is claimed.
+
 ## Equal Earth map
 
 The interactive mockup uses D3 7.9.0's `geoEqualEarth`, a content-addressed [Natural Earth snapshot](../../data/prototypes/natural-earth-110m.metadata.json), and the [metro seed](../../data/raw/metropolitan_areas_5m.json). Natural Earth's [terms](https://www.naturalearthdata.com/about/terms-of-use/) permit public-domain reuse. The [projection reference](https://proj.org/en/stable/operations/projections/eqearth.html) describes Equal Earth's global, equal-area purpose.

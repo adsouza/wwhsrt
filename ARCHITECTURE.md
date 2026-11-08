@@ -2,7 +2,7 @@
 
 This document describes the intended implementation of World-wide High-speed Rail Tycoon. The repository currently contains specifications, versioned prototype data, an HTML map prototype checker, and an isolated Go/ebitenui rendering spike. The game packages and server described below are not implemented yet.
 
-The [game design](docs/DESIGN.md) owns gameplay rules and domain invariants; [UX](docs/UX.md) owns interaction behavior; [testing](TESTING.md) records verification commands and release gates. Numeric camera settings and cost assumptions live in their linked manifests. This document explains the system boundaries that realize those requirements. Proposed balance and recovery policies retain their status from the design; listing them here does not make them calibrated or implemented.
+The [game design](docs/DESIGN.md) owns gameplay rules and domain invariants; [UX](docs/UX.md) owns interaction behavior; [testing](TESTING.md) records verification commands and release gates. The [state/storage contract](docs/STATE_AND_STORAGE.md) defines Go type shapes, portable save v1, the SQLite server backend and migration policy. Numeric camera settings and cost assumptions live in their linked manifests. This document explains the system boundaries that realize those requirements. Proposed balance and recovery policies retain their status from the design; listing them here does not make them calibrated or implemented.
 
 ## Architecture style
 
@@ -115,6 +115,8 @@ The current ebitenui spike proves visual layout and selected input paths, not ac
 
 Use versioned JSON snapshots behind application-owned persistence ports, with filesystem and IndexedDB adapters. Persist a consistent world, not independent per-city/train repositories. Include data and algorithm identities, obligations, protected reservations, owned assets, plans, reports, and replay summaries. Server storage additionally owns scheduling and operation identities; authentication secrets stay separate from downloadable game data.
 
+The dedicated server uses embedded SQLite via `database/sql` and `modernc.org/sqlite`, with a single connection/writer and transactional world/host-state/receipt commits. Entities stay in a versioned whole-world JSON snapshot; sessions and invite hashes stay in separate operational tables. Save, host-record and database schemas begin at v1; no historical game-save migration is needed yet. See the [detailed contract and reference artifacts](docs/STATE_AND_STORAGE.md).
+
 Decode and validate into an isolated replacement world before swapping live state. Incompatible or corrupt loads preserve the current campaign. Serialize writes; acknowledge saves only after durable commit; preserve the previous slot on failure. Support portable browser export/import and a single browser storage writer. UI preferences/drafts use separate versioned records.
 
 Native and browser lifecycle adapters handle audio activation, visibility, storage failures, and resume. Browser background timers do not control online deadlines. On reconnect/resume, refresh world, schedule, and uncertain operation status before enabling commitments.
@@ -122,7 +124,7 @@ Native and browser lifecycle adapters handle audio activation, visibility, stora
 ## Decisions still to qualify
 
 - Accessible browser/native control strategy and physical iOS/Android keyboard, safe-area, and lifecycle behavior.
-- Native/browser transport and server storage implementation behind the agreed ports.
+- Native/browser transport, and implementation/qualification of the chosen SQLite server adapter and platform storage adapters.
 - Worked deterministic rounding/shared-capacity allocation and cross-target checkpoint equality.
 - Qualified existing-HSR inventory, corridor catalog, economic calibration, and data redistribution rights.
 - Measured mobile/stress performance, memory, and shipped WebAssembly size.

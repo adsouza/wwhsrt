@@ -1,0 +1,13 @@
+{
+  "id": "fixture-balance-v1",
+  "role": "Contract-test fixture; no calibrated game economics",
+  "currency": "game_USD",
+  "minor_units_per_unit": 100,
+  "cash_categories": [
+    "fare",
+    "upkeep",
+    "construction",
+    "loan",
+    "access"
+  ]
+}
