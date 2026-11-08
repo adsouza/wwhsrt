@@ -88,9 +88,13 @@ def main():
 
         def snapshot():
             return (db.execute("SELECT * FROM worlds").fetchall(),
-                    db.execute("SELECT * FROM operations ORDER BY actor,operation_key").fetchall())
+                    db.execute("SELECT * FROM operations ORDER BY actor,operation_key").fetchall(),
+                    db.execute("SELECT * FROM audit_events ORDER BY store_revision,event_index").fetchall())
 
         def commit(expected, candidate, host_state, actor, key, request_hash, response, fail_at=None):
+            # A canonical fixture command stands in for a production typed DTO.
+            request_json = json.dumps({"fixture_command": request_hash}, separators=(",", ":"))
+            request_hash = digest(request_json.encode())
             validator.validate(json.loads(encode(candidate)))
             db.execute("BEGIN IMMEDIATE")
             try:
@@ -101,6 +105,7 @@ def main():
                         raise ValueError("IdempotencyConflict")
                     db.execute("COMMIT")
                     return prior[2], json.loads(prior[1])
+                before_save = json.loads(db.execute("SELECT save_json FROM worlds WHERE world_id=?", (world_id,)).fetchone()[0])
                 changed = db.execute("UPDATE worlds SET store_revision=store_revision+1,save_json=?,host_json=?,updated_at_utc=? "
                                      "WHERE world_id=? AND store_revision=?",
                                      (encode(candidate), json.dumps(host_state), now, world_id, expected))
@@ -108,10 +113,19 @@ def main():
                     raise ValueError("StoreRevisionConflict")
                 if fail_at == "state":
                     raise RuntimeError("injected failure after state update")
-                db.execute("INSERT INTO operations VALUES (?,?,?,?,?,?,?)",
-                           (world_id, actor, key, request_hash, json.dumps(response), expected + 1, now))
+                db.execute("INSERT INTO operations VALUES (?,?,?,?,?,?,?,?)",
+                           (world_id, actor, key, request_hash, request_json, json.dumps(response), expected + 1, now))
                 if fail_at == "receipt":
                     raise RuntimeError("injected failure after receipt insert")
+                kind = ("month.resolved" if key.startswith("resolve:") else "scheduler.locked") if actor == "system" else ("command.rejected" if "error" in response else "command.committed")
+                company = actor.removeprefix("company:") if actor.startswith("company:") else None
+                month = before_save["payload"]["world"]["month"]
+                db.execute("INSERT INTO audit_events VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                           (world_id, expected + 1, 0, kind, "company" if company else "admin", company, key,
+                            month["year"], month["month"], before_save["payload_sha256"], json.loads(encode(candidate))["payload_sha256"],
+                            1, json.dumps({"operation_key": key, "outcome": response}), now))
+                if fail_at == "audit":
+                    raise RuntimeError("injected failure after audit insert")
                 db.execute("COMMIT")
                 return expected + 1, response
             except BaseException:
@@ -123,7 +137,7 @@ def main():
         changed_payload["world"]["plans"][0]["revision"] = "1"
         actor = "company:co_player"
         request = digest(b"apply-plan-month-2025-01-revision-0")
-        for point in ("state", "receipt"):
+        for point in ("state", "receipt", "audit"):
             before = snapshot()
             try:
                 commit(0, changed_payload, host, actor, "op_1", request, {"accepted": True}, point)
@@ -144,7 +158,7 @@ def main():
             else:
                 raise AssertionError("conflict accepted")
             assert snapshot() == before
-        checks.append("SQLite v1 bootstrap, configured durability, atomic rollback at state/receipt boundaries, CAS and actor/key deduplication")
+        checks.append("SQLite v1 bootstrap, configured durability, atomic rollback at state/receipt/audit boundaries, CAS and actor/key deduplication without duplicate audit events")
 
         db.close()
         db = sqlite3.connect(path, isolation_level=None); configure(db)
@@ -181,11 +195,12 @@ def main():
         db.backup(backup)
         assert backup.execute("SELECT * FROM worlds").fetchall() == before[0]
         assert backup.execute("SELECT * FROM operations ORDER BY actor,operation_key").fetchall() == before[1]
+        assert backup.execute("SELECT * FROM audit_events ORDER BY store_revision,event_index").fetchall() == before[2]
         assert backup.execute("SELECT count(*) FROM sessions").fetchone()[0] == 1
         assert backup.execute("PRAGMA integrity_check").fetchone()[0] == "ok"
         assert backup.execute("PRAGMA foreign_key_check").fetchall() == []
         backup.close(); db.close()
-        checks.append("SQLite backup preserves consistent world/receipts/identity rows; integrity and foreign-key checks")
+        checks.append("SQLite backup preserves consistent world/receipts/audit/identity rows; integrity and foreign-key checks")
 
     result = {"date": datetime.datetime.now(datetime.timezone.utc).date().isoformat(),
               "scope": "Reference JSON schema and SQLite transaction contract via Python sqlite3; not the production Go adapter or domain restore validator",

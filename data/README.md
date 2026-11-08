@@ -2,6 +2,8 @@
 
 ## Prototype basemap
 
+[ui/theme.v1.json](ui/theme.v1.json) records the cheerful light/dark palette and semantic color roles. The [presentation contract](../docs/PRESENTATION.md) defines its contrast targets and construction/train animation and sound behavior.
+
 [prototypes/map-region-presets.v1.json](prototypes/map-region-presets.v1.json) records the user-defined region labels, landscape/portrait metro anchor sets, latitude cushion, and timezone-selected initial portrait views for map framing. Bounds are derived from raw metro coordinates at runtime; no metro records are renamed or edited by these presentation presets.
 
 [prototypes/natural-earth-110m.countries.geojson](prototypes/natural-earth-110m.countries.geojson) contains 177 Natural Earth country geometries and names for the Equal Earth world/region mockup. Its [manifest](prototypes/natural-earth-110m.metadata.json) records the public-domain source, source/processed hashes, snapshot date, and transformation. This is overview artwork, not qualified terrain, station positions, rail topology, or production regional detail. The raw seed preserves all 96 records. The [playable catalog](prototypes/playable-metros.v1.json) retains the original values of 93 metros with populations of at least 5M, excluding Manila, Taipei, and Brasília according to the [selection policy](prototypes/playable-metro-selection.v1.json). Display names omit a trailing “Metropolitan Area” without changing source names; [validation evidence](../docs/validation/README.md) describes projection and raw-data checks.

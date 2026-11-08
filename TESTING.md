@@ -111,9 +111,11 @@ These are planned gates, not existing scripts. Add concrete commands when their 
 | Persistence | Save/reload continuation equals uninterrupted play; failed writes/loads preserve committed/live state; data-version compatibility, single-writer browser storage, and portable export/import |
 | Determinism | Identical command logs and versioned data yield matching canonical checkpoints across supported native targets and WebAssembly; replay/help/forecast behavior cannot affect them |
 | Multiplayer | Shared OD demand and finite capacity, company authorization/private frames, idempotent retries, acknowledgments, atomic month commits, and crash recovery |
+| Diagnostics/audit | Correlated outcomes, atomic world/receipt/audit persistence, exactly-once business events after retry, redaction/export authorization, bounded queues/rotation, reproducible command histories, and unchanged checkpoints with logging disabled/verbose/failed sinks |
 | Scheduling | Injected clocks test 15-minute boundaries, absent players, backward/forward clock changes, and the proposed bounded outage catch-up; do not wait real hours in ordinary correctness checks |
 | Full workflows | Construction-led and existing-track starts, disconnected networks and later joins, service/report/cash flows, auctions/open access, grants/loans, insolvency, and continuation |
 | Presentation | Shared intent behavior, draft preservation, drawing/picking agreement, text/DPI reflow, reduced motion, phone rotation/keyboard/back/resume, and meaningful semantic controls |
+| Palette/motion/audio | Light/dark contrast and color-independent states; state-grounded rail/train effects, cue deduplication, no reconnect backlog, audio unlock/background/mute handling, bounded voices/markers, and unchanged results across effect/replay preferences |
 
 The [design's end-to-end scenarios](docs/DESIGN.md#end-to-end-scenarios) remain the full scenario checklist. Extend that list and relevant checks together when a gameplay rule changes. Use example tests and targeted Go fuzz/property tests for mathematical/allocation boundaries; a third-party property framework or blanket mutation-testing requirement is not necessary to begin.
 

@@ -18,6 +18,9 @@ const original = raw.filter(m => m.population >= 5_000_000 && !['manila', 'taipe
     await page.goto(url); const f = page.frameLocator('iframe');
     await f.locator('.wm-metro').first().waitFor();
     assert.equal(await f.locator('.wm-metro').count(), 93);
+    const theme = JSON.parse(fs.readFileSync(path.join(root, 'data/ui/theme.v1.json')));
+    assert.deepEqual(JSON.parse(await f.locator('#wm-theme').textContent()), theme);
+    assert.equal(await f.locator('#equal-earth-rail-map').getAttribute('data-theme'), 'cheerful-rail-v1');
     assert.deepEqual(JSON.parse(await f.locator('#wm-metros').textContent()), original);
     assert.equal(await f.locator('[data-preview="portrait"]').getAttribute('aria-pressed'), 'true');
     assert.equal(await f.locator('.wm-stage').getAttribute('data-orientation'), 'portrait');
@@ -96,7 +99,7 @@ const original = raw.filter(m => m.population >= 5_000_000 && !['manila', 'taipe
     await f.locator('[data-region]').selectOption('east-asia'); await page.waitForTimeout(100);
     assert.ok(Number(await f.locator('.wm-stage').getAttribute('data-zoom')) > 1);
     await page.screenshot({ path: path.join(root, 'docs/validation/equal-earth-east-asia-dark.png'), fullPage: true });
-    checks.checks.push('dark appearance and reduced-motion regional navigation');
+    checks.checks.push('bright cheerful theme matches its manifest; dark appearance and reduced-motion regional navigation');
 
     // Exercise real window aspect ratios in a top-level document as well as
     // the inline preview. The preview host sizes its iframe to its content.

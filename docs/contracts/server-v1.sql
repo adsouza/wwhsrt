@@ -21,10 +21,30 @@ CREATE TABLE operations (
     actor TEXT NOT NULL,
     operation_key TEXT NOT NULL,
     request_sha256 TEXT NOT NULL CHECK (length(request_sha256) = 64),
+    request_json TEXT NOT NULL,
     response_json TEXT NOT NULL,
     committed_store_revision INTEGER NOT NULL CHECK (committed_store_revision >= 0),
     created_at_utc TEXT NOT NULL,
     PRIMARY KEY (world_id, actor, operation_key)
+) STRICT;
+
+CREATE TABLE audit_events (
+    world_id TEXT NOT NULL REFERENCES worlds(world_id),
+    store_revision INTEGER NOT NULL CHECK (store_revision >= 0),
+    event_index INTEGER NOT NULL CHECK (event_index BETWEEN 0 AND 65535),
+    kind TEXT NOT NULL,
+    scope TEXT NOT NULL CHECK (scope IN ('public', 'company', 'admin')),
+    company_id TEXT,
+    correlation_id TEXT NOT NULL,
+    business_year INTEGER NOT NULL CHECK (business_year BETWEEN 1 AND 9999),
+    business_month INTEGER NOT NULL CHECK (business_month BETWEEN 1 AND 12),
+    before_state_sha256 TEXT NOT NULL CHECK (length(before_state_sha256) = 64),
+    after_state_sha256 TEXT NOT NULL CHECK (length(after_state_sha256) = 64),
+    payload_version INTEGER NOT NULL CHECK (payload_version > 0),
+    payload_json TEXT NOT NULL,
+    occurred_at_utc TEXT NOT NULL,
+    CHECK (scope <> 'company' OR company_id IS NOT NULL),
+    PRIMARY KEY (world_id, store_revision, event_index)
 ) STRICT;
 
 -- Operational identity data is excluded from portable game exports.

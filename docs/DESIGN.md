@@ -478,6 +478,8 @@ Show construction cost, opening date, first operating-month ridership and operat
 
 ### Main screen
 
+Use a cheerful bright visual identity with purposeful construction/train motion and sound, as defined in [PRESENTATION.md](PRESENTATION.md). Animation follows authoritative project progress and resolved operating-day timing; it cannot complete work or advance time. Reduced motion, master mute and separate sound channels preserve full playability.
+
 The detailed [interaction, layout, and onboarding specification](UX.md) defines the screen compositions and task flows. Four stable destinations are Map, Services (including fleet), Company (including finance), and Reports. The map is the principal workplace; Watch operating day is a distinct replay mode within it.
 
 - **Status strip:** business month and unrestricted cash; Advance month offline, or the server deadline and plan acknowledgment state online. Phone branding scrolls away while the compact status remains available. Wider layouts add operating cash flow, runway, and debt.
@@ -716,7 +718,7 @@ First targets: macOS arm64, Windows amd64, Linux amd64, and desktop plus smartph
 
 Desktop and web share rules, content versions, saves, and checkpoints. Browser execution yields between bounded calculation stages so forecasts and monthly resolution do not freeze controls indefinitely. Native and browser builds must not depend on divergent domain code paths.
 
-Diagnostics are local, structured, and bounded. They record command failures, invariant failures, storage outcomes, data identities, and slow operations. No gameplay telemetry is uploaded by default. Audio begins after browser interaction and respects focus, mute, volume, and reduced-motion preferences where relevant.
+Pervasive diagnostics follow [DIAGNOSTICS.md](DIAGNOSTICS.md): correlate intents, validation, authoritative commits, construction/fleet changes, monthly phases, storage, networking and presentation failures. Keep rolling local diagnostics bounded; persist canonical game requests and audit events with authoritative server commits for after-the-fact investigation. Never log credentials or expose rival-private plans to players. No gameplay telemetry is uploaded by default. Audio begins after browser interaction and respects focus, mute, volume, and reduced-motion preferences where relevant.
 
 ## 13. Verification and performance
 

@@ -205,7 +205,7 @@ Standing services continue while the player is away. The interface helps prepare
 
 ## 8. Input, accessibility, and visual density
 
-Use a restrained contemporary transport-map style: clear labels, distinct railway line styles, readable numerals, light and dark appearances, and motion that explains routes or selection. Station activity and the representative day provide character. Keep financial panels calm enough to read. High resolution improves detail and available workspace rather than shrinking controls.
+Use a cheerful contemporary transport-map style with bright railway blue, teal, sunflower yellow, coral and violet accents, fresh map colors, and readable deep-ink typography. Clear labels, distinct railway line styles, readable numerals, light and dark appearances, and purposeful motion keep it usable. Station activity and the representative day provide character. Keep financial panels calm enough to read. High resolution improves detail and available workspace rather than shrinking controls. The [presentation specification](PRESENTATION.md) and [theme manifest](../data/ui/theme.v1.json) define the initial palette and semantic roles.
 
 All visible actions, keyboard commands, and touch controls emit the same intent with the same validation. Escape/Back closes one transient layer or returns within a task; it never silently applies or discards a draft. Text editing owns its shortcuts. Avoid a bare Space shortcut for month advancement, where a player may intend to pause replay. Any advance shortcut is documented, guarded against key-repeat, and unavailable inside editors/modals.
 
@@ -214,6 +214,10 @@ Proposed defaults: 16 logical px body text, larger text options, at least 44×44
 For web interfaces, W3C's [Reflow guidance](https://www.w3.org/WAI/WCAG22/Understanding/reflow.html) describes 320 CSS px reflow while recognizing genuinely two-dimensional content such as maps. Its [Target Size guidance](https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html) sets a 24 CSS px AA minimum with exceptions and identifies 44 CSS px as the enhanced threshold. The proposed 44 px touch default is a product choice; these sources do not establish that the game already conforms to WCAG.
 
 Accessible labels, focus order, visible focus, error association, selected states, and meaningful announcements are required for management controls. City, service, route-alternative, and report lists provide a non-spatial path through core decisions. Reduced motion replaces train movement with static positions and aggregate counts, removes camera tweening, and retains full operating information. Audio has separate controls and never carries a unique warning.
+
+### Railway motion and sound
+
+Show short track/sleeper reveals and work-front effects when authoritative construction progress changes, then an opening highlight when the line actually becomes operational. V1 timeline-derived progress is labeled scheduled; animation does not make unfinished track usable. Train markers follow resolved operating-day paths/timing, with appropriate electric-train departure, rolling and pass-by sounds plus selected station ambience. Refer to [PRESENTATION.md](PRESENTATION.md) for cues, timing, mixing, deduplication, reduced motion and background behavior. Keep master mute and independent music/effects/ambience controls available. Never replay a backlog of sounds after reconnect or make the player wait for an effect to finish.
 
 ## 9. Implementation constraints and early feasibility work
 

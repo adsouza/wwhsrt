@@ -6,7 +6,7 @@
 
 The [state/storage design](../STATE_AND_STORAGE.md) selects SQLite for the dedicated server and defines portable save v1. The focused Go reference checks compile its type declarations, compare generated schema/example output, and exercise wide-integer round trips, checksum/version handling and duplicate/trailing JSON rejection.
 
-The [Python contract checker](../../tools/check-state-contracts.py) and [results](state-contract-checks.json) cover the structural schema, fixture bundle hashes, SQLite bootstrap/settings, transaction rollback, compare-and-swap conflicts, idempotency receipts, reopen, locked-month atomicity and backup consistency. This uses Python's SQLite, not a production Go adapter. The reference decoder does not yet implement the full structural/domain restore pipeline. No crash-process/power-loss, authentication, network, native/browser storage, or full-game persistence qualification is claimed.
+The [Python contract checker](../../tools/check-state-contracts.py) and [results](state-contract-checks.json) cover the structural schema, fixture bundle hashes, SQLite bootstrap/settings, atomic world/receipt/audit rollback, compare-and-swap conflicts, idempotency without duplicate audit events, reopen, locked-month atomicity and backup consistency. This uses Python's SQLite, not a production Go adapter. The reference decoder does not yet implement the full structural/domain restore pipeline. No crash-process/power-loss, authentication, network, native/browser storage, or full-game persistence qualification is claimed.
 
 ## Equal Earth map
 
@@ -22,6 +22,9 @@ The latest presets also use orientation-specific Frangistan anchors, separate Ea
 
 Checks cover raw-record equality, 177 country geometries, forward-projection agreement for every marker, world reset, regional zoom, raw-value inspection, dense markers, narrow layouts, dark appearance, and reduced-motion navigation. [Map results](map-checks.json) include the subpixel projection comparison. The [checker](../../tools/check-map-preview.cjs) accepts a locally served visualization preview URL.
 
+The current map preview applies [cheerful-rail-v1](../../data/ui/theme.v1.json). Its core normal-text/action/bright-fill text pairs were calculated at 4.5:1 or better in light and dark palettes; browser checks verify the manifest and actual action foreground colors. This is not full accessibility qualification. Construction/train motion and sound are specified in [PRESENTATION.md](../PRESENTATION.md), not implemented by this metro-only map or validated by these palette checks.
+
+- [Cheerful dark palette](equal-earth-palette-dark.png)
 - [Dhaka eastern-edge starting view](equal-earth-dhaka-edge-portrait.png)
 - [Karachi western-edge starting view](equal-earth-karachi-edge-portrait.png)
 - [Portrait Americas starting view](equal-earth-portrait-preview.png)

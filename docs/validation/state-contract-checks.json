@@ -4,14 +4,14 @@
   "sqliteVersion": "3.45.3",
   "jsonschemaVersion": "4.23.0",
   "schemaSHA256": "1dbe278f3b5e94cedb2e2d633ced5a9dac2a2abf4309868cebf515f6b6b0e3b0",
-  "sqlSHA256": "eaa93070b5e9ed5a2d499590a35f67d7f289ab5582dc0e4a469698df995c61e1",
+  "sqlSHA256": "cab0794ddb823034589da3b2b4f0da294555bf53380a61246667619883bb833c",
   "checks": [
     "generated JSON schema/example and fixture bundle hashes",
     "missing/unknown fields, null arrays, month bounds, wide-number syntax, future version",
-    "SQLite v1 bootstrap, configured durability, atomic rollback at state/receipt boundaries, CAS and actor/key deduplication",
+    "SQLite v1 bootstrap, configured durability, atomic rollback at state/receipt/audit boundaries, CAS and actor/key deduplication without duplicate audit events",
     "close/reopen preserves receipts; durable rejection does not change game payload",
     "locked-month failure retains lock/checkpoint; resolved world, deadline and completion receipt commit together and retry once",
-    "SQLite backup preserves consistent world/receipts/identity rows; integrity and foreign-key checks"
+    "SQLite backup preserves consistent world/receipts/audit/identity rows; integrity and foreign-key checks"
   ],
   "passed": true
 }

@@ -39,9 +39,22 @@ type OperationReceipt struct {
 	Actor                  string // derived from authentication, or the scheduler's system actor
 	Key                    string
 	RequestSHA256          string
+	RequestJSON            json.RawMessage // canonical typed game command; no credentials
 	ResponseJSON           json.RawMessage
 	CommittedStoreRevision int64
 	CreatedAtUTC           string
+}
+
+type AuditEvent struct {
+	Kind              string
+	Scope             string // public, company, admin; projected views still authorize fields
+	CompanyID         *CompanyID
+	CorrelationID     string
+	Month             GameMonth
+	BeforeStateSHA256 string
+	AfterStateSHA256  string
+	PayloadVersion    uint16
+	PayloadJSON       json.RawMessage
 }
 
 type StoreCommit struct {
@@ -50,11 +63,12 @@ type StoreCommit struct {
 	SaveJSON              []byte
 	HostJSON              []byte
 	Receipt               *OperationReceipt
+	AuditEvents           []AuditEvent // nonempty; adapter assigns ordered event_index
 	UpdatedAtUTC          string
 }
 
 // WorldStore belongs to the application layer. SQL details stay in its adapter.
-// Commit atomically compares/increments store revision and writes state/receipt.
+// Commit atomically compares/increments revision and writes state/receipt/audit.
 type WorldStore interface {
 	Load(context.Context, WorldID) (StoredWorld, error)
 	LookupOperation(context.Context, WorldID, string, string) (OperationReceipt, bool, error)

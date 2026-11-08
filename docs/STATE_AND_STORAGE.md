@@ -13,7 +13,7 @@ Use one mutable `World` aggregate per game, owned by its application/coordinator
 | Scenario and balance | Immutable content-addressed bundles: cities, node/route geometry, engineering profiles, train/track models, costs, contract/offer terms, and scenario constraints |
 | Business world | Companies; station/junction graph; ownership and access; projects; fleet/orders; services and acknowledged plans; finance; auctions/bids; reservations; cash journal; reports |
 | Derived indexes | Adjacency, spatial/search indexes, OD candidates, cache entries, free-cash totals, and lookup tables; rebuild after validated restore |
-| Server operations | Schedule/phase, locked resolution identity, operation receipts, authenticated sessions and invitations; excluded from portable saves and gameplay hashes |
+| Server operations | Schedule/phase, locked resolution identity, canonical command receipts, audit events, authenticated sessions and invitations; excluded from portable saves and gameplay hashes |
 | Local presentation | Camera, selection, audio, hints, replay cursor, and unsubmitted drafts; separate versioned UI records |
 
 The immutable bundle manifest transitively hashes all referenced assets. Saves pin exact bundle IDs and SHA-256 values, plus simulation/demand/allocation/RNG algorithm IDs. They do not copy the basemap or corridor polylines. New construction selects qualified catalog geometry; a later free-waypoint feature would need an explicit geometry representation and compatibility decision.
@@ -114,18 +114,19 @@ One server process owns `server-data/wwhsrt.sqlite` on a persistent local disk. 
 
 Use one database connection (`SetMaxOpenConns(1)`, `SetMaxIdleConns(1)`) and a short serialized database-write path. Configure/read back `foreign_keys=ON`, `journal_mode=DELETE`, `synchronous=EXTRA`, and `busy_timeout=5000` on connection creation. SQLite's [EXTRA setting](https://sqlite.org/pragma.html#pragma_synchronous) adds a directory sync for DELETE-journal commits. Calculate forecasts/months outside database transactions; a database lock is not held while the simulation runs. WAL is unnecessary for this initial access pattern.
 
-The [SQL bootstrap](contracts/server-v1.sql) contains four tables:
+The [SQL bootstrap](contracts/server-v1.sql) contains five tables:
 
 It uses SQLite [STRICT tables](https://sqlite.org/stricttables.html) (SQLite 3.37 or newer), application ID `0x57574852` and `user_version=1`. Bootstrap only when both identifiers are zero and the database is empty; otherwise validate the application ID and supported schema version before reading/writing. A file belonging to another application is not a schema-zero game database.
 
 | Table | Contents |
 | --- | --- |
 | `worlds` | Current whole-world save JSON, host-record JSON, store generation, update timestamp |
-| `operations` | Actor-scoped idempotency key, canonical request hash, exact authorized response and committed generation |
+| `operations` | Actor-scoped idempotency key, canonical typed game request and hash, exact authorized response and committed generation |
+| `audit_events` | Ordered committed/rejected/phase events with correlation, business month, before/after hashes and scoped versioned payloads |
 | `sessions` | World/company binding, hashed random bearer token, expiry/revocation; no plaintext token |
 | `invitations` | Hashed random invite token, target company, expiry and remaining uses |
 
-Keep entities inside the world snapshot instead of creating relational train/station/account repositories. This preserves the aggregate transaction boundary and keeps schema changes small. Operations are deduplication receipts, not an event-sourced world; restore does not replay them. Sessions/invitations are operational identity data, excluded from game exports. Validate company bindings against the world because company rows live inside its snapshot.
+Keep entities inside the world snapshot instead of creating relational train/station/account repositories. This preserves the aggregate transaction boundary and keeps schema changes small. Operations are deduplication/reproduction records, not an event-sourced world; ordinary restore does not replay them. Audit events and operation history follow [DIAGNOSTICS.md](DIAGNOSTICS.md), are retained for the world's lifetime, and do not enter portable saves or gameplay hashes. This extends the still-unreleased SQL v1 bootstrap; there is no historical database migration to run. Sessions/invitations are operational identity data, excluded from game exports. Validate company bindings against the world because company rows live inside its snapshot.
 
 V1 invitations target already-created company slots. Consume an invitation's remaining use and create the session in one identity-table transaction. Joining/reconnecting cannot create another company or starting-capital package. Creating an additional company is an explicit idempotent application command; an invitation is issued only after that company exists.
 
@@ -136,7 +137,7 @@ The [application-owned store port](contracts/server.go) exposes load, operation 
 1. Authenticate/authorize first. Derive the actor namespace on the server. Look up `(world, actor, operation_key)` before stale-month checks: a matching request hash returns its recorded result; a changed payload with the same key returns `IdempotencyConflict`.
 2. Apply a fresh operation to an isolated candidate world and validate it. Encode/check the candidate before beginning the database write.
 3. Inside the transaction, recheck the operation identity and expected store generation. Update `worlds` with `WHERE store_revision = expected`; require exactly one changed row, incrementing without integer overflow.
-4. Write the save, host state, and operation receipt in that same transaction. For an authenticated terminal business rejection, keep save/state revision unchanged but atomically store its error receipt and new store generation. Unauthenticated failures do not create world receipts.
+4. Write the save, host state, operation receipt/canonical game request, and nonempty audit event group in that same transaction. Assign event indices in stable order within the new store generation. For an authenticated terminal business rejection, keep save/state revision unchanged but atomically store its error receipt, rejection event and new store generation. Unauthenticated failures do not create world receipts. Replayed operations return the existing outcome without appending another business event.
 5. Commit successfully, then replace the coordinator's in-memory state and acknowledge/broadcast. Database errors before commit leave the old state usable. An ambiguous commit result requires reloading/checking the original receipt; stop further mutation until reconciled, rather than claiming the operation certainly failed.
 
 Use a pinned `sql.Conn` for `BEGIN IMMEDIATE`, every statement, and `COMMIT`/`ROLLBACK`, returning it to the pool only afterward. Do not mix connection-scoped transaction statements with `DB.Exec` calls that could wait for the same sole connection. Validate that a receipt's committed generation equals the compare-and-swap result. Generate session tokens from 32 cryptographically random bytes and invites from at least 16; store only their SHA-256 hashes.
@@ -167,6 +168,6 @@ Future SQL migrations run with the server stopped, a verified whole-database bac
 
 ## 6. Verification and remaining implementation
 
-The focused reference Go checks compile the types, compare the generated structural schema/example, check exact wide-integer round trips, reject duplicate/trailing JSON and tampered/future-schema envelopes. The Python contract checker validates the schema/example and fixture hashes and exercises SQLite bootstrap, atomic rollback, generation conflicts, deduplication, close/reopen and backup consistency.
+The focused reference Go checks compile the types, compare the generated structural schema/example, check exact wide-integer round trips, reject duplicate/trailing JSON and tampered/future-schema envelopes. The Python contract checker validates the schema/example and fixture hashes and exercises SQLite bootstrap, atomic world/receipt/audit rollback, generation conflicts, deduplication without duplicate events, close/reopen and backup consistency.
 
 These checks do not implement world mapping, complete semantic restore validation, the selected Go SQL driver, production native/browser storage, authentication, process locking or a server coordinator. Those are implementation tasks with the contracts above fixed for the first slice. Qualify real driver/filesystem/browser fault recovery and abrupt-process/power-loss behavior before claiming production durability. Follow [TESTING.md](../TESTING.md) for the focused commands and remaining gates.

@@ -111,6 +111,12 @@ Camera, selection, dismissed hints, replay position, and drafts are local UI sta
 
 The current ebitenui spike proves visual layout and selected input paths, not accessible management controls or physical-phone behavior. Keep the semantic HTML browser-HUD fallback open; native accessibility also needs qualification. Resolve this host decision in the first milestone before building a large inventory of canvas forms.
 
+The [presentation contract](docs/PRESENTATION.md) requires a cheerful bright palette and state-grounded construction/train animation and sound. Renderer/audio consume frames and deduplicated presentation cues, never mutate campaign state, and honor reduced motion, mute and lifecycle preferences.
+
+## Diagnostics and audit
+
+Pervasive structured diagnostics are required, through explicit Go `log/slog` decorators/adapters and domain-returned facts. The [diagnostics contract](docs/DIAGNOSTICS.md) defines coverage, correlation, retention, privacy, support exports and reproducibility. Rolling diagnostic sinks are bounded and non-authoritative. Server canonical game requests and ordered audit events persist with world/host/receipt commits in SQLite; retry cannot duplicate a business event. Audit data is admin-private and separately projected for player-visible activity. Logging verbosity, dropped verbose events and audio/render tracing cannot alter canonical outcomes.
+
 ## Persistence and lifecycle
 
 Use versioned JSON snapshots behind application-owned persistence ports, with filesystem and IndexedDB adapters. Persist a consistent world, not independent per-city/train repositories. Include data and algorithm identities, obligations, protected reservations, owned assets, plans, reports, and replay summaries. Server storage additionally owns scheduling and operation identities; authentication secrets stay separate from downloadable game data.
