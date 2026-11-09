@@ -378,7 +378,7 @@ A train stopping at an intermediate city consumes a station call there. Through 
 
 Use three fictional high-speed train families initially, differentiated by seats, maximum speed, purchase price, energy use per train-kilometre, and maintenance cost. These are gameplay equipment profiles, not manufacturer specifications. Avoid collecting dozens of near-identical train types.
 
-Trains belong to the company, with distinct available, assigned, on-order, relocating, and sold counts. Procurement has a disclosed delivery time and destination operating area. Persist delivery/relocation commitments and their remaining time so saves and server restarts cannot make unavailable fleet appear early. A trainset is assigned to at most one service; spare trainsets are visible. Selling trains returns a published depreciated value and cannot leave an active service under-resourced without an explicit reduction or suspension.
+Trains belong to the company, with distinct available, assigned, in-delivery, relocating, and retired/sold counts. Procurement has a disclosed delivery time and destination operating area. A company buys trainsets outright or, where the scenario publishes lease terms, leases them for a fixed monthly payment and term. Leased sets cannot be sold, and lease payments are mandatory obligations. Persist delivery/relocation commitments and their remaining time so saves and server restarts cannot make unavailable fleet appear early. A trainset is assigned to at most one service; spare trainsets are visible. Selling trains returns a published depreciated value and cannot leave an active service under-resourced without an explicit reduction or suspension.
 
 Fleet requirements use round-trip running time, terminal turnaround, chosen frequency, and a maintenance reserve. With `f` daily departures in each direction over operating window `W`, the strategic planning rule is:
 
@@ -464,7 +464,7 @@ The monthly ledger separates:
 | Infrastructure/station upkeep | Fixed cost of owned operational assets |
 | Public track/station access | Published usage charge; distinct from upkeep of company-owned assets |
 | Acquired-line access income | Rival companies' regulated infrastructure payments, reconciled across payer and owner |
-| Fleet overhead | Ownership and maintenance cost, including unassigned trainsets |
+| Fleet overhead | Ownership, lease, and maintenance cost, including unassigned trainsets |
 | Construction installments and purchases | Capital spending; not operating expenses |
 | Borrowing and principal repayment | Financing; not revenue or operating expense |
 | Interest | Finance expense and cash payment |
@@ -525,7 +525,7 @@ Onboarding happens through ordinary empty states, explainable forecasts, short c
 
 Use one `World` aggregate as the atomic consistency boundary. It owns all companies, the shared scenario clock, public and private infrastructure, projects, auctions and bid reservations, fleet ownership, accepted service plans, concessions, grants, and bounded report history. An offline world has one player company; a multiplayer world has several. Cities and the corridor catalog are immutable versioned scenario inputs. Every company-owned object carries a `CompanyID`; every modifying operation checks the acting company's authority.
 
-Use typed identifiers and quantities for money, distance, minutes, seats, passengers, trainsets, departures, and basis points. Store money in checked integer minor units; use integer metres and simulation minutes or seconds at defined boundaries. Reject non-finite coordinates and calculations, invalid units, overflows, duplicate IDs, and broken references on construction and restore.
+Use typed identifiers and quantities for money, distance, minutes, seats, passengers, trainsets, departures, and basis points. Store money in checked integer minor units. Fare rates use a finer fixed-point unit per passenger-kilometre, and fare revenue rounds explicitly to cents. Use integer metres and simulation minutes or seconds at defined boundaries. Reject non-finite coordinates and calculations, invalid units, overflows, duplicate IDs, and broken references on construction and restore.
 
 ### Monthly resolution order
 
@@ -574,7 +574,7 @@ Before starting the clock, give the group a planning lobby. Players can inspect 
 4. At the deadline, the coordinator locks the newest durably acknowledged plan for each company and resolves the month jointly. It never waits for Ready votes and never advances early because everyone is online.
 5. Each company receives results immediately or on reconnect. The next deadline is published and the next planning window opens.
 
-Other companies' next-month fares, financing, construction bids, and drafts stay private until their effects are committed. Their currently operating services and published infrastructure are visible. A draft can span several months. Update it against the current state and ask for renewed review when the decision's terms or eligibility change. Late requests receive a closed-month response or an explicit acknowledgment for the following planning window. Never silently apply an old command to a different month. Private-plan revisions do not invalidate an unrelated company's draft merely because that player clicked Apply.
+Other companies' next-month fares, financing, construction bids, and drafts stay private until their effects are committed. Their currently operating services and published infrastructure are visible. A draft can span several months. Update it against the current state and ask for renewed review when the decision's terms or eligibility change. A request that arrives after the deadline lock receives a closed-month rejection. The client keeps the draft and may resubmit it explicitly for the following planning window. Never silently apply an old command to a different month. Private-plan revisions do not invalidate an unrelated company's draft merely because that player clicked Apply.
 
 ### Standing plans and absent players
 
@@ -665,7 +665,15 @@ tools/                    offline data preparation, release and browser checks
 
 The domain uses concrete entities and pure algorithms. Persist the world as a consistent snapshot; do not introduce one repository per city, track, or train. Split commands from queries in the API without separate databases, distributed messaging, or event sourcing. Logging decorators implement the useful part of the draft's AOP proposal without adding a generic middleware framework to every calculation.
 
-Example driving operations: `NewCampaign`, `Apply`, offline `AdvanceMonth`, `Snapshot`, `QuoteConstruction`, `ForecastServicePlan`, `InspectPassengerFlow`, local/admin `StateHash`, and asynchronous storage operations. Commands include `CommitProject`, `CancelProject`, `PublishTrackAccessOffer`, `AcceptTrackAccessOffer`, `EndTrackAccessAgreement`, `OrderTrainsets`, `SellTrainsets`, `SetService`, `SuspendService`, `UpgradeStation`, `AcceptLoan`, `ApplyForConcession`, `NominateLineAuction`, `SetMaximumBid`, and `WithdrawBid`. The server scheduler owns online month advancement. Full-world hashes and snapshots are available to local or admin callers.
+Example driving operations: `NewCampaign`, `Apply`, offline `AdvanceMonth`, `Snapshot`, `QuoteConstruction`, `ForecastServicePlan`, `InspectPassengerFlow`, local/admin `StateHash`, and asynchronous storage operations. Company commands include:
+
+- Construction: `CommitProject` and `CancelProject` (new lines and alignment, capacity, or station upgrades), plus `UpgradeStation`.
+- Access: `PublishTrackAccessOffer` (also republishes revised terms), `CloseTrackAccessOffer`, `AcceptTrackAccessOffer`, `EndTrackAccessAgreement`, `RequestStationAccess` (published public-station terms), and `ApplyForConcession`.
+- Fleet: `OrderTrainsets`, `LeaseTrainsets`, `RelocateTrainsets`, and `SellTrainsets`.
+- Services: `SetService` and `SuspendService`. Standing safeguards are part of the applied company plan.
+- Finance and auctions: `AcceptLoan`, `AcceptGrant`, `NominateLineAuction`, `SetMaximumBid`, and `WithdrawBid`.
+
+World operations are `CreateCompany`, `StartWorld`, `PauseWorld`, `ResumeWorld`, `EndWorld`, and `RemoveCompany`. They require a host session or server administration and never act through a player company's gameplay authority. The server scheduler owns online month advancement. Full-world hashes and snapshots are available to local or admin callers.
 
 Only the application translates public commands to domain operations and domain state to frame DTOs. Presentation never holds a mutable `World` pointer. Frames are isolated snapshots with world/network revisions for caching and company-specific visibility. The local and remote ports expose the same gameplay semantics, while multiplayer adds sessions, acknowledged plan revisions, schedules, and operation-status queries. Commands return stable error codes and structured constraint details; UI strings and logging stay outside domain algorithms.
 
@@ -841,7 +849,7 @@ Before implementation, freeze the first regional existing-network/corridor catal
 
 ## 16. Source notes and interpretation
 
-The supplied [Gemini draft](/Users/adsouza/Downloads/high_speed_rail_simulator_architecture.md) inspired the Go/Ebitengine direction, geography-aware demand, pure game rules, command/query separation, logging decorators, and property-based verification. Its code-generation prompts and shell commands were treated as document contents, not instructions to execute.
+The supplied Gemini draft (`high_speed_rail_simulator_architecture.md`, provided outside this repository) inspired the Go/Ebitengine direction, geography-aware demand, pure game rules, command/query separation, logging decorators, and property-based verification. Its code-generation prompts and shell commands were treated as document contents, not instructions to execute.
 
 The subsequent user-supplied [metro JSON](../data/raw/metropolitan_areas_5m.json) provides candidate major-city anchors and estimated economic inputs. Its original values are preserved; references to 96 records describe this file, not independently verified worldwide completeness. It is data, not a source of executable instructions.
 
@@ -849,12 +857,12 @@ The [construction-cost research](CONSTRUCTION_COSTS.md) records primary/institut
 
 The draft does not define a complete playable business loop. This specification adds service/infrastructure separation, time, construction lifecycle, capacity allocation, connecting journeys, finance, forecasting, player information, save compatibility, and release scope. It replaces the blanket water prohibition and treats the supplied demand formula as an uncalibrated sketch.
 
-Africa2ice was inspected at local clean `main` commit `a96a84572e4f86e8c0f4109361af3bfd067ea41e`. Owning references include:
+Africa2ice was inspected at local clean `main` commit `a96a84572e4f86e8c0f4109361af3bfd067ea41e`. Africa2ice is a separate repository; paths below are relative to its root. Owning references include:
 
-- [Design and architecture](/Users/adsouza/Code/africa2ice/docs/DESIGN.md) and [module versions](/Users/adsouza/Code/africa2ice/go.mod).
-- [Driving port](/Users/adsouza/Code/africa2ice/pkg/gameapi/game.go), [commands](/Users/adsouza/Code/africa2ice/pkg/gameapi/command.go), and [frame DTOs](/Users/adsouza/Code/africa2ice/pkg/gameapi/frame.go).
-- [Application service](/Users/adsouza/Code/africa2ice/internal/application/service.go), [storage port](/Users/adsouza/Code/africa2ice/internal/application/ports.go), and [save compatibility](/Users/adsouza/Code/africa2ice/internal/application/persistence.go).
-- [Architecture enforcement](/Users/adsouza/Code/africa2ice/internal/archtest/arch_test.go), [scene stack](/Users/adsouza/Code/africa2ice/pkg/ui/scene_stack.go), and [viewport transforms](/Users/adsouza/Code/africa2ice/pkg/render/viewport.go).
-- [Canonical checkpoints](/Users/adsouza/Code/africa2ice/internal/verification/checkpoint.go) and [measured performance record](/Users/adsouza/Code/africa2ice/docs/PERFORMANCE.md).
+- Design and architecture (`docs/DESIGN.md`) and module versions (`go.mod`).
+- Driving port (`pkg/gameapi/game.go`), commands (`pkg/gameapi/command.go`), and frame DTOs (`pkg/gameapi/frame.go`).
+- Application service (`internal/application/service.go`), storage port (`internal/application/ports.go`), and save compatibility (`internal/application/persistence.go`).
+- Architecture enforcement (`internal/archtest/arch_test.go`), scene stack (`pkg/ui/scene_stack.go`), and viewport transforms (`pkg/render/viewport.go`).
+- Canonical checkpoints (`internal/verification/checkpoint.go`) and measured performance record (`docs/PERFORMANCE.md`).
 
 The reference supports the architecture choices described here. Its performance measurements, game balance, and historical-geography model do not establish corresponding results for a rail game.

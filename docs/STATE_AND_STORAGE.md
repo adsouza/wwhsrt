@@ -21,6 +21,7 @@ The immutable bundle manifest transitively hashes all referenced assets. Saves p
 ### Quantities and identity
 
 - `Money` is checked `int64` **game USD cents**. This is the game's common accounting unit, not a promise that supplied GDP estimates or real project costs share that price basis. No floating-point cash arithmetic.
+- `FareRate` is checked `int64` in hundredths of a game cent (0.0001 USD) per passenger-km. Cent-sized fare steps would be too coarse for typical per-kilometre fares. Fare revenue rounds explicitly to `Money`.
 - Distances are integer metres, durations integer seconds/minutes at named boundaries, passenger totals integer counts, and rates integer basis points. Monthly calculations use the actual Gregorian month.
 - `GameMonth{Year, Month}` is the month still to resolve; it is not a local timestamp. Real UTC deadlines exist only in the server host record.
 - World/company/city/node/section/project/service/trainset IDs have distinct Go types. Wire IDs are case-sensitive ASCII strings matching `[a-z][a-z0-9_-]{0,63}` and are unique within their entity collection. References are validated for their expected type and world/company ownership.
@@ -32,18 +33,18 @@ The complete field shapes are in [state.go](contracts/state.go); this table stat
 
 | Record | Important semantics |
 | --- | --- |
-| `Company` | Ownership identity, status, home market, opening cash and current cash; optional restructuring deadline |
+| `Company` | Ownership identity, status, home market, opening cash and current cash; optional restructuring deadline. The world pins `restructuring_window_months` at creation. |
 | `Node`, `Station`, `StationAccess` | Explicit station/junction topology, immutable geometry reference, station capacity/book value/owner, and company-specific access terms; visual crossings do not create junctions |
 | `TrackSection`, `TrackAccessOffer` | Referenced alignment and engineering, operational status, capacity, ownership, base access policy, and optional posted fee and offer revision |
 | `TrackAccessAgreement` | Section, owner and operator IDs, accepted fee per train-kilometre, effective month, and optional first ineligible month. Separate station access still applies. |
-| `Project` | Geometry and targets, cost, start and ready months, status, and ordered installments. Pending multiplayer requests retain the reviewed competition fingerprint and protected funds. |
-| `Trainset`, `TrainOrder`, `Lease` | Ownership, model/location/readiness, book value, pending deliveries and payment obligations; a trainset cannot be assigned to disconnected services simultaneously |
-| `ServiceSpec` | Ordered section traversals and called stops, assigned trainsets, desired daily return pairs, fare, and suspension; passing nodes do not automatically become stops |
+| `Project` | New line or alignment, capacity, or station upgrade; geometry and targets, cost, start and ready months, status, and ordered installments. Pending multiplayer requests retain the reviewed competition fingerprint and protected funds. |
+| `Trainset`, `TrainOrder`, `Lease` | Ownership, model/location/readiness, book value, pending deliveries and payment obligations. Status is delivery, operational, relocation, or retired (sold or withdrawn), and leased sets cannot be sold. A trainset cannot be assigned to disconnected services simultaneously |
+| `ServiceSpec` | Ordered section traversals and called stops, assigned trainsets, desired daily return pairs, fare rate per passenger-km, and suspension; passing nodes do not automatically become stops |
 | `CompanyPlan` | Private, complete desired service set for a named effective month, its own revision, and acknowledged standing safeguards |
-| `Loan`, `Grant`, `Concession` | Pinned terms plus outstanding/paid/remaining obligations, project links, and expiry information needed to continue exactly |
+| `Loan`, `Grant`, `Concession` | Pinned terms plus outstanding/paid/remaining obligations, project links, concession effective month (lead time) and expiry information needed to continue exactly |
 | `Auction`, `Bid`, `Reservation` | Auction state, protected maximum bids and other earmarked cash; closed auctions retain outcome summaries while active bids/reservations are settled or removed together |
 | `CashEntry` | Ordered cash posting with category, business month and reference; paired intercompany transfers share an identity and equal/opposite amounts |
-| `MonthReport`, `OperatingDay` | Compact resolved financial/service results and latest replay timings; train positions at every animation frame are not saved |
+| `MonthReport`, `OperatingDay` | Compact resolved results: company finance and requested/carried/alternate-served/rejected journeys, service boardings and revenue, and section capacity requested/granted with contributing services. The latest replay keeps leg timings, per-leg loads by direction and aggregate station activity; train positions at every animation frame are not saved. |
 
 Ownership is `public`, `company`, or `estate`, with a company ID for the latter two. Public/acquired legacy sections retain regulated open access. A bankrupt owner's regulated lines use the public caretaker rule without deleting the estate's ownership/liability record.
 
@@ -87,7 +88,7 @@ Encode money, passenger/distance totals, seed, ID counters and revisions as **ca
 
 Canonical state hashing is distinct from the file checksum: map the world to the canonical `PayloadV1`, encode with the pinned codec and fixed struct-field order, then SHA-256 the bytes. Exclude envelope creation time, host schedule, session/receipt data, UI state and caches. Include rule identities, accepted plans, counters, and authoritative financial state. Compare hashes only under the same codec and rule versions.
 
-Sort entity sets by ID, plans by company, station access by station and company, and track agreements by section, operator, and effective month. Sort concessions by company, jurisdiction, and terms. Sort reports chronologically and their company and service rows by ID. Sort cash entries by sequence and set-like trainset and target IDs. Preserve meaningful path, stop, installment, replay-leg, departure, and RNG-word order. Reject duplicate IDs and noncanonical ordering during qualification.
+Sort entity sets by ID, plans by company, station access by station and company, and track agreements by section, operator, and effective month. Sort concessions by company, jurisdiction, and terms. Sort reports chronologically and their company, service and section rows by ID; sort replay stations by ID. Sort cash entries by sequence and set-like trainset and target IDs. Preserve meaningful path, stop, installment, replay-leg, departure, and RNG-word order. Reject duplicate IDs and noncanonical ordering during qualification.
 
 Keep compact monthly reports/cash history for the configured campaign length (default 360 months), and replay detail for the latest resolved month only. The initial uncompressed save limit is **128 MiB**, with maximum nesting 64. Do not silently truncate records to fit. Qualify these limits against the proposed stress world; increasing a resource limit is a coordinated reader/writer change, not a data migration by itself.
 
@@ -128,7 +129,7 @@ It uses SQLite [STRICT tables](https://sqlite.org/stricttables.html) (SQLite 3.3
 | `worlds` | Current whole-world save JSON, host-record JSON, store generation, update timestamp |
 | `operations` | Actor-scoped idempotency key, canonical typed game request and hash, exact authorized response and committed generation |
 | `audit_events` | Ordered committed/rejected/phase events with correlation, business month, before/after hashes and scoped versioned payloads |
-| `sessions` | World/company binding, hashed random bearer token, expiry/revocation; no plaintext token |
+| `sessions` | World/company binding, host flag, hashed random bearer token, expiry/revocation; no plaintext token |
 | `invitations` | Hashed random invite token, target company, expiry and remaining uses |
 
 Keep entities inside the world snapshot instead of creating relational train/station/account repositories. This preserves the aggregate transaction boundary and keeps schema changes small. Operations are deduplication/reproduction records, not an event-sourced world; ordinary restore does not replay them. Audit events and operation history follow [DIAGNOSTICS.md](DIAGNOSTICS.md), are retained for the world's lifetime, and do not enter portable saves or gameplay hashes. This extends the still-unreleased SQL v1 bootstrap; there is no historical database migration to run. Sessions/invitations are operational identity data, excluded from game exports. Validate company bindings against the world because company rows live inside its snapshot.
@@ -153,7 +154,7 @@ Retain operation receipts while the world exists, including old months; an offli
 
 `ServerHostV1` stores a separate schema version, scheduler policy, phase (`planning`, `accepting`, `locked`, `paused`, `ended`), interval, UTC deadline, schedule revision, and optional locked resolution. The proposed default for a new world is 30 seconds. Resumed worlds use their stored interval. A locked resolution pins its business month, payload checksum/state revision and each company plan revision.
 
-In `planning`, the opening world is available for read-only queries and the next deadline is null. Players can keep private drafts in client storage. A host start operation changes the phase to `accepting` and commits the first deadline one full interval after start, together with its receipt. Retrying start returns the same receipt and deadline. Convert the restructuring response minimum to whole game months at world creation and pin it with the world's balance inputs.
+In `planning`, the opening world is available for read-only queries and the next deadline is null. Players can keep private drafts in client storage. A host start operation changes the phase to `accepting` and commits the first deadline one full interval after start, together with its receipt. Retrying start returns the same receipt and deadline. Convert the restructuring response minimum to whole game months at world creation. Store the larger of that count and the baseline window in `restructuring_window_months`.
 
 For each online auction, persist the cutoff in host state when publishing the listing. Reject new or revised bids and withdrawals received at or after the cutoff using server time. Persist the seal and honor it after restart. An explicit host pause records the remaining time for open auctions. Resume restores that time. A locked resolution pins the sorted IDs of sealed auctions whose cutoff falls at or before that resolution's deadline. The domain settles those auctions from the pinned inputs, so replay uses the same bids and selection. The domain's `Auction.Closes` drives offline closure and represents the expected settlement month online. Persist the chosen auction IDs as part of the canonical lock request.
 

@@ -21,6 +21,7 @@
       "month": 1
     },
     "campaign_months": 360,
+    "restructuring_window_months": 3,
     "start_month": {
       "year": 2025,
       "month": 1

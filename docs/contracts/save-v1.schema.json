@@ -263,6 +263,26 @@
           "pattern": "^(0|[1-9][0-9]*)$",
           "type": "string"
         },
+        "journeys_alternate_served": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "journeys_carried": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "journeys_rejected": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "journeys_requested": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string"
+        },
         "last_cash_sequence": {
           "maxLength": 20,
           "pattern": "^(0|[1-9][0-9]*)$",
@@ -299,7 +319,11 @@
         "outstanding_debt",
         "closing_reserved",
         "first_cash_sequence",
-        "last_cash_sequence"
+        "last_cash_sequence",
+        "journeys_requested",
+        "journeys_carried",
+        "journeys_alternate_served",
+        "journeys_rejected"
       ],
       "type": "object"
     },
@@ -309,6 +333,9 @@
         "company_id": {
           "pattern": "^[a-z][a-z0-9_-]{0,63}$",
           "type": "string"
+        },
+        "effective": {
+          "$ref": "#/$defs/GameMonth"
         },
         "expires": {
           "anyOf": [
@@ -331,6 +358,7 @@
         "company_id",
         "jurisdiction_ref",
         "terms_ref",
+        "effective",
         "expires"
       ],
       "type": "object"
@@ -579,6 +607,12 @@
         "month": {
           "$ref": "#/$defs/GameMonth"
         },
+        "sections": {
+          "items": {
+            "$ref": "#/$defs/SectionReport"
+          },
+          "type": "array"
+        },
         "services": {
           "items": {
             "$ref": "#/$defs/ServiceReport"
@@ -589,7 +623,8 @@
       "required": [
         "month",
         "companies",
-        "services"
+        "services",
+        "sections"
       ],
       "type": "object"
     },
@@ -641,11 +676,18 @@
             "$ref": "#/$defs/ReplayService"
           },
           "type": "array"
+        },
+        "stations": {
+          "items": {
+            "$ref": "#/$defs/ReplayStation"
+          },
+          "type": "array"
         }
       },
       "required": [
         "month",
-        "services"
+        "services",
+        "stations"
       ],
       "type": "object"
     },
@@ -734,6 +776,7 @@
           "enum": [
             "new_line",
             "alignment_upgrade",
+            "capacity_upgrade",
             "station_upgrade"
           ],
           "type": "string"
@@ -820,9 +863,25 @@
           },
           "type": "array"
         },
+        "inbound_leg_load_bps": {
+          "items": {
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "type": "array"
+        },
         "leg_seconds": {
           "items": {
             "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "type": "array"
+        },
+        "outbound_leg_load_bps": {
+          "items": {
+            "maximum": 4294967295,
             "minimum": 0,
             "type": "integer"
           },
@@ -843,7 +902,40 @@
         "service_id",
         "path",
         "leg_seconds",
-        "departure_minutes"
+        "departure_minutes",
+        "outbound_leg_load_bps",
+        "inbound_leg_load_bps"
+      ],
+      "type": "object"
+    },
+    "ReplayStation": {
+      "additionalProperties": false,
+      "properties": {
+        "alightings": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "boardings": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string"
+        },
+        "station_id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "transfers": {
+          "maxLength": 20,
+          "pattern": "^(0|-?[1-9][0-9]*)$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "station_id",
+        "boardings",
+        "alightings",
+        "transfers"
       ],
       "type": "object"
     },
@@ -950,6 +1042,45 @@
       ],
       "type": "object"
     },
+    "SectionReport": {
+      "additionalProperties": false,
+      "properties": {
+        "capacity_return_pairs_per_day": {
+          "maximum": 4294967295,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "granted_return_pairs_per_day": {
+          "maximum": 4294967295,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "requested_return_pairs_per_day": {
+          "maximum": 4294967295,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "section_id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "service_ids": {
+          "items": {
+            "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "section_id",
+        "capacity_return_pairs_per_day",
+        "requested_return_pairs_per_day",
+        "granted_return_pairs_per_day",
+        "service_ids"
+      ],
+      "type": "object"
+    },
     "ServiceReport": {
       "additionalProperties": false,
       "properties": {
@@ -1016,7 +1147,7 @@
           "pattern": "^[a-z][a-z0-9_-]{0,63}$",
           "type": "string"
         },
-        "fare": {
+        "fare_per_passenger_km": {
           "maxLength": 20,
           "pattern": "^(0|-?[1-9][0-9]*)$",
           "type": "string"
@@ -1061,7 +1192,7 @@
         "stops",
         "trainset_ids",
         "return_trips_per_day",
-        "fare",
+        "fare_per_passenger_km",
         "suspended"
       ],
       "type": "object"
@@ -1559,6 +1690,11 @@
           },
           "type": "array"
         },
+        "restructuring_window_months": {
+          "maximum": 65535,
+          "minimum": 1,
+          "type": "integer"
+        },
         "rng_state": {
           "anyOf": [
             {
@@ -1618,6 +1754,7 @@
         "id",
         "month",
         "campaign_months",
+        "restructuring_window_months",
         "start_month",
         "seed",
         "next_id",

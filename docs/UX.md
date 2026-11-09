@@ -1,6 +1,6 @@
 # Interaction, layout, and learning through play
 
-**Status:** Proposed UX specification, 2026-11-08. Supplements [DESIGN.md](DESIGN.md), draft 0.8. The user has confirmed integrated onboarding and smartphone usability alongside larger displays; the layouts, breakpoints, copy, and usability targets below are proposals.
+**Status:** Proposed UX specification, 2026-11-08. Supplements [DESIGN.md](DESIGN.md), draft 0.9. The user has confirmed integrated onboarding and smartphone usability alongside larger displays; the layouts, breakpoints, copy, and usability targets below are proposals.
 
 ## 1. The experience
 
@@ -257,7 +257,7 @@ Show short track/sleeper reveals and work-front effects when authoritative const
 
 Preserve Africa2ice's isolated frames, shared intents, guarded draft lifecycle, scene ownership, and consistent drawing/hit-test transforms. Replace its fixed 1280×720 presentation assumptions and guided-first-turn sequence. Logical layout rectangles are recomputed from available space; both rendering and picking consume the same geometry. Framebuffer/device scale controls raster quality, not breakpoint choice. Rendering, accessibility views, and help consume projected frames rather than a mutable world.
 
-Reference: Africa2ice's [HUD interaction design](/Users/adsouza/Code/africa2ice/docs/superpowers/specs/2026-09-02-hud-redesign-design.md) illustrates shared intents, contextual diagnostics, and camera space accounting. Its fixed panel and sequential guide are reference-specific choices that this design replaces.
+Reference: Africa2ice's HUD interaction design (`docs/superpowers/specs/2026-09-02-hud-redesign-design.md` in that separate repository) illustrates shared intents, contextual diagnostics, and camera space accounting. Its fixed panel and sequential guide are reference-specific choices that this design replaces.
 
 The Go/domain and local/remote game-port boundaries remain. Choosing an Ebitengine renderer does not establish smartphone browser lifecycle, text input, or screen-reader support. Milestone 1 must prove a narrow-screen task with touch, software keyboard, browser back behavior, text scaling, background/resume, and semantic controls. Evaluate iOS Safari and Android Chrome on actual devices. Mobile browser single-player runs locally, with explicit save/export behavior; native iOS/Android packaging is a separate delivery decision.
 
@@ -291,7 +291,7 @@ The first usability pass should settle whether the phone summary sheet leaves en
 
 ## 11. Service planning and monthly-report screen examples
 
-The proposed service editor and report use one continuous decision loop. An illustrative operating scenario starts with a public-track Lyon–Turin service, locally available trains, and a completed first operating month. This is a separate scenario from the construction example, not an automatic completion of that project. Its fare, demand, cost, route, and fleet figures illustrate interaction and are not calibrated balance inputs or real-world service claims.
+The proposed service editor and report use one continuous decision loop. An illustrative operating scenario starts with a service on public track, locally available trains, and a completed first operating month. This is a separate scenario from the construction example, not an automatic completion of that project. The [rendering spike](../tools/ebitenui-spike/README.md) labels this placeholder service Lyon–Turin. In the [launch shortlist](LAUNCH_CORRIDORS.md#strategic-projects-10), Lyon–Turin is an unbuilt Alpine crossing, so the label does not imply existing high-speed track there. A playable public-track start uses a pair from the qualified starting inventory. Its fare, demand, cost, route, and fleet figures illustrate interaction and are not calibrated balance inputs or real-world service claims.
 
 ### Service editor
 

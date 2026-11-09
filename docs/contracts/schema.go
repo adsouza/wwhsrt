@@ -57,7 +57,7 @@ func JSONSchemaV1() ([]byte, error) {
 					case "GameMonth.Month":
 						p["minimum"] = 1
 						p["maximum"] = 12
-					case "WorldV1.CampaignMonths":
+					case "WorldV1.CampaignMonths", "WorldV1.RestructuringWindowMonths":
 						p["minimum"] = 1
 					case "WorldV1.Companies":
 						p["minItems"] = 1
@@ -75,7 +75,7 @@ func JSONSchemaV1() ([]byte, error) {
 					case "TrackSection.Status":
 						p["enum"] = []string{"construction", "operational", "closed"}
 					case "Project.Kind":
-						p["enum"] = []string{"new_line", "alignment_upgrade", "station_upgrade"}
+						p["enum"] = []string{"new_line", "alignment_upgrade", "capacity_upgrade", "station_upgrade"}
 					case "Project.Status":
 						p["enum"] = []string{"pending", "committed", "building", "completed", "cancelled"}
 					case "TrackAccessOffer.FeePerTrainKM", "TrackAccessAgreement.FeePerTrainKM":

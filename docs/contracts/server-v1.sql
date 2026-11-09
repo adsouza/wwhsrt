@@ -54,7 +54,10 @@ CREATE TABLE sessions (
     company_id TEXT NOT NULL,
     token_sha256 BLOB NOT NULL UNIQUE CHECK (length(token_sha256) = 32),
     expires_at_utc TEXT NOT NULL,
-    revoked INTEGER NOT NULL DEFAULT 0 CHECK (revoked IN (0, 1))
+    revoked INTEGER NOT NULL DEFAULT 0 CHECK (revoked IN (0, 1)),
+    -- Host sessions may also run world operations (start, pause, resume, end,
+    -- company creation/removal); they still act on gameplay only as company_id.
+    is_host INTEGER NOT NULL DEFAULT 0 CHECK (is_host IN (0, 1))
 ) STRICT;
 CREATE INDEX sessions_by_world ON sessions(world_id);
 

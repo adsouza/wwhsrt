@@ -20,6 +20,7 @@ type (
 	ReservationID string
 	LeaseID       string
 	Money         int64 // Game USD cents; arithmetic must check overflow.
+	FareRate      int64 // Hundredths of a game cent (0.0001 USD) per passenger-km.
 	Metres        int64
 	Seconds       int64
 	Passengers    int64
@@ -30,36 +31,37 @@ type (
 // private fields and invariant-preserving methods, not JSON persistence tags.
 // Map traversal must use sorted IDs for consequential operations.
 type World struct {
-	id              WorldID
-	month           GameMonth
-	startMonth      GameMonth
-	campaignMonths  uint16
-	seed            uint64
-	rules           RulesRef
-	networkRevision uint64
-	nextID          uint64
-	companies       map[CompanyID]Company
-	nodes           map[NodeID]Node
-	stations        map[StationID]Station
-	stationAccess   []StationAccess
-	trackAccess     []TrackAccessAgreement
-	sections        map[SectionID]TrackSection
-	projects        map[ProjectID]Project
-	trainsets       map[TrainsetID]Trainset
-	orders          map[OrderID]TrainOrder
-	services        map[ServiceID]ServiceSpec
-	plans           map[CompanyID]CompanyPlan
-	loans           map[LoanID]Loan
-	leases          map[LeaseID]Lease
-	grants          map[GrantID]Grant
-	concessions     []Concession
-	auctions        map[AuctionID]Auction
-	bids            map[BidID]Bid
-	reservations    map[ReservationID]Reservation
-	cashJournal     []CashEntry
-	reports         []MonthReport
-	latestReplay    *OperatingDay
-	rngState        *RNGState
+	id                        WorldID
+	month                     GameMonth
+	startMonth                GameMonth
+	campaignMonths            uint16
+	restructuringWindowMonths uint16
+	seed                      uint64
+	rules                     RulesRef
+	networkRevision           uint64
+	nextID                    uint64
+	companies                 map[CompanyID]Company
+	nodes                     map[NodeID]Node
+	stations                  map[StationID]Station
+	stationAccess             []StationAccess
+	trackAccess               []TrackAccessAgreement
+	sections                  map[SectionID]TrackSection
+	projects                  map[ProjectID]Project
+	trainsets                 map[TrainsetID]Trainset
+	orders                    map[OrderID]TrainOrder
+	services                  map[ServiceID]ServiceSpec
+	plans                     map[CompanyID]CompanyPlan
+	loans                     map[LoanID]Loan
+	leases                    map[LeaseID]Lease
+	grants                    map[GrantID]Grant
+	concessions               []Concession
+	auctions                  map[AuctionID]Auction
+	bids                      map[BidID]Bid
+	reservations              map[ReservationID]Reservation
+	cashJournal               []CashEntry
+	reports                   []MonthReport
+	latestReplay              *OperatingDay
+	rngState                  *RNGState
 }
 
 // GameMonth is the calendar month still to be resolved; no wall-clock timestamp.
@@ -91,35 +93,37 @@ type PayloadV1 struct {
 }
 
 type WorldV1 struct {
-	ID              WorldID                `json:"id"`
-	Month           GameMonth              `json:"month"`
-	CampaignMonths  uint16                 `json:"campaign_months"`
-	StartMonth      GameMonth              `json:"start_month"`
-	Seed            uint64                 `json:"seed,string"`
-	NextID          uint64                 `json:"next_id,string"`
-	NetworkRevision uint64                 `json:"network_revision,string"`
-	Companies       []Company              `json:"companies"`
-	Nodes           []Node                 `json:"nodes"`
-	Stations        []Station              `json:"stations"`
-	StationAccess   []StationAccess        `json:"station_access"`
-	TrackAccess     []TrackAccessAgreement `json:"track_access"`
-	Sections        []TrackSection         `json:"sections"`
-	Projects        []Project              `json:"projects"`
-	Trainsets       []Trainset             `json:"trainsets"`
-	Orders          []TrainOrder           `json:"orders"`
-	Services        []ServiceSpec          `json:"services"`
-	Plans           []CompanyPlan          `json:"plans"`
-	Loans           []Loan                 `json:"loans"`
-	Leases          []Lease                `json:"leases"`
-	Grants          []Grant                `json:"grants"`
-	Concessions     []Concession           `json:"concessions"`
-	Auctions        []Auction              `json:"auctions"`
-	Bids            []Bid                  `json:"bids"`
-	Reservations    []Reservation          `json:"reservations"`
-	CashJournal     []CashEntry            `json:"cash_journal"`
-	Reports         []MonthReport          `json:"reports"`
-	LatestReplay    *OperatingDay          `json:"latest_replay"`
-	RNGState        *RNGState              `json:"rng_state"`
+	ID             WorldID   `json:"id"`
+	Month          GameMonth `json:"month"`
+	CampaignMonths uint16    `json:"campaign_months"`
+	// Pinned at world creation: max(baseline window, real-time minimum at the interval).
+	RestructuringWindowMonths uint16                 `json:"restructuring_window_months"`
+	StartMonth                GameMonth              `json:"start_month"`
+	Seed                      uint64                 `json:"seed,string"`
+	NextID                    uint64                 `json:"next_id,string"`
+	NetworkRevision           uint64                 `json:"network_revision,string"`
+	Companies                 []Company              `json:"companies"`
+	Nodes                     []Node                 `json:"nodes"`
+	Stations                  []Station              `json:"stations"`
+	StationAccess             []StationAccess        `json:"station_access"`
+	TrackAccess               []TrackAccessAgreement `json:"track_access"`
+	Sections                  []TrackSection         `json:"sections"`
+	Projects                  []Project              `json:"projects"`
+	Trainsets                 []Trainset             `json:"trainsets"`
+	Orders                    []TrainOrder           `json:"orders"`
+	Services                  []ServiceSpec          `json:"services"`
+	Plans                     []CompanyPlan          `json:"plans"`
+	Loans                     []Loan                 `json:"loans"`
+	Leases                    []Lease                `json:"leases"`
+	Grants                    []Grant                `json:"grants"`
+	Concessions               []Concession           `json:"concessions"`
+	Auctions                  []Auction              `json:"auctions"`
+	Bids                      []Bid                  `json:"bids"`
+	Reservations              []Reservation          `json:"reservations"`
+	CashJournal               []CashEntry            `json:"cash_journal"`
+	Reports                   []MonthReport          `json:"reports"`
+	LatestReplay              *OperatingDay          `json:"latest_replay"`
+	RNGState                  *RNGState              `json:"rng_state"`
 }
 
 type Company struct {
@@ -198,7 +202,7 @@ type Installment struct {
 type Project struct {
 	ID             ProjectID     `json:"id"`
 	CompanyID      CompanyID     `json:"company_id"`
-	Kind           string        `json:"kind"` // new_line, alignment_upgrade, station_upgrade
+	Kind           string        `json:"kind"` // new_line, alignment_upgrade, capacity_upgrade, station_upgrade
 	AlignmentRef   string        `json:"alignment_ref"`
 	SectionIDs     []SectionID   `json:"section_ids"`
 	StationIDs     []StationID   `json:"station_ids"`
@@ -215,7 +219,7 @@ type Trainset struct {
 	CompanyID   CompanyID  `json:"company_id"`
 	ModelRef    string     `json:"model_ref"`
 	HomeStation StationID  `json:"home_station"`
-	Status      string     `json:"status"` // delivery, operational, relocation, retired
+	Status      string     `json:"status"` // delivery, operational, relocation, retired (sold or withdrawn)
 	Ready       GameMonth  `json:"ready"`
 	BookValue   Money      `json:"book_value,string"`
 	LeaseID     *LeaseID   `json:"lease_id"`
@@ -237,14 +241,14 @@ type Traversal struct {
 }
 
 type ServiceSpec struct {
-	ID                ServiceID    `json:"id"`
-	CompanyID         CompanyID    `json:"company_id"`
-	Path              []Traversal  `json:"path"`  // ordered; return journey reverses it
-	Stops             []StationID  `json:"stops"` // ordered calls, not every passing node
-	TrainsetIDs       []TrainsetID `json:"trainset_ids"`
-	ReturnTripsPerDay uint16       `json:"return_trips_per_day"`
-	Fare              Money        `json:"fare,string"`
-	Suspended         bool         `json:"suspended"`
+	ID                 ServiceID    `json:"id"`
+	CompanyID          CompanyID    `json:"company_id"`
+	Path               []Traversal  `json:"path"`  // ordered; return journey reverses it
+	Stops              []StationID  `json:"stops"` // ordered calls, not every passing node
+	TrainsetIDs        []TrainsetID `json:"trainset_ids"`
+	ReturnTripsPerDay  uint16       `json:"return_trips_per_day"`
+	FarePerPassengerKM FareRate     `json:"fare_per_passenger_km,string"` // charged on distance ridden
+	Suspended          bool         `json:"suspended"`
 }
 
 type StandingPolicy struct {
@@ -299,6 +303,7 @@ type Concession struct {
 	CompanyID       CompanyID  `json:"company_id"`
 	JurisdictionRef string     `json:"jurisdiction_ref"`
 	TermsRef        string     `json:"terms_ref"`
+	Effective       GameMonth  `json:"effective"` // First usable month; a later month means the lead time is still running.
 	Expires         *GameMonth `json:"expires"`
 }
 
@@ -342,6 +347,7 @@ type MonthReport struct {
 	Month     GameMonth       `json:"month"`
 	Companies []CompanyReport `json:"companies"`
 	Services  []ServiceReport `json:"services"`
+	Sections  []SectionReport `json:"sections"`
 }
 
 type CompanyReport struct {
@@ -355,6 +361,12 @@ type CompanyReport struct {
 	ClosingReserved   Money     `json:"closing_reserved,string"`
 	FirstCashSequence uint64    `json:"first_cash_sequence,string"`
 	LastCashSequence  uint64    `json:"last_cash_sequence,string"`
+	// Rail journeys for this company's offers: requested = carried + rejected;
+	// alternate_served is the carried subset moved to a second itinerary.
+	JourneysRequested       Passengers `json:"journeys_requested,string"`
+	JourneysCarried         Passengers `json:"journeys_carried,string"`
+	JourneysAlternateServed Passengers `json:"journeys_alternate_served,string"`
+	JourneysRejected        Passengers `json:"journeys_rejected,string"`
 }
 
 type ServiceReport struct {
@@ -362,16 +374,26 @@ type ServiceReport struct {
 	Spec                       ServiceSpec `json:"spec"` // immutable resolved config
 	RequestedReturnTripsPerDay uint16      `json:"requested_return_trips_per_day"`
 	GrantedReturnTripsPerDay   uint16      `json:"granted_return_trips_per_day"`
-	Passengers                 Passengers  `json:"passengers,string"`
+	Passengers                 Passengers  `json:"passengers,string"` // boardings on this service
 	PassengerMetres            Metres      `json:"passenger_metres,string"`
 	TrainMetres                Metres      `json:"train_metres,string"`
 	Revenue                    Money       `json:"revenue,string"`
 	OperatingCost              Money       `json:"operating_cost,string"`
 }
 
+// SectionReport explains shared-capacity outcomes for one track section.
+type SectionReport struct {
+	SectionID                  SectionID   `json:"section_id"`
+	CapacityReturnPairsPerDay  uint32      `json:"capacity_return_pairs_per_day"`
+	RequestedReturnPairsPerDay uint32      `json:"requested_return_pairs_per_day"`
+	GrantedReturnPairsPerDay   uint32      `json:"granted_return_pairs_per_day"`
+	ServiceIDs                 []ServiceID `json:"service_ids"` // contributing services, sorted
+}
+
 type OperatingDay struct {
 	Month    GameMonth       `json:"month"`
 	Services []ReplayService `json:"services"`
+	Stations []ReplayStation `json:"stations"`
 }
 
 type ReplayService struct {
@@ -379,6 +401,17 @@ type ReplayService struct {
 	Path             []Traversal `json:"path"`
 	LegSeconds       []Seconds   `json:"leg_seconds"` // each value must fit a JSON-safe int
 	DepartureMinutes []uint16    `json:"departure_minutes"`
+	// Average occupancy per leg, aligned with LegSeconds; inbound legs in travel order.
+	OutboundLegLoadBPS []BasisPoints `json:"outbound_leg_load_bps"`
+	InboundLegLoadBPS  []BasisPoints `json:"inbound_leg_load_bps"`
+}
+
+// ReplayStation is aggregate representative-day activity, not individual passengers.
+type ReplayStation struct {
+	StationID  StationID  `json:"station_id"`
+	Boardings  Passengers `json:"boardings,string"`
+	Alightings Passengers `json:"alightings,string"`
+	Transfers  Passengers `json:"transfers,string"`
 }
 
 type RNGState struct {

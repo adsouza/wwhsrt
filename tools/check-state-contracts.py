@@ -192,13 +192,13 @@ def main():
         assert snapshot() == before
         checks.append("locked-month failure retains lock/checkpoint; resolved world, deadline and completion receipt commit together and retry once")
 
-        db.execute("INSERT INTO sessions VALUES (?,?,?,?,?,0)", ("session_a", world_id, "co_player", bytes(range(32)), "2026-12-01T00:00:00Z"))
+        db.execute("INSERT INTO sessions (session_id, world_id, company_id, token_sha256, expires_at_utc, is_host) VALUES (?,?,?,?,?,1)", ("session_a", world_id, "co_player", bytes(range(32)), "2026-12-01T00:00:00Z"))
         backup = sqlite3.connect(Path(tmp) / "backup.sqlite", isolation_level=None)
         db.backup(backup)
         assert backup.execute("SELECT * FROM worlds").fetchall() == before[0]
         assert backup.execute("SELECT * FROM operations ORDER BY actor,operation_key").fetchall() == before[1]
         assert backup.execute("SELECT * FROM audit_events ORDER BY store_revision,event_index").fetchall() == before[2]
-        assert backup.execute("SELECT count(*) FROM sessions").fetchone()[0] == 1
+        assert backup.execute("SELECT count(*) FROM sessions WHERE is_host = 1 AND revoked = 0").fetchone()[0] == 1
         assert backup.execute("PRAGMA integrity_check").fetchone()[0] == "ok"
         assert backup.execute("PRAGMA foreign_key_check").fetchall() == []
         backup.close(); db.close()
