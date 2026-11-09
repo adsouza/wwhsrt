@@ -8,7 +8,7 @@
 
 [prototypes/launch-map-framing.v1.json](prototypes/launch-map-framing.v1.json) extends that base for the launch network preview. It records the framing changes for Frangistan, landscape North America, portrait SouthEast Asia, Australia, and Uzbekistan. Frangistan uses the OpenStreetMap station coordinates for Hörnefors and Cortadura as its latitude anchors in both orientations. Uzbekistan references the existing OpenStreetMap station IDs for Khanki, Bukhara (Kogon), Samarkand, and Tashkent Central. The major-metro preview uses the base manifest.
 
-The launch network preview sources fast-track candidates and station geometry from [OpenStreetMap via QLever](https://wiki.openstreetmap.org/wiki/QLever). The [overlay audit](prototypes/hsr-overlay-audit.v1.json) records the reviewed exclusions. The remaining tracks are provisional candidates. Station candidates include tagged service stops and named rail stations within 400 m of the filtered track. The inspector gives the evidence for the selected station. Qualify starting infrastructure, commercial status, and service stops separately for production.
+The launch network preview sources fast-track candidates and station geometry from [OpenStreetMap via QLever](https://wiki.openstreetmap.org/wiki/QLever). The [overlay audit](prototypes/hsr-overlay-audit.v1.json) records the reviewed exclusions. The remaining tracks are provisional candidates. Station candidates include tagged service stops and named rail stations within 400 m of the filtered track. The inspector gives the evidence for the selected station. Qualify starting infrastructure, commercial status, and service stops separately for production. This layer selects track by tags, not by the cities it joins. The game admits only corridors between catalog cities, as described in the [design's admission rule](../docs/DESIGN.md#supplementary-geography-sources).
 
 The [KCIC Whoosh stop list](https://kcic.co.id/syarat-ketentuan-frequent-whooser-card/) identifies Halim, Karawang, Padalarang, and Tegalluar Summarecon. The preview displays the western terminus as **Jakarta (Halim)** at the existing Halim station coordinates.
 
@@ -43,6 +43,71 @@ Population and GDP reference years, upstream sources, GDP basis/price year, coor
 Before using the file for demand totals, review geographic coverage and potential overlap between broad regional labels and nearby city records. Coordinates are map markers, not surveyed station sites. Preserve country labels as raw input and normalize them separately for scenario regions and concessions.
 
 The [specification](../docs/DESIGN.md) describes the seed's role in the broader city catalog and conditional use of GDP in bounded demand indices. No game runtime loader or calibrated demand model is implemented yet.
+
+## Existing-HSR stop-city candidates
+
+[prototypes/hsr-stop-city-candidates.v1.csv](prototypes/hsr-stop-city-candidates.v1.csv) screens which cities the provisional fast-track station layer touches. It is input to the planned catalog of about 250 cities, which includes the 94 major metros. [tools/derive-hsr-stop-cities.py](../tools/derive-hsr-stop-cities.py) generates it, and the [metadata](prototypes/hsr-stop-city-candidates.v1.metadata.json) records input hashes, parameters and counts. The script needs the external launch-network preview and a GeoNames `cities15000.txt` download.
+
+Method:
+- Each of the 4,833 station candidates is assigned to the most populous GeoNames place within 12 km. 1,876 rural stations have none.
+- Cities within 40 km of a playable metro count as covered; 160 do.
+- The remaining 1,361 cities are ranked by GeoNames population. Each row records the strongest station evidence (operator-published, tagged high-speed stop, or proximity only) and whether its stations link to mapped fast track.
+
+Findings:
+- 161 candidate cities have population of 1M or more, 425 have 250k or more, and 690 have 100k or more. 382 of the 690 are in China.
+- Cities with 1M+ alone would fill the roughly 156 catalog places left after the 94 metros. The catalog therefore needs a regional allocation rule, not a population cut.
+- Several major cities on existing high-speed lines are missing from the 5M seed, including Berlin, Hamburg, Munich, Vienna, Warsaw, Ankara, Casablanca, Jeddah, Harbin and Hefei.
+
+Caveats:
+- GeoNames populations are not a common metropolitan definition. Many Chinese entries are prefecture totals.
+- Evidence tiers follow OpenStreetMap tagging habits: French and German stops are often tagged, Chinese and Japanese stops rarely are.
+- A station near tagged track is not proof of high-speed service.
+
+Screens and checks:
+- **Corridor screen:** groups the preview's track into connected pieces and classes each city by whether its track can form a corridor with another catalog city (`corridor_class`). It is informational only. The service check decides inclusion (decision of 2026-11-09), because gaps in the tagged track made the screen drop real high-speed cities in China and elsewhere.
+- **Service check:** all 161 cities of 1M+ were checked on 2026-11-09 for scheduled high-speed passenger service on 2025-01-01. [hsr-service-evidence.v1.jsonl](prototypes/hsr-service-evidence.v1.jsonl) records the station, lines, service kind, opening year and sources, and the generator joins it onto the candidate list.
+  - **Result:** 157 have service, 3 do not (Budapest, Bayan Nur, Fushun) and 1 is uncertain (Zoucheng).
+  - **Spot-checks:** nine rows are flagged `needs_spot_check` because a cited URL was not opened during the check.
+  - **Decisions:** Casablanca, Rabat, Oslo and Belgrade stay in by user decision despite debatable speed or date evidence.
+  - **Sources:** almost all are Wikipedia line and station articles plus some Chinese news. DESIGN §12 still requires dated official evidence before a line becomes a starting asset.
+- **How the corridor screen scored against the check:**
+  - **China:** it dropped 9 cities, of which 8 have service; only Bayan Nur was a correct drop. It also kept Fushun (no service) and Zoucheng (uncertain).
+  - **Outside China:** it dropped 7, of which 6 have service; only Budapest was a correct drop.
+- **Misplaced or ambiguous points found by the check:**
+  - The "Puyang" point is Pujiang, Zhejiang, while its population is Puyang, Henan's.
+  - "Chengtangcun" is Tengzhou, and "Heshan" stands for Yiyang.
+  - Several same-name cities (two Taizhous, two Fuzhous, Suzhou in Anhui) are correctly placed but easy to confuse.
+
+- **GHSL urban centres:** given the GHSL Urban Centre Database R2024A V1.2 (General Characteristics theme), the generator matches each city to the urban centre containing it. It tries the GeoNames point first, then the city's assigned stations, then anything within 5 km of an outline. Xuzhou needs one reviewed override.
+  - **Columns:** `ghsl_pop_2025` gives a comparable 2025 urban population. `ghsl_shared_metro` and `ghsl_shared_candidates` show cities that share an urban centre with a metro or another candidate.
+  - **Effect on the inflated figures:** Weifang falls from 9.4M (GeoNames) to 0.96M and Wuzhong from 7.2M to 245k.
+  - **Same urban area:** Zhongshan, Jiangmen, Wuxi, Shaoxing and Kyoto sit inside a metro's urban centre.
+  - **Gaps:** 409 smaller candidates match no urban centre.
+
+GeoNames data is used under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) with attribution to [GeoNames](https://www.geonames.org/). GHSL data is © European Union, 1995–2026, used under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) from the [GHSL Urban Centre Database R2024A](https://human-settlement.emergency.copernicus.eu/ucdb2024Overview.php) (Mari Rivero et al.); this repository stores derived matches and populations only.
+
+## Draft catalog allocation
+
+[prototypes/catalog-city-selection.v1.json](prototypes/catalog-city-selection.v1.json) is a draft allocation of the 156 catalog places beyond the 94 playable metros, under the 250-city target. It is for review, not an approved catalog. [tools/draft-catalog-selection.py](../tools/draft-catalog-selection.py) generates it from the candidate list, the service evidence, the launch preview's shortlist points and GeoNames.
+
+| Group | Places | Rule |
+| --- | ---: | --- |
+| Launch endpoints | 60 | Shortlist endpoints more than 40 km from a playable metro. Bandung, Belgrade, Casablanca and Warsaw are counted in the next group instead. |
+| Checked stops outside China | 32 | Every non-China city of 1M+ with checked service on 2025-01-01 |
+| Smaller stops outside China | 14 | Draft picks on existing lines that the 1M cut misses: Frankfurt, Hanover, Nuremberg, Lille, Marseille, Bologna, Florence, Naples, Zaragoza, Valencia, Seville, Okayama, Niigata and Kanazawa. Service is not yet checked. |
+| China | 50 | 16 provincial capitals, then 14 draft junctions and line ends, then 20 picks ranked by GHSL urban population. The ranking skips cities inside a metro's urban centre, cities sharing an urban centre with one already chosen, and cities within 50 km of a metro or chosen city. |
+
+The remaining 75 Chinese cities with service are not selected; they stay as pass-through stations on starting corridors. Kyoto shares Osaka's GHSL urban centre but stays a catalog city of its own by decision on 2026-11-09.
+
+The Chinese population fill excludes rows the service check flagged: Wuzhong (inflated population), Puyang (misplaced point), Chengtangcun, Heshan, Jinjiang and Cixi.
+
+Two endpoints lack GeoNames data:
+- Albury-Wodonga's ID is not in `cities15000`.
+- Shin-Hakodate-Hokuto is an OSM station point.
+
+Open items:
+- Check service for the smaller stops and the endpoints.
+- Review the junction picks against line maps.
 
 ## Construction-cost inputs
 

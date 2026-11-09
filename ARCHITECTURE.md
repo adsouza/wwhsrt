@@ -91,7 +91,7 @@ Keep three distinct representations:
 
 The first version uses a precomputed corridor catalog with curated alternatives. Passenger/service routing runs at runtime; global civil-engineering route generation does not. A direct line crossing water cannot invalidate a qualified overland alternative. Kinshasa–Lagos is the coastline-detour acceptance case: one continuous project may bend without adding intermediate stations. Missing catalog coverage must be distinguished from geographic impossibility.
 
-The offline data pipeline must qualify full-route engineering coverage, terrain, shorelines, crossings, borders, and rights. Missing terrain is unqualified data, never free flat land. A coarse Natural Earth overview cannot price tunnels or establish buildability. Cross-border costs use the jurisdiction of each engineering interval, not whichever endpoint is cheaper.
+The offline data pipeline must qualify full-route engineering coverage, terrain, shorelines, crossings, borders, and rights. Starting track is admitted as corridors between catalog cities, never by track tags alone. Missing terrain is unqualified data, never free flat land. A coarse Natural Earth overview cannot price tunnels or establish buildability. Cross-border costs use the jurisdiction of each engineering interval, not whichever endpoint is cheaper.
 
 Current inputs and their scope:
 

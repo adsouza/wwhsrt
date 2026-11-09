@@ -1,0 +1,176 @@
+{
+  "schema_version": 1,
+  "generated_on": "2026-11-09",
+  "status": "Screening candidates for the planned city catalog; not qualified starting infrastructure or service stops",
+  "inputs": {
+    "station_layer": {
+      "description": "Launch network preview station candidates (OpenStreetMap via QLever)",
+      "source_hashes": {
+        "stations.tsv": "e3bfbda00186a4f6b93946dc9bfcf54271a11bbb8423e0321a6c50c76d1d1aab",
+        "hsr-stops.tsv": "2c564fd83c3ea5ecfb94caf742dc44aa2f7ecf2b6cdf4c6f4a27571605264f01"
+      },
+      "station_count": 4833
+    },
+    "geonames": {
+      "file": "cities15000.txt",
+      "sha256": "1b9a270385538947d0f1c074693d7c3c2957543575a6fff48bcccd73c018132e",
+      "source": "https://download.geonames.org/export/dump/cities15000.zip",
+      "license": "CC BY 4.0",
+      "attribution": "GeoNames (https://www.geonames.org/)"
+    },
+    "playable_metros": {
+      "file": "playable-metros.v1.json",
+      "sha256": "7c8e69192195f8b1c68c7bfeb49c6761d5168a616fbb817f6bca238489ded0d4"
+    },
+    "ghsl_ucdb": {
+      "file": "GHS_UCDB_THEME_GENERAL_CHARACTERISTICS_GLOBE_R2024A.gpkg",
+      "sha256": "b58b72eb61d6f17e1d316e10ce8703c446ca3540acf9a36b4700472956e387a5",
+      "release": "R2024A V1.2",
+      "population_field": "GC_POP_TOT_2025",
+      "edge_tolerance_km": 5,
+      "match_order": [
+        "GeoNames point inside",
+        "assigned station inside",
+        "within edge_tolerance_km of the outline"
+      ],
+      "overrides": {
+        "10630003": {
+          "ucdb_id": 10143,
+          "reason": "Xuzhou: GeoNames point lies 6 km outside the Xuzhou urban centre; its stations are on the edge"
+        }
+      },
+      "source": "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_UCDB_GLOBE_R2024A/",
+      "license": "CC BY 4.0",
+      "attribution": "European Commission, GHSL Urban Centre Database R2024A"
+    },
+    "service_evidence": {
+      "file": "hsr-service-evidence.v1.jsonl",
+      "sha256": "ce17caca28e94278e8992bb8ca4cd547024afef0e039e0291b98dafdba6ffada",
+      "rows": 161
+    }
+  },
+  "method": {
+    "assign_km": 12,
+    "metro_coverage_km": 40,
+    "station_track_km": 5,
+    "track_join_cell_deg": 0.002,
+    "corridor_class_use": "Informational only; the service check decides inclusion",
+    "corridor_classes": {
+      "reaches_metro": "Track component comes within metro_coverage_km of a playable metro",
+      "candidate_pair": "No metro, but another candidate city has a station on the same component",
+      "isolated": "Only this city has a station on the component",
+      "no_track_match": "No station within station_track_km of preview track"
+    },
+    "assignment": "Most populous GeoNames populated place within assign_km of each station",
+    "evidence_order": [
+      "operator_published",
+      "tagged_stop",
+      "proximity_only"
+    ]
+  },
+  "summary": {
+    "stations_unassigned": 1876,
+    "cities_with_station": 1521,
+    "covered_by_playable_metro": 160,
+    "candidate_cities": 1361,
+    "with_tagged_or_published_stop": 344,
+    "population_thresholds": {
+      ">=1000000": {
+        "all": 161,
+        "tagged_or_published": 19
+      },
+      ">=500000": {
+        "all": 299,
+        "tagged_or_published": 44
+      },
+      ">=250000": {
+        "all": 425,
+        "tagged_or_published": 77
+      },
+      ">=100000": {
+        "all": 690,
+        "tagged_or_published": 151
+      }
+    },
+    "service_yes_1m_by_country": {
+      "CN": 125,
+      "DE": 4,
+      "KR": 4,
+      "JP": 4,
+      "SA": 3,
+      "MA": 3,
+      "TW": 3,
+      "TR": 2,
+      "ID": 1,
+      "IT": 1,
+      "UZ": 1,
+      "PL": 1,
+      "AT": 1,
+      "SE": 1,
+      "RS": 1,
+      "NO": 1,
+      "BE": 1
+    },
+    "service_checked": {
+      "yes": 157,
+      "no": 3,
+      "uncertain": 1,
+      "unchecked": 1200
+    },
+    "corridor_classes": {
+      "reaches_metro": {
+        "all": 704,
+        ">=1000000": 128
+      },
+      "candidate_pair": {
+        "all": 339,
+        ">=1000000": 17
+      },
+      "isolated": {
+        "all": 76,
+        ">=1000000": 9
+      },
+      "no_track_match": {
+        "all": 242,
+        ">=1000000": 7
+      }
+    },
+    "candidates_100k_by_country": {
+      "CN": 382,
+      "JP": 64,
+      "DE": 46,
+      "FR": 29,
+      "KR": 23,
+      "ES": 22,
+      "IT": 15,
+      "GB": 12,
+      "TR": 11,
+      "SE": 9,
+      "UZ": 8,
+      "US": 7,
+      "TW": 6,
+      "PL": 6,
+      "AT": 6,
+      "BE": 5,
+      "FI": 5,
+      "PT": 5,
+      "CH": 5,
+      "MA": 4,
+      "ID": 4,
+      "SA": 3,
+      "RS": 3,
+      "NL": 3,
+      "DZ": 3,
+      "HU": 2,
+      "NO": 1,
+      "RU": 1
+    }
+  },
+  "caveats": [
+    "GeoNames populations are not a common metropolitan definition; many Chinese entries are prefecture totals.",
+    "Evidence tiers reflect OpenStreetMap tagging practice; Chinese and Japanese stations are rarely tagged as high-speed stops.",
+    "The station layer includes upgraded conventional lines and stops within 400 m of tagged track; a station is not proof of high-speed service.",
+    "A fixed metro-coverage radius mishandles broad metro regions and large cities just outside it.",
+    "Track components come from a speed-tag extract; terminal approaches below the tag threshold split real networks, so metro reach (not track continuity) bridges those gaps."
+  ]
+}
