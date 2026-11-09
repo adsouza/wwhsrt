@@ -45,8 +45,8 @@
     },
     "service_evidence": {
       "file": "hsr-service-evidence.v1.jsonl",
-      "sha256": "ce17caca28e94278e8992bb8ca4cd547024afef0e039e0291b98dafdba6ffada",
-      "rows": 161
+      "sha256": "c48030178745998894b6bf82688559097135451fe6fcbf7503059ffcf35ea635",
+      "rows": 235
     }
   },
   "method": {
@@ -112,10 +112,10 @@
       "BE": 1
     },
     "service_checked": {
-      "yes": 157,
-      "no": 3,
+      "yes": 182,
+      "no": 6,
       "uncertain": 1,
-      "unchecked": 1200
+      "unchecked": 1172
     },
     "corridor_classes": {
       "reaches_metro": {

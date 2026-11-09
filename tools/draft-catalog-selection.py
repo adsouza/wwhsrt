@@ -13,6 +13,7 @@ Usage (run with python3 -I):
       "$WWHSRT_MAP_PREVIEW_DIR/hsr-network-overlay.html" /path/to/cities15000.txt
 """
 
+import collections
 import csv
 import datetime
 import hashlib
@@ -34,8 +35,11 @@ SMALLER_STOPS = [2925533, 2910831, 2861650, 2998324, 2995469, 3181928, 3176959,
                  3172394, 3104324, 2509954, 2510911, 1854383, 1855431, 1860243]
 CHINA_CAPITALS = [2037013, 2038180, 1795270, 1793511, 2036892, 1808722, 1810821, 1800163,
                   1799869, 1804651, 1809461, 1804430, 1788852, 1786657, 1529102, 1809078]
-CHINA_JUNCTIONS = [10630003, 1796134, 10942359, 1808370, 1803300, 1805528, 1787858,
-                   1791388, 1814087, 1787093, 2037799, 1796556, 1795940, 1799397]
+# Checked against line maps on 2026-11-09 (china-junction-roles.v1.jsonl). Baoji, Liuzhou,
+# Sanya and Ningbo proved to be through stops and were replaced by Guilin, Huizhou,
+# Huzhou and Fuyang by user decision.
+CHINA_JUNCTIONS = [10630003, 1796134, 1808370, 1805528, 1787858, 1791388, 1814087,
+                   1787093, 2037799, 1795940, 1809498, 1806776, 1806535, 1810845]
 # Rows the service check flagged as misplaced, inflated, or overlapping another city.
 CHINA_FILL_EXCLUDE = {
     1790842: "GeoNames population (7.2M) far exceeds the city",
@@ -70,7 +74,10 @@ def main(overlay_path, geonames_path):
     overlay = json.loads(html[start:html.index("</script>", start)])
     metros = json.loads((PROTO / "playable-metros.v1.json").read_text(encoding="utf-8"))
     candidates = {int(r["geonameid"]): r for r in csv.DictReader(open(PROTO / "hsr-stop-city-candidates.v1.csv", encoding="utf-8"))}
+    roles = {r["geonameid"]: r for r in map(json.loads, (PROTO / "china-junction-roles.v1.jsonl").read_text(encoding="utf-8").splitlines())}
     evidence = {e["geonameid"]: e for e in map(json.loads, (PROTO / "hsr-service-evidence.v1.jsonl").read_text(encoding="utf-8").splitlines())}
+    checked_outside_china = {k: e for k, e in evidence.items()
+                             if isinstance(k, int) and e["country_code"] != "CN" and e.get("checked_for") in (None, "candidate_1m")}
     geonames = {}
     for line in open(geonames_path, encoding="utf-8"):
         f = line.rstrip("\n").split("\t")
@@ -98,7 +105,7 @@ def main(overlay_path, geonames_path):
         return min(km(lat, lng, m["lat"], m["lng"]) for m in metros) <= METRO_KM
 
     groups = {}
-    checked = [entry(gid) for gid, e in sorted(evidence.items()) if e["country_code"] != "CN" and e["hsr_service"] == "yes"]
+    checked = [entry(gid) for gid, e in sorted(checked_outside_china.items()) if e["hsr_service"] == "yes"]
     groups["checked_stops_outside_china"] = checked
     checked_ids = {c["geonameid"] for c in checked}
 
@@ -115,10 +122,18 @@ def main(overlay_path, geonames_path):
             item = {"geonameid": gid, "name": name, "country_code": None, "lat": lat, "lng": lng,
                     "population": None, "shortlist_name": name,
                     "note": "GeoNames ID is not in cities15000; coordinates from the shortlist"}
+            if gid in evidence:
+                e = evidence[gid]
+                item.update({"country_code": e["country_code"], "hsr_service": e["hsr_service"],
+                             "service_kind": e["service_kind"], "station": e["station"]})
         else:
             item = {"geonameid": None, "source_ref": source, "name": name, "country_code": "JP",
                     "lat": lat, "lng": lng, "population": None, "shortlist_name": name,
                     "note": "Station point; its town is below the GeoNames cities15000 floor"}
+            osm_key = "osm:" + source.split()[-1]
+            if osm_key in evidence:
+                e = evidence[osm_key]
+                item.update({"hsr_service": e["hsr_service"], "service_kind": e["service_kind"], "station": e["station"]})
         if item["geonameid"] in checked_ids or any(km(lat, lng, c["lat"], c["lng"]) <= 15 for c in checked):
             overlap.append(name)
             continue
@@ -128,7 +143,8 @@ def main(overlay_path, geonames_path):
     groups["smaller_stops_outside_china"] = [entry(gid, status="draft pick; service not yet checked") for gid in SMALLER_STOPS]
 
     china = [entry(gid, basis="provincial capital") for gid in CHINA_CAPITALS]
-    china += [entry(gid, basis="junction or line end (draft pick)") for gid in CHINA_JUNCTIONS]
+    china += [entry(gid, basis="junction or line end (checked against line maps)",
+                    network_role=roles[gid]["role"], directions=roles[gid]["directions"]) for gid in CHINA_JUNCTIONS]
     chosen = list(china)
     fill_quota = QUOTAS["china"] - len(china)
     def ghsl_pop(gid):
@@ -175,10 +191,12 @@ def main(overlay_path, geonames_path):
         "places": TOTAL_TARGET - len(metros),
         "quotas": QUOTAS,
         "counts": counts,
+        "service_by_group": {g: dict(collections.Counter(c.get("hsr_service", "unchecked") for c in v)) for g, v in groups.items()},
         "selected_total": sum(counts.values()),
         "inputs": {
             "candidate_list": {"file": "hsr-stop-city-candidates.v1.csv", "sha256": sha256(PROTO / "hsr-stop-city-candidates.v1.csv")},
             "service_evidence": {"file": "hsr-service-evidence.v1.jsonl", "sha256": sha256(PROTO / "hsr-service-evidence.v1.jsonl")},
+            "junction_roles": {"file": "china-junction-roles.v1.jsonl", "sha256": sha256(PROTO / "china-junction-roles.v1.jsonl")},
             "playable_metros": {"file": "playable-metros.v1.json", "sha256": sha256(PROTO / "playable-metros.v1.json")},
             "geonames": {"file": Path(geonames_path).name, "sha256": sha256(geonames_path), "license": "CC BY 4.0"},
             "ghsl_ucdb": "Joined through hsr-stop-city-candidates.v1.csv (GHSL UCDB R2024A V1.2, CC BY 4.0)",
@@ -199,9 +217,7 @@ def main(overlay_path, geonames_path):
                                                 for g, v in groups.items() for c in v if c.get("ghsl_shared_metro")],
         "china_with_service_not_selected": china_unselected,
         "open_items": [
-            "Check service for the smaller stops outside China and the shortlist endpoints that are not yet checked.",
             "Review selected cities that share a metro's GHSL urban centre.",
-            "Review the draft junction picks against line maps.",
             "Unselected cities with service remain pass-through stations on starting corridors.",
         ],
         "groups": groups,

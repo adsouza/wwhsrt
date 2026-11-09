@@ -70,6 +70,15 @@ Screens and checks:
   - **Spot-checks:** nine rows are flagged `needs_spot_check` because a cited URL was not opened during the check.
   - **Decisions:** Casablanca, Rabat, Oslo and Belgrade stay in by user decision despite debatable speed or date evidence.
   - **Sources:** almost all are Wikipedia line and station articles plus some Chinese news. DESIGN §12 still requires dated official evidence before a line becomes a starting asset.
+- **Second check:** on 2026-11-09, the same check covered the 60 non-metro shortlist endpoints and the 14 smaller stops outside China (`checked_for` is `launch_endpoint` or `smaller_stop`).
+  - **Endpoints already served:** Bordeaux, Boston, Dresden, Kenitra, Lisbon, Lyon, Montpellier, Perpignan, Plasencia, Porto, Shin-Hakodate-Hokuto, Tsuruga and Turin.
+  - **Build-only:** the other 47 endpoints had no high-speed service on 2025-01-01.
+  - **Smaller stops:** all 14 are confirmed.
+  - **Judgement calls:**
+    - Boston (Acela) and the Portuguese Alfa Pendular are classed as upgraded lines.
+    - Birmingham (110 mph into New Street) and Dammam (180 km/h) fall just below the threshold.
+    - Plasencia counts as dedicated because its line is designed for 350 km/h, although trains run at 200.
+  - **Spot-checks:** nine of these rows are flagged `needs_spot_check` for links seen only in search results.
 - **How the corridor screen scored against the check:**
   - **China:** it dropped 9 cities, of which 8 have service; only Bayan Nur was a correct drop. It also kept Fushun (no service) and Zoucheng (uncertain).
   - **Outside China:** it dropped 7, of which 6 have service; only Budapest was a correct drop.
@@ -92,22 +101,28 @@ GeoNames data is used under [CC BY 4.0](https://creativecommons.org/licenses/by/
 
 | Group | Places | Rule |
 | --- | ---: | --- |
-| Launch endpoints | 60 | Shortlist endpoints more than 40 km from a playable metro. Bandung, Belgrade, Casablanca and Warsaw are counted in the next group instead. |
+| Launch endpoints | 60 | Shortlist endpoints more than 40 km from a playable metro. Bandung, Belgrade, Casablanca and Warsaw are counted in the next group instead. 13 already have service; 47 are build-only endpoints. |
 | Checked stops outside China | 32 | Every non-China city of 1M+ with checked service on 2025-01-01 |
-| Smaller stops outside China | 14 | Draft picks on existing lines that the 1M cut misses: Frankfurt, Hanover, Nuremberg, Lille, Marseille, Bologna, Florence, Naples, Zaragoza, Valencia, Seville, Okayama, Niigata and Kanazawa. Service is not yet checked. |
-| China | 50 | 16 provincial capitals, then 14 draft junctions and line ends, then 20 picks ranked by GHSL urban population. The ranking skips cities inside a metro's urban centre, cities sharing an urban centre with one already chosen, and cities within 50 km of a metro or chosen city. |
+| Smaller stops outside China | 14 | Picks on existing lines that the 1M cut misses: Frankfurt, Hanover, Nuremberg, Lille, Marseille, Bologna, Florence, Naples, Zaragoza, Valencia, Seville, Okayama, Niigata and Kanazawa. All 14 have checked service. |
+| China | 50 | 16 provincial capitals, then 14 checked junctions and line ends, then 20 picks ranked by GHSL urban population. The ranking skips cities inside a metro's urban centre, cities sharing an urban centre with one already chosen, and cities within 50 km of a metro or chosen city. |
 
 The remaining 75 Chinese cities with service are not selected; they stay as pass-through stations on starting corridors. Kyoto shares Osaka's GHSL urban centre but stays a catalog city of its own by decision on 2026-11-09.
 
 The Chinese population fill excludes rows the service check flagged: Wuzhong (inflated population), Puyang (misplaced point), Chengtangcun, Heshan, Jinjiang and Cixi.
+
+[china-junction-roles.v1.jsonl](prototypes/china-junction-roles.v1.jsonl) records the network-role check on 2026-11-09, against high-speed lines open on 2025-01-01. It classifies each city as a junction, a line end or a through stop, with the number of directions, the lines and the sources.
+- **Original picks:** of the 14 drafted, 8 are junctions and 2 are line ends (Dalian, Shantou). Baoji, Liuzhou, Sanya and Ningbo are through stops.
+- **Replacements:** by decision, the through stops gave way to Guilin, Huizhou and Huzhou (4 directions each) and Fuyang (3). Yiwu also has 4 directions but sits within 50 km of Jinhua.
+- **Knock-on effect:** Ningbo and Liuzhou re-enter through the GHSL ranking, replacing Yancheng and Zunyi.
+- **Date-sensitive calls:** Datong is a junction only because Ulanqab–Datong opened on 2024-12-31. Shangqiu's fourth line opened in 2026, after the reference date.
 
 Two endpoints lack GeoNames data:
 - Albury-Wodonga's ID is not in `cities15000`.
 - Shin-Hakodate-Hokuto is an OSM station point.
 
 Open items:
-- Check service for the smaller stops and the endpoints.
-- Review the junction picks against line maps.
+- Spot-check the evidence rows flagged `needs_spot_check`.
+- Replace Wikipedia-only evidence with dated official sources before any line becomes a starting asset (DESIGN §12).
 
 ## Construction-cost inputs
 

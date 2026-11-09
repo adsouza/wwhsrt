@@ -17,15 +17,34 @@
     "smaller_stops_outside_china": 14,
     "china": 50
   },
+  "service_by_group": {
+    "checked_stops_outside_china": {
+      "yes": 32
+    },
+    "launch_endpoints": {
+      "no": 47,
+      "yes": 13
+    },
+    "smaller_stops_outside_china": {
+      "yes": 14
+    },
+    "china": {
+      "yes": 50
+    }
+  },
   "selected_total": 156,
   "inputs": {
     "candidate_list": {
       "file": "hsr-stop-city-candidates.v1.csv",
-      "sha256": "a904b5725ad49e1aab3f8a55ed1922a8099a2d3f19ab7aece23b9d56e85d9e60"
+      "sha256": "a7896ba44b7f2443425d5176db2de779ce0486f0ce92f9350d57f28a93cd277f"
     },
     "service_evidence": {
       "file": "hsr-service-evidence.v1.jsonl",
-      "sha256": "ce17caca28e94278e8992bb8ca4cd547024afef0e039e0291b98dafdba6ffada"
+      "sha256": "c48030178745998894b6bf82688559097135451fe6fcbf7503059ffcf35ea635"
+    },
+    "junction_roles": {
+      "file": "china-junction-roles.v1.jsonl",
+      "sha256": "f8f780f4d583d88a3471d79ef640eb25228404459ebbfff4803417ecd6eceb90"
     },
     "playable_metros": {
       "file": "playable-metros.v1.json",
@@ -123,6 +142,7 @@
   ],
   "china_with_service_not_selected": [
     "Baoding",
+    "Baoji",
     "Bijie",
     "Bozhou",
     "Changde",
@@ -131,18 +151,14 @@
     "Chengtangcun",
     "Cixi",
     "Daqing",
-    "Fuyang",
     "Fuzhou",
     "Guigang",
-    "Guilin",
     "Hanzhong",
     "Heshan",
     "Heze",
     "Hezhou",
     "Huaibei",
     "Huainan",
-    "Huizhou",
-    "Huzhou",
     "Jiangmen",
     "Jiangyin",
     "Jiaxing",
@@ -170,6 +186,7 @@
     "Qingyuan",
     "Qinzhou",
     "Rui’an",
+    "Sanya",
     "Shaoguan",
     "Shaoxing",
     "Shiyan",
@@ -185,6 +202,7 @@
     "Wuxi",
     "Wuzhong",
     "Xinyang",
+    "Yancheng",
     "Yangjiang",
     "Yangzhou",
     "Yichun",
@@ -196,12 +214,11 @@
     "Zhongshan",
     "Zhongwei",
     "Zhuzhou",
-    "Zigong"
+    "Zigong",
+    "Zunyi"
   ],
   "open_items": [
-    "Check service for the smaller stops outside China and the shortlist endpoints that are not yet checked.",
     "Review selected cities that share a metro's GHSL urban centre.",
-    "Review the draft junction picks against line maps.",
     "Unselected cities with service remain pass-through stations on starting corridors."
   ],
   "groups": {
@@ -695,6 +712,9 @@
         "lat": 24.45118,
         "lng": 54.39696,
         "population": 1807000,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Abu Dhabi"
       },
       {
@@ -704,17 +724,23 @@
         "lat": 29.58902,
         "lng": 32.33597,
         "population": 45552,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Ain Sokhna"
       },
       {
         "geonameid": 2178174,
         "name": "Albury-Wodonga",
-        "country_code": null,
+        "country_code": "AU",
         "lat": -36.07482,
         "lng": 146.92401,
         "population": null,
         "shortlist_name": "Albury-Wodonga",
-        "note": "GeoNames ID is not in cities15000; coordinates from the shortlist"
+        "note": "GeoNames ID is not in cities15000; coordinates from the shortlist",
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": ""
       },
       {
         "geonameid": 4671654,
@@ -723,6 +749,9 @@
         "lat": 30.26715,
         "lng": -97.74306,
         "population": 974447,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Austin"
       },
       {
@@ -732,6 +761,9 @@
         "lat": 35.37329,
         "lng": -119.01871,
         "population": 373640,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Bakersfield"
       },
       {
@@ -741,6 +773,9 @@
         "lat": 52.48142,
         "lng": -1.89983,
         "population": 1157603,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Birmingham"
       },
       {
@@ -754,6 +789,9 @@
         "ghsl_name": "Bordeaux",
         "ghsl_pop_2025": 642756,
         "ghsl_shared_metro": null,
+        "hsr_service": "yes",
+        "service_kind": "dedicated_hsr",
+        "station": "Bordeaux-Saint-Jean",
         "shortlist_name": "Bordeaux"
       },
       {
@@ -767,6 +805,9 @@
         "ghsl_name": "Boston",
         "ghsl_pop_2025": 1669310,
         "ghsl_shared_metro": null,
+        "hsr_service": "yes",
+        "service_kind": "upgraded_or_200",
+        "station": "Boston South Station",
         "shortlist_name": "Boston"
       },
       {
@@ -776,6 +817,9 @@
         "lat": -27.46794,
         "lng": 153.02809,
         "population": 2780063,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Brisbane"
       },
       {
@@ -789,6 +833,9 @@
         "ghsl_name": "Béziers",
         "ghsl_pop_2025": 69194,
         "ghsl_shared_metro": null,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Béziers"
       },
       {
@@ -798,6 +845,9 @@
         "lat": -22.90556,
         "lng": -47.06083,
         "population": 1031554,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Campinas"
       },
       {
@@ -807,6 +857,9 @@
         "lat": -35.28346,
         "lng": 149.12807,
         "population": 367752,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Canberra"
       },
       {
@@ -816,6 +869,9 @@
         "lat": 22.3384,
         "lng": 91.83168,
         "population": 3920222,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Chattogram"
       },
       {
@@ -825,6 +881,9 @@
         "lat": -36.60664,
         "lng": -72.10344,
         "population": 150396,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Chillán"
       },
       {
@@ -834,6 +893,9 @@
         "lat": -6.7063,
         "lng": 108.557,
         "population": 344851,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Cirebon"
       },
       {
@@ -843,6 +905,9 @@
         "lat": -30.29626,
         "lng": 153.11351,
         "population": 78759,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Coffs Harbour"
       },
       {
@@ -852,6 +917,9 @@
         "lat": -25.42778,
         "lng": -49.27306,
         "population": 1948626,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Curitiba"
       },
       {
@@ -861,6 +929,9 @@
         "lat": -31.40648,
         "lng": -64.18853,
         "population": 2106734,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Córdoba"
       },
       {
@@ -870,6 +941,9 @@
         "lat": 26.43442,
         "lng": 50.10326,
         "population": 1252523,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Dammam"
       },
       {
@@ -879,6 +953,9 @@
         "lat": 43.71032,
         "lng": -1.05366,
         "population": 22305,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Dax"
       },
       {
@@ -892,6 +969,9 @@
         "ghsl_name": "Dresden",
         "ghsl_pop_2025": 566233,
         "ghsl_shared_metro": null,
+        "hsr_service": "yes",
+        "service_kind": "upgraded_or_200",
+        "station": "Dresden Hauptbahnhof",
         "shortlist_name": "Dresden"
       },
       {
@@ -901,6 +981,9 @@
         "lat": -29.8579,
         "lng": 31.0292,
         "population": 3338026,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Durban"
       },
       {
@@ -910,6 +993,9 @@
         "lat": 36.74773,
         "lng": -119.77237,
         "population": 542107,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Fresno"
       },
       {
@@ -919,6 +1005,9 @@
         "lat": -28.00029,
         "lng": 153.43088,
         "population": 640778,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Gold Coast"
       },
       {
@@ -928,6 +1017,9 @@
         "lat": 7.37756,
         "lng": 3.90591,
         "population": 3649000,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Ibadan"
       },
       {
@@ -937,6 +1029,9 @@
         "lat": -14.07538,
         "lng": -75.73422,
         "population": 282407,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Ica"
       },
       {
@@ -946,6 +1041,9 @@
         "lat": 26.91962,
         "lng": 75.78781,
         "population": 3046163,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Jaipur"
       },
       {
@@ -955,6 +1053,9 @@
         "lat": 0.31628,
         "lng": 32.58219,
         "population": 1680600,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Kampala"
       },
       {
@@ -968,6 +1069,9 @@
         "ghsl_name": "Kenitra",
         "ghsl_pop_2025": 588772,
         "ghsl_shared_metro": null,
+        "hsr_service": "yes",
+        "service_kind": "dedicated_hsr",
+        "station": "Kénitra (new LGV station, opened Nov 2018)",
         "shortlist_name": "Kenitra"
       },
       {
@@ -977,6 +1081,9 @@
         "lat": 36.17497,
         "lng": -115.13722,
         "population": 641903,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Las Vegas"
       },
       {
@@ -990,6 +1097,9 @@
         "ghsl_name": "Lisbon",
         "ghsl_pop_2025": 1974574,
         "ghsl_shared_metro": null,
+        "hsr_service": "yes",
+        "service_kind": "upgraded_or_200",
+        "station": "Lisboa-Oriente (also Santa Apolónia)",
         "shortlist_name": "Lisbon"
       },
       {
@@ -1003,6 +1113,9 @@
         "ghsl_name": "Lyon",
         "ghsl_pop_2025": 1194741,
         "ghsl_shared_metro": null,
+        "hsr_service": "yes",
+        "service_kind": "dedicated_hsr",
+        "station": "Lyon-Part-Dieu",
         "shortlist_name": "Lyon"
       },
       {
@@ -1012,6 +1125,9 @@
         "lat": 31.63416,
         "lng": -7.99994,
         "population": 995871,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Marrakech"
       },
       {
@@ -1021,6 +1137,9 @@
         "lat": 6.245,
         "lng": -75.57151,
         "population": 1999979,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Medellín"
       },
       {
@@ -1030,6 +1149,9 @@
         "lat": -4.05466,
         "lng": 39.66359,
         "population": 1208333,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Mombasa"
       },
       {
@@ -1043,6 +1165,9 @@
         "ghsl_name": "Montpellier",
         "ghsl_pop_2025": 337381,
         "ghsl_shared_metro": null,
+        "hsr_service": "yes",
+        "service_kind": "upgraded_or_200",
+        "station": "Montpellier-Sud-de-France",
         "shortlist_name": "Montpellier"
       },
       {
@@ -1052,6 +1177,9 @@
         "lat": 45.50884,
         "lng": -73.58781,
         "population": 1762949,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Montréal"
       },
       {
@@ -1061,6 +1189,9 @@
         "lat": -6.82102,
         "lng": 37.66122,
         "population": 471409,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Morogoro"
       },
       {
@@ -1070,6 +1201,9 @@
         "lat": 30.19679,
         "lng": 71.47824,
         "population": 2169915,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Multan"
       },
       {
@@ -1079,6 +1213,9 @@
         "lat": 14.97066,
         "lng": 102.10196,
         "population": 126391,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Nakhon Ratchasima"
       },
       {
@@ -1088,6 +1225,9 @@
         "lat": -32.92953,
         "lng": 151.7801,
         "population": 508437,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Newcastle"
       },
       {
@@ -1097,6 +1237,9 @@
         "lat": 43.32472,
         "lng": 21.90333,
         "population": 250000,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Niš"
       },
       {
@@ -1106,6 +1249,9 @@
         "lat": 45.41117,
         "lng": -75.69812,
         "population": 1017449,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Ottawa"
       },
       {
@@ -1119,6 +1265,9 @@
         "ghsl_name": "Perpignan",
         "ghsl_pop_2025": 124596,
         "ghsl_shared_metro": null,
+        "hsr_service": "yes",
+        "service_kind": "dedicated_hsr",
+        "station": "Perpignan",
         "shortlist_name": "Perpignan"
       },
       {
@@ -1128,6 +1277,9 @@
         "lat": 40.03116,
         "lng": -6.08845,
         "population": 40141,
+        "hsr_service": "yes",
+        "service_kind": "dedicated_hsr",
+        "station": "Monfragüe (Malpartida de Plasencia)",
         "shortlist_name": "Plasencia"
       },
       {
@@ -1141,6 +1293,9 @@
         "ghsl_name": "Porto",
         "ghsl_pop_2025": 1060250,
         "ghsl_shared_metro": null,
+        "hsr_service": "yes",
+        "service_kind": "upgraded_or_200",
+        "station": "Porto-Campanhã",
         "shortlist_name": "Porto"
       },
       {
@@ -1150,6 +1305,9 @@
         "lat": 50.08804,
         "lng": 14.42076,
         "population": 1165581,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Prague"
       },
       {
@@ -1159,6 +1317,9 @@
         "lat": 20.58806,
         "lng": -100.38806,
         "population": 1594212,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Querétaro"
       },
       {
@@ -1168,6 +1329,9 @@
         "lat": 46.81228,
         "lng": -71.21454,
         "population": 531902,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Québec City"
       },
       {
@@ -1177,6 +1341,9 @@
         "lat": -32.94682,
         "lng": -60.63932,
         "population": 948312,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Rosario"
       },
       {
@@ -1186,6 +1353,9 @@
         "lat": 29.42412,
         "lng": -98.49363,
         "population": 1526656,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "San Antonio"
       },
       {
@@ -1195,6 +1365,9 @@
         "lat": 43.31283,
         "lng": -1.97499,
         "population": 185357,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "San Sebastián"
       },
       {
@@ -1204,6 +1377,9 @@
         "lat": 43.06667,
         "lng": 141.35,
         "population": 1973832,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Sapporo"
       },
       {
@@ -1213,6 +1389,9 @@
         "lat": -6.99306,
         "lng": 110.42083,
         "population": 1694740,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Semarang"
       },
       {
@@ -1224,7 +1403,10 @@
         "lng": 140.6485358,
         "population": null,
         "shortlist_name": "Shin-Hakodate-Hokuto",
-        "note": "Station point; its town is below the GeoNames cities15000 floor"
+        "note": "Station point; its town is below the GeoNames cities15000 floor",
+        "hsr_service": "yes",
+        "service_kind": "dedicated_hsr",
+        "station": "Shin-Hakodate-Hokuto"
       },
       {
         "geonameid": 2972315,
@@ -1237,6 +1419,9 @@
         "ghsl_name": "Toulouse",
         "ghsl_pop_2025": 712882,
         "ghsl_shared_metro": null,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Toulouse"
       },
       {
@@ -1250,6 +1435,9 @@
         "ghsl_name": "Tsuruga",
         "ghsl_pop_2025": 50373,
         "ghsl_shared_metro": null,
+        "hsr_service": "yes",
+        "service_kind": "dedicated_hsr",
+        "station": "Tsuruga",
         "shortlist_name": "Tsuruga"
       },
       {
@@ -1263,6 +1451,9 @@
         "ghsl_name": "Turin",
         "ghsl_pop_2025": 1243448,
         "ghsl_shared_metro": null,
+        "hsr_service": "yes",
+        "service_kind": "dedicated_hsr",
+        "station": "Torino Porta Susa",
         "shortlist_name": "Turin"
       },
       {
@@ -1272,6 +1463,9 @@
         "lat": -33.036,
         "lng": -71.62963,
         "population": 282448,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Valparaíso"
       },
       {
@@ -1281,6 +1475,9 @@
         "lat": 51.77058,
         "lng": 19.47395,
         "population": 639890,
+        "hsr_service": "no",
+        "service_kind": "none",
+        "station": "",
         "shortlist_name": "Łódź"
       }
     ],
@@ -1296,6 +1493,9 @@
         "ghsl_name": "Frankfurt",
         "ghsl_pop_2025": 916259,
         "ghsl_shared_metro": null,
+        "hsr_service": "yes",
+        "service_kind": "dedicated_hsr",
+        "station": "Frankfurt (Main) Hauptbahnhof",
         "status": "draft pick; service not yet checked"
       },
       {
@@ -1309,6 +1509,9 @@
         "ghsl_name": "Hanover",
         "ghsl_pop_2025": 663997,
         "ghsl_shared_metro": null,
+        "hsr_service": "yes",
+        "service_kind": "dedicated_hsr",
+        "station": "Hannover Hauptbahnhof",
         "status": "draft pick; service not yet checked"
       },
       {
@@ -1322,6 +1525,9 @@
         "ghsl_name": "Nuremberg",
         "ghsl_pop_2025": 645853,
         "ghsl_shared_metro": null,
+        "hsr_service": "yes",
+        "service_kind": "dedicated_hsr",
+        "station": "Nürnberg Hauptbahnhof",
         "status": "draft pick; service not yet checked"
       },
       {
@@ -1335,6 +1541,9 @@
         "ghsl_name": "Lille",
         "ghsl_pop_2025": 907123,
         "ghsl_shared_metro": null,
+        "hsr_service": "yes",
+        "service_kind": "dedicated_hsr",
+        "station": "Lille-Flandres / Lille-Europe",
         "status": "draft pick; service not yet checked"
       },
       {
@@ -1348,6 +1557,9 @@
         "ghsl_name": "Marseille",
         "ghsl_pop_2025": 911934,
         "ghsl_shared_metro": null,
+        "hsr_service": "yes",
+        "service_kind": "dedicated_hsr",
+        "station": "Marseille-Saint-Charles",
         "status": "draft pick; service not yet checked"
       },
       {
@@ -1361,6 +1573,9 @@
         "ghsl_name": "Bologna",
         "ghsl_pop_2025": 456780,
         "ghsl_shared_metro": null,
+        "hsr_service": "yes",
+        "service_kind": "dedicated_hsr",
+        "station": "Bologna Centrale (AV underground platforms)",
         "status": "draft pick; service not yet checked"
       },
       {
@@ -1374,6 +1589,9 @@
         "ghsl_name": "Florence",
         "ghsl_pop_2025": 711105,
         "ghsl_shared_metro": null,
+        "hsr_service": "yes",
+        "service_kind": "dedicated_hsr",
+        "station": "Firenze Santa Maria Novella",
         "status": "draft pick; service not yet checked"
       },
       {
@@ -1387,6 +1605,9 @@
         "ghsl_name": "Naples",
         "ghsl_pop_2025": 2885079,
         "ghsl_shared_metro": null,
+        "hsr_service": "yes",
+        "service_kind": "dedicated_hsr",
+        "station": "Napoli Centrale",
         "status": "draft pick; service not yet checked"
       },
       {
@@ -1400,6 +1621,9 @@
         "ghsl_name": "Zaragoza",
         "ghsl_pop_2025": 624271,
         "ghsl_shared_metro": null,
+        "hsr_service": "yes",
+        "service_kind": "dedicated_hsr",
+        "station": "Zaragoza-Delicias",
         "status": "draft pick; service not yet checked"
       },
       {
@@ -1413,6 +1637,9 @@
         "ghsl_name": "Valencia",
         "ghsl_pop_2025": 1404208,
         "ghsl_shared_metro": null,
+        "hsr_service": "yes",
+        "service_kind": "dedicated_hsr",
+        "station": "València-Joaquín Sorolla",
         "status": "draft pick; service not yet checked"
       },
       {
@@ -1426,6 +1653,9 @@
         "ghsl_name": "Seville",
         "ghsl_pop_2025": 696193,
         "ghsl_shared_metro": null,
+        "hsr_service": "yes",
+        "service_kind": "dedicated_hsr",
+        "station": "Sevilla-Santa Justa",
         "status": "draft pick; service not yet checked"
       },
       {
@@ -1439,6 +1669,9 @@
         "ghsl_name": "Okayama",
         "ghsl_pop_2025": 847111,
         "ghsl_shared_metro": null,
+        "hsr_service": "yes",
+        "service_kind": "dedicated_hsr",
+        "station": "Okayama",
         "status": "draft pick; service not yet checked"
       },
       {
@@ -1452,6 +1685,9 @@
         "ghsl_name": "Niigata",
         "ghsl_pop_2025": 437871,
         "ghsl_shared_metro": null,
+        "hsr_service": "yes",
+        "service_kind": "dedicated_hsr",
+        "station": "Niigata",
         "status": "draft pick; service not yet checked"
       },
       {
@@ -1465,6 +1701,9 @@
         "ghsl_name": "Kanazawa",
         "ghsl_pop_2025": 527097,
         "ghsl_shared_metro": null,
+        "hsr_service": "yes",
+        "service_kind": "dedicated_hsr",
+        "station": "Kanazawa",
         "status": "draft pick; service not yet checked"
       }
     ],
@@ -1739,7 +1978,9 @@
         "hsr_service": "yes",
         "service_kind": "dedicated_hsr",
         "station": "Xuzhou East 徐州东",
-        "basis": "junction or line end (draft pick)"
+        "basis": "junction or line end (checked against line maps)",
+        "network_role": "junction",
+        "directions": 5
       },
       {
         "geonameid": 1796134,
@@ -1755,23 +1996,9 @@
         "hsr_service": "yes",
         "service_kind": "dedicated_hsr",
         "station": "Shangqiu (商丘)",
-        "basis": "junction or line end (draft pick)"
-      },
-      {
-        "geonameid": 10942359,
-        "name": "Baoji",
-        "country_code": "CN",
-        "lat": 34.36775,
-        "lng": 107.23705,
-        "population": 1437802,
-        "ghsl_id": 6943,
-        "ghsl_name": "Baoji",
-        "ghsl_pop_2025": 773901,
-        "ghsl_shared_metro": null,
-        "hsr_service": "yes",
-        "service_kind": "dedicated_hsr",
-        "station": "Baoji South 宝鸡南",
-        "basis": "junction or line end (draft pick)"
+        "basis": "junction or line end (checked against line maps)",
+        "network_role": "junction",
+        "directions": 3
       },
       {
         "geonameid": 1808370,
@@ -1787,23 +2014,9 @@
         "hsr_service": "yes",
         "service_kind": "dedicated_hsr",
         "station": "Hengyang East 衡阳东",
-        "basis": "junction or line end (draft pick)"
-      },
-      {
-        "geonameid": 1803300,
-        "name": "Liuzhou",
-        "country_code": "CN",
-        "lat": 24.32405,
-        "lng": 109.40698,
-        "population": 1436599,
-        "ghsl_id": 9939,
-        "ghsl_name": "Liuzhou",
-        "ghsl_pop_2025": 1318051,
-        "ghsl_shared_metro": null,
-        "hsr_service": "yes",
-        "service_kind": "dedicated_hsr",
-        "station": "Liuzhou 柳州",
-        "basis": "junction or line end (draft pick)"
+        "basis": "junction or line end (checked against line maps)",
+        "network_role": "junction",
+        "directions": 4
       },
       {
         "geonameid": 1805528,
@@ -1819,7 +2032,9 @@
         "hsr_service": "yes",
         "service_kind": "dedicated_hsr",
         "station": "Jinhua 金华 (former Jinhua West)",
-        "basis": "junction or line end (draft pick)"
+        "basis": "junction or line end (checked against line maps)",
+        "network_role": "junction",
+        "directions": 3
       },
       {
         "geonameid": 1787858,
@@ -1835,7 +2050,9 @@
         "hsr_service": "yes",
         "service_kind": "dedicated_hsr",
         "station": "Shangrao 上饶",
-        "basis": "junction or line end (draft pick)"
+        "basis": "junction or line end (checked against line maps)",
+        "network_role": "junction",
+        "directions": 4
       },
       {
         "geonameid": 1791388,
@@ -1851,7 +2068,9 @@
         "hsr_service": "yes",
         "service_kind": "dedicated_hsr",
         "station": "Wenzhou South (温州南)",
-        "basis": "junction or line end (draft pick)"
+        "basis": "junction or line end (checked against line maps)",
+        "network_role": "junction",
+        "directions": 4
       },
       {
         "geonameid": 1814087,
@@ -1867,7 +2086,9 @@
         "hsr_service": "yes",
         "service_kind": "dedicated_hsr",
         "station": "Dalian North (大连北)",
-        "basis": "junction or line end (draft pick)"
+        "basis": "junction or line end (checked against line maps)",
+        "network_role": "line_end",
+        "directions": 2
       },
       {
         "geonameid": 1787093,
@@ -1883,7 +2104,9 @@
         "hsr_service": "yes",
         "service_kind": "dedicated_hsr",
         "station": "Yantai South (烟台南)",
-        "basis": "junction or line end (draft pick)"
+        "basis": "junction or line end (checked against line maps)",
+        "network_role": "junction",
+        "directions": 3
       },
       {
         "geonameid": 2037799,
@@ -1899,23 +2122,9 @@
         "hsr_service": "yes",
         "service_kind": "dedicated_hsr",
         "station": "Datong South (大同南)",
-        "basis": "junction or line end (draft pick)"
-      },
-      {
-        "geonameid": 1796556,
-        "name": "Sanya",
-        "country_code": "CN",
-        "lat": 18.25435,
-        "lng": 109.50947,
-        "population": 1031396,
-        "ghsl_id": 10683,
-        "ghsl_name": "Sanya",
-        "ghsl_pop_2025": 421522,
-        "ghsl_shared_metro": null,
-        "hsr_service": "yes",
-        "service_kind": "dedicated_hsr",
-        "station": "Sanya 三亚",
-        "basis": "junction or line end (draft pick)"
+        "basis": "junction or line end (checked against line maps)",
+        "network_role": "junction",
+        "directions": 3
       },
       {
         "geonameid": 1795940,
@@ -1931,23 +2140,81 @@
         "hsr_service": "yes",
         "service_kind": "dedicated_hsr",
         "station": "Shantou South (汕头南)",
-        "basis": "junction or line end (draft pick)"
+        "basis": "junction or line end (checked against line maps)",
+        "network_role": "line_end",
+        "directions": 1
       },
       {
-        "geonameid": 1799397,
-        "name": "Ningbo",
+        "geonameid": 1809498,
+        "name": "Guilin",
         "country_code": "CN",
-        "lat": 29.87819,
-        "lng": 121.54945,
-        "population": 3731203,
-        "ghsl_id": 11563,
-        "ghsl_name": "Ningbo",
-        "ghsl_pop_2025": 2953172,
+        "lat": 25.28022,
+        "lng": 110.29639,
+        "population": 1572300,
+        "ghsl_id": 10023,
+        "ghsl_name": "Guilin",
+        "ghsl_pop_2025": 965076,
         "ghsl_shared_metro": null,
         "hsr_service": "yes",
         "service_kind": "dedicated_hsr",
-        "station": "Ningbo (宁波)",
-        "basis": "junction or line end (draft pick)"
+        "station": "Guilin West (桂林西)",
+        "basis": "junction or line end (checked against line maps)",
+        "network_role": "junction",
+        "directions": 4
+      },
+      {
+        "geonameid": 1806776,
+        "name": "Huizhou",
+        "country_code": "CN",
+        "lat": 23.11147,
+        "lng": 114.41523,
+        "population": 2900113,
+        "ghsl_id": 11173,
+        "ghsl_name": "Huizhou",
+        "ghsl_pop_2025": 1061952,
+        "ghsl_shared_metro": null,
+        "hsr_service": "yes",
+        "service_kind": "dedicated_hsr",
+        "station": "Huizhou North (惠州北)",
+        "basis": "junction or line end (checked against line maps)",
+        "network_role": "junction",
+        "directions": 4
+      },
+      {
+        "geonameid": 1806535,
+        "name": "Huzhou",
+        "country_code": "CN",
+        "lat": 30.8703,
+        "lng": 120.0933,
+        "population": 1015937,
+        "ghsl_id": 11259,
+        "ghsl_name": "Huzhou",
+        "ghsl_pop_2025": 431049,
+        "ghsl_shared_metro": null,
+        "hsr_service": "yes",
+        "service_kind": "dedicated_hsr",
+        "station": "Huzhou 湖州",
+        "basis": "junction or line end (checked against line maps)",
+        "network_role": "junction",
+        "directions": 4
+      },
+      {
+        "geonameid": 1810845,
+        "name": "Fuyang",
+        "country_code": "CN",
+        "lat": 32.9,
+        "lng": 115.81667,
+        "population": 1768947,
+        "ghsl_id": 10099,
+        "ghsl_name": "Fuyang",
+        "ghsl_pop_2025": 1026179,
+        "ghsl_shared_metro": null,
+        "hsr_service": "yes",
+        "service_kind": "dedicated_hsr",
+        "station": "Fuyang West (阜阳西)",
+        "basis": "junction or line end (checked against line maps)",
+        "network_role": "junction",
+        "directions": 3
       },
       {
         "geonameid": 1797353,
@@ -1963,6 +2230,22 @@
         "hsr_service": "yes",
         "service_kind": "dedicated_hsr",
         "station": "Quanzhou 泉州",
+        "basis": "population fill ranked by GHSL urban-centre population (2025)"
+      },
+      {
+        "geonameid": 1799397,
+        "name": "Ningbo",
+        "country_code": "CN",
+        "lat": 29.87819,
+        "lng": 121.54945,
+        "population": 3731203,
+        "ghsl_id": 11563,
+        "ghsl_name": "Ningbo",
+        "ghsl_pop_2025": 2953172,
+        "ghsl_shared_metro": null,
+        "hsr_service": "yes",
+        "service_kind": "dedicated_hsr",
+        "station": "Ningbo (宁波)",
         "basis": "population fill ranked by GHSL urban-centre population (2025)"
       },
       {
@@ -2222,6 +2505,22 @@
         "basis": "population fill ranked by GHSL urban-centre population (2025)"
       },
       {
+        "geonameid": 1803300,
+        "name": "Liuzhou",
+        "country_code": "CN",
+        "lat": 24.32405,
+        "lng": 109.40698,
+        "population": 1436599,
+        "ghsl_id": 9939,
+        "ghsl_name": "Liuzhou",
+        "ghsl_pop_2025": 1318051,
+        "ghsl_shared_metro": null,
+        "hsr_service": "yes",
+        "service_kind": "dedicated_hsr",
+        "station": "Liuzhou 柳州",
+        "basis": "population fill ranked by GHSL urban-centre population (2025)"
+      },
+      {
         "geonameid": 1804879,
         "name": "Kaifeng",
         "country_code": "CN",
@@ -2235,38 +2534,6 @@
         "hsr_service": "yes",
         "service_kind": "dedicated_hsr",
         "station": "Kaifeng North 开封北",
-        "basis": "population fill ranked by GHSL urban-centre population (2025)"
-      },
-      {
-        "geonameid": 1787746,
-        "name": "Yancheng",
-        "country_code": "CN",
-        "lat": 33.3575,
-        "lng": 120.1573,
-        "population": 1615717,
-        "ghsl_id": 10941,
-        "ghsl_name": "Yancheng",
-        "ghsl_pop_2025": 1211454,
-        "ghsl_shared_metro": null,
-        "hsr_service": "yes",
-        "service_kind": "dedicated_hsr",
-        "station": "Yancheng (盐城)",
-        "basis": "population fill ranked by GHSL urban-centre population (2025)"
-      },
-      {
-        "geonameid": 1783621,
-        "name": "Zunyi",
-        "country_code": "CN",
-        "lat": 27.68667,
-        "lng": 106.90722,
-        "population": 2037775,
-        "ghsl_id": 8945,
-        "ghsl_name": "Honghuagang",
-        "ghsl_pop_2025": 1185303,
-        "ghsl_shared_metro": null,
-        "hsr_service": "yes",
-        "service_kind": "dedicated_hsr",
-        "station": "Zunyi (遵义)",
         "basis": "population fill ranked by GHSL urban-centre population (2025)"
       }
     ]

@@ -295,7 +295,8 @@ def main(overlay_path, geonames_path, ghsl_path=None):
         for line in EVIDENCE.read_text(encoding="utf-8").splitlines():
             if line.strip():
                 item = json.loads(line)
-                evidence[int(item["geonameid"])] = item
+                key = item["geonameid"]
+                evidence[int(key) if str(key).isdigit() else key] = item
     for row in rows:
         item = evidence.get(row["geonameid"], {})
         row["hsr_service"] = item.get("hsr_service", "unchecked")
