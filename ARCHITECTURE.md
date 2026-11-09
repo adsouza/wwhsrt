@@ -103,7 +103,7 @@ Current inputs and their scope:
 | Prototype country outlines | [Natural Earth manifest](data/prototypes/natural-earth-110m.metadata.json) |
 | Regional construction assumptions, observations, normalization, and engineering factors | [Cost ledger](data/costs/construction_costs.v1.json) and [research](docs/CONSTRUCTION_COSTS.md) |
 
-Preserve raw inputs and derive game catalogs with explicit transformations. Record source/version/hash identities in released scenario bundles and saves. The 93-metro prototype is not the complete worldwide corridor catalog; smaller intermediate cities and existing HSR stops remain part of the planned broader catalog.
+Preserve raw inputs and derive game catalogs with explicit transformations. Record source/version/hash identities in released scenario bundles and saves. The 94-metro prototype is not the complete worldwide corridor catalog; smaller intermediate cities and existing HSR stops remain part of the planned broader catalog.
 
 ## Presentation and camera state
 

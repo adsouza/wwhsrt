@@ -13,7 +13,7 @@ const latitudeNorth = manifest.portrait_limits.northern_reference.lat + latitude
 const original = raw.filter(m => m.population >= 5_000_000 && !['manila', 'brasilia'].includes(m.id));
 (async () => {
   const browser = await chromium.launch({ headless: true });
-  const checks = { date: '2026-11-08', browser: browser.version(), projection: 'Equal Earth', checks: [] };
+  const checks = { date: new Date().toISOString().slice(0, 10), browser: browser.version(), projection: 'Equal Earth', checks: [] };
   try {
     const page = await browser.newPage({ viewport: { width: 1280, height: 900 }, timezoneId: 'America/New_York', ignoreHTTPSErrors: true });
     const errors = []; page.on('pageerror', e => errors.push(e.message));

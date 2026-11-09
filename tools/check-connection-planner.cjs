@@ -66,7 +66,7 @@ async function noOverflow(f, label) {
     const page = await context.newPage();
     page.on('pageerror', e => errors.push(e.message));
     const f = await attach(page);
-    assert.equal(await f.locator('[data-city] option').count(), 94);
+    assert.equal(await f.locator('[data-city] option').count(), 95); // 94 metros + placeholder
     assert.equal(await f.locator('[data-metro]').count(), 94);
     assert.equal(await endpoint(f, 'a'), 'Delhi');
     assert.equal(await endpoint(f, 'b'), 'Mumbai');

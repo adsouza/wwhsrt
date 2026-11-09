@@ -88,7 +88,7 @@ Displayed route kilometres, engineering quantities, journey times, and costs com
 
 #### Regional camera presets
 
-Apply the [launch map framing overrides](../data/prototypes/launch-map-framing.v1.json) to the [base preset manifest](../data/prototypes/map-region-presets.v1.json) for the launch map. Resolve metro and station anchors using their own coordinates. Fit the minimum and maximum longitude and latitude of each anchor set with a small screen-space gutter for markers, except where a projected-point fit is specified below. The launch map uses GeoNames coordinates for Québec City, Lisbon, and Brisbane, and OpenStreetMap station coordinates for the Frangistan latitude anchors and the Uzbekistan preset. Camera anchors do not add cities to the 93-metro roster.
+Apply the [launch map framing overrides](../data/prototypes/launch-map-framing.v1.json) to the [base preset manifest](../data/prototypes/map-region-presets.v1.json) for the launch map. Resolve metro and station anchors using their own coordinates. Fit the minimum and maximum longitude and latitude of each anchor set with a small screen-space gutter for markers, except where a projected-point fit is specified below. The launch map uses GeoNames coordinates for Québec City, Lisbon, and Brisbane, and OpenStreetMap station coordinates for the Frangistan latitude anchors and the Uzbekistan preset. Camera anchors do not add cities to the 94-metro roster.
 
 | Preset | Landscape viewport | Portrait viewport |
 | --- | --- | --- |

@@ -1,14 +1,14 @@
 {
   "passed": true,
   "prototypeOnly": true,
-  "browser": "153.0.8010.12",
+  "browser": "151.0.7922.34",
   "checks": [
     {
       "name": "Fixture units, revenue arithmetic, directional capacity and exact endpoint coordinates",
       "detail": true
     },
     {
-      "name": "93 named/map metros, initial distinct endpoints and consistent opening quote",
+      "name": "94 named/map metros, initial distinct endpoints and consistent opening quote",
       "detail": true
     },
     {

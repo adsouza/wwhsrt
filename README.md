@@ -24,4 +24,4 @@ The [world-data notes](data/README.md) describe the supplied 96-metro seed, its 
 
 The [construction-cost research](docs/CONSTRUCTION_COSTS.md) supports 20 regional cost profiles, with HSR benchmarks, conventional-rail extrapolations, and explicit price/scope assumptions.
 
-The [map and widget validation report](docs/validation/README.md) contains Equal Earth world/regional views of the playable metros derived from the 96-record seed (recorded with 93; Taipei has since been restored, giving 94) and screenshots/checks from an actual Go/WebAssembly ebitenui renderer. The [isolated rendering spike](tools/ebitenui-spike/README.md) runs independently of the future game.
+The [map and widget validation report](docs/validation/README.md) contains Equal Earth world/regional views of the playable metros derived from the 96-record seed (94 after Taipei's restoration) and screenshots/checks from an actual Go/WebAssembly ebitenui renderer. The [isolated rendering spike](tools/ebitenui-spike/README.md) runs independently of the future game.

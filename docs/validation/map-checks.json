@@ -1,10 +1,10 @@
 {
-  "date": "2026-11-08",
-  "browser": "153.0.8010.12",
+  "date": "2026-11-09",
+  "browser": "151.0.7922.34",
   "projection": "Equal Earth",
   "checks": [
     "portrait starts at hidden Americas bounds with all four anchor labels; World absent from DOM; dropdown has only specific regions; manual +/- and wheel zoom remain usable",
-    "93 playable records retain raw values and all meet the 5M minimum; Phoenix retained at exactly 5M; Brasília/Manila/Taipei excluded; display suffix removed; portrait preview defaults correctly; 177 sourced country geometries; all markers match Equal Earth forward projection",
+    "94 playable records retain raw values and all meet the 5M minimum; Phoenix retained at exactly 5M; Brasília/Manila excluded; display suffix removed; portrait preview defaults correctly; 177 sourced country geometries; all markers match Equal Earth forward projection",
     "regional zoom uses camera scaling; marker sizes and raw records stay fixed; metro inspection shows source values; world reset; overlapping metro disambiguation",
     "narrow layouts, resize persistence, and labels remain at readable pixel sizes",
     "bright cheerful theme matches its manifest; dark appearance and reduced-motion regional navigation",
@@ -283,7 +283,7 @@
     "south": -40.8136,
     "north": 66.63292,
     "cushionDegrees": 3,
-    "animationFrames": 214,
+    "animationFrames": 241,
     "violations": 0
   },
   "timezoneDefaults": [
