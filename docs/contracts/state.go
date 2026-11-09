@@ -36,6 +36,7 @@ type World struct {
 	startMonth                GameMonth
 	campaignMonths            uint16
 	restructuringWindowMonths uint16
+	minimumNoticeMonths       uint16
 	seed                      uint64
 	rules                     RulesRef
 	networkRevision           uint64
@@ -97,39 +98,41 @@ type WorldV1 struct {
 	Month          GameMonth `json:"month"`
 	CampaignMonths uint16    `json:"campaign_months"`
 	// Pinned at world creation: max(baseline window, real-time minimum at the interval).
-	RestructuringWindowMonths uint16                 `json:"restructuring_window_months"`
-	StartMonth                GameMonth              `json:"start_month"`
-	Seed                      uint64                 `json:"seed,string"`
-	NextID                    uint64                 `json:"next_id,string"`
-	NetworkRevision           uint64                 `json:"network_revision,string"`
-	Companies                 []Company              `json:"companies"`
-	Nodes                     []Node                 `json:"nodes"`
-	Stations                  []Station              `json:"stations"`
-	StationAccess             []StationAccess        `json:"station_access"`
-	TrackAccess               []TrackAccessAgreement `json:"track_access"`
-	Sections                  []TrackSection         `json:"sections"`
-	Projects                  []Project              `json:"projects"`
-	Trainsets                 []Trainset             `json:"trainsets"`
-	Orders                    []TrainOrder           `json:"orders"`
-	Services                  []ServiceSpec          `json:"services"`
-	Plans                     []CompanyPlan          `json:"plans"`
-	Loans                     []Loan                 `json:"loans"`
-	Leases                    []Lease                `json:"leases"`
-	Grants                    []Grant                `json:"grants"`
-	Concessions               []Concession           `json:"concessions"`
-	Auctions                  []Auction              `json:"auctions"`
-	Bids                      []Bid                  `json:"bids"`
-	Reservations              []Reservation          `json:"reservations"`
-	CashJournal               []CashEntry            `json:"cash_journal"`
-	Reports                   []MonthReport          `json:"reports"`
-	LatestReplay              *OperatingDay          `json:"latest_replay"`
-	RNGState                  *RNGState              `json:"rng_state"`
+	RestructuringWindowMonths uint16 `json:"restructuring_window_months"`
+	// Pinned at world creation for online worlds; 0 offline, where no rival rights exist.
+	MinimumNoticeMonths uint16                 `json:"minimum_notice_months"`
+	StartMonth          GameMonth              `json:"start_month"`
+	Seed                uint64                 `json:"seed,string"`
+	NextID              uint64                 `json:"next_id,string"`
+	NetworkRevision     uint64                 `json:"network_revision,string"`
+	Companies           []Company              `json:"companies"`
+	Nodes               []Node                 `json:"nodes"`
+	Stations            []Station              `json:"stations"`
+	StationAccess       []StationAccess        `json:"station_access"`
+	TrackAccess         []TrackAccessAgreement `json:"track_access"`
+	Sections            []TrackSection         `json:"sections"`
+	Projects            []Project              `json:"projects"`
+	Trainsets           []Trainset             `json:"trainsets"`
+	Orders              []TrainOrder           `json:"orders"`
+	Services            []ServiceSpec          `json:"services"`
+	Plans               []CompanyPlan          `json:"plans"`
+	Loans               []Loan                 `json:"loans"`
+	Leases              []Lease                `json:"leases"`
+	Grants              []Grant                `json:"grants"`
+	Concessions         []Concession           `json:"concessions"`
+	Auctions            []Auction              `json:"auctions"`
+	Bids                []Bid                  `json:"bids"`
+	Reservations        []Reservation          `json:"reservations"`
+	CashJournal         []CashEntry            `json:"cash_journal"`
+	Reports             []MonthReport          `json:"reports"`
+	LatestReplay        *OperatingDay          `json:"latest_replay"`
+	RNGState            *RNGState              `json:"rng_state"`
 }
 
 type Company struct {
 	ID                CompanyID  `json:"id"`
 	Name              string     `json:"name"`
-	Status            string     `json:"status"` // active, restructuring, bankrupt
+	Status            string     `json:"status"` // active, restructuring, bankrupt, removed
 	HomeCity          CityID     `json:"home_city"`
 	OpeningCash       Money      `json:"opening_cash,string"`
 	Cash              Money      `json:"cash,string"`
@@ -157,10 +160,20 @@ type Station struct {
 	BookValue        Money     `json:"book_value,string"`
 }
 
+// StationAccess is a regulated right; station owners cannot refuse or reprice it.
 type StationAccess struct {
-	StationID StationID `json:"station_id"`
-	CompanyID CompanyID `json:"company_id"`
-	TermsRef  string    `json:"terms_ref"`
+	StationID  StationID  `json:"station_id"`
+	CompanyID  CompanyID  `json:"company_id"`
+	TermsRef   string     `json:"terms_ref"`
+	FeePerCall Money      `json:"fee_per_call,string"` // 0 for the owner's own calls
+	Effective  GameMonth  `json:"effective"`
+	Ends       *GameMonth `json:"ends"` // First month without access.
+}
+
+// QuotaChange schedules a new shared path quota; reductions honor the minimum notice.
+type QuotaChange struct {
+	ReturnPairsPerDay uint32    `json:"return_pairs_per_day"`
+	Effective         GameMonth `json:"effective"`
 }
 
 type TrackAccessOffer struct {
@@ -190,7 +203,10 @@ type TrackSection struct {
 	Status            string            `json:"status"` // construction, operational, closed
 	SpeedLimitKPH     uint16            `json:"speed_limit_kph"`
 	ReturnPairsPerDay uint32            `json:"return_pairs_per_day"`
-	BookValue         Money             `json:"book_value,string"`
+	// Paths available to operators with accepted rights; the owner keeps the rest.
+	SharedReturnPairsPerDay uint32       `json:"shared_return_pairs_per_day"`
+	SharedQuotaChange       *QuotaChange `json:"shared_quota_change"`
+	BookValue               Money        `json:"book_value,string"`
 }
 
 type Installment struct {
@@ -328,7 +344,7 @@ type Bid struct {
 type Reservation struct {
 	ID        ReservationID `json:"id"`
 	CompanyID CompanyID     `json:"company_id"`
-	Kind      string        `json:"kind"` // construction, auction
+	Kind      string        `json:"kind"` // construction, auction, train_order
 	TargetID  string        `json:"target_id"`
 	Amount    Money         `json:"amount,string"`
 }

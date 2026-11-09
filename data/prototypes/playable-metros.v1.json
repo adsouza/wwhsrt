@@ -207,6 +207,15 @@
     "gdp_usd_billion": 190
   },
   {
+    "id": "taipei",
+    "name": "Greater Taipei Area",
+    "country": "Taiwan",
+    "lat": 25.033,
+    "lng": 121.5654,
+    "population": 7000000,
+    "gdp_usd_billion": 408
+  },
+  {
     "id": "hong_kong",
     "name": "Hong Kong",
     "country": "Hong Kong",

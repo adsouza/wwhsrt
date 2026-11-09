@@ -8,7 +8,7 @@ Real geography shapes expansion: compare longer valley routes with expensive mou
 
 Single-player runs offline. Optional multiplayer connects competing companies to a private dedicated server. Players prepare in a planning lobby before the host starts the clock. The proposed default is 30 seconds per business month for a three-hour campaign, with a fixed interval chosen at world creation. Existing public lines can be acquired through reserve-price auctions while retaining regulated open access.
 
-Committed construction is visible to every company. Owners can offer paid track access on new private lines. Online auctions give players three real minutes to bid.
+Committed construction is visible to every company. Owners can offer paid track access on new private lines. Online auctions give players at least three real minutes to bid. Every station is open access at regulated fees.
 
 The [game design specification](docs/DESIGN.md) records the current design, confirmed choices, proposed rules, and delivery milestones. The repository is at the specification stage, with isolated map and widget feasibility prototypes.
 
@@ -24,4 +24,4 @@ The [world-data notes](data/README.md) describe the supplied 96-metro seed, its 
 
 The [construction-cost research](docs/CONSTRUCTION_COSTS.md) supports 20 regional cost profiles, with HSR benchmarks, conventional-rail extrapolations, and explicit price/scope assumptions.
 
-The [map and widget validation report](docs/validation/README.md) contains Equal Earth world/regional views of 93 playable metros derived from the 96-record seed and screenshots/checks from an actual Go/WebAssembly ebitenui renderer. The [isolated rendering spike](tools/ebitenui-spike/README.md) runs independently of the future game.
+The [map and widget validation report](docs/validation/README.md) contains Equal Earth world/regional views of the playable metros derived from the 96-record seed (recorded with 93; Taipei has since been restored, giving 94) and screenshots/checks from an actual Go/WebAssembly ebitenui renderer. The [isolated rendering spike](tools/ebitenui-spike/README.md) runs independently of the future game.

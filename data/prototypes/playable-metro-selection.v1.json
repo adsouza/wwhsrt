@@ -2,13 +2,12 @@
   "schema_version": 1,
   "source": "../raw/metropolitan_areas_5m.json",
   "source_count": 96,
-  "playable_count": 93,
+  "playable_count": 94,
   "excluded_metro_ids": [
     "manila",
-    "taipei",
     "brasilia"
   ],
-  "reason": "Manila and Taipei are excluded by the user-directed initial island-connectivity scope. Brasília is excluded because its supplied population of 4.8M is below the 5M minimum; Phoenix remains eligible at exactly 5M.",
+  "reason": "Manila is excluded by user-directed initial scope: the Philippines is outside the launch catalog. Taipei is playable (restored 2026-11-09; Taiwan has existing HSR and uses the Korea/Taiwan cost analogue). Brasília is excluded because its supplied population of 4.8M is below the 5M minimum; Phoenix remains eligible at exactly 5M.",
   "display_names": "Remove the trailing phrase Metropolitan Area in presentation; retain original source names and values.",
   "minimum_population": 5000000
 }

@@ -67,11 +67,11 @@ async function noOverflow(f, label) {
     page.on('pageerror', e => errors.push(e.message));
     const f = await attach(page);
     assert.equal(await f.locator('[data-city] option').count(), 94);
-    assert.equal(await f.locator('[data-metro]').count(), 93);
+    assert.equal(await f.locator('[data-metro]').count(), 94);
     assert.equal(await endpoint(f, 'a'), 'Delhi');
     assert.equal(await endpoint(f, 'b'), 'Mumbai');
     assert.equal(await f.locator('[data-build]').innerText(), '$14.8B');
-    record('93 named/map metros, initial distinct endpoints and consistent opening quote');
+    record('94 named/map metros, initial distinct endpoints and consistent opening quote');
     await f.locator(rootSelector).screenshot({ path: path.join(evidence, 'connection-planner-desktop.png') });
     await choose(f, 'b', 'delhi');
     assert(await f.locator('[data-error]').isVisible());

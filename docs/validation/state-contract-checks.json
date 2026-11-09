@@ -3,7 +3,7 @@
   "scope": "Reference JSON schema and SQLite transaction contract via Python sqlite3; not the production Go adapter or domain restore validator",
   "sqliteVersion": "3.45.3",
   "jsonschemaVersion": "4.23.0",
-  "schemaSHA256": "190d80d0ac43f1c278a79787383bd0c45aaad7d9f9ab56b627e735c6d01ba3ff",
+  "schemaSHA256": "2c0c5c45433506dae4bb66aa906d7654524adb0947c7cea5d6517e471277791d",
   "sqlSHA256": "b39d36f82918356224093036c73e1de93410aaae41d6a22eeaf2586da31a3135",
   "checks": [
     "generated JSON schema/example and fixture bundle hashes",

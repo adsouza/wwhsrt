@@ -10,7 +10,7 @@ const manifest = JSON.parse(fs.readFileSync(path.join(root, 'data/prototypes/map
 const latitudeCushion = 3;
 const latitudeSouth = raw.find(m => m.id === 'melbourne').lat - latitudeCushion;
 const latitudeNorth = manifest.portrait_limits.northern_reference.lat + latitudeCushion;
-const original = raw.filter(m => m.population >= 5_000_000 && !['manila', 'taipei', 'brasilia'].includes(m.id));
+const original = raw.filter(m => m.population >= 5_000_000 && !['manila', 'brasilia'].includes(m.id));
 (async () => {
   const browser = await chromium.launch({ headless: true });
   const checks = { date: '2026-11-08', browser: browser.version(), projection: 'Equal Earth', checks: [] };
@@ -19,7 +19,7 @@ const original = raw.filter(m => m.population >= 5_000_000 && !['manila', 'taipe
     const errors = []; page.on('pageerror', e => errors.push(e.message));
     await page.goto(url); const f = page.frameLocator('iframe');
     await f.locator('.wm-metro').first().waitFor();
-    assert.equal(await f.locator('.wm-metro').count(), 93);
+    assert.equal(await f.locator('.wm-metro').count(), 94);
     const theme = JSON.parse(fs.readFileSync(path.join(root, 'data/ui/theme.v1.json')));
     assert.deepEqual(JSON.parse(await f.locator('#wm-theme').textContent()), theme);
     assert.equal(await f.locator('#equal-earth-rail-map').getAttribute('data-theme'), 'cheerful-rail-v1');
@@ -41,7 +41,7 @@ const original = raw.filter(m => m.population >= 5_000_000 && !['manila', 'taipe
     }), initialIds));
     for (const id of initialIds) assert.equal(await f.locator(`.wm-label[data-city-label="${id}"]`).count(), 1);
 
-    assert.equal(await f.locator('[data-city-id="manila"], [data-city-id="taipei"], [data-city-id="brasilia"]').count(), 0);
+    assert.equal(await f.locator('[data-city-id="manila"], [data-city-id="brasilia"]').count(), 0);
     assert.ok(!(await f.locator('[data-city]').innerText()).includes('Metropolitan Area'));
     await page.screenshot({ path: path.join(root, 'docs/validation/equal-earth-portrait-preview.png'), fullPage: true });
     const initialZoom = Number(await f.locator('.wm-stage').getAttribute('data-zoom'));
@@ -59,7 +59,7 @@ const original = raw.filter(m => m.population >= 5_000_000 && !['manila', 'taipe
     assert.ok(!(await f.locator('.wm-detail').innerText()).includes('Metropolitan Area'));
     await f.locator('[data-preview="auto"]').click();
     await f.locator('[data-action="world"]').click(); await page.waitForTimeout(850);
-    assert.equal(await f.locator('.wm-stage').getAttribute('data-visible-count'), '93');
+    assert.equal(await f.locator('.wm-stage').getAttribute('data-visible-count'), '94');
     const geometry = JSON.parse(await f.locator('#wm-countries').textContent()); assert.equal(geometry.features.length, 177);
     const context = page.frames().find(frame => frame !== page.mainFrame());
     const coordinateError = await context.evaluate(async () => {
@@ -72,17 +72,17 @@ const original = raw.filter(m => m.population >= 5_000_000 && !['manila', 'taipe
       }));
     });
     assert.ok(coordinateError < 0.001); checks.maxMarkerProjectionErrorPx = coordinateError;
-    checks.checks.push('93 playable records retain raw values and all meet the 5M minimum; Phoenix retained at exactly 5M; Brasília/Manila/Taipei excluded; display suffix removed; portrait preview defaults correctly; 177 sourced country geometries; all markers match Equal Earth forward projection');
+    checks.checks.push('94 playable records retain raw values and all meet the 5M minimum; Phoenix retained at exactly 5M; Brasília/Manila excluded; display suffix removed; portrait preview defaults correctly; 177 sourced country geometries; all markers match Equal Earth forward projection');
     await page.screenshot({ path: path.join(root, 'docs/validation/equal-earth-world.png'), fullPage: true });
     const dot = f.locator('[data-city-id="delhi"]'); const initialRadius = await dot.getAttribute('r');
     await f.locator('[data-region]').selectOption('south-asia'); await page.waitForTimeout(850);
     assert.ok(Number(await f.locator('.wm-stage').getAttribute('data-zoom')) > 2);
-    assert.equal(await f.locator('.wm-metro').count(), 93); assert.equal(await dot.getAttribute('r'), initialRadius);
+    assert.equal(await f.locator('.wm-metro').count(), 94); assert.equal(await dot.getAttribute('r'), initialRadius);
     await f.locator('[data-city]').selectOption('delhi'); assert.match(await f.locator('.wm-detail').innerText(), /Delhi/);
     const delhi = original.find(m => m.id === 'delhi'); assert.ok((await f.locator('.wm-detail').innerText()).includes('$' + delhi.gdp_usd_billion.toLocaleString('en-US') + 'B'));
     await page.screenshot({ path: path.join(root, 'docs/validation/equal-earth-south-asia.png'), fullPage: true });
     await f.locator('[data-action="world"]').click(); await page.waitForTimeout(800);
-    assert.equal(await f.locator('.wm-stage').getAttribute('data-visible-count'), '93');
+    assert.equal(await f.locator('.wm-stage').getAttribute('data-visible-count'), '94');
     const cluster = f.locator('[data-city-id="guangzhou"]'); const stage = await f.locator('.wm-stage').boundingBox();
     await page.mouse.click(stage.x + Number(await cluster.getAttribute('cx')), stage.y + Number(await cluster.getAttribute('cy')));
     assert.ok(await f.locator('.wm-candidates button').count() > 1, 'overlapping markers remain selectable');
@@ -93,7 +93,7 @@ const original = raw.filter(m => m.population >= 5_000_000 && !['manila', 'taipe
     for (const width of [352, 422, 800, 1060]) {
       await page.setViewportSize({ width, height: 1100 }); await page.waitForTimeout(100);
       assert.ok(await f.locator('.wm-app').evaluate(e => e.scrollWidth <= e.clientWidth), 'no overflow at ' + width);
-      assert.equal(await f.locator('.wm-metro').count(), 93);
+      assert.equal(await f.locator('.wm-metro').count(), 94);
       assert.ok(await f.locator('.wm-label').evaluateAll(labels => labels.every(e => parseFloat(getComputedStyle(e).fontSize) >= 12)));
     }
     checks.checks.push('narrow layouts, resize persistence, and labels remain at readable pixel sizes');

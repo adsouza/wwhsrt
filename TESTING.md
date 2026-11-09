@@ -18,7 +18,7 @@ Use the [architecture](ARCHITECTURE.md) for system boundaries, [game design veri
 | --- | --- | --- |
 | Metro inputs | Python structural checks in [data/README.md](data/README.md#reproduce-the-metro-structural-checks) | Raw hash/schema, identity/ranges, derived selection, and current 5M minimum; not accuracy of demographic estimates |
 | State/save contracts | Focused Go package under [docs/contracts](docs/contracts), [Python checker](tools/check-state-contracts.py), [results](docs/validation/state-contract-checks.json) | Compile-checked type shapes, schema/fixture coherence, numeric precision/integrity checks, SQLite transaction/retry/backup contract; not a production restore validator or Go SQL adapter |
-| Map prototype | [tools/check-map-preview.cjs](tools/check-map-preview.cjs), [results](docs/validation/map-checks.json) | Equal Earth projection, source values, 93 markers, responsive framing, region exclusions, latitude cushion, gestures, saved views, and timezone defaults |
+| Map prototype | [tools/check-map-preview.cjs](tools/check-map-preview.cjs), [results](docs/validation/map-checks.json) | Equal Earth projection, source values, playable markers (94 after Taipei's restoration; the recorded run predates it), responsive framing, region exclusions, latitude cushion, gestures, saved views, and timezone defaults |
 | Actual ebitenui renderer | [tools/ebitenui-spike/check-browser.cjs](tools/ebitenui-spike/check-browser.cjs), [results](docs/validation/ebitenui-checks.json) | Real Go/WASM widgets, selected pointer/keyboard/touch-emulated paths, layout, scrolling, reports, and high DPI |
 | Native rendering spike | Build instructions below and [spike notes](tools/ebitenui-spike/README.md) | The macOS arm64 target compiled during the recorded investigation; its window was not exercised |
 
@@ -38,7 +38,7 @@ Also inspect touched Markdown links, code examples, and claims against the ownin
 
 Run the standard-library Python block in [data/README.md](data/README.md#reproduce-the-metro-structural-checks). For catalog or camera changes, also run the map checker against a preview containing the updated embedded data. Check that the embedded catalogs/manifests match their repository records; editing a JSON file alone does not update the current HTML prototype.
 
-Keep the raw 96-record attachment unchanged. Current derived output contains 93 major metros, retains Phoenix at exactly 5M, and excludes Brasília at 4.8M as well as the Manila/Taipei scope exclusions. Camera changes must not alter source coordinates or identities. Cost changes need reconciliation of the relevant observations, units, regional assignment, and engineering/overhead arithmetic against the [cost research](docs/CONSTRUCTION_COSTS.md); a JSON parse alone is insufficient.
+Keep the raw 96-record attachment unchanged. Current derived output contains 94 major metros, retains Phoenix at exactly 5M, and excludes Brasília at 4.8M as well as the Manila scope exclusion. Camera changes must not alter source coordinates or identities. Cost changes need reconciliation of the relevant observations, units, regional assignment, and engineering/overhead arithmetic against the [cost research](docs/CONSTRUCTION_COSTS.md); a JSON parse alone is insufficient.
 
 ### State and save contracts
 
@@ -122,7 +122,7 @@ These are planned gates, not existing scripts. Add concrete commands when their 
 | Determinism | Identical command logs and versioned data yield matching canonical checkpoints across supported native targets and WebAssembly; replay/help/forecast behavior cannot affect them |
 | Multiplayer | Shared OD demand and finite capacity, public construction and private drafts, concurrent construction conflicts and reservation release, paid track rights and settlement, idempotent retries, atomic month commits, and crash recovery |
 | Diagnostics/audit | Correlated outcomes, atomic world/receipt/audit persistence, exactly-once business events after retry, redaction/export authorization, bounded queues/rotation, reproducible command histories, and unchanged checkpoints with logging disabled/verbose/failed sinks |
-| Scheduling | Injected clocks test host start, the 30-second and 15-minute month intervals, three-minute auction cutoff and next eligible settlement, explicit pause and restart, clock jumps, and bounded outage catch-up |
+| Scheduling | Injected clocks test host start, the 30-second and 15-minute month intervals, auction cutoff (the longer of three minutes and one interval) and next eligible settlement, minimum-notice conversion, explicit pause and restart, clock jumps, and bounded outage catch-up |
 | Full workflows | Construction-led and existing-track starts, disconnected networks and later joins, service/report/cash flows, auctions/open access, grants/loans, insolvency, and continuation |
 | Presentation | Shared intent behavior, draft preservation, drawing/picking agreement, text/DPI reflow, reduced motion, phone rotation/keyboard/back/resume, and meaningful semantic controls |
 | Palette/motion/audio | Light/dark contrast and color-independent states; state-grounded rail/train effects, cue deduplication, no reconnect backlog, audio unlock/background/mute handling, bounded voices/markers, and unchanged results across effect/replay preferences |

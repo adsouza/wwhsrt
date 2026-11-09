@@ -26,7 +26,7 @@ The preview shows 4,275 candidates with a mapped link as filled dots. It keeps 4
 
 The preview filters stationless track after the station review and before simplifying the linework. It keeps components within 400 m of a displayed station, separately documented passenger corridors, and nearby track reachable from either group across gaps of at most 150 m. The last rule preserves adjacent tracks and small breaks in the extract for display. It does not add track or establish a routable connection. The [overlay audit](prototypes/hsr-overlay-audit.v1.json) records the display counts, source hashes, and documented corridors.
 
-[prototypes/natural-earth-110m.countries.geojson](prototypes/natural-earth-110m.countries.geojson) contains 177 Natural Earth country geometries and names for the Equal Earth world/region mockup. Its [manifest](prototypes/natural-earth-110m.metadata.json) records the public-domain source, source/processed hashes, snapshot date, and transformation. This is overview artwork, not qualified terrain, station positions, rail topology, or production regional detail. The raw seed preserves all 96 records. The [playable catalog](prototypes/playable-metros.v1.json) retains the original values of 93 metros with populations of at least 5M, excluding Manila, Taipei, and Brasília according to the [selection policy](prototypes/playable-metro-selection.v1.json). Display names omit a trailing “Metropolitan Area” without changing source names; [validation evidence](../docs/validation/README.md) describes projection and raw-data checks.
+[prototypes/natural-earth-110m.countries.geojson](prototypes/natural-earth-110m.countries.geojson) contains 177 Natural Earth country geometries and names for the Equal Earth world/region mockup. Its [manifest](prototypes/natural-earth-110m.metadata.json) records the public-domain source, source/processed hashes, snapshot date, and transformation. This is overview artwork, not qualified terrain, station positions, rail topology, or production regional detail. The raw seed preserves all 96 records. The [playable catalog](prototypes/playable-metros.v1.json) retains the original values of 94 metros with populations of at least 5M, excluding Manila and Brasília according to the [selection policy](prototypes/playable-metro-selection.v1.json). Display names omit a trailing “Metropolitan Area” without changing source names; [validation evidence](../docs/validation/README.md) describes projection and raw-data checks.
 
 ## Major-metro seed
 
@@ -83,7 +83,7 @@ assert exceptions == metadata['strict_population_gt_5000000']['exceptions_retain
 assert sum(r['population'] > 5_000_000 for r in rows) == 94
 policy = json.loads(Path('data/prototypes/playable-metro-selection.v1.json').read_text())
 playable = json.loads(Path('data/prototypes/playable-metros.v1.json').read_text())
-assert len(playable) == policy['playable_count'] == 93
+assert len(playable) == policy['playable_count'] == 94
 assert playable == [r for r in rows if r['population'] >= policy['minimum_population']
                     and r['id'] not in policy['excluded_metro_ids']]
 assert all(r['population'] >= 5_000_000 for r in playable)

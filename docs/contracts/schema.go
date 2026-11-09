@@ -63,7 +63,7 @@ func JSONSchemaV1() ([]byte, error) {
 						p["minItems"] = 1
 						p["maxItems"] = 8
 					case "Company.Status":
-						p["enum"] = []string{"active", "restructuring", "bankrupt"}
+						p["enum"] = []string{"active", "restructuring", "bankrupt", "removed"}
 					case "Ownership.Kind":
 						p["enum"] = []string{"public", "company", "estate"}
 					case "Node.Kind":
@@ -87,7 +87,7 @@ func JSONSchemaV1() ([]byte, error) {
 					case "Auction.Status":
 						p["enum"] = []string{"listed", "sold", "unsold", "withdrawn"}
 					case "Reservation.Kind":
-						p["enum"] = []string{"construction", "auction"}
+						p["enum"] = []string{"construction", "auction", "train_order"}
 					}
 					properties[key] = p
 					required = append(required, key)

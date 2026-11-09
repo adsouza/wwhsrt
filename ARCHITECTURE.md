@@ -79,7 +79,7 @@ Publish committed project and access-offer summaries from the authoritative worl
 
 New multiplayer worlds begin in a planning lobby with a fixed opening snapshot and a host-controlled start. The server scheduler sets the first deadline one full interval after the host starts. Online months then resolve on the fixed interval chosen at world creation, including while players are absent. The proposed default is 30 real seconds. Persist the interval, deadline, phase, acknowledged plans, and resolution identity. Commit the complete month durably before publishing it. The proposed recovery policy completes an already committed operation idempotently, resolves at most one overdue month after an outage, and schedules the next deadline one interval after recovery. Qualify that policy before release. Standing services and commitments continue according to acknowledged plans. Shared-world spending requires server acknowledgment.
 
-Online auction cutoffs belong to the server host record. The server enforces the three-minute bid deadline and includes the sealed auction IDs in the durable monthly lock. The domain settles those pinned bids using the same deterministic clearing rules as offline play.
+Online auction cutoffs belong to the server host record. The server enforces the bid deadline (the longer of three real minutes and one interval) and includes the sealed auction IDs in the durable monthly lock. The domain settles those pinned bids using the same deterministic clearing rules as offline play.
 
 ## Geography and data preparation
 
@@ -98,7 +98,7 @@ Current inputs and their scope:
 | Input | Owning record |
 | --- | --- |
 | Original 96-record metro attachment and unresolved provenance | [Raw metadata](data/raw/metropolitan_areas_5m.metadata.json) |
-| Current 93 major playable metros, each at least 5M; Manila, Taipei, Brasília excluded | [Selection policy](data/prototypes/playable-metro-selection.v1.json) and [derived catalog](data/prototypes/playable-metros.v1.json) |
+| Current 94 major playable metros, each at least 5M; Manila and Brasília excluded | [Selection policy](data/prototypes/playable-metro-selection.v1.json) and [derived catalog](data/prototypes/playable-metros.v1.json) |
 | Regional names, anchors, exclusions, orientation rules, latitude cushion, timezone defaults | [Camera preset manifest](data/prototypes/map-region-presets.v1.json) |
 | Prototype country outlines | [Natural Earth manifest](data/prototypes/natural-earth-110m.metadata.json) |
 | Regional construction assumptions, observations, normalization, and engineering factors | [Cost ledger](data/costs/construction_costs.v1.json) and [research](docs/CONSTRUCTION_COSTS.md) |

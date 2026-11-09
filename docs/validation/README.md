@@ -10,6 +10,8 @@ The [Python contract checker](../../tools/check-state-contracts.py) and [results
 
 ## Equal Earth map
 
+**Catalog note (2026-11-09):** Taipei was restored to the playable catalog after the map and connection-planner checks below, giving 94 metros. That evidence still describes 93 metros. Regenerate both previews from the repository catalog and rerun their checkers before relying on it for Taipei.
+
 The interactive mockup uses D3 7.9.0's `geoEqualEarth`, a content-addressed [Natural Earth snapshot](../../data/prototypes/natural-earth-110m.metadata.json), and the [metro seed](../../data/raw/metropolitan_areas_5m.json). Natural Earth's [terms](https://www.naturalearthdata.com/about/terms-of-use/) permit public-domain reuse. The [projection reference](https://proj.org/en/stable/operations/projections/eqearth.html) describes Equal Earth's global, equal-area purpose.
 
 The raw source preserves all 96 records. The map embeds the 93 playable records with values unchanged, each at least 5M in population. Phoenix is retained at exactly 5M; Brasília (4.8M), Manila, and Taipei are excluded by the [playable selection policy](../../data/prototypes/playable-metro-selection.v1.json). Marker area is proportional to the supplied population. Selecting a metro shows its display name (without a trailing “Metropolitan Area”), country, coordinates, population, and estimated GDP. No new demographic estimates, railway inventory, prices, or station positions were inferred.
