@@ -6,8 +6,10 @@ const { chromium } = require('playwright');
 const url = process.argv[2] || 'http://127.0.0.1:8766/equal-earth-world-map-preview.html';
 const root = path.resolve(__dirname, '..');
 const raw = JSON.parse(fs.readFileSync(path.join(root, 'data/raw/metropolitan_areas_5m.json')));
+const manifest = JSON.parse(fs.readFileSync(path.join(root, 'data/prototypes/map-region-presets.v1.json')));
 const latitudeCushion = 3;
-const latitudeSouth = raw.find(m => m.id === 'melbourne').lat - latitudeCushion, latitudeNorth = raw.find(m => m.id === 'saint_petersburg').lat + latitudeCushion;
+const latitudeSouth = raw.find(m => m.id === 'melbourne').lat - latitudeCushion;
+const latitudeNorth = manifest.portrait_limits.northern_reference.lat + latitudeCushion;
 const original = raw.filter(m => m.population >= 5_000_000 && !['manila', 'taipei', 'brasilia'].includes(m.id));
 (async () => {
   const browser = await chromium.launch({ headless: true });
@@ -145,7 +147,6 @@ const original = raw.filter(m => m.population >= 5_000_000 && !['manila', 'taipe
         'south-east-asia': ['ho_chi_minh', 'singapore', 'yangon']
       }
     };
-    const manifest = JSON.parse(fs.readFileSync(path.join(root, 'data/prototypes/map-region-presets.v1.json')));
     assert.deepEqual(JSON.parse(await full.locator('#wm-region-presets').textContent()), manifest);
     assert.equal(manifest.portrait_limits.cushion_degrees, latitudeCushion);
     checks.orientationCases = [];checks.portraitFraming = [];

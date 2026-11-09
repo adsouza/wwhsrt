@@ -1,11 +1,19 @@
 {
   "schema_version": 1,
-  "revision": 10,
+  "revision": 11,
   "role": "User-defined regional camera presets for the Equal Earth map prototype",
   "orientation": "Use the game document viewport: portrait when height > width; otherwise landscape. Do not infer orientation from the map rectangle or a width breakpoint.",
   "padding_screen_px": { "horizontal": 26, "vertical": 21 },
   "legacy_aliases": { "oceania": "south-east-asia" },
-  "portrait_limits": { "southern_metro_id": "melbourne", "northern_metro_id": "saint_petersburg", "cushion_degrees": 3 },
+  "portrait_limits": {
+    "southern_metro_id": "melbourne",
+    "northern_reference": {
+      "name": "Hörnefors",
+      "lat": 63.63292,
+      "source": "https://www.openstreetmap.org/node/11428753978"
+    },
+    "cushion_degrees": 3
+  },
   "initial_views": {
     "portrait": { "id": "americas", "label": "Americas", "available_in": ["portrait"], "metro_ids": ["buenos_aires", "toronto", "san_francisco", "rio_de_janeiro"] }
   },

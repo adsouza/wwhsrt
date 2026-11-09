@@ -186,8 +186,8 @@ async function noOverflow(f, label) {
     }
     assert(await f.locator('[data-action=out]').isDisabled());
     const cap = await f.locator(stageSelector).evaluate(el => ({ limits: JSON.parse(el.dataset.limits), camera: JSON.parse(el.dataset.camera) }));
-    assert.deepEqual(cap.limits, [-40.8136, 62.9311]);
-    record('Portrait min zoom and cushioned Melbourne–Saint Petersburg latitude band', cap.limits);
+    assert.deepEqual(cap.limits, [-40.8136, 66.63292]);
+    record('Portrait min zoom and cushioned Melbourne–Hörnefors latitude band', cap.limits);
     await page.emulateMedia({ colorScheme: 'dark', reducedMotion: 'reduce' });
     await f.locator('[data-action=pair]').click(); await noOverflow(f, 'Dark reduced motion');
     await f.locator(rootSelector).screenshot({ path: path.join(evidence, 'connection-planner-dark.png') });

@@ -281,9 +281,9 @@
   ],
   "portraitLatitudeLimits": {
     "south": -40.8136,
-    "north": 62.9311,
+    "north": 66.63292,
     "cushionDegrees": 3,
-    "animationFrames": 212,
+    "animationFrames": 214,
     "violations": 0
   },
   "timezoneDefaults": [

@@ -20,7 +20,7 @@ The [interaction and UX specification](docs/UX.md) defines map-centered decision
 
 The [presentation specification](docs/PRESENTATION.md) defines the bright palette and construction/train motion and sound. The [diagnostics contract](docs/DIAGNOSTICS.md) defines pervasive event logging, durable audit history and support bundles.
 
-The [world-data notes](data/README.md) describe the supplied 96-metro seed, its population/GDP estimates, and its role alongside smaller corridor cities.
+The [world-data notes](data/README.md) describe the supplied 96-metro seed, its population and GDP estimates, and the track and station audits for the launch map. The [launch corridor shortlist](docs/LAUNCH_CORRIDORS.md) records the 70 proposed links for alignment authoring and qualification.
 
 The [construction-cost research](docs/CONSTRUCTION_COSTS.md) supports 20 regional cost profiles, with HSR benchmarks, conventional-rail extrapolations, and explicit price/scope assumptions.
 

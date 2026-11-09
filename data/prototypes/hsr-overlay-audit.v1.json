@@ -1,0 +1,264 @@
+{
+  "schema_version": 1,
+  "review_date": "2026-11-08",
+  "scope": "Spot checks of the OpenStreetMap fast-track overlay. Review commercial passenger operation before promoting a corridor into the starting network.",
+  "candidate_filter": "Open railway=rail or railway=maglev ways with highspeed=yes or a qualifying 200 km/h or 125 mph speed tag, excluding sidings, yards, spurs, crossovers and explicitly inactive or construction-tagged ways.",
+  "source_sha256": "d0462797921134130f05e77b889928b6543708313437d016125a6dc413f67958",
+  "filtered_sha256": "775efe5bf8c42a62abf81b1028fa47d98bec7a51f04df0699396ecfc0fc60e73",
+  "source_linear_ways": 155685,
+  "retained_candidate_ways": 155128,
+  "excluded_ways": 557,
+  "exclusions": [
+    {
+      "id": "gautrain",
+      "description": "Gautrain commuter and airport railway",
+      "way_count": 246,
+      "example_way_ids": [124122878, 1435659590],
+      "tag_evidence": "highspeed=yes and maxspeed=160",
+      "basis": "The Gautrain Management Agency identifies the 160 km/h service.",
+      "source": "https://gma.gautrain.co.za/news-room/Pages/20234g73.html?year=2023"
+    },
+    {
+      "id": "bangkok_airport_link",
+      "description": "Bangkok Airport Rail Link",
+      "way_count": 18,
+      "example_way_ids": [126977826, 126977827],
+      "tag_evidence": "highspeed=yes on the AERA1 SkyTrain alignment",
+      "basis": "The project profile gives a maximum design speed of 160 km/h.",
+      "source": "https://www.srtet.co.th/th/single-page/13"
+    },
+    {
+      "id": "uae_conventional_network",
+      "description": "UAE national railway",
+      "way_count": 138,
+      "example_way_ids": [1015854167, 1015854168],
+      "tag_evidence": "maxspeed=200 on the mixed-use Etihad Rail main line",
+      "basis": "Etihad Rail identifies the Abu Dhabi–Dubai high-speed project as a separate network. The extracted ways are on the national mixed-use line.",
+      "source": "https://corporate.etihadrail.ae/en/our-projects/high-speed-rail"
+    },
+    {
+      "id": "egypt_green_line",
+      "description": "Ain Sokhna section of Egypt's Green Line",
+      "way_count": 1,
+      "example_way_ids": [1211072687],
+      "tag_evidence": "railway=rail and highspeed=yes on a project section",
+      "basis": "The National Authority for Tunnels describes preparations for trials without passengers.",
+      "source": "https://www.nat.gov.eg/NewsDetails.aspx?id=1306"
+    },
+    {
+      "id": "bendigo_regional",
+      "description": "Bendigo regional approach in Melbourne",
+      "way_count": 1,
+      "example_way_ids": [290486272],
+      "tag_evidence": "highspeed=yes and maxspeed=65",
+      "basis": "Australia's dedicated HSR project starts with the future Newcastle–Sydney line.",
+      "source": "https://www.hsra.gov.au/newcastle-to-sydney"
+    },
+    {
+      "id": "speed_anomalies",
+      "description": "Implausible railway speed tags in Slovakia and Czechia",
+      "way_count": 2,
+      "example_way_ids": [1213624845, 160725219],
+      "tag_evidence": "700 km/h backward and 80 km/h forward on the Slovak way, 980 km/h on the Czech way",
+      "basis": "Exclude anomalous speed-only candidates unless supported by operating evidence.",
+      "source": "https://www.openstreetmap.org/way/1213624845"
+    },
+    {
+      "id": "nyingchi_conventional",
+      "description": "Two conventional approach fragments at Nyingchi",
+      "way_count": 2,
+      "example_way_ids": [1105106799, 1274950307],
+      "tag_evidence": "The extract retained two ways with maxspeed=200. OpenStreetMap corrected both to 160 km/h on 2026-11-03.",
+      "basis": "The Lhasa–Nyingchi railway is in service and has a design speed of 160 km/h. Neither station approach qualifies for the fast-track preview.",
+      "source": "https://english.www.gov.cn/news/202406/26/content_WS667b8830c6d0868f4e8e8950.html"
+    },
+    {
+      "id": "test_or_freight",
+      "description": "Explicit test and freight-only ways",
+      "way_count": 149,
+      "example_way_ids": [360808408, 1075766421],
+      "tag_evidence": "usage=test or railway:traffic_mode=freight/test. The Făurei test loop is tagged maxspeed=200.",
+      "basis": "Testing and freight-only capability does not establish commercial HSR passenger operation.",
+      "source": "https://www.afer.ro/arhiva_buletin_afer/buletin%20afer%202013%20N1.pdf"
+    }
+  ],
+  "qualification_reference": "https://uic.org/activities/high-speed-data-and-atlas",
+  "stationless_filter": {
+    "source_sha256": "775efe5bf8c42a62abf81b1028fa47d98bec7a51f04df0699396ecfc0fc60e73",
+    "display_sha256": "141487d36a81adee62ece668346e09ff66af2c5cd810e80611fc7324c8838a4f",
+    "station_association_m": 400,
+    "nearby_track_m": 150,
+    "input_components": 1189,
+    "components_with_displayed_station": 602,
+    "retained_by_station_track_proximity": 132,
+    "retained_by_documented_corridor_or_nearby_track": 37,
+    "removed_components": 418,
+    "removed_ways": 3562,
+    "display_ways": 151566,
+    "documented_corridors": [
+      {
+        "name": "Tanger–Kénitra LGV",
+        "anchor_way_ids": [
+          1041746755,
+          1000032487
+        ],
+        "source": "https://www.oncf.ma/fr/content/download/108220/2523753/file/Recueil%20Statistiques%20%C3%A9dition%202024%20VF.pdf"
+      },
+      {
+        "name": "Turin–Milan high-speed line",
+        "anchor_way_ids": [
+          105078028,
+          105064030
+        ],
+        "source": "https://www.rfi.it/it/news-e-media/infomobilita/avvisi/2026/9/15/linee-salerno---torino--perugia---torino--venezia---torino--lecc.html"
+      },
+      {
+        "name": "Plasencia–Cáceres–Mérida–Badajoz high-speed line",
+        "anchor_way_ids": [
+          1009336308
+        ],
+        "source": "https://www.adifaltavelocidad.es/financiacion-europea/2021-2027/lav-extremadura"
+      },
+      {
+        "name": "Belgian LGV2",
+        "anchor_way_ids": [
+          1059973606,
+          100262381
+        ],
+        "source": "https://infrabel.be/fr/lgv2-2026"
+      },
+      {
+        "name": "Copenhagen–Ringsted high-speed line",
+        "anchor_way_ids": [
+          1163112246,
+          1163112247
+        ],
+        "source": "https://www.banedanmark.dk/Borger/Baneprojekter/Om-Den-nye-bane"
+      },
+      {
+        "name": "Gotthard Base Tunnel",
+        "anchor_way_ids": [
+          1556438981,
+          1556438982
+        ],
+        "source": "https://news.sbb.ch/en/019d7b76-dea8-7bc7-a9d2-8b70f60dc7b9/gotthard-base-tunnel-passenger-information"
+      },
+      {
+        "name": "Lötschberg Base Tunnel",
+        "anchor_way_ids": [
+          1189555554
+        ],
+        "source": "https://www.bls.ch/en/unternehmen/drittkunden/netzzugang/networkstatement"
+      },
+      {
+        "name": "Rothrist–Mattstetten high-speed line",
+        "anchor_way_ids": [
+          1223550784
+        ],
+        "source": "https://company.sbb.ch/de/bahnentwicklung/projekte/deutschschweiz/aargau-solothurn/bahn-2000-strecke.html"
+      },
+      {
+        "name": "HSL-Zuid north of Rotterdam",
+        "anchor_way_ids": [
+          1533953385
+        ],
+        "source": "https://www.ns.nl/over-ns/trein-en-sporen/hogesnelheidslijn"
+      },
+      {
+        "name": "East Coast Main Line sections north of Peterborough and Doncaster",
+        "anchor_way_ids": [
+          1305333396,
+          2162114
+        ],
+        "source": "https://www.networkrail.co.uk/our-work/our-routes/east-coast/"
+      },
+      {
+        "name": "Tampere–Parkano–Seinäjoki",
+        "anchor_way_ids": [
+          111211185
+        ],
+        "source": "https://www.vr.fi/en/on-track/railway-station-area-renovation"
+      },
+      {
+        "name": "Botniabanan",
+        "anchor_way_ids": [
+          1002618426
+        ],
+        "source": "https://bransch.trafikverket.se/for-dig-i-branschen/teknik/ett-nytt-digitalt-signalsystem-for-jarnvagen/tidiga-anlaggningar/pilotbanor-ertms/"
+      },
+      {
+        "name": "West Coast Line near Falkenberg",
+        "anchor_way_ids": [
+          1097822628,
+          1097822627
+        ],
+        "source": "https://www.trafikverket.se/resa-och-trafik/jarnvag/Sveriges-jarnvagsnat/Vastkustbanan/"
+      },
+      {
+        "name": "Follo Line (Oslo–Ski)",
+        "anchor_way_ids": [
+          233263914
+        ],
+        "source": "https://www.banenor.no/nyheter-og-aktuelt/hendelser/follobanen-i-2022/follobanen-er-apen-reisetiden-mellom-ski-og-oslo-er-halvert/"
+      },
+      {
+        "name": "Linha do Sul near Grândola",
+        "anchor_way_ids": [
+          117425397
+        ],
+        "source": "https://www.cp.pt/info/documents/d/cp/comboio-porto-lisboa-faro-lagos-v-r-s-antonio"
+      },
+      {
+        "name": "Kouvola–Luumäki",
+        "anchor_way_ids": [
+          1158149927,
+          102880991
+        ],
+        "source": "https://www.sweco.fi/en/projects/reliability-of-the-kouvola-luumaki-railway-improves/"
+      },
+      {
+        "name": "Antequera–Granada high-speed line",
+        "anchor_way_ids": [
+          209518652
+        ],
+        "source": "https://www.adifaltavelocidad.es/sobre-adif-av/red-av/antequera-granada"
+      },
+      {
+        "name": "Farriseidet–Porsgrunn",
+        "anchor_way_ids": [
+          109158391
+        ],
+        "source": "https://www.banenor.no/contentassets/203eca03f68348019f09d6f3e570ea6a/arsrapport-2018-bane-nor-sf.pdf"
+      },
+      {
+        "name": "Mälarbanan east of Örebro",
+        "anchor_way_ids": [
+          201210756
+        ],
+        "source": "https://www.trafikverket.se/resa-och-trafik/jarnvag/Sveriges-jarnvagsnat/Malarbanan/"
+      },
+      {
+        "name": "Belgian LGV3 near Chênée",
+        "anchor_way_ids": [
+          28750699
+        ],
+        "source": "https://www.tassignon.be/trains/PDF/CONNECT%2046.pdf"
+      },
+      {
+        "name": "Great Western Main Line west of Swindon",
+        "anchor_way_ids": [
+          27259839,
+          211245967
+        ],
+        "source": "https://www.networkrail.co.uk/wp-content/uploads/2019/06/Route-Strategic-Plan-Western.pdf"
+      },
+      {
+        "name": "Brightline Orlando–Cocoa",
+        "anchor_way_ids": [
+          586717065
+        ],
+        "source": "https://www.gobrightline.com/press-room/2023/brightline-130-mph-milestone"
+      }
+    ]
+  }
+}

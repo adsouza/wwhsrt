@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "base_presets": "map-region-presets.v1.json",
+  "base_revision": 11,
+  "role": "Camera overrides for the launch corridor and existing rail map",
+  "additional_anchors": [
+    {
+      "id": "quebec_city",
+      "name": "Québec City",
+      "lat": 46.81228,
+      "lng": -71.21454,
+      "source": "https://www.geonames.org/6325494/"
+    },
+    {
+      "id": "lisbon",
+      "name": "Lisbon",
+      "lat": 38.72509,
+      "lng": -9.1498,
+      "source": "https://www.geonames.org/2267057/"
+    },
+    {
+      "id": "brisbane",
+      "name": "Brisbane",
+      "lat": -27.46794,
+      "lng": 153.02809,
+      "source": "https://www.geonames.org/2174003/"
+    }
+  ],
+  "region_overrides": [
+    {
+      "id": "europe",
+      "landscape": {
+        "metro_ids": ["moscow", "lisbon"],
+        "station_ids": ["node/11428753978", "node/260383905"]
+      },
+      "portrait": {
+        "fit": "metro-points",
+        "metro_ids": ["lisbon", "milan", "randstad"],
+        "station_ids": ["node/11428753978", "node/260383905"]
+      }
+    },
+    {
+      "id": "north-america",
+      "metro_ids": ["quebec_city", "mexico_city", "san_francisco"]
+    },
+    {
+      "id": "south-east-asia",
+      "portrait": { "metro_ids": ["ho_chi_minh", "singapore", "yangon", "surabaya"] }
+    }
+  ],
+  "additional_regions": [
+    {
+      "id": "australia",
+      "label": "Australia",
+      "available_in": ["landscape"],
+      "metro_ids": ["melbourne", "brisbane"]
+    },
+    {
+      "id": "uzbekistan",
+      "label": "Uzbekistan",
+      "available_in": ["landscape"],
+      "station_ids": ["node/9104373406", "node/8328285677", "node/2279305298", "node/2204812766"]
+    }
+  ]
+}
