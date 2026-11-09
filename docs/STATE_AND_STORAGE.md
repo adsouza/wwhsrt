@@ -34,8 +34,9 @@ The complete field shapes are in [state.go](contracts/state.go); this table stat
 | --- | --- |
 | `Company` | Ownership identity, status, home market, opening cash and current cash; optional restructuring deadline |
 | `Node`, `Station`, `StationAccess` | Explicit station/junction topology, immutable geometry reference, station capacity/book value/owner, and company-specific access terms; visual crossings do not create junctions |
-| `TrackSection` | Directed endpoint definition, referenced alignment/engineering/class, status, speed/capacity, ownership/access, and book value; both travel directions use explicit traversal direction |
-| `Project` | Accepted geometry/targets, committed cost, start/ready month, status, and ordered paid/unpaid installments; completion changes eligibility at the next monthly boundary |
+| `TrackSection`, `TrackAccessOffer` | Referenced alignment and engineering, operational status, capacity, ownership, base access policy, and optional posted fee and offer revision |
+| `TrackAccessAgreement` | Section, owner and operator IDs, accepted fee per train-kilometre, effective month, and optional first ineligible month. Separate station access still applies. |
+| `Project` | Geometry and targets, cost, start and ready months, status, and ordered installments. Pending multiplayer requests retain the reviewed competition fingerprint and protected funds. |
 | `Trainset`, `TrainOrder`, `Lease` | Ownership, model/location/readiness, book value, pending deliveries and payment obligations; a trainset cannot be assigned to disconnected services simultaneously |
 | `ServiceSpec` | Ordered section traversals and called stops, assigned trainsets, desired daily return pairs, fare, and suspension; passing nodes do not automatically become stops |
 | `CompanyPlan` | Private, complete desired service set for a named effective month, its own revision, and acknowledged standing safeguards |
@@ -45,6 +46,10 @@ The complete field shapes are in [state.go](contracts/state.go); this table stat
 | `MonthReport`, `OperatingDay` | Compact resolved financial/service results and latest replay timings; train positions at every animation frame are not saved |
 
 Ownership is `public`, `company`, or `estate`, with a company ID for the latter two. Public/acquired legacy sections retain regulated open access. A bankrupt owner's regulated lines use the public caretaker rule without deleting the estate's ownership/liability record.
+
+The base policy `owner_only` can be supplemented by explicit agreements. An offer revision identifies a specific publication and advances when the owner republishes terms. Accept a multi-section offer atomically and pin the accepted fees independently of later offers. Validate that every section and owner matches, the requester is eligible, and rights for the same section and operator have disjoint effective periods. A section with an accepted right participates in shared allocation while the right applies.
+
+Pending construction requests and their reservations are authoritative private state. Only committed or building projects enter the public construction frame. Derive the unordered pair from catalog endpoints. Check physical conflicts using catalog section identities and authored conflict groups. The competition fingerprint pins the published line and project identities reviewed by the player. Acceptance publishes the project and keeps its reservation. Rejection releases the reservation and returns the competing project to the requester.
 
 `world.services` is the committed standing configuration carried from the last resolution. `world.plans` holds the latest acknowledged desired configurations for the current planning month; it does not overwrite published delivered service prematurely. Delivered frequency, ridership, and time belong to the resolved month's report. At resolution, freeze acknowledged plans, allocate service, publish results, and carry the accepted configuration forward. Unsubmitted client drafts never enter either collection.
 
@@ -82,7 +87,7 @@ Encode money, passenger/distance totals, seed, ID counters and revisions as **ca
 
 Canonical state hashing is distinct from the file checksum: map the world to the canonical `PayloadV1`, encode with the pinned codec and fixed struct-field order, then SHA-256 the bytes. Exclude envelope creation time, host schedule, session/receipt data, UI state and caches. Include rule identities, accepted plans, counters, and authoritative financial state. Compare hashes only under the same codec and rule versions.
 
-Sort entity sets by ID; plans by company; station access by station/company; concessions by company/jurisdiction/terms; reports chronologically and their company/service rows by ID; cash entries by sequence. Sort set-like trainset/target IDs. Preserve meaningful path, stop, installment, replay-leg, departure, and RNG-word order. Reject duplicate IDs and noncanonical ordering during qualification. Go map iteration and incidental JSON library defaults are not the ordering contract.
+Sort entity sets by ID, plans by company, station access by station and company, and track agreements by section, operator, and effective month. Sort concessions by company, jurisdiction, and terms. Sort reports chronologically and their company and service rows by ID. Sort cash entries by sequence and set-like trainset and target IDs. Preserve meaningful path, stop, installment, replay-leg, departure, and RNG-word order. Reject duplicate IDs and noncanonical ordering during qualification.
 
 Keep compact monthly reports/cash history for the configured campaign length (default 360 months), and replay detail for the latest resolved month only. The initial uncompressed save limit is **128 MiB**, with maximum nesting 64. Do not silently truncate records to fit. Qualify these limits against the proposed stress world; increasing a resource limit is a coordinated reader/writer change, not a data migration by itself.
 
@@ -146,7 +151,11 @@ Retain operation receipts while the world exists, including old months; an offli
 
 ### Monthly lock, commit and recovery
 
-`ServerHostV1` stores a separate schema version, scheduler policy, phase (`accepting`, `locked`, `paused`, `ended`), interval, UTC deadline, schedule revision, and optional locked resolution. Default interval is 900 seconds. A locked resolution pins its business month, payload checksum/state revision and each company plan revision.
+`ServerHostV1` stores a separate schema version, scheduler policy, phase (`planning`, `accepting`, `locked`, `paused`, `ended`), interval, UTC deadline, schedule revision, and optional locked resolution. The proposed default for a new world is 30 seconds. Resumed worlds use their stored interval. A locked resolution pins its business month, payload checksum/state revision and each company plan revision.
+
+In `planning`, the opening world is available for read-only queries and the next deadline is null. Players can keep private drafts in client storage. A host start operation changes the phase to `accepting` and commits the first deadline one full interval after start, together with its receipt. Retrying start returns the same receipt and deadline. Convert the restructuring response minimum to whole game months at world creation and pin it with the world's balance inputs.
+
+For each online auction, persist the cutoff in host state when publishing the listing. Reject new or revised bids and withdrawals received at or after the cutoff using server time. Persist the seal and honor it after restart. An explicit host pause records the remaining time for open auctions. Resume restores that time. A locked resolution pins the sorted IDs of sealed auctions whose cutoff falls at or before that resolution's deadline. The domain settles those auctions from the pinned inputs, so replay uses the same bids and selection. The domain's `Auction.Closes` drives offline closure and represents the expected settlement month online. Persist the chosen auction IDs as part of the canonical lock request.
 
 At the deadline, the world coordinator durably records `locked` before computing. Reject new commands for that closed planning window; callers refresh/retry with the next month after commit. Compute the month from the pinned snapshot in scratch state. Commit the next world, next deadline, accepting/ended phase, and the system resolution receipt atomically. Only then publish results. A crash before commit recomputes from the unchanged locked snapshot; a crash after commit returns the recorded resolution. Neither case advances twice.
 
@@ -154,7 +163,7 @@ Normal deadlines stay on the fixed schedule (`previous deadline + interval`). Re
 
 Use SQLite's [backup API or VACUUM INTO](https://sqlite.org/backup.html) for a live consistent database backup, or close the server before copying its database. Back up the whole database and pinned data bundles; a lone world JSON would omit the receipts needed for recovery. A valid SQLite rollback journal must not be manually discarded. Corruption/checksum failures quarantine the affected world for explicit recovery rather than automatically rewinding an acknowledged game.
 
-An admin portable game export contains the save envelope, not host/session/receipt data. Importing it creates a **new world ID**, fresh schedule and new admission credentials. It cannot overwrite a running multiplayer world. A player-facing cache/frame is never accepted as a whole-world save.
+An admin portable game export contains the save envelope. Import creates a **new world ID**, schedule and admission credentials. For listed auctions carried into a new multiplayer world, disclose that they receive a fresh three-minute bidding window when the host starts. Preserve existing bids and reservations. Only validated whole-world saves can be imported.
 
 ## 5. Migrations
 

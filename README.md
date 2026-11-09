@@ -6,7 +6,9 @@ Build independent lines between unserved cities, expand existing railways, or jo
 
 Real geography shapes expansion: compare longer valley routes with expensive mountain works, tunnels, and bridges, balancing construction time and upkeep against journey speed.
 
-Single-player runs offline. Optional multiplayer connects competing companies to a private dedicated server that advances one business month every 15 real minutes. Existing public lines can be acquired through reserve-price auctions while retaining regulated open access.
+Single-player runs offline. Optional multiplayer connects competing companies to a private dedicated server. Players prepare in a planning lobby before the host starts the clock. The proposed default is 30 seconds per business month for a three-hour campaign, with a fixed interval chosen at world creation. Existing public lines can be acquired through reserve-price auctions while retaining regulated open access.
+
+Committed construction is visible to every company. Owners can offer paid track access on new private lines. Online auctions give players three real minutes to bid.
 
 The [game design specification](docs/DESIGN.md) records the current design, confirmed choices, proposed rules, and delivery milestones. The repository is at the specification stage, with isolated map and widget feasibility prototypes.
 

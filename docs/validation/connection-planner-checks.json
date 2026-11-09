@@ -1,0 +1,84 @@
+{
+  "passed": true,
+  "prototypeOnly": true,
+  "browser": "153.0.8010.12",
+  "checks": [
+    {
+      "name": "Fixture units, revenue arithmetic, directional capacity and exact endpoint coordinates",
+      "detail": true
+    },
+    {
+      "name": "93 named/map metros, initial distinct endpoints and consistent opening quote",
+      "detail": true
+    },
+    {
+      "name": "Duplicate endpoint rejection, order-independent quote, atomic alignment/estimate update",
+      "detail": true
+    },
+    {
+      "name": "Iframe full-screen fallback, alignment switching while expanded, Escape and draft/scale preservation",
+      "detail": true
+    },
+    {
+      "name": "Read-only funding review, explicit fleet cost/gap, disabled commitment and local-only draft",
+      "detail": true
+    },
+    {
+      "name": "Missing alignment coverage, clear endpoint, immediate stale-value removal and latest-pair-only async results",
+      "detail": true
+    },
+    {
+      "name": "Independent unserved-pair planning and clearly negative operating contribution",
+      "detail": true
+    },
+    {
+      "name": "Map marker selection and drag pan preserving endpoint identities",
+      "detail": true
+    },
+    {
+      "name": "Overlapping markers require named disambiguation before assignment",
+      "detail": true
+    },
+    {
+      "name": "Host state restore without camera/default resets or committed operations",
+      "detail": true
+    },
+    {
+      "name": "Normal/expanded layouts fit 320, 390, 768 and 1280px, with portrait World removed",
+      "detail": true
+    },
+    {
+      "name": "Portrait min zoom and cushioned Melbourne–Saint Petersburg latitude band",
+      "detail": [
+        -40.8136,
+        62.9311
+      ]
+    },
+    {
+      "name": "Dark appearance and reduced-motion layout",
+      "detail": true
+    },
+    {
+      "name": "Native browser full-screen entry, viewport fit and system exit synchronizing map focus",
+      "detail": {
+        "h": 1000,
+        "scroll": 1000,
+        "window": 1000
+      }
+    },
+    {
+      "name": "390×844 full-screen phone keeps map, endpoint controls, alignment and financial review in viewport",
+      "detail": {
+        "h": 844,
+        "scroll": 844,
+        "stage": 319,
+        "window": 844
+      }
+    }
+  ],
+  "limitations": [
+    "Illustrative alignments and financials, not route engineering or economic calibration",
+    "Browser checks, not Ebitengine implementation or physical-phone qualification",
+    "Static CDN import does not establish offline cold launch"
+  ]
+}

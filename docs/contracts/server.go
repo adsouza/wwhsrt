@@ -7,13 +7,21 @@ import (
 
 // ServerHostV1 is operational state, excluded from portable saves and game hashes.
 type ServerHostV1 struct {
-	SchemaVersion    uint16            `json:"schema_version"`
-	SchedulerPolicy  string            `json:"scheduler_policy"`
-	Phase            string            `json:"phase"` // accepting, locked, paused, ended
-	IntervalSeconds  uint32            `json:"interval_seconds"`
-	NextDeadlineUTC  *string           `json:"next_deadline_utc"`
-	ScheduleRevision uint64            `json:"schedule_revision,string"`
-	Resolution       *LockedResolution `json:"resolution"`
+	SchemaVersion    uint16                `json:"schema_version"`
+	SchedulerPolicy  string                `json:"scheduler_policy"`
+	Phase            string                `json:"phase"` // planning, accepting, locked, paused, ended
+	IntervalSeconds  uint32                `json:"interval_seconds"`
+	NextDeadlineUTC  *string               `json:"next_deadline_utc"`
+	ScheduleRevision uint64                `json:"schedule_revision,string"`
+	AuctionWindows   []OnlineAuctionWindow `json:"auction_windows"`
+	Resolution       *LockedResolution     `json:"resolution"`
+}
+
+type OnlineAuctionWindow struct {
+	AuctionID       AuctionID `json:"auction_id"`
+	CutoffUTC       *string   `json:"cutoff_utc"`
+	RemainingMillis *uint32   `json:"remaining_millis"` // Set during explicit host pause.
+	Sealed          bool      `json:"sealed"`
 }
 
 type LockedResolution struct {
@@ -22,6 +30,7 @@ type LockedResolution struct {
 	LockedStateRevision uint64       `json:"locked_state_revision,string"`
 	LockedPayloadSHA256 string       `json:"locked_payload_sha256"`
 	Plans               []LockedPlan `json:"plans"`
+	SealedAuctionIDs    []AuctionID  `json:"sealed_auction_ids"`
 }
 
 type LockedPlan struct {

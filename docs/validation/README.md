@@ -35,6 +35,17 @@ The current map preview applies [cheerful-rail-v1](../../data/ui/theme.v1.json).
 
 The 1:110m geometry is an overview demonstration, not qualified terrain, railway alignment, urban detail, or production regional-zoom geometry. Metro estimates and CRS retain the qualification gaps in the raw-data manifest.
 
+## Two-endpoint connection planning
+
+The connection-planner preview adds editable A/B endpoint slots, map and named selection, clearing either endpoint, candidate alignment comparison, a persistent cost/revenue/operating-contribution strip, expanded-map controls, and a separate funding review. It uses the same 93 metro records and Natural Earth Equal Earth basemap. [Fixture data](../../data/prototypes/connection-planner-demo.v1.json) provides only illustrative Delhi–Mumbai and Lagos–Kinshasa alternatives and forecasts; other pairs report missing authored coverage. These polylines and prices do not qualify real-world alignments or validate the economic engine.
+
+The [focused checker](../../tools/check-connection-planner.cjs) and [results](connection-planner-checks.json) cover distinct endpoints, replacement and clearing, order-independent estimates, direct marker selection, drag versus selection, crowded-marker disambiguation, absent route coverage, estimate invalidation/late responses, negative operating contribution, local draft restoration, alignment changes while expanded, and separate noncommitting funding review. Checks cover 320/390/768/1280px layouts, dark/reduced-motion appearance, portrait zoom floor, iframe full-screen fallback, native browser full-screen and system exit. The full-screen phone case fits the map, endpoints, alignment switcher and financial strip inside 390×844. This is browser prototype evidence, not implementation or qualification of Ebitengine/native mobile full-screen, safe areas, physical keyboards/Back gestures, or semantic accessibility. The full regional/timezone checks remain owned by the metro-map checker above.
+
+- [Desktop connection planner](connection-planner-desktop.png)
+- [Phone connection planner](connection-planner-phone.png)
+- [Expanded-map phone layout](connection-planner-phone-expanded.png)
+- [Phone browser full-screen](connection-planner-phone-fullscreen.png)
+
 ## Actual ebitenui rendering
 
 The [isolated Go spike](../../tools/ebitenui-spike/README.md) executes **ebitenui 0.7.3 / Ebitengine 2.10.5**. Go **1.27.1**, macOS arm64, Chromium **153.0.8010.12**. The native macOS binary compiled; interaction checks executed the WebAssembly build with real library widgets.

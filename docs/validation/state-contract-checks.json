@@ -1,9 +1,9 @@
 {
-  "date": "2026-11-08",
+  "date": "2026-11-09",
   "scope": "Reference JSON schema and SQLite transaction contract via Python sqlite3; not the production Go adapter or domain restore validator",
   "sqliteVersion": "3.45.3",
   "jsonschemaVersion": "4.23.0",
-  "schemaSHA256": "1dbe278f3b5e94cedb2e2d633ced5a9dac2a2abf4309868cebf515f6b6b0e3b0",
+  "schemaSHA256": "5eb18450db41390b8c2e6378338ac2001c57d41f3e88c740af74afe2e6d4a0ce",
   "sqlSHA256": "cab0794ddb823034589da3b2b4f0da294555bf53380a61246667619883bb833c",
   "checks": [
     "generated JSON schema/example and fixture bundle hashes",

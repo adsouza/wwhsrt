@@ -71,7 +71,8 @@ def main():
     world_id = payload["world"]["id"]
     host = {"schema_version": 1, "scheduler_policy": "fixed-interval-bounded-recovery-v1",
             "phase": "accepting", "interval_seconds": 900,
-            "next_deadline_utc": "2026-11-08T00:15:00Z", "schedule_revision": "0", "resolution": None}
+            "next_deadline_utc": "2026-11-08T00:15:00Z", "schedule_revision": "0",
+            "auction_windows": [], "resolution": None}
     now = "2026-11-08T00:00:00Z"
     checks = ["generated JSON schema/example and fixture bundle hashes",
               "missing/unknown fields, null arrays, month bounds, wide-number syntax, future version"]
@@ -171,7 +172,8 @@ def main():
         locked["phase"] = "locked"
         locked["resolution"] = {"id": "resolve_2025_01", "month": {"year": 2025, "month": 1},
                                 "locked_state_revision": "1", "locked_payload_sha256": json.loads(encode(changed_payload))["payload_sha256"],
-                                "plans": [{"company_id": "co_player", "revision": "1"}]}
+                                "plans": [{"company_id": "co_player", "revision": "1"}],
+                                "sealed_auction_ids": []}
         assert commit(2, changed_payload, locked, "system", "lock:2025-01", digest(b"lock 2025-01"), {"locked": True})[0] == 3
         next_payload = copy.deepcopy(changed_payload)
         next_payload["state_revision"] = "2"

@@ -42,6 +42,7 @@ type World struct {
 	nodes           map[NodeID]Node
 	stations        map[StationID]Station
 	stationAccess   []StationAccess
+	trackAccess     []TrackAccessAgreement
 	sections        map[SectionID]TrackSection
 	projects        map[ProjectID]Project
 	trainsets       map[TrainsetID]Trainset
@@ -90,34 +91,35 @@ type PayloadV1 struct {
 }
 
 type WorldV1 struct {
-	ID              WorldID         `json:"id"`
-	Month           GameMonth       `json:"month"`
-	CampaignMonths  uint16          `json:"campaign_months"`
-	StartMonth      GameMonth       `json:"start_month"`
-	Seed            uint64          `json:"seed,string"`
-	NextID          uint64          `json:"next_id,string"`
-	NetworkRevision uint64          `json:"network_revision,string"`
-	Companies       []Company       `json:"companies"`
-	Nodes           []Node          `json:"nodes"`
-	Stations        []Station       `json:"stations"`
-	StationAccess   []StationAccess `json:"station_access"`
-	Sections        []TrackSection  `json:"sections"`
-	Projects        []Project       `json:"projects"`
-	Trainsets       []Trainset      `json:"trainsets"`
-	Orders          []TrainOrder    `json:"orders"`
-	Services        []ServiceSpec   `json:"services"`
-	Plans           []CompanyPlan   `json:"plans"`
-	Loans           []Loan          `json:"loans"`
-	Leases          []Lease         `json:"leases"`
-	Grants          []Grant         `json:"grants"`
-	Concessions     []Concession    `json:"concessions"`
-	Auctions        []Auction       `json:"auctions"`
-	Bids            []Bid           `json:"bids"`
-	Reservations    []Reservation   `json:"reservations"`
-	CashJournal     []CashEntry     `json:"cash_journal"`
-	Reports         []MonthReport   `json:"reports"`
-	LatestReplay    *OperatingDay   `json:"latest_replay"`
-	RNGState        *RNGState       `json:"rng_state"`
+	ID              WorldID                `json:"id"`
+	Month           GameMonth              `json:"month"`
+	CampaignMonths  uint16                 `json:"campaign_months"`
+	StartMonth      GameMonth              `json:"start_month"`
+	Seed            uint64                 `json:"seed,string"`
+	NextID          uint64                 `json:"next_id,string"`
+	NetworkRevision uint64                 `json:"network_revision,string"`
+	Companies       []Company              `json:"companies"`
+	Nodes           []Node                 `json:"nodes"`
+	Stations        []Station              `json:"stations"`
+	StationAccess   []StationAccess        `json:"station_access"`
+	TrackAccess     []TrackAccessAgreement `json:"track_access"`
+	Sections        []TrackSection         `json:"sections"`
+	Projects        []Project              `json:"projects"`
+	Trainsets       []Trainset             `json:"trainsets"`
+	Orders          []TrainOrder           `json:"orders"`
+	Services        []ServiceSpec          `json:"services"`
+	Plans           []CompanyPlan          `json:"plans"`
+	Loans           []Loan                 `json:"loans"`
+	Leases          []Lease                `json:"leases"`
+	Grants          []Grant                `json:"grants"`
+	Concessions     []Concession           `json:"concessions"`
+	Auctions        []Auction              `json:"auctions"`
+	Bids            []Bid                  `json:"bids"`
+	Reservations    []Reservation          `json:"reservations"`
+	CashJournal     []CashEntry            `json:"cash_journal"`
+	Reports         []MonthReport          `json:"reports"`
+	LatestReplay    *OperatingDay          `json:"latest_replay"`
+	RNGState        *RNGState              `json:"rng_state"`
 }
 
 type Company struct {
@@ -157,19 +159,34 @@ type StationAccess struct {
 	TermsRef  string    `json:"terms_ref"`
 }
 
+type TrackAccessOffer struct {
+	Revision      uint64 `json:"revision,string"`
+	FeePerTrainKM Money  `json:"fee_per_train_km,string"`
+}
+
+type TrackAccessAgreement struct {
+	SectionID     SectionID  `json:"section_id"`
+	OwnerID       CompanyID  `json:"owner_id"`
+	OperatorID    CompanyID  `json:"operator_id"`
+	FeePerTrainKM Money      `json:"fee_per_train_km,string"`
+	Effective     GameMonth  `json:"effective"`
+	Ends          *GameMonth `json:"ends"` // First month without access.
+}
+
 type TrackSection struct {
-	ID                SectionID `json:"id"`
-	From              NodeID    `json:"from"`
-	To                NodeID    `json:"to"`
-	AlignmentRef      string    `json:"alignment_ref"`
-	EngineeringRef    string    `json:"engineering_ref"`
-	TrackClassRef     string    `json:"track_class_ref"`
-	Owner             Ownership `json:"owner"`
-	Access            string    `json:"access"` // regulated_open, owner_only
-	Status            string    `json:"status"` // construction, operational, closed
-	SpeedLimitKPH     uint16    `json:"speed_limit_kph"`
-	ReturnPairsPerDay uint32    `json:"return_pairs_per_day"`
-	BookValue         Money     `json:"book_value,string"`
+	ID                SectionID         `json:"id"`
+	From              NodeID            `json:"from"`
+	To                NodeID            `json:"to"`
+	AlignmentRef      string            `json:"alignment_ref"`
+	EngineeringRef    string            `json:"engineering_ref"`
+	TrackClassRef     string            `json:"track_class_ref"`
+	Owner             Ownership         `json:"owner"`
+	Access            string            `json:"access"` // regulated_open, owner_only
+	PaidAccessOffer   *TrackAccessOffer `json:"paid_access_offer"`
+	Status            string            `json:"status"` // construction, operational, closed
+	SpeedLimitKPH     uint16            `json:"speed_limit_kph"`
+	ReturnPairsPerDay uint32            `json:"return_pairs_per_day"`
+	BookValue         Money             `json:"book_value,string"`
 }
 
 type Installment struct {
@@ -179,17 +196,18 @@ type Installment struct {
 }
 
 type Project struct {
-	ID           ProjectID     `json:"id"`
-	CompanyID    CompanyID     `json:"company_id"`
-	Kind         string        `json:"kind"` // new_line, alignment_upgrade, station_upgrade
-	AlignmentRef string        `json:"alignment_ref"`
-	SectionIDs   []SectionID   `json:"section_ids"`
-	StationIDs   []StationID   `json:"station_ids"`
-	Started      GameMonth     `json:"started"`
-	Ready        GameMonth     `json:"ready"`
-	Status       string        `json:"status"` // committed, building, completed, cancelled
-	TotalCost    Money         `json:"total_cost,string"`
-	Installments []Installment `json:"installments"`
+	ID             ProjectID     `json:"id"`
+	CompanyID      CompanyID     `json:"company_id"`
+	Kind           string        `json:"kind"` // new_line, alignment_upgrade, station_upgrade
+	AlignmentRef   string        `json:"alignment_ref"`
+	SectionIDs     []SectionID   `json:"section_ids"`
+	StationIDs     []StationID   `json:"station_ids"`
+	Started        GameMonth     `json:"started"`
+	Ready          GameMonth     `json:"ready"`
+	Status         string        `json:"status"`          // pending, committed, building, completed, cancelled
+	CompetitionRef *string       `json:"competition_ref"` // Reviewed competition for a pending request.
+	TotalCost      Money         `json:"total_cost,string"`
+	Installments   []Installment `json:"installments"`
 }
 
 type Trainset struct {
@@ -288,7 +306,7 @@ type Auction struct {
 	ID           AuctionID   `json:"id"`
 	SectionIDs   []SectionID `json:"section_ids"`
 	ReservePrice Money       `json:"reserve_price,string"`
-	Closes       GameMonth   `json:"closes"`
+	Closes       GameMonth   `json:"closes"` // Offline cutoff or expected online settlement.
 	Status       string      `json:"status"` // listed, sold, unsold, withdrawn
 	Winner       *CompanyID  `json:"winner"`
 	SalePrice    *Money      `json:"sale_price,string"`

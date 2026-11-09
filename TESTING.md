@@ -77,6 +77,16 @@ The checker exercises both the wrapper iframe and the original fragment, writes 
 
 Check region visibility and anchors in both orientations, Dhaka/Karachi camera exclusions, the hidden portrait initial views, absent portrait World button, manual zoom and the 3° latitude cushion, saved-camera precedence, and UTC+05:30's Dhaka-edge tie-break. The owning values are in the [preset manifest](data/prototypes/map-region-presets.v1.json), not this document. Stop the local HTTP server when finished.
 
+### Connection-planning preview
+
+The separate two-endpoint preview uses `connection-planner.html` and its generated `connection-planner-preview.html` wrapper in the same chat-owned directory. Serve that directory as above, regenerate the wrapper when the source changes, then run only its focused checks:
+
+```sh
+NODE_OPTIONS=--max-old-space-size=1536 node tools/check-connection-planner.cjs http://127.0.0.1:8766/connection-planner-preview.html
+```
+
+This checks the A/B selection state machine, marker selection and drag separation, dense-marker choices, stale estimate suppression, authored-route absence, alignment changes, funding review, draft restore, expanded-map fallback, native browser full-screen, and narrow layouts. It also checks fixture arithmetic/endpoint coordinates and records screenshots plus `docs/validation/connection-planner-checks.json`. The illustrative route and forecast fixtures do not validate real-world engineering or simulation results. Actual Ebitengine full-screen, physical-device Back/safe areas/software keyboards, and accessibility remain implementation gates. This prototype shares the region manifest but does not replace the full regional/timezone checker above.
+
 ### Go/ebitenui rendering spike
 
 This is a separate module under `tools/ebitenui-spike`, not the future game's root build. Its [go.mod](tools/ebitenui-spike/go.mod) declares Go 1.26.4 and pins ebitenui 0.7.3 / Ebitengine 2.10.5. Recorded validation used Go 1.27.1. Use the `wasm_exec.js` shim from the same toolchain that built the WASM.
@@ -110,9 +120,9 @@ These are planned gates, not existing scripts. Add concrete commands when their 
 | Public application API | Quotes/forecasts are read-only; frame mutation cannot change world state; stale drafts and structured errors preserve accepted state |
 | Persistence | Save/reload continuation equals uninterrupted play; failed writes/loads preserve committed/live state; data-version compatibility, single-writer browser storage, and portable export/import |
 | Determinism | Identical command logs and versioned data yield matching canonical checkpoints across supported native targets and WebAssembly; replay/help/forecast behavior cannot affect them |
-| Multiplayer | Shared OD demand and finite capacity, company authorization/private frames, idempotent retries, acknowledgments, atomic month commits, and crash recovery |
+| Multiplayer | Shared OD demand and finite capacity, public construction and private drafts, concurrent construction conflicts and reservation release, paid track rights and settlement, idempotent retries, atomic month commits, and crash recovery |
 | Diagnostics/audit | Correlated outcomes, atomic world/receipt/audit persistence, exactly-once business events after retry, redaction/export authorization, bounded queues/rotation, reproducible command histories, and unchanged checkpoints with logging disabled/verbose/failed sinks |
-| Scheduling | Injected clocks test 15-minute boundaries, absent players, backward/forward clock changes, and the proposed bounded outage catch-up; do not wait real hours in ordinary correctness checks |
+| Scheduling | Injected clocks test host start, the 30-second and 15-minute month intervals, three-minute auction cutoff and next eligible settlement, explicit pause and restart, clock jumps, and bounded outage catch-up |
 | Full workflows | Construction-led and existing-track starts, disconnected networks and later joins, service/report/cash flows, auctions/open access, grants/loans, insolvency, and continuation |
 | Presentation | Shared intent behavior, draft preservation, drawing/picking agreement, text/DPI reflow, reduced motion, phone rotation/keyboard/back/resume, and meaningful semantic controls |
 | Palette/motion/audio | Light/dark contrast and color-independent states; state-grounded rail/train effects, cue deduplication, no reconnect backlog, audio unlock/background/mute handling, bounded voices/markers, and unchanged results across effect/replay preferences |
@@ -150,6 +160,6 @@ Measure performance on named hardware and pinned browsers using the workload in 
 
 Before release, qualify actual iOS Safari and Android Chrome, software keyboards/IME, safe-area and keyboard occlusion, background termination/resume, storage recovery, and the complete 320px workflow. Repeat on desktop with keyboard-only use, text scaling, and fractional/2× device scales. Test screen-reader and native accessibility through actual semantic controls. The current canvas exposes no semantic management interface; touch emulation and a native compile do not close these gates.
 
-First-time-player sessions must cover both starting strategies without a required tutorial, plus experienced play with hints disabled. A stable online company must survive the proposed eight-hour unattended target without repetitive acknowledgments. Correctness should use accelerated/injected clocks; separately qualify real host timing and operational behavior.
+First-time-player sessions must cover both starting strategies without a required tutorial, plus experienced play with hints disabled. Verify that drafts carry from the planning lobby across host start and several live month boundaries. A stable online company must survive a 30-minute absence at the proposed default and eight hours at the 15-minute host setting. Use injected clocks for correctness checks and qualify real host timing separately.
 
 For meaningful verification, record source/data identities, toolchain/browser/OS versions, executed commands, outcomes, and remaining gaps. Keep screenshots and ledgers tied to the build they describe. An unresolved required gate is reported as unresolved rather than hidden behind a prototype `passed` flag.

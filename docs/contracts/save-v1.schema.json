@@ -710,6 +710,16 @@
           "pattern": "^[a-z][a-z0-9_-]{0,63}$",
           "type": "string"
         },
+        "competition_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "id": {
           "pattern": "^[a-z][a-z0-9_-]{0,63}$",
           "type": "string"
@@ -750,6 +760,7 @@
         },
         "status": {
           "enum": [
+            "pending",
             "committed",
             "building",
             "completed",
@@ -773,6 +784,7 @@
         "started",
         "ready",
         "status",
+        "competition_ref",
         "total_cost",
         "installments"
       ],
@@ -1149,6 +1161,70 @@
       ],
       "type": "object"
     },
+    "TrackAccessAgreement": {
+      "additionalProperties": false,
+      "properties": {
+        "effective": {
+          "$ref": "#/$defs/GameMonth"
+        },
+        "ends": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GameMonth"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fee_per_train_km": {
+          "maxLength": 20,
+          "pattern": "^[1-9][0-9]*$",
+          "type": "string"
+        },
+        "operator_id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "owner_id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        "section_id": {
+          "pattern": "^[a-z][a-z0-9_-]{0,63}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "section_id",
+        "owner_id",
+        "operator_id",
+        "fee_per_train_km",
+        "effective",
+        "ends"
+      ],
+      "type": "object"
+    },
+    "TrackAccessOffer": {
+      "additionalProperties": false,
+      "properties": {
+        "fee_per_train_km": {
+          "maxLength": 20,
+          "pattern": "^[1-9][0-9]*$",
+          "type": "string"
+        },
+        "revision": {
+          "maxLength": 20,
+          "pattern": "^(0|[1-9][0-9]*)$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "revision",
+        "fee_per_train_km"
+      ],
+      "type": "object"
+    },
     "TrackSection": {
       "additionalProperties": false,
       "properties": {
@@ -1180,6 +1256,16 @@
         },
         "owner": {
           "$ref": "#/$defs/Ownership"
+        },
+        "paid_access_offer": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TrackAccessOffer"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "return_pairs_per_day": {
           "maximum": 4294967295,
@@ -1216,6 +1302,7 @@
         "track_class_ref",
         "owner",
         "access",
+        "paid_access_offer",
         "status",
         "speed_limit_kph",
         "return_pairs_per_day",
@@ -1514,6 +1601,12 @@
           },
           "type": "array"
         },
+        "track_access": {
+          "items": {
+            "$ref": "#/$defs/TrackAccessAgreement"
+          },
+          "type": "array"
+        },
         "trainsets": {
           "items": {
             "$ref": "#/$defs/Trainset"
@@ -1533,6 +1626,7 @@
         "nodes",
         "stations",
         "station_access",
+        "track_access",
         "sections",
         "projects",
         "trainsets",

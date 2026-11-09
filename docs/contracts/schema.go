@@ -77,7 +77,9 @@ func JSONSchemaV1() ([]byte, error) {
 					case "Project.Kind":
 						p["enum"] = []string{"new_line", "alignment_upgrade", "station_upgrade"}
 					case "Project.Status":
-						p["enum"] = []string{"committed", "building", "completed", "cancelled"}
+						p["enum"] = []string{"pending", "committed", "building", "completed", "cancelled"}
+					case "TrackAccessOffer.FeePerTrainKM", "TrackAccessAgreement.FeePerTrainKM":
+						p["pattern"] = "^[1-9][0-9]*$"
 					case "Trainset.Status":
 						p["enum"] = []string{"delivery", "operational", "relocation", "retired"}
 					case "TrainOrder.Status":

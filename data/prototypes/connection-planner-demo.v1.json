@@ -1,0 +1,208 @@
+{
+  "schema_version": 1,
+  "role": "Interaction-only fixtures: illustrative alignments, costs and forecasts; not surveyed corridors or calibrated economic outputs.",
+  "cash_usd_million": 8000,
+  "operating_days": 30,
+  "return_trips_per_day": 12,
+  "seats_per_train": 1000,
+  "pairs": [
+    {
+      "metro_ids": [
+        "delhi",
+        "mumbai"
+      ],
+      "average_fare_usd": 75,
+      "alternatives": [
+        {
+          "id": "western-plains",
+          "name": "Western plains",
+          "distance_km": 1460,
+          "minutes": 295,
+          "build_usd_million": 14800,
+          "fleet_usd_million": 700,
+          "trainsets": 7,
+          "months": 48,
+          "passengers": 560000,
+          "revenue_usd_million": 42,
+          "operating_cost_usd_million": 28,
+          "note": "Longer surface route; fewer major structures.",
+          "coordinates": [
+            [
+              77.209,
+              28.6139
+            ],
+            [
+              76.5,
+              27.8
+            ],
+            [
+              75.8,
+              26.9
+            ],
+            [
+              74.5,
+              25.0
+            ],
+            [
+              73.0,
+              23.2
+            ],
+            [
+              72.9,
+              21.0
+            ],
+            [
+              72.8777,
+              19.076
+            ]
+          ]
+        },
+        {
+          "id": "direct-plateau",
+          "name": "Direct plateau",
+          "distance_km": 1320,
+          "minutes": 255,
+          "build_usd_million": 19600,
+          "fleet_usd_million": 600,
+          "trainsets": 6,
+          "months": 60,
+          "passengers": 640000,
+          "revenue_usd_million": 48,
+          "operating_cost_usd_million": 31,
+          "note": "Faster journey; more cuttings and viaducts.",
+          "coordinates": [
+            [
+              77.209,
+              28.6139
+            ],
+            [
+              76.8,
+              27.0
+            ],
+            [
+              75.8,
+              24.5
+            ],
+            [
+              74.7,
+              22.5
+            ],
+            [
+              73.9,
+              20.2
+            ],
+            [
+              72.8777,
+              19.076
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "metro_ids": [
+        "lagos",
+        "kinshasa"
+      ],
+      "average_fare_usd": 120,
+      "alternatives": [
+        {
+          "id": "inland-detour",
+          "name": "Inland detour",
+          "distance_km": 3400,
+          "minutes": 690,
+          "build_usd_million": 24000,
+          "fleet_usd_million": 1400,
+          "trainsets": 14,
+          "months": 84,
+          "passengers": 130000,
+          "revenue_usd_million": 15.6,
+          "operating_cost_usd_million": 20.6,
+          "note": "Longer land route with explicit river crossings.",
+          "coordinates": [
+            [
+              3.3792,
+              6.5244
+            ],
+            [
+              6.9,
+              6.5
+            ],
+            [
+              9.5,
+              5.5
+            ],
+            [
+              11.5,
+              3.8
+            ],
+            [
+              12.5,
+              1.0
+            ],
+            [
+              13.0,
+              -1.5
+            ],
+            [
+              15.0,
+              -3.8
+            ],
+            [
+              15.2663,
+              -4.4419
+            ]
+          ]
+        },
+        {
+          "id": "coastal-detour",
+          "name": "Coastal detour",
+          "distance_km": 2860,
+          "minutes": 610,
+          "build_usd_million": 29500,
+          "fleet_usd_million": 1300,
+          "trainsets": 13,
+          "months": 78,
+          "passengers": 150000,
+          "revenue_usd_million": 18,
+          "operating_cost_usd_million": 21.8,
+          "note": "Shorter overland route; higher structure costs.",
+          "coordinates": [
+            [
+              3.3792,
+              6.5244
+            ],
+            [
+              7.0,
+              5.2
+            ],
+            [
+              9.8,
+              4.5
+            ],
+            [
+              11.5,
+              2.0
+            ],
+            [
+              12.4,
+              -0.5
+            ],
+            [
+              13.0,
+              -2.5
+            ],
+            [
+              15.1,
+              -4.0
+            ],
+            [
+              15.2663,
+              -4.4419
+            ]
+          ]
+        }
+      ]
+    }
+  ]
+}

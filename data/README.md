@@ -10,6 +10,8 @@
 
 ## Major-metro seed
 
+[prototypes/connection-planner-demo.v1.json](prototypes/connection-planner-demo.v1.json) supplies two illustrative endpoint pairs, each with two alignment choices, for the connection-planning interaction preview. Monetary values are USD millions; forecast passenger counts are monthly. These are authored UI fixtures, not researched prices, qualified terrain alignments, corridor-catalog entries, or economic simulation outputs. Polyline endpoints use the original metro coordinates. Revenue equals passengers times the stated average fare; capacity is two directions × return trips/day × seats × operating days. The Lagos–Kinshasa example deliberately includes a negative operating contribution. The preview never extrapolates these numbers to unlisted pairs.
+
 [raw/metropolitan_areas_5m.json](raw/metropolitan_areas_5m.json) is an unchanged copy of the user's supplied file, received on 2026-11-08. The [sidecar manifest](raw/metropolitan_areas_5m.metadata.json) records its SHA-256, units, checked properties, and unknown metadata. Preserve this snapshot; derived game catalogs should carry explicit mappings and transformation versions.
 
 One record represents a labeled metro or urban region, with an ID, country label, representative latitude/longitude, population in people, and estimated GDP in USD billions. It is a candidate anchor list for the game map. Smaller cities and existing rail stops remain necessary to complete playable corridors.
