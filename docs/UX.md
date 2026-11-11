@@ -249,6 +249,14 @@ For web interfaces, W3C's [Reflow guidance](https://www.w3.org/WAI/WCAG22/Unders
 
 Accessible labels, focus order, visible focus, error association, selected states, and meaningful announcements are required for management controls. City, service, route-alternative, and report lists provide a non-spatial path through core decisions. Reduced motion replaces train movement with static positions and aggregate counts, removes camera tweening, and retains full operating information. Audio has separate controls and never carries a unique warning.
 
+### Language and Chinese text
+
+Offer **English** and **简体中文** in the language selector. On first launch, use Simplified Chinese for device locales that resolve to `zh-Hans` or a bare `zh`. Default to English for unsupported locales. Save an explicit choice locally and apply it immediately, including in an active game with an open draft. Keep language selection independent of the device timezone used for the portrait camera. Set the web document's language for assistive technology.
+
+Show reviewed localized names for cities, regions, lines, and stations, using the source name when a localized name is unavailable. Let city and station search match the source name and curated Simplified Chinese aliases. Preserve player-entered names as typed. Support Chinese IME composition in search and name fields. While composition is active, Enter selects or confirms the IME candidate and game shortcuts stay inactive.
+
+Use script-appropriate font fallback and line breaking that respects Chinese punctuation without relying on spaces. Check dense map labels, station pickers, reports, and dialogs at phone widths and larger text settings. Keep financial values legible and show the settlement currency with an unambiguous symbol or code. [Unicode line breaking](https://www.unicode.org/reports/tr14/)
+
 ### Railway motion and sound
 
 Show short track/sleeper reveals and work-front effects when authoritative construction progress changes, then an opening highlight when the line actually becomes operational. V1 timeline-derived progress is labeled scheduled; animation does not make unfinished track usable. Train markers follow resolved operating-day paths/timing, with appropriate electric-train departure, rolling and pass-by sounds plus selected station ambience. Refer to [PRESENTATION.md](PRESENTATION.md) for cues, timing, mixing, deduplication, reduced motion and background behavior. Keep master mute and independent music/effects/ambience controls available. Never replay a backlog of sounds after reconnect or make the player wait for an effect to finish.

@@ -113,6 +113,8 @@ Use one forward/inverse camera transform for map drawing and picking. Layout use
 
 Camera, selection, dismissed hints, replay position, and drafts are local UI state, separate from authoritative campaign state. Timezone-selected portrait defaults are calculated locally and give way to saved views. Region framing and the cushioned zoom floor follow the [UX camera contract](docs/UX.md#regional-camera-presets); retain those details in the manifest rather than duplicating regional tables here.
 
+Localize in the client using stable message keys, typed arguments, and display names keyed by catalog ID. Frames, commands, saves, and server events carry canonical IDs, quantities, and reason codes so the client can render them in its own language. Keep the language preference outside campaign state. Bundle translation catalogs and fonts with the desktop and web clients. Use English as the fallback for missing interface messages and the source label for untranslated catalog names. [Localization requirements](docs/DESIGN.md#localization)
+
 The current ebitenui spike proves visual layout and selected input paths, not accessible management controls or physical-phone behavior. Keep the semantic HTML browser-HUD fallback open; native accessibility also needs qualification. Resolve this host decision in the first milestone before building a large inventory of canvas forms.
 
 The [presentation contract](docs/PRESENTATION.md) requires a cheerful bright palette and state-grounded construction/train animation and sound. Renderer/audio consume frames and deduplicated presentation cues, never mutate campaign state, and honor reduced motion, mute and lifecycle preferences.

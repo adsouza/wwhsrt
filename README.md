@@ -2,6 +2,8 @@
 
 A strategic railway business game about operating and expanding the world's high-speed rail networks. Plan monthly business turns, watch an animated operating day, and compete for passengers through fares, frequency, speed, and useful connections.
 
+![World-wide High-speed Rail Tycoon social card with a streamlined train in front of a globe](assets/branding/social-preview.png)
+
 Build independent lines between unserved cities, expand existing railways, or join separate networks. A new line can operate without connecting to the legacy network.
 
 Real geography shapes expansion: compare longer valley routes with expensive mountain works, tunnels, and bridges, balancing construction time and upkeep against journey speed.

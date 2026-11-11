@@ -41,6 +41,7 @@ The game uses real-world geography and recognizable cities. Its financial values
 | Independent construction | Either or both endpoint cities may be unserved; a new line need not connect to an existing network |
 | Learning to play | Onboarding is integrated transparently into normal gameplay, without a separate required tutorial |
 | Responsive interface | Complete core gameplay on smartphone screens; larger displays add map area and useful simultaneous views |
+| Localization | Provide a Simplified Chinese player interface |
 | Projection constraint | Do not use Mercator for the game map |
 
 ### Proposed detail
@@ -765,9 +766,18 @@ Multi-tab browser play has one storage writer; other tabs remain visibly read-on
 
 First targets: macOS arm64, Windows amd64, Linux amd64, and desktop plus smartphone browsers via WebAssembly. Complete core gameplay must reflow to a 320 CSS px width, with portrait and landscape support. Native phone-app packaging is a separate delivery decision. Start phone layout, touch/text entry, background/resume, and storage qualification in the first milestone rather than treating them as late polish. Larger displays add useful map area and optional simultaneous comparison/report views. See [UX.md](UX.md) for proposed layout bands and accessibility/validation requirements.
 
+- For Flatpak, install the app icon at `/app/share/icons/hicolor/scalable/apps/<APP_ID>.svg`. Use the Flatpak application ID as the desktop entry's `Icon` value. [App icon SVG](../assets/branding/app-icon.svg)
+- For the browser build, place `favicon.svg` in the web build's public root, serve it as `image/svg+xml`, and reference it from the document head with `rel="icon"`. [Favicon SVG](../assets/branding/favicon.svg)
+
 Desktop and web share rules, content versions, saves, and checkpoints. Browser execution yields between bounded calculation stages so forecasts and monthly resolution do not freeze controls indefinitely. Native and browser builds must not depend on divergent domain code paths.
 
 Pervasive diagnostics follow [DIAGNOSTICS.md](DIAGNOSTICS.md): correlate intents, validation, authoritative commits, construction/fleet changes, monthly phases, storage, networking and presentation failures. Keep rolling local diagnostics bounded; persist canonical game requests and audit events with authoritative server commits for after-the-fact investigation. Never log credentials or expose rival-private plans to players. No gameplay telemetry is uploaded by default. Audio begins after browser interaction and respects focus, mute, volume, and reduced-motion preferences where relevant.
+
+### Localization
+
+Ship English and Simplified Chinese (`zh-Hans`) in the worldwide release on desktop and web. The translation covers the complete player interface, including settings, map labels and search, contextual onboarding, construction and service planning, monthly reports, multiplayer notices, accessibility labels, and errors. Have fluent reviewers check railway and finance terminology in context. [W3C language tag guidance](https://www.w3.org/International/quicktips/doc/checker.en.php)
+
+Bundle the translations and Chinese fonts for offline use. Format dates, numbers, and currency amounts for the selected language while preserving the game calendar, units, and settlement currency. Players in the same world can use different languages. Language changes affect presentation and search labels only. [Language selection and Chinese input](UX.md#language-and-chinese-text)
 
 ## 13. Verification and performance
 
@@ -845,12 +855,12 @@ CI verifies native builds, optimized browser builds, focused and full automated 
 
 | Milestone | Playable result | Exit evidence |
 | --- | --- | --- |
-| 1. Walking skeleton | One small map, cities, selection, a monthly clock, basic report, and a train illustration; responsive shell and phone/accessibility feasibility spike | Same commands work headlessly and in desktop/browser hosts; narrow-screen selection, text input, semantic control approach, and resume behavior qualified |
+| 1. Walking skeleton | One small map, cities, selection, a monthly clock, basic report, and a train illustration. Include a localization and phone/accessibility feasibility spike. | Same commands work headlessly and in desktop/browser hosts. Qualify narrow-screen selection, Simplified Chinese glyphs and IME input, semantic controls, and resume behavior. |
 | 2. First business | 8–12 cities, a real existing HSR starter section, an independent unserved-city pair, terrain-aware corridor alternatives including a substantial barrier, construction, stations, one train family, direct service, fares, access charges, costs, loan, grant, saves; contextual onboarding throughout | Existing-track operation and independent A–B construction both work on phone and desktop; finances and terrain tradeoffs are explainable without a tutorial; quotes reconcile; continuation resumes correctly |
 | 3. Network game | Shared track, multiple services, transfers, competing modes, fleet/capacity constraints, full representative day | Through-journey, feeder-value, and bottleneck scenarios pass |
 | 4. Shared-world competition | Headless authoritative server, remote port, invites, private plans, fixed scheduler, standing operations, common demand and capacity | Two human companies compete; disconnect/retry/restart and unattended-company tests pass; offline still works independently |
 | 5. Regional campaign | Several starting offers, legacy-line auctions, grants, upgraded assets, campaign objectives, restructuring, extended contextual guidance | Independent regional strategies can finish; acquisition preserves access and its ledger reconciles; guidance covers different starting paths |
-| 6. Worldwide release | Qualified existing HSR inventory and six-region city/corridor catalog, concessions, disconnected regional networks, complete platform delivery | Region viability, multiplayer stress workload, compatible saves, and cross-target checkpoints pass |
+| 6. Worldwide release | Qualified existing HSR inventory and six-region city/corridor catalog, concessions, disconnected regional networks, complete platform delivery, and Simplified Chinese localization | Region viability, multiplayer stress workload, compatible saves, cross-target checkpoints, and Simplified Chinese localization checks pass |
 
 Deliver breadth at working depth before expanding data or adding crises. Model company identity, ownership, and shared markets from milestone 1, even while there is only one player. Milestone 2 may be a deliberately limited development slice; milestone 6 is the scope promised by the product's worldwide title. Multiplayer is implemented after the core loop is playable, while its domain boundaries are established from the beginning. Detailed implementation plans follow review of this specification.
 

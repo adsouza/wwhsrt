@@ -125,7 +125,10 @@ These are planned gates, not existing scripts. Add concrete commands when their 
 | Scheduling | Injected clocks test host start, the 30-second and 15-minute month intervals, auction cutoff (the longer of three minutes and one interval) and next eligible settlement, minimum-notice conversion, explicit pause and restart, clock jumps, and bounded outage catch-up |
 | Full workflows | Construction-led and existing-track starts, disconnected networks and later joins, service/report/cash flows, auctions/open access, grants/loans, insolvency, and continuation |
 | Presentation | Shared intent behavior, draft preservation, drawing/picking agreement, text/DPI reflow, reduced motion, phone rotation/keyboard/back/resume, and meaningful semantic controls |
+| Localization | Complete Simplified Chinese message catalog, matching typed placeholders, offline fonts and translations, and identical simulation checkpoints across UI languages |
 | Palette/motion/audio | Light/dark contrast and color-independent states; state-grounded rail/train effects, cue deduplication, no reconnect backlog, audio unlock/background/mute handling, bounded voices/markers, and unchanged results across effect/replay preferences |
+
+For the [Simplified Chinese localization release check](docs/DESIGN.md#localization), have fluent reviewers complete a construction, service, and monthly-report flow in Simplified Chinese. Check missing glyphs, punctuation and wrapping at 320 CSS px and larger text settings, city search across aliases, and IME composition on native desktop and physical phones. Verify that switching languages preserves an open draft and that two clients using different languages see equivalent results and notices from the same world.
 
 The [design's end-to-end scenarios](docs/DESIGN.md#end-to-end-scenarios) remain the full scenario checklist. Extend that list and relevant checks together when a gameplay rule changes. Use example tests and targeted Go fuzz/property tests for mathematical/allocation boundaries; a third-party property framework or blanket mutation-testing requirement is not necessary to begin.
 
