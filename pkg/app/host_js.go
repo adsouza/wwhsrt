@@ -139,6 +139,11 @@ func (h *host) run(g *Game) {
 			}
 			b, _ := json.Marshal(v)
 			r.resolve.Invoke(string(b))
+		case "guidance":
+			var state ui.State
+			_ = json.Unmarshal([]byte(r.body), &state)
+			b, _ := json.Marshal(ui.HelpFor(g.Frame, state))
+			r.resolve.Invoke(string(b))
 		case "ui":
 			var s ui.State
 			if json.Unmarshal([]byte(r.body), &s) == nil {

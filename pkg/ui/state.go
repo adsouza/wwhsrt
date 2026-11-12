@@ -75,6 +75,7 @@ type State struct {
 	HideTerrain     bool           `json:"hide_terrain"`
 	Appearance      string         `json:"appearance"`
 	Dark            bool           `json:"dark"`
+	FleetDetails    bool           `json:"fleet_details"`
 }
 
 // NewGameState clears company-specific drafts and onboarding while retaining

@@ -11,7 +11,6 @@ import (
 	"os"
 	"path/filepath"
 	"time"
-	"unicode/utf8"
 
 	"github.com/ebitenui/ebitenui"
 	uimage "github.com/ebitenui/ebitenui/image"
@@ -63,7 +62,8 @@ type host struct {
 	busy             bool
 	result           chan commandResult
 	field            textinput.Field
-	nameButton       *widget.Button
+	nameInput        *nameInput
+	statusLabel      *widget.Text
 	scroll           *widget.ScrollContainer
 	scrollbar        *widget.Slider
 	lastView         string
@@ -195,8 +195,13 @@ func (h *host) update(g *Game) {
 	case r := <-h.result:
 		h.busy = false
 		g.Frame = r.frame
+		if r.err == nil && r.kind == gameapi.BuildLine {
+			h.scroll = nil
+		}
 		if r.err == nil && r.kind == gameapi.NewGame {
 			h.confirmNewGame = false
+			h.blurName()
+			h.nameInput = nil
 			g.newGamePresentation()
 			h.field.SetTextAndSelection(g.State.DraftName, len(g.State.DraftName), len(g.State.DraftName))
 			h.scroll = nil
@@ -241,57 +246,20 @@ func (h *host) update(g *Game) {
 		h.sidebarKeyboard(g)
 	}
 	if g.State.View == "company" && h.loanInput != nil && h.loanInput.IsFocused() {
-		h.field.Blur()
+		h.blurName()
 	}
 	if g.State.View == "company" && h.loanInput != nil && h.loanInput.IsFocused() && (ebiten.IsKeyPressed(ebiten.KeyMeta) || ebiten.IsKeyPressed(ebiten.KeyControl)) && inpututil.IsKeyJustPressed(ebiten.KeyA) {
 		h.loanInput.SetText(loanBefore)
 		h.loanInput.SelectAll()
 	}
-	if h.field.IsFocused() {
-		bounds := image.Rect(g.width-310, 180, g.width-290, 202)
-		if h.nameButton != nil {
-			bounds = h.nameButton.GetWidget().Rect
-		}
-		handled, e := h.field.HandleInputWithBounds(bounds)
-		if e != nil {
-			h.message = "invalid_name"
-		}
-		if !handled && h.field.UncommittedTextLengthInBytes() == 0 {
-			value := h.field.Text()
-			a, b := h.field.Selection()
-			switch {
-			case (ebiten.IsKeyPressed(ebiten.KeyMeta) || ebiten.IsKeyPressed(ebiten.KeyControl)) && inpututil.IsKeyJustPressed(ebiten.KeyA):
-				h.field.SetSelection(0, len(value))
-			case inpututil.IsKeyJustPressed(ebiten.KeyBackspace):
-				if a == b && a > 0 {
-					_, n := utf8.DecodeLastRuneInString(value[:a])
-					a -= n
-				}
-				value = value[:a] + value[b:]
-				h.field.SetTextAndSelection(value, a, a)
-			case inpututil.IsKeyJustPressed(ebiten.KeyLeft):
-				if a > 0 {
-					_, n := utf8.DecodeLastRuneInString(value[:a])
-					a -= n
-				}
-				h.field.SetSelection(a, a)
-			case inpututil.IsKeyJustPressed(ebiten.KeyRight):
-				if b < len(value) {
-					_, n := utf8.DecodeRuneInString(value[b:])
-					b += n
-				}
-				h.field.SetSelection(b, b)
-			case inpututil.IsKeyJustPressed(ebiten.KeyEnter) || inpututil.IsKeyJustPressed(ebiten.KeyEscape):
-				h.field.Blur()
+	if g.State.View == "company" && h.nameInput != nil {
+		if err := h.nameInput.updateInput(); err != nil {
+			h.message = "text_edit_failed"
+			if h.statusLabel != nil {
+				h.statusLabel.Label = ui.Text(g.State.Locale, h.message)
 			}
 		}
-		if h.field.Text() != g.State.DraftName {
-			g.State.DraftName = h.field.Text()
-			h.persist(g)
-		}
-		if h.nameButton != nil {
-			h.nameButton.SetText(h.field.TextForRendering() + " │")
-		}
+		h.syncName(g)
 	}
 }
 func (h *host) draw(g *Game, screen *ebiten.Image) {
@@ -307,6 +275,13 @@ func (h *host) draw(g *Game, screen *ebiten.Image) {
 	}
 }
 func (h *host) build(g *Game) {
+	previousName := h.nameInput
+	refocusName := previousName != nil && previousName.IsFocused() && g.State.View == "company" && !g.State.Expanded && !h.confirmNewGame
+	h.blurName()
+	if previousName != nil {
+		h.syncName(g)
+	}
+	h.nameInput = nil
 	p := ui.PaletteFor(g.State)
 	if h.confirmNewGame {
 		h.buildNewGame(g)
@@ -358,16 +333,13 @@ func (h *host) build(g *Game) {
 			}
 			tabInk = p.Accent
 		}
-		b := widget.NewButton(widget.ButtonOpts.WidgetOpts(widget.WidgetOpts.MinSize(44, 44)), widget.ButtonOpts.Image(tabImage), widget.ButtonOpts.Text(t(v), face(12), &widget.ButtonTextColor{Idle: tabInk}), widget.ButtonOpts.ClickedHandler(func(*widget.ButtonClickedEventArgs) { h.field.Blur(); g.State.View = v; g.dirty = true; h.persist(g) }))
+		b := widget.NewButton(widget.ButtonOpts.WidgetOpts(widget.WidgetOpts.MinSize(44, 44)), widget.ButtonOpts.Image(tabImage), widget.ButtonOpts.Text(t(v), face(12), &widget.ButtonTextColor{Idle: tabInk}), widget.ButtonOpts.ClickedHandler(func(*widget.ButtonClickedEventArgs) { h.blurName(); g.State.View = v; g.dirty = true; h.persist(g) }))
 		nav.AddChild(b)
 	}
 	content.AddChild(nav)
+	h.guide(g, label, button)
 
 	if g.State.View == "map" {
-		if !g.State.HintDismissed {
-			label(t("hint"), 15)
-			button(t("dismiss"), func() { g.State.HintDismissed = true; g.dirty = true; h.persist(g) })
-		}
 		label(t("cities"), 18)
 		for _, city := range g.Frame.Cities {
 			city := city
@@ -380,6 +352,9 @@ func (h *host) build(g *Game) {
 		for _, city := range g.Frame.Cities {
 			if city.ID == g.State.Selected {
 				label(fmt.Sprintf("%s · %.4f°, %.4f°", t(string(city.ID)), city.Lat, city.Lon), 14)
+				for _, row := range ui.StationDetails(g.Frame, g.State.Locale, city.ID) {
+					label(row.Label+"\n"+row.Value, 14)
+				}
 			}
 		}
 	} else if g.State.View == "build" {
@@ -412,6 +387,7 @@ func (h *host) build(g *Game) {
 			g.dirty = true
 			h.persist(g)
 		})
+		button(t("guidanceSettings")+" · "+t(map[bool]string{true: "motionOff", false: "motionOn"}[g.State.HintDismissed]), func() { g.State.HintDismissed = !g.State.HintDismissed; g.dirty = true; h.persist(g) })
 		label(t("finance"), 22)
 		label(t("debt")+"\n"+ui.Cash(g.Frame.Debt), 16)
 		h.financeForm(g, t, label, button, content, contentWidth-40)
@@ -419,19 +395,26 @@ func (h *host) build(g *Game) {
 		label(t("loanTerms"), 14)
 		label(t("terrainCredits"), 12)
 		label(t("companyName"), 18)
-		h.nameButton = button(g.State.DraftName, func() {
+		h.nameInput = newNameInput(&h.field, g.State.DraftName, *face(16), p)
+		h.nameInput.onFocus = func() {
 			if h.loanInput != nil {
 				h.loanInput.Focus(false)
 			}
-			h.field.Focus()
-			h.field.SetSelection(0, len(h.field.Text()))
-		})
+		}
+		if previousName != nil && previousName.observed.value == h.field.Text() {
+			h.nameInput.undo, h.nameInput.redo = previousName.undo, previousName.redo
+			h.nameInput.anchor, h.nameInput.caret = previousName.anchor, previousName.caret
+			h.nameInput.offset = previousName.offset
+			h.nameInput.observed = h.nameInput.snapshot()
+		}
+		content.AddChild(h.nameInput)
 		label(t("nameHint"), 14)
 		button(t("applyName"), func() {
 			if h.field.UncommittedTextLengthInBytes() > 0 {
 				return
 			}
-			h.field.Blur()
+			h.blurName()
+			h.syncName(g)
 			h.send(g, gameapi.RenameCompany)
 		})
 	}
@@ -488,7 +471,8 @@ func (h *host) build(g *Game) {
 	if h.message != "" {
 		labelText = t(h.message)
 	}
-	footer.AddChild(widget.NewText(widget.TextOpts.Text(labelText, face(13), p.Text), widget.TextOpts.MaxWidth(float64(w-24))))
+	h.statusLabel = widget.NewText(widget.TextOpts.Text(labelText, face(13), p.Text), widget.TextOpts.MaxWidth(float64(w-24)))
+	footer.AddChild(h.statusLabel)
 	b := widget.NewButton(widget.ButtonOpts.WidgetOpts(widget.WidgetOpts.MinSize(44, 48), widget.WidgetOpts.LayoutData(widget.RowLayoutData{Stretch: true})), widget.ButtonOpts.Image(&widget.ButtonImage{Idle: uimage.NewNineSliceColor(p.Action), Hover: uimage.NewNineSliceColor(p.ActionHover), Pressed: uimage.NewNineSliceColor(p.ActionHover), Disabled: uimage.NewNineSliceColor(p.Disabled)}), widget.ButtonOpts.Text(t("advance"), face(16), &widget.ButtonTextColor{Idle: p.OnAction, Disabled: p.OnAction}), widget.ButtonOpts.ClickedHandler(func(*widget.ButtonClickedEventArgs) { h.send(g, gameapi.AdvanceMonth) }))
 	b.GetWidget().Disabled = h.busy || g.Frame.MonthsResolved >= g.Frame.CampaignMonths || g.State.View == "services" && ui.ServiceDirty(g.State, g.Frame)
 	timeButtons := widget.NewContainer(widget.ContainerOpts.Layout(widget.NewGridLayout(widget.GridLayoutOpts.Columns(2), widget.GridLayoutOpts.Stretch([]bool{true, true}, nil), widget.GridLayoutOpts.Spacing(6, 0))), widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{Stretch: true})))
@@ -505,4 +489,7 @@ func (h *host) build(g *Game) {
 		root.AddChild(b)
 	}
 	h.ui = &ebitenui.UI{Container: root}
+	if refocusName && h.nameInput != nil {
+		h.ui.SetFocusedWidget(h.nameInput)
+	}
 }

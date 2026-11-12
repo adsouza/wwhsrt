@@ -4,6 +4,12 @@ This development slice replaces the inert walking skeleton with a build-and-oper
 
 ## Playing
 
+The native Company name editor supports click/drag and double-click selection, Shift selection, Home/End, word movement, Select All, copy/cut/paste and undo/redo (Command shortcuts on macOS, Control elsewhere). It keeps IME composition separate from accepted names; editing saves only the local draft until **Apply name**. Selection and undo history survive a panel resize. Clipboard failures preserve the draft. Linux clipboard access requires `wl-clipboard` on Wayland or `xclip`/`xsel` on X11; unavailable access is reported without erasing text. Browser names retain their ordinary HTML input behavior.
+
+Milestone 2 now exposes station delivery and the fictional **Swift 400** train family. Existing public stations are operational immediately. An independent project creates its missing endpoint station works and opens them with the line; an existing public station keeps its ownership and opening status. The map distinguishes stationless cities, open stations and station works, and selected-city details show ownership/readiness. Services publish the actual 400-seat family, lease, running/access/handling charges and fleet-day assumptions; extra details can be expanded. Basic station works are bundled without a separate capital bill in this introductory model.
+
+One contextual **Next step** cue follows the active task through starter revenue, funding, construction, opening, fleet/service planning and reports. Its navigation shortcuts preserve the plan, and financial changes still require explicit actions. **Got it** hides guidance; Company can restore it. Guidance is presentation only, cannot change quotes or allocation, and never gates gameplay.
+
 Construction funding previews in Build and Company name the selected city pair and alignment and show the signed calculation: total cost − grant = company contribution; contribution − available cash + any existing cash deficit = additional cash needed, floored at zero. For the fresh Tsuruga–Osaka tunnel plan this is USD 19,816,110,000 − USD 17,834,499,000 − USD 100,000,000 = **USD 1,881,611,000**. Company offers **Review this route** to inspect/change that plan. The full-gap loan and its monthly interest are distinguished from the editable custom loan amount and its interest. Committed/public lines do not offer another construction-funding quote. This is explanatory UI; prices, grants and loan rules are unchanged.
 
 **Appearance:** Company offers System, Light and Dark. The native button cycles through these choices; the browser uses a selector. System follows live OS/browser appearance, with light as the fallback when the OS cannot report a preference. Both palettes cover controls, dialogs, warnings, map water/land, terrain, labels, city markers and routes. The preference is local, works offline and survives New game. Changing appearance does not issue a business command or affect saved campaign hashes.
@@ -60,7 +66,7 @@ Construction quotes freeze the [Japan regional profile](../../data/costs/constru
 | Hokkaido / tunnel | 212 km | 170 km | 48 | USD 23.03565B | USD 2.303565B |
 | Hokkaido / valley | 300 km | 45 km | 60 | USD 16.43235B | USD 1.643235B |
 
-This is the first playable portion of milestone 2. It does not qualify the full production geography, engineering inventory, station-capacity management, train purchasing, transfers, multiplayer or restructuring requirements.
+This implements the limited milestone 2 feature scope, with [current evidence and qualification limits](MILESTONE_2.md). It does not qualify the full production geography, engineering inventory, station-capacity management, train purchasing, through-running/transfers, multiplayer or restructuring requirements.
 
 ## Running and storage
 

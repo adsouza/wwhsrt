@@ -53,17 +53,47 @@ type GeoPoint struct {
 	Lon float64 `json:"lon"`
 }
 type Alignment struct {
-	ID        string     `json:"id"`
-	KM        int        `json:"km"`
-	Minutes   int        `json:"minutes"`
-	Months    int        `json:"months"`
-	SurfaceKM int        `json:"surface_km"`
-	HillKM    int        `json:"hill_km"`
-	ViaductKM int        `json:"viaduct_km"`
-	TunnelKM  int        `json:"tunnel_km"`
-	Path      []GeoPoint `json:"path"`
-	Cost      Money      `json:"cost"`
-	Grant     Money      `json:"grant"`
+	ID        string               `json:"id"`
+	KM        int                  `json:"km"`
+	Minutes   int                  `json:"minutes"`
+	Months    int                  `json:"months"`
+	SurfaceKM int                  `json:"surface_km"`
+	HillKM    int                  `json:"hill_km"`
+	ViaductKM int                  `json:"viaduct_km"`
+	TunnelKM  int                  `json:"tunnel_km"`
+	Path      []GeoPoint           `json:"path"`
+	Cost      Money                `json:"cost"`
+	Grant     Money                `json:"grant"`
+	Estimate  ConstructionEstimate `json:"estimate"`
+}
+type ConstructionEstimate struct {
+	Surface     Money `json:"surface"`
+	Hills       Money `json:"hills"`
+	Viaducts    Money `json:"viaducts"`
+	Tunnels     Money `json:"tunnels"`
+	Management  Money `json:"management"`
+	Contingency Money `json:"contingency"`
+}
+
+// Stations are delivered with their line. Ready is a resolved-month offset;
+// public starter stations have Ready zero. Open is authoritative eligibility.
+type Station struct {
+	CityID CityID    `json:"city_id"`
+	Owner  CompanyID `json:"owner"`
+	Public bool      `json:"public"`
+	Ready  int       `json:"ready"`
+	Open   bool      `json:"open"`
+}
+type TrainFamily struct {
+	ID                  string `json:"id"`
+	NameKey             string `json:"name_key"`
+	Seats               int    `json:"seats"`
+	LeaseMonthly        Money  `json:"lease_monthly"`
+	RunningPerKM        Money  `json:"running_per_km"`
+	PublicAccessPerKM   Money  `json:"public_access_per_km"`
+	StationPerJourney   Money  `json:"station_per_journey"`
+	DailyMinutes        int    `json:"daily_minutes"`
+	RoundTripTurnaround int    `json:"round_trip_turnaround"`
 }
 type Corridor struct {
 	ID          string      `json:"id"`
@@ -128,6 +158,8 @@ type Frame struct {
 	CampaignMonths int          `json:"campaign_months"`
 	Player         Company      `json:"player"`
 	Cities         []City       `json:"cities"`
+	Stations       []Station    `json:"stations"`
+	TrainFamily    TrainFamily  `json:"train_family"`
 	Reports        []Report     `json:"reports"`
 	Checkpoint     string       `json:"checkpoint"`
 	Corridors      []Corridor   `json:"corridors"`

@@ -4,7 +4,7 @@
 const $ = id => document.getElementById(id);
 let db, bridge, frame, texts = {}, busy = false, composing = false, message = '';
 const preferenceKey = 'wwhsrt-business-ui-v2';
-let prefs = {locale: initialLocale(), selected:'', view:'map', query:'', draft_name:'', hint_dismissed:false, motion:!matchMedia('(prefers-reduced-motion: reduce)').matches,from_city:'tsuruga',to_city:'osaka',choosing:'from',alignment_id:'mountain',service_corridor:'tokyo-nagoya',frequency:6,fare:9000,expanded:false,loan_amount:'',hide_terrain:false,appearance:'system'};
+let prefs = {locale: initialLocale(), selected:'', view:'map', query:'', draft_name:'', hint_dismissed:false, motion:!matchMedia('(prefers-reduced-motion: reduce)').matches,from_city:'tsuruga',to_city:'osaka',choosing:'from',alignment_id:'mountain',service_corridor:'tokyo-nagoya',frequency:6,fare:9000,expanded:false,loan_amount:'',hide_terrain:false,appearance:'system',fleet_details:false};
 function initialLocale() { return /^(zh$|zh-Hans|zh-CN|zh-SG)/i.test(navigator.language) ? 'zh-Hans' : 'en'; }
 try {
   const saved = JSON.parse(localStorage.getItem(preferenceKey));
@@ -58,11 +58,12 @@ function render() {
   $('appearance').value=prefs.appearance;
   $('language').value=prefs.locale;$('search').value=prefs.query;$('company-name').value=prefs.draft_name;$('motion').checked=prefs.motion;$('terrain-toggle').setAttribute('aria-pressed',String(!prefs.hide_terrain));
   $('hint').hidden=prefs.hint_dismissed;
+ $('guidance-settings').setAttribute('aria-pressed',String(!prefs.hint_dismissed));$('guidance-settings').textContent=label('guidanceSettings')+' · '+label(prefs.hint_dismissed?'motionOff':'motionOn');
   for(const name of ['map','build','services','report','company']) {
     $('view-'+name).hidden=prefs.view!==name;
     if(prefs.view===name)$('tab-'+name).setAttribute('aria-current','page');else $('tab-'+name).removeAttribute('aria-current');
   }
-  renderCities();renderReport();renderBusiness();renderIdleLines();
+  renderCities();renderReport();renderBusiness();renderIdleLines();renderGuidance();
   $('status').textContent=label(message || 'saved');
   $('advance').disabled=busy||frame.months_resolved>=frame.campaign_months||(prefs.view==='services'&&serviceDirty());
   $('new-game').disabled=busy||composing;$('confirm-new-game').disabled=busy;$('cancel-new-game').disabled=busy;$('new-game-dialog').setAttribute('aria-busy',String(busy));
@@ -82,7 +83,10 @@ function renderCities() {
   }
   $('no-results').hidden=list.childElementCount>0;
   const details=$('city-details');details.replaceChildren();const c=frame.cities.find(c=>c.id===prefs.selected);
-  if(c){const heading=document.createElement('h2');heading.textContent=label('selected');const name=document.createElement('strong');name.textContent=label(c.id);const coords=document.createElement('p');coords.textContent=label('latitude')+': '+c.lat.toFixed(4)+'° · '+label('longitude')+': '+c.lon.toFixed(4)+'°';details.append(heading,name,coords);}
+  if(c){const heading=document.createElement('h2');heading.textContent=label('selected');const name=document.createElement('strong');name.textContent=label(c.id);const coords=document.createElement('p');coords.textContent=label('latitude')+': '+c.lat.toFixed(4)+'° · '+label('longitude')+': '+c.lon.toFixed(4)+'°';details.append(heading,name,coords);
+   const station=frame.stations.find(s=>s.city_id===c.id),facts=document.createElement('dl'),rows=station?[[label('station'),label(station.open?'stationOpen':'stationBuilding')],[label('stationOwner'),station.public?label('stationPublic'):frame.player.name]]:[[label('station'),label('stationAbsent')]];
+   if(station&&!station.open)rows.push([label('opens'),month({year:2029+Math.floor(station.ready/12),month:1+station.ready%12})]);
+   if(station)rows.push([label('stationHandling'),money(frame.train_family.station_per_journey)]);ledgerRows(facts,rows);details.append(facts);}
   else{const p=document.createElement('p');p.textContent=label('selectCity');details.append(p);}
 }
 function renderReport(){
@@ -92,7 +96,7 @@ function renderReport(){
 }
 async function command(kind,extra={}) {
   if(busy||composing||$('new-game-dialog').open&&kind!=='new_game')return;busy=true;message='advancing';$('new-game-error').hidden=true;render();
-  try {const s=await call('command',{kind,revision:frame.revision,name:prefs.draft_name,corridor_id:prefs.service_corridor,frequency:prefs.frequency,fare:prefs.fare,...extra});frame=s.frame;message=s.error||kind;if(kind==='advance_month'&&!s.error)prefs.view='report';
+  try {const s=await call('command',{kind,revision:frame.revision,name:prefs.draft_name,corridor_id:prefs.service_corridor,frequency:prefs.frequency,fare:prefs.fare,...extra});frame=s.frame;message=s.error||kind;if(kind==='advance_month'&&!s.error)prefs.view='report';if(kind==='build_line'&&!s.error){$('inspector').scrollTop=0;scrollTo(0,0);}
     if(kind==='new_game'&&!s.error){prefs=s.state;applyAppearance(s.palette);document.body.classList.remove('expanded');$('expand').setAttribute('aria-pressed','false');$('new-game-dialog').close();$('inspector').scrollTop=0;scrollTo(0,0);}
     savePreferences();}
   catch {message='storage_failed';}
@@ -106,7 +110,8 @@ $('confirm-new-game').onclick=()=>command('new_game');
 $('advance').onclick=()=>command('advance_month');
 $('company-form').onsubmit=e=>{e.preventDefault();if(!composing)command('rename_company');};
 for(const e of document.querySelectorAll('[data-view]'))e.onclick=()=>showView(e.dataset.view);
-$('dismiss').onclick=()=>{prefs.hint_dismissed=true;savePreferences();$('hint').hidden=true;};
+$('dismiss').onclick=async()=>{prefs.hint_dismissed=true;savePreferences();renderGuidance();await syncUI();render();};
+$('guidance-settings').onclick=async()=>{prefs.hint_dismissed=!prefs.hint_dismissed;savePreferences();await syncUI();renderGuidance();};
 $('search').oninput=e=>{prefs.query=e.target.value;savePreferences();renderCities();};
 $('company-name').oninput=e=>{prefs.draft_name=e.target.value;savePreferences();};
 $('company-name').oncompositionstart=()=>{composing=true;$('rename').disabled=true;};
@@ -179,19 +184,22 @@ function renderBusiness(){
 function renderBuild(){
  const cityOptions=frame.cities.map(c=>[c.id,label(c.id)]);selectOptions($('from-city'),cityOptions,prefs.from_city);selectOptions($('to-city'),cityOptions,prefs.to_city);
  const list=$('opportunities');list.replaceChildren();for(const c of frame.corridors.filter(c=>!c.existing&&!frame.projects.some(p=>p.corridor_id===c.id))){const b=document.createElement('button');b.textContent=corridorName(c);b.dataset.corridor=c.id;b.onclick=async()=>{prefs.from_city=c.from_city;prefs.to_city=c.to_city;prefs.alignment_id=c.alignments[0].id;savePreferences();await syncUI();renderBuild();};list.append(b);}
- const co=chosenPair(),project=co&&frame.projects.find(p=>p.corridor_id===co.id);$('alignments').replaceChildren();$('quote').replaceChildren();$('build-preview').replaceChildren();$('funding-gap').textContent='';$('build-status').textContent='';$('terrain-explanation').textContent='';$('build-line').disabled=true;$('finance-link').hidden=true;$('borrow-shortfall-build').hidden=true;$('project-service').hidden=true;$('project-progress').hidden=true;
+ const co=chosenPair(),project=co&&frame.projects.find(p=>p.corridor_id===co.id);$('build-package').hidden=true;$('alignments').replaceChildren();$('quote').replaceChildren();$('engineering-values').replaceChildren();$('station-package').hidden=true;$('build-preview').replaceChildren();$('funding-gap').textContent='';$('build-status').textContent='';$('terrain-explanation').textContent='';$('build-line').disabled=true;$('finance-link').hidden=true;$('borrow-shortfall-build').hidden=true;$('project-service').hidden=true;$('project-progress').hidden=true;
  if(!co){$('build-status').textContent=label('no_route');return;}
  if(co.existing){$('build-status').textContent=label('publicTrack');return;}
  if(project){$('project-progress').hidden=false;$('project-progress').max=project.ready-project.started;$('project-progress').value=Math.min(frame.months_resolved-project.started,project.ready-project.started);$('project-service').hidden=project.ready>frame.months_resolved;$('project-service').onclick=()=>{loadService(co.id);showView('services');};$('build-status').textContent=project.ready<=frame.months_resolved?label('readyForService'):label('underConstruction')+' · '+label('opens')+' '+month({year:2029+Math.floor(project.ready/12),month:1+project.ready%12})+' · '+(project.ready-frame.months_resolved)+' '+label('monthsLeft');return;}
+ $('build-package').hidden=false;
  if(!co.alignments.some(a=>a.id===prefs.alignment_id))prefs.alignment_id=co.alignments[0].id;
  for(const a of co.alignments){const b=document.createElement('button');b.textContent=label(a.id)+' · '+a.km+' km · '+a.minutes+' min · '+label('duration')+' '+a.months;b.setAttribute('aria-pressed',String(a.id===prefs.alignment_id));b.onclick=async()=>{prefs.alignment_id=a.id;savePreferences();await syncUI();renderBuild();};$('alignments').append(b);}
  const a=co.alignments.find(a=>a.id===prefs.alignment_id),net=a.cost-a.grant;
+ const e=a.estimate;ledgerRows($('engineering-values'),[[label('surfaceWorks')+' · '+a.surface_km+' km',money(e.surface)],[label('hillWorks')+' · '+a.hill_km+' km',money(e.hills)],[label('viaductWorks')+' · '+a.viaduct_km+' km',money(e.viaducts)],[label('tunnelWorks')+' · '+a.tunnel_km+' km',money(e.tunnels)],[label('managementAllowance'),money(e.management)],[label('contingencyAllowance'),money(e.contingency)],[label('totalCost'),money(a.cost)]]);$('station-package').hidden=false;
  $('terrain-explanation').textContent=label((co.id==='hokkaido-extension'?'hokkaido':'kansai')+(a.id==='mountain'?'MountainWhy':'ValleyWhy'));
  const quoteID=co.id,variant=a.id;call('forecast',{corridor_id:co.id,alignment_id:a.id,frequency:6,fare:9000}).then(result=>{if(chosenPair()?.id===quoteID&&prefs.alignment_id===variant&&!result.error){ledgerRows($('build-preview'),[[label('potential'),money(result.forecast.contribution)]]);}}).catch(()=>{});ledgerRows($('quote'),fundingRows(selectedFunding()));
  if(net>frame.player.cash){$('funding-gap').textContent=(frame.player.cash<0?label('fundingNegativeCash')+' ':'')+label('fundingFormula')+' '+label('shortfallInterest')+': '+money(Math.ceil((frame.debt+net-frame.player.cash)/600)-Math.ceil(frame.debt/600));$('finance-link').hidden=false;$('borrow-shortfall-build').hidden=false;$('borrow-shortfall-build').textContent=label('borrowShortfall')+' · '+money(net-frame.player.cash);$('borrow-shortfall-build').disabled=busy||net-frame.player.cash>frame.debt_limit-frame.debt;}
  $('build-line').disabled=busy||net>frame.player.cash;
 }
 function renderServices(){
+ const t=frame.train_family;$('train-summary').textContent=label(t.name_key)+' · '+t.seats+' '+label('seatUnit');$('train-details').open=prefs.fleet_details;ledgerRows($('train-values'),[[label('trainFamily'),label(t.name_key)],[label('seatsPerTrain'),String(t.seats)],[label('trainLease'),money(t.lease_monthly)],[label('trainRunning'),money(t.running_per_km)],[label('trackAccess'),money(t.public_access_per_km)],[label('stationHandling'),money(t.station_per_journey)],[label('trainDay'),String(t.daily_minutes/60)],[label('trainTurnaround'),String(t.round_trip_turnaround)]]);
  const available=frame.corridors.filter(isOpen);if(!available.some(c=>c.id===prefs.service_corridor)&&available.length)loadService(available[0].id);
  selectOptions($('service-corridor'),available.map(c=>[c.id,corridorName(c)]),prefs.service_corridor);$('frequency').value=prefs.frequency;$('fare').value=prefs.fare/100;
  $('service-draft-note').textContent=serviceDirty()?label('draft_not_applied'):label('saved');$('restore-plan').hidden=!serviceDirty();
@@ -212,8 +220,8 @@ for(const [id,which]of [['choose-from','from'],['choose-to','to']])$(id).onclick
 $('finance-link').onclick=()=>{prefs.loan_amount=dollarInput(fundingShortfall());showView('company');};
 $('build-line').onclick=()=>{const co=chosenPair();if(co)command('build_line',{corridor_id:co.id,alignment_id:prefs.alignment_id});};
 $('service-corridor').onchange=async e=>{loadService(e.target.value);savePreferences();await syncUI();renderServices();};
-$('frequency').oninput=e=>{prefs.frequency=Number(e.target.value);savePreferences();updateDraftGuard();queueForecast();};
-$('fare').oninput=e=>{prefs.fare=Math.round(Number(e.target.value)*100);savePreferences();updateDraftGuard();queueForecast();};
+$('frequency').oninput=e=>{prefs.frequency=Number(e.target.value);savePreferences();updateDraftGuard();queueForecast();renderGuidance();};
+$('fare').oninput=e=>{prefs.fare=Math.round(Number(e.target.value)*100);savePreferences();updateDraftGuard();queueForecast();renderGuidance();};
 $('apply-service').onclick=()=>command('set_service');$('lease-train').onclick=()=>command('lease_train');$('return-train').onclick=()=>command('return_train');
 $('borrow').onclick=()=>command('take_loan',{amount:parseDollars(prefs.loan_amount)});$('repay').onclick=()=>command('repay_loan');$('advance-year').onclick=()=>command('advance_year');
 
@@ -250,3 +258,21 @@ async function borrowShortfall(){const amount=fundingShortfall();if(amount<=0)re
 $('borrow-shortfall').onclick=borrowShortfall;$('borrow-shortfall-build').onclick=borrowShortfall;
 
 $('terrain-toggle').onclick=async()=>{prefs.hide_terrain=!prefs.hide_terrain;savePreferences();await syncUI();$('terrain-toggle').setAttribute('aria-pressed',String(!prefs.hide_terrain));};
+
+let guidanceTicket=0;
+async function renderGuidance(){
+ const ticket=++guidanceTicket;
+ if(!bridge||prefs.hint_dismissed){$('hint').hidden=true;return;}
+ const cue=await call('guidance',prefs);if(ticket!==guidanceTicket||prefs.hint_dismissed)return;
+ $('hint').hidden=!cue.key;if(!cue.key)return;
+ $('hint-copy').textContent=label(cue.key);$('hint-action').hidden=!cue.action;
+ $('hint-action').textContent=label('helpAction_'+cue.action);$('hint-action').disabled=busy||composing;
+ $('hint-action').onclick=()=>followGuidance(cue);
+}
+async function followGuidance(cue){
+ if(cue.action==='advance_month'||cue.action==='advance_year'){await command(cue.action);return;}
+ if(cue.action==='services'&&cue.corridor_id)loadService(cue.corridor_id);
+ if(cue.action==='company'&&fundingShortfall()>0)prefs.loan_amount=dollarInput(fundingShortfall());
+ if(['services','company','build'].includes(cue.action))await showView(cue.action);
+}
+$('train-details').ontoggle=()=>{const open=$('train-details').open;if(prefs.fleet_details!==open){prefs.fleet_details=open;savePreferences();syncUI();}};

@@ -50,10 +50,15 @@ func NewCatalog(rows []gameapi.Corridor) (Catalog, error) {
 			if !r.Existing {
 				// Japan profile: B=20M/km, systems=3M/km. Terrain factors 1/1.5/2.5/5.
 				// Management 15%, then contingency 20%; no engineering interval is free.
-				direct := gameapi.Money(a.SurfaceKM)*2_000_000_000 + gameapi.Money(a.HillKM)*2_850_000_000 + gameapi.Money(a.ViaductKM)*4_550_000_000 + gameapi.Money(a.TunnelKM)*8_800_000_000
-				a.Cost = (direct + direct*15/100) * 120 / 100
+				a.Estimate = gameapi.ConstructionEstimate{Surface: gameapi.Money(a.SurfaceKM) * 2_000_000_000, Hills: gameapi.Money(a.HillKM) * 2_850_000_000, Viaducts: gameapi.Money(a.ViaductKM) * 4_550_000_000, Tunnels: gameapi.Money(a.TunnelKM) * 8_800_000_000}
+				direct := a.Estimate.Surface + a.Estimate.Hills + a.Estimate.Viaducts + a.Estimate.Tunnels
+				a.Estimate.Management = direct * 15 / 100
+				// Preserve the scenario's existing cent rounding exactly.
+				a.Cost = (direct + a.Estimate.Management) * 120 / 100
+				a.Estimate.Contingency = a.Cost - direct - a.Estimate.Management
 				a.Grant = a.Cost * 90 / 100
 			} else {
+				a.Estimate = gameapi.ConstructionEstimate{}
 				a.Cost = 0
 				a.Grant = 0
 			}
@@ -174,7 +179,9 @@ func days(m gameapi.Month) int {
 	}
 	return d[m.Month-1]
 }
-func required(frequency, minutes int) int { return (frequency*(minutes*2+40) + 959) / 960 }
+func required(frequency, minutes int) int {
+	return (frequency*(minutes*2+roundTripTurnaround) + trainDayMinutes - 1) / trainDayMinutes
+}
 func (w World) Forecast(q gameapi.ForecastRequest) (gameapi.Forecast, error) {
 	c, ok := w.catalog.find(q.CorridorID)
 	if !ok {
@@ -194,18 +201,18 @@ func (w World) Forecast(q gameapi.ForecastRequest) (gameapi.Forecast, error) {
 		generalized := int64(q.Fare) + int64(a.Minutes)*20 + 9600/f
 		outside := int64(c.OutsideCost)
 		demand := int64(c.DailyMarket) * outside * outside / (outside*outside + generalized*generalized)
-		capacity := f * 2 * 400
+		capacity := f * 2 * trainSeats
 		carried := min(demand, capacity)
 		result.Passengers = int(carried * d)
 		result.Capacity = int(capacity * d)
 		result.Revenue = gameapi.Money(result.Passengers) * q.Fare
 		km := gameapi.Money(f * 2 * int64(a.KM) * d)
-		running := km * 1200
+		running := km * runningPerKM
 		access := gameapi.Money(0)
 		if c.Existing {
-			access = km * 500
+			access = km * publicAccessPerKM
 		}
-		stations := gameapi.Money(result.Passengers) * 50
+		stations := gameapi.Money(result.Passengers) * stationPerJourney
 		result.Costs = running + access + stations
 	}
 	result.Costs += gameapi.Money(result.FleetNeeded) * LeaseMonthly
@@ -383,11 +390,11 @@ func (w *World) resolve() error {
 		r.Revenue += forecast.Revenue
 		r.Services = append(r.Services, gameapi.ServiceRun{CorridorID: s.CorridorID, AlignmentID: a.ID, Frequency: s.Frequency, Passengers: forecast.Passengers, Revenue: forecast.Revenue, Fare: s.Fare})
 		km := gameapi.Money(s.Frequency * 2 * a.KM * days(r.Month))
-		r.RunningCosts += km * 1200
+		r.RunningCosts += km * runningPerKM
 		if c.Existing {
-			r.AccessCosts += km * 500
+			r.AccessCosts += km * publicAccessPerKM
 		}
-		r.StationCosts += gameapi.Money(forecast.Passengers) * 50
+		r.StationCosts += gameapi.Money(forecast.Passengers) * stationPerJourney
 	}
 	r.LeaseCosts = gameapi.Money(len(w.fleet)) * LeaseMonthly
 	for _, p := range w.projects {
@@ -452,7 +459,7 @@ func Restore(c Catalog, revision uint64, months int, company gameapi.Company, re
 		for _, run := range r.Services {
 			co, ok := c.find(run.CorridorID)
 			_, exists := alternative(co, run.AlignmentID)
-			if !ok || !exists || runs[run.CorridorID] || run.Frequency < 0 || run.Frequency > 16 || run.Fare < 1000 || run.Fare > 30000 || run.Passengers < 0 || run.Passengers > run.Frequency*800*days(r.Month) || run.Revenue != gameapi.Money(run.Passengers)*run.Fare {
+			if !ok || !exists || runs[run.CorridorID] || run.Frequency < 0 || run.Frequency > 16 || run.Fare < 1000 || run.Fare > 30000 || run.Passengers < 0 || run.Passengers > run.Frequency*trainSeats*2*days(r.Month) || run.Revenue != gameapi.Money(run.Passengers)*run.Fare {
 				return fail()
 			}
 			runs[run.CorridorID] = true

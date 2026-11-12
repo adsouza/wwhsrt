@@ -222,7 +222,7 @@ func decode(b []byte) (domain.World, error) {
 }
 func (g *Game) frame() gameapi.Frame {
 	p, _ := json.Marshal(data(g.w))
-	return gameapi.Frame{WorldID: "first-business", Revision: g.w.Revision(), Month: domain.Calendar(g.w.Months()), MonthsResolved: g.w.Months(), CampaignMonths: domain.CampaignMonths, Player: g.w.Company(), Cities: append([]gameapi.City{}, g.cities...), Reports: g.w.Reports(), Checkpoint: hash(p), Corridors: g.catalog.Corridors(), Projects: g.w.Projects(), Services: g.w.Services(), Fleet: g.w.Fleet(), IdleLines: g.w.IdleLines(), Debt: g.w.Debt(), DebtLimit: domain.DebtLimit, Pending: g.w.Pending()}
+	return gameapi.Frame{WorldID: "first-business", Revision: g.w.Revision(), Month: domain.Calendar(g.w.Months()), MonthsResolved: g.w.Months(), CampaignMonths: domain.CampaignMonths, Player: g.w.Company(), Cities: append([]gameapi.City{}, g.cities...), Stations: g.w.Stations(), TrainFamily: domain.TrainFamily(), Reports: g.w.Reports(), Checkpoint: hash(p), Corridors: g.catalog.Corridors(), Projects: g.w.Projects(), Services: g.w.Services(), Fleet: g.w.Fleet(), IdleLines: g.w.IdleLines(), Debt: g.w.Debt(), DebtLimit: domain.DebtLimit, Pending: g.w.Pending()}
 }
 func (g *Game) Forecast(q gameapi.ForecastRequest) (gameapi.Forecast, error) {
 	g.mu.Lock()

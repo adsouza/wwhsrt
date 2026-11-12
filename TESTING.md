@@ -16,6 +16,10 @@ Use the [architecture](ARCHITECTURE.md) for system boundaries, [game design veri
 
 ### First business slice
 
+For native Company name editing, run `GOMEMLIMIT=768MiB GOMAXPROCS=2 go test -p 1 ./pkg/app -run '^TestNative(Name|Panels|Wrapped|ReportScroll|NewGame)' -count=1`. `TestNativeName*` covers Unicode/repeated-substring selections, grapheme deletion, pointer placement/double-click, Shift/word navigation, fake-clipboard copy/cut/paste, failed/empty clipboard preservation, undo/redo, UI focus traversal, draft-only persistence and resize retention. Clipboard tests use an in-memory adapter and never inspect or overwrite the host clipboard. Native OS shortcuts, physical drag/keyboard/IME and actual clipboard exchange still need a manual pass: automated CUA input did not reliably activate even the existing native controls during the isolated observation.
+
+Milestone 2 evidence is in [MILESTONE_2.md](docs/validation/MILESTONE_2.md). After building browser/headless targets and starting the test server, run `NODE_OPTIONS=--max-old-space-size=1536 node tools/check-milestone2.cjs` (optional URL argument). It drives the contextual starter action, guidance dismissal/restore, station/family inspection, cost/alternative comparison, independent project/station construction, opening, fleet, service, revenue, export/headless restore and offline continuation on desktop/Chinese phone layouts. It records `milestone2-checks.json`, screenshots and native-headless/WASM parity. Run the focused Go application/UI/native-widget packages below; `TestM2*` adds station lifecycle/reuse and projection/accounting coverage, and `TestContextGuidance*` covers cue transitions and dismissal without state mutation. Native macOS service rendering was visually inspected in isolation, but automated native input did not reliably activate controls. Native interaction and physical-device qualification remain open.
+
 Use Go 1.27.1 (module minimum 1.26.4). From the root, these are focused checks for the implemented slice, not permission to run the full repository suite locally:
 
 ```sh

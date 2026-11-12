@@ -177,7 +177,18 @@ func (m *Map) Draw(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s ui.St
 			vector.DrawFilledCircle(dst, float32(p.X), float32(p.Y), 13, pal.Surface, true)
 			vector.StrokeCircle(dst, float32(p.X), float32(p.Y), 13, 3, pal.Accent, true)
 		}
-		vector.DrawFilledCircle(dst, float32(p.X), float32(p.Y), 6, pal.Text, true)
+		station, hasStation := ui.StationAt(f, city.ID)
+		if !hasStation {
+			vector.StrokeCircle(dst, float32(p.X), float32(p.Y), 4.5, 1.5, pal.Muted, true)
+		} else if !station.Open {
+			vector.DrawFilledRect(dst, float32(p.X-5), float32(p.Y-5), 10, 10, pal.Construction, true)
+		} else {
+			ink := pal.Accent
+			if station.Public {
+				ink = pal.Existing
+			}
+			vector.DrawFilledCircle(dst, float32(p.X), float32(p.Y), 6, ink, true)
+		}
 		vector.DrawFilledCircle(dst, float32(p.X), float32(p.Y), 3.5, pal.Surface, true)
 		if s.View == "build" {
 			tag := ""
@@ -220,6 +231,7 @@ func (m *Map) Draw(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s ui.St
 		m.terrain.labels(m, dst, c, s, occupied)
 	}
 	m.Label(dst, ui.Text(s.Locale, "east_asia"), 20, 18, 20, pal.Text)
+	m.Label(dst, ui.Text(s.Locale, "stationLegend"), 20, 40, 11, pal.Muted)
 }
 
 func routePoint(c mapview.Camera, path []gameapi.GeoPoint, u float64) mapview.Point {

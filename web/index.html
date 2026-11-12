@@ -14,9 +14,9 @@
     <aside id="inspector">
       <div class="section-head"><span class="pill" data-t="offline"></span><span class="eyebrow" data-t="scope"></span></div>
       <section id="idle-warning" class="idle-warning" hidden role="status"><strong id="idle-title"></strong><p id="idle-summary"></p><button id="review-idle" data-t="reviewIdleLines"></button></section>
-      <nav aria-label="Management"><button id="tab-map" data-view="map" data-t="map" aria-current="page"></button><button id="tab-build" data-view="build" data-t="build"></button><button id="tab-services" data-view="services" data-t="services"></button><button id="tab-report" data-view="report" data-t="report"></button><button id="tab-company" data-view="company" data-t="company"></button></nav>
+      <nav aria-label="Management"><button id="tab-map" data-view="map" data-t="map" aria-current="page"></button><button id="tab-build" data-view="build" data-t="build"></button><button id="tab-services" data-view="services" data-t="services"></button><button id="tab-report" data-view="report" data-t="report"></button><button id="tab-company" data-view="company" data-t="company"></button></nav><div id="hint" class="hint"><h2 data-t="nextStep"></h2><p id="hint-copy"></p><button id="hint-action" hidden></button><button id="dismiss" data-t="dismiss"></button></div>
       <section id="view-map" class="view" aria-labelledby="cities-heading">
-        <div id="hint" class="hint"><h2 data-t="guide"></h2><p data-t="hint"></p><button id="dismiss" data-t="dismiss"></button></div>
+
         <h1 id="cities-heading" data-t="cities"></h1><label for="search" data-t="search"></label><input id="search" type="search" autocomplete="off"><div id="city-list" class="city-list"></div><p id="no-results" hidden data-t="noResults"></p>
         <section id="city-details" class="city-details" aria-live="polite"></section>
       </section>
@@ -25,13 +25,13 @@
         <label for="from-city" data-t="fromCity"></label><select id="from-city"></select><button id="choose-from" data-t="chooseFrom"></button>
         <label for="to-city" data-t="toCity"></label><select id="to-city"></select><button id="choose-to" data-t="chooseTo"></button>
         <h2 data-t="plans"></h2><div id="opportunities" class="city-list"></div>
-        <div id="build-status" role="status"></div><progress id="project-progress" hidden></progress><button id="project-service" class="primary" hidden data-t="services"></button><dl id="build-preview"></dl><div id="alignments"></div><dl id="quote"></dl>
+        <div id="build-status" role="status"></div><progress id="project-progress" hidden></progress><button id="project-service" class="primary" hidden data-t="services"></button><div id="build-package" hidden><dl id="build-preview"></dl><div id="alignments"></div><dl id="quote"></dl>
         <p id="funding-gap"></p><button id="borrow-shortfall-build" data-t="borrowShortfall"></button><button id="finance-link" data-t="finance"></button>
         <button id="build-line" class="primary" data-t="commitBuild"></button>
-        <p class="hint" data-t="buildHint"></p><p class="hint" id="terrain-explanation"></p><p data-t="estimateNote"></p>
+        <h2 data-t="engineeringBreakdown"></h2><dl id="engineering-values"></dl><p id="station-package" data-t="stationPackage"></p><p class="hint" data-t="buildHint"></p><p class="hint" id="terrain-explanation"></p><p data-t="estimateNote"></p></div>
       </section>
       <section id="view-services" class="view" hidden aria-labelledby="services-heading">
-        <h1 id="services-heading" data-t="services"></h1>
+        <h1 id="services-heading" data-t="services"></h1><p id="train-summary"></p><details id="train-details"><summary data-t="fleetDetails"></summary><dl id="train-values"></dl></details><p data-t="directService"></p>
         <section id="idle-details" class="idle-warning" hidden><p data-t="idleExplanation"></p><div id="idle-line-list"></div></section>
         <label for="service-corridor" data-t="selectService"></label><select id="service-corridor"></select>
         <label for="frequency" data-t="frequency"></label><input id="frequency" type="number" inputmode="numeric" min="0" max="16" step="1">
@@ -41,7 +41,7 @@
         <button id="apply-service" class="primary" data-t="applyService"></button><p class="hint" data-t="serviceHint"></p>
       </section>
       <section id="view-report" class="view" hidden aria-labelledby="report-heading"><span class="eyebrow" id="report-month"></span><h1 id="report-heading" data-t="report"></h1><p id="no-report" data-t="noReport"></p><dl id="ledger"></dl><p class="hint" data-t="reportHint"></p><p><span data-t="resolved"></span>: <span id="resolved"></span></p></section>
-      <section id="view-company" class="view" hidden aria-labelledby="company-heading"><h1 id="company-heading" data-t="company"></h1><button id="new-game" data-t="reset"></button><label for="appearance" data-t="appearance"></label><select id="appearance"><option value="system" data-t="appearance_system"></option><option value="light" data-t="appearance_light"></option><option value="dark" data-t="appearance_dark"></option></select><h2 data-t="finance"></h2><p id="debt"></p>
+      <section id="view-company" class="view" hidden aria-labelledby="company-heading"><h1 id="company-heading" data-t="company"></h1><button id="new-game" data-t="reset"></button><label for="appearance" data-t="appearance"></label><select id="appearance"><option value="system" data-t="appearance_system"></option><option value="light" data-t="appearance_light"></option><option value="dark" data-t="appearance_dark"></option></select><button id="guidance-settings" data-t="guidanceSettings"></button><h2 data-t="finance"></h2><p id="debt"></p>
         <section id="company-funding" hidden aria-labelledby="company-funding-title"><h2 id="company-funding-title" data-t="fundingPlan"></h2><p id="company-funding-route"></p><dl id="company-funding-values"></dl><p id="company-funding-note" class="hint"></p><button id="review-funding-plan" data-t="reviewFundingPlan"></button><p id="shortfall-interest"></p><button id="borrow-shortfall" data-t="borrowShortfall"></button><p data-t="fundingLoanHelp"></p></section>
         <p id="no-funding-plan" data-t="fundingChoosePlan" hidden></p><button id="choose-funding-plan" data-t="build" hidden></button><label for="loan-amount" data-t="loanAmount"></label><input id="loan-amount" type="text" inputmode="decimal" autocomplete="off" aria-describedby="loan-preview"><p id="credit-available"></p><p id="loan-preview" role="status"></p><div class="service-actions"><button id="borrow" data-t="borrow"></button><button id="repay" data-t="repay"></button></div><p class="hint" data-t="loanTerms"></p><form id="company-form"><label for="company-name" data-t="companyName"></label><input id="company-name" autocomplete="organization" aria-describedby="name-hint"><p id="name-hint" data-t="nameHint"></p><button class="primary" id="rename" type="submit" data-t="applyName"></button></form><label class="motion"><input id="motion" type="checkbox"><span data-t="motion"></span></label><p data-t="soundless"></p><p data-t="terrainCredits"></p><a href="terrain-credits.txt" target="_blank" rel="noopener" data-t="terrain"></a><button id="export" data-t="download"></button></section>
     </aside>

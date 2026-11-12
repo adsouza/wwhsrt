@@ -78,6 +78,11 @@ func (h *host) buildPlanner(g *Game, t func(string) string, label nativeLabel, b
 		}
 		label(t(why), 14)
 		q, _ := ui.FundingBreakdown(g.Frame, g.State)
+		label(t("engineeringBreakdown"), 18)
+		for _, row := range ui.EstimateDetails(a, g.State.Locale) {
+			label(row.Label+"\n"+row.Value, 14)
+		}
+		label(t("stationPackage"), 14)
 		fundingLabels(g, q, label)
 		if gap := q.Shortfall; gap > 0 {
 			label(t("shortfallInterest")+"\n"+ui.Cash((g.Frame.Debt+gap+599)/600-(g.Frame.Debt+599)/600), 14)
@@ -102,6 +107,14 @@ func (h *host) buildPlanner(g *Game, t func(string) string, label nativeLabel, b
 }
 func (h *host) buildServices(g *Game, t func(string) string, label nativeLabel, button nativeButton) {
 	label(t("services"), 22)
+	label(t(g.Frame.TrainFamily.NameKey)+" · "+fmt.Sprint(g.Frame.TrainFamily.Seats)+" "+t("seatUnit"), 15)
+	button(t(map[bool]string{true: "hideFleetDetails", false: "showFleetDetails"}[g.State.FleetDetails]), func() { g.State.FleetDetails = !g.State.FleetDetails; g.dirty = true; h.persist(g) })
+	if g.State.FleetDetails {
+		for _, row := range ui.TrainDetails(g.Frame, g.State.Locale) {
+			label(row.Label+"\n"+row.Value, 14)
+		}
+	}
+	label(t("directService"), 14)
 	for _, line := range g.Frame.IdleLines {
 		if line.CorridorID == g.State.ServiceCorridor {
 			reason := "idleNeedsService"

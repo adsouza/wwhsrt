@@ -1,0 +1,11 @@
+{
+  "date": "2026-11-12T11:41:31.012580+00:00",
+  "platform": "macOS arm64",
+  "binary_sha256": "edd0c3bb3d1d73d768f344554103cb9db72b6cec98e906b9513986b39dc9c49c",
+  "isolated_bundle_identifier": "io.github.adsouza.wwhsrt.edit-validation",
+  "result": "native_launch_observed_interaction_unqualified",
+  "observation": "Rebuilt app opened the Company panel. Automated scroll/drag did not change the existing panel; the name editor was not reached, so no OS editing/clipboard pass is claimed.",
+  "isolated_campaign_unchanged": true,
+  "player_campaign_reset": false,
+  "component_checks": "TestNativeName* exercises actual widget pointer/focus events and editor commands with an in-memory clipboard; see TESTING.md."
+}

@@ -22,7 +22,7 @@ func (h *host) openNewGame(g *Game) {
 	if h.busy {
 		return
 	}
-	h.field.Blur()
+	h.blurName()
 	if h.loanInput != nil {
 		h.loanInput.Focus(false)
 	}

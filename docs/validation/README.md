@@ -4,6 +4,8 @@
 
 ## Current first-business slice
 
+[Milestone 2 implementation/evidence](MILESTONE_2.md) and [its workflow results](milestone2-checks.json) cover the full limited first-business feature scope, including station lifecycle, the named train family, component quotes, contextual guidance and independent operation. The existing business regression also passes on that WASM. The rebuilt native macOS service panel was visually inspected in isolation; automated native input did not reliably activate controls. Native interaction, physical devices and native accessibility remain unqualified. Through-running and transfers remain milestone 3.
+
 The [first-business notes](FIRST_BUSINESS.md) and [browser results](business-checks.json) cover the playable construction/funding/service/revenue loop.
 
 The [New game checks](new-game-checks.json) cover Company → New game, confirmation/cancellation, failed-save retry, a fresh starter company, reload, offline restart and native-headless/WASM replay. [Desktop confirmation](new-game-desktop.png) · [320×480 Chinese confirmation](new-game-phone-zh.png). Native widget checks cover layout and Cancel; native OS pointer/keyboard input and physical phones remain outside this automated evidence.

@@ -2,6 +2,8 @@
 
 This document describes the architecture of World-wide High-speed Rail Tycoon. The [first-business slice](docs/validation/FIRST_BUSINESS.md) implements domain/application/API boundaries, direct-service demand and finance, construction and funding, dedicated train leases, native ebitenui controls, an Ebitengine map, a semantic browser HUD, a headless CLI and development saves. Transfer markets, the worldwide data pipeline, production save contract and multiplayer server remain planned. Earlier map and widget prototypes remain separate reference artifacts.
 
+Milestone 2 derives station ownership/readiness from the pinned starting network and committed projects; stations open with their project. A single named train-family projection publishes the constants used by fleet validation and settlement. Construction component projections use the same existing cost calculation and cent rounding. These projections and pure UI guidance are excluded from canonical saves/checkpoints, so this milestone needs no version-2 save migration or financial reset. Detailed station capex/capacity and multiple train families remain outside this introductory model.
+
 The [game design](docs/DESIGN.md) owns gameplay rules and domain invariants; [UX](docs/UX.md) owns interaction behavior; [testing](TESTING.md) records verification commands and release gates. The [state/storage contract](docs/STATE_AND_STORAGE.md) defines Go type shapes, portable save v1, the SQLite server backend and migration policy. Numeric camera settings and cost assumptions live in their linked manifests. This document explains the system boundaries that realize those requirements. Proposed balance and recovery policies retain their status from the design; listing them here does not make them calibrated or implemented.
 
 ## Architecture style
@@ -142,3 +144,7 @@ Native and browser lifecycle adapters handle audio activation, visibility, stora
 - Measured mobile/stress performance, memory, and shipped WebAssembly size.
 
 Use [TESTING.md](TESTING.md) to distinguish existing prototype evidence from these implementation and release obligations.
+
+### Native text editing
+
+The Company name editor participates in Ebiten UI layout, input layers and focus traversal, with Ebitengine `textinput.Field` retaining IME composition. The pinned Ebiten UI 0.7.3 `TextInput` has no native clipboard/IME integration and uses rune positions as byte slices in selection extraction/deletion; using it unchanged would corrupt non-ASCII selections. `pkg/app/name_input_native.go` supplies grapheme-safe editing/selection rendering and bounded undo history; `github.com/atotto/clipboard` supplies explicit clipboard reads/writes only on editing shortcuts, with failures preserving the draft. Clipboard contents are not logged. The browser keeps its semantic HTML input. This adapter can be replaced when the upstream widget meets the same Unicode/IME/clipboard contract.

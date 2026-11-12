@@ -35,6 +35,8 @@ Open `http://127.0.0.1:8765/`. Once its offline cache has installed, the browser
 
 The [first-business notes](docs/validation/FIRST_BUSINESS.md) explain controls, funding, model assumptions, save locations and remaining qualification. [TESTING.md](TESTING.md#first-business-slice) lists focused checks. The graphics-free CLI uses the same application: `go run ./cmd/headless -advance 2`.
 
+[Milestone 2](docs/validation/MILESTONE_2.md) adds explicit station readiness, the Swift 400 train family and costs, reconciled engineering breakdowns, and contextual guidance through the first-business loop. Existing version-2 saves and economic balances are preserved. Through-running and transfers belong to milestone 3.
+
 The [game design specification](docs/DESIGN.md) records the current design, confirmed choices, proposed rules, and delivery milestones. The broader worldwide game and multiplayer server remain planned.
 
 The [architecture](ARCHITECTURE.md) describes system boundaries, offline/server execution, data preparation, presentation, and persistence. The [testing guide](TESTING.md) separates current runnable prototype checks from planned implementation and release gates.

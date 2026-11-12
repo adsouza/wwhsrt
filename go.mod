@@ -3,6 +3,7 @@ module wwhsrt
 go 1.26.4
 
 require (
+	github.com/atotto/clipboard v0.1.4
 	github.com/ebitenui/ebitenui v0.7.3
 	github.com/go-text/typesetting v0.3.5
 	github.com/hajimehoshi/ebiten/v2 v2.10.5

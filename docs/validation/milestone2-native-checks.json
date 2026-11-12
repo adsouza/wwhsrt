@@ -1,0 +1,20 @@
+{
+  "date": "2026-11-12T11:11:56.579936+00:00",
+  "platform": "macOS arm64",
+  "binary_sha256": "650626109ec6f09f9ba76ac0100097903bebfd33b1c007fd5e235352475763c7",
+  "isolated_bundle_identifier": "io.github.adsouza.wwhsrt.m2-validation",
+  "isolated_data_directory": "build/m2-native-validation-data",
+  "rendering_observed": [
+    "Dark Services panel with selected-tab indicator",
+    "Swift 400 summary, seats, lease, running, access and handling costs",
+    "Operating hours, turnaround and direct-service explanation",
+    "City/open-station/station-works map legend and public starter network"
+  ],
+  "interaction_result": "unqualified: automated canvas clicks and keyboard attempts did not reliably change controls",
+  "player_campaign_reset": false,
+  "limitations": [
+    "Rendering observation only; native pointer/keyboard workflow remains unqualified",
+    "Physical phones, native assistive technology/IME and other desktop runtime platforms remain unqualified"
+  ],
+  "result": "rendering_observed_interaction_unqualified"
+}

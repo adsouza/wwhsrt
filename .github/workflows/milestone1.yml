@@ -15,7 +15,11 @@ jobs:
         with:
           node-version: '24'
           cache: npm
-      - run: go test -p 1 ./...
+      - name: Linux renderer test dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb xauth libgl1 libgl1-mesa-dri libx11-6 libxcursor1 libxext6 libxi6 libxinerama1 libxrandr2 libxrender1
+      - run: xvfb-run -a go test -p 1 ./...
         env:
           GOMEMLIMIT: 768MiB
           GOMAXPROCS: '2'
@@ -34,6 +38,7 @@ jobs:
           build/webserve > /tmp/wwhsrt-http.log 2>&1 &
           server_pid=$!
           trap 'kill "$server_pid"' EXIT
+          NODE_OPTIONS=--max-old-space-size=1536 node tools/check-milestone2.cjs
           NODE_OPTIONS=--max-old-space-size=1536 node tools/check-business.cjs
           NODE_OPTIONS=--max-old-space-size=1536 node tools/check-new-game.cjs
           NODE_OPTIONS=--max-old-space-size=1536 node tools/check-theme.cjs
@@ -49,6 +54,7 @@ jobs:
             docs/validation/theme-*
             docs/validation/funding-*
             docs/validation/milestone1-*
+            docs/validation/milestone2-*
             docs/validation/terrain-*
             docs/validation/route-geography-*
   native-builds:

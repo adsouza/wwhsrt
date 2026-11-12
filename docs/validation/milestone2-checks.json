@@ -1,0 +1,16 @@
+{
+  "date": "2026-11-12T03:24:38.264Z",
+  "browser": "153.0.8010.12",
+  "wasm_sha256": "262c98c1fc9b633f0c096dedd2c3a5a55e7245665f712c022b19ba85ec0ec5b9",
+  "checks": [
+    "Twelve cities, three operational public stations, named 400-seat train family and actual costs; contextual first-month action earns starter revenue; guidance dismissal/settings and fleet detail disclosure leave checkpoint unchanged; stationless/public city inspection",
+    "Substantial barrier and priced terrain alternatives reconcile; one full-gap loan funds a standalone project; both initially stationless endpoints receive timed station works; ordinary guidance leads through construction, opening, local fleet lease, applied service and positive revenue; every report reconciles on a Chinese phone layout",
+    "Station/fleet/business state resumes identically; exported browser save opens headlessly; cached offline continuation works; accepted commands replay to an identical native-headless/WASM checkpoint"
+  ],
+  "limitations": [
+    "Phone/touch/IME are emulated; physical phones and native assistive technology remain unqualified.",
+    "Direct services only; through-running and transfers are milestone 3."
+  ],
+  "checkpoint": "f954b9ecafda1af28abdf43079dff4d56f8bc387aa3c529498a614b4dc0ad6b9",
+  "result": "passed"
+}
