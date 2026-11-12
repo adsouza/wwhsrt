@@ -1,6 +1,6 @@
 # Testing
 
-The repository is at the specification/prototype stage. There is no root game Go module, simulation test suite, dedicated server, or CI workflow yet. The runnable checks below cover the existing data and rendering prototypes. Passing them does not qualify the future game.
+The repository has a root Go module and a playable first-business slice, alongside earlier prototypes. Focused checks exercise construction, direct-service demand/revenue, funding, fleet, cash reconciliation and continuation. The broader network economy, dedicated server and full production save format remain planned. A hosted workflow builds native/browser targets and runs the initial rules and browser checks; adding the workflow does not establish that it has run remotely.
 
 Use the [architecture](ARCHITECTURE.md) for system boundaries, [game design verification contract](docs/DESIGN.md#13-verification-and-performance) for domain properties and scenarios, and [UX acceptance criteria](docs/UX.md#10-acceptance-and-questions-to-test) for player workflows. Existing results and limitations are recorded in the [validation report](docs/validation/README.md).
 
@@ -13,6 +13,54 @@ Use the [architecture](ARCHITECTURE.md) for system boundaries, [game design veri
 - State exactly which checks ran and any remaining limits. A build is not an interaction check; browser touch emulation is not physical-device qualification.
 
 ## Existing checks
+
+### First business slice
+
+Use Go 1.27.1 (module minimum 1.26.4). From the root, these are focused checks for the implemented slice, not permission to run the full repository suite locally:
+
+```sh
+GOMEMLIMIT=768MiB GOMAXPROCS=2 go test -p 1 ./assets ./internal/application ./internal/adapters/filestore ./pkg/mapview ./pkg/ui -count=1
+python3 tools/check-boundaries.py
+```
+
+For the real WASM/browser acceptance checks, build first, then start the server in a separate terminal:
+
+```sh
+sh tools/build-web.sh
+mkdir -p build
+GOMEMLIMIT=768MiB GOMAXPROCS=2 go build -p 1 -o build/headless ./cmd/headless
+go run ./cmd/webserve
+```
+
+In another terminal:
+
+```sh
+npm ci --ignore-scripts --no-audit --no-fund
+npx playwright install chromium
+NODE_OPTIONS=--max-old-space-size=1536 npm run check:business
+```
+
+The checker uses actual DOM inputs and the Go-rendered map. It verifies selection/drag separation, zoom, keyboard controls and accessibility-tree names, CDP Chinese composition, draft retention, narrow layouts, hidden-map commands, IndexedDB write failure, Web Lock ownership, reload, offline cold launch, corrupt-save preservation, and native-headless/WASM checkpoints. It writes `docs/validation/business-checks.json` and screenshots. Synthetic inputs cannot qualify an actual phone keyboard, VoiceOver experience, native IME or OS termination. The native app was launched/visually inspected on macOS; its canvas management controls are absent from the accessibility tree.
+
+For native sidebar sizing and scrolling, run `GOMEMLIMIT=768MiB GOMAXPROCS=2 go test -p 1 ./pkg/app -run '^TestNative(ReportScroll|Panels|Wrapped)' -count=1`. These checks measure actual ebitenui content/footer preferred sizes across five views, English/Chinese and 320–1920px windows, and check wrapped catalog text with the bundled font. They reproduce the Build panel's former 448px content width inside a 360px sidebar. Populated-report tests dispatch the actual widget wheel/slider events at 320×480 through 1200×800: fractional wheel deltas, both scroll limits, dragging, view rebuilds, stale events, expanded-map isolation, footer/gutter separation and no-overflow behavior. Scrolling preserves the simulation checkpoint. These tests do not open a window or qualify OS input; manually check wheel/trackpad, scrollbar dragging and Page Up/Down/Home/End in the rebuilt native app. Text fields retain their editing keys.
+
+Hosted [CI](.github/workflows/milestone1.yml) owns the full root suite, race checks, bounded fuzz campaigns and macOS/Linux/Windows builds. Stop a test server when finished; preserve an interactive development instance the user is using.
+
+For idle-line warnings, run `go test -p 1 ./internal/application -run '^TestIdle' -count=1` and `go test -p 1 ./pkg/app -run '^TestNativeIdle' -count=1`. They cover authoritative fees, opening boundaries, accepted versus previewed service, leasing alone, suspension, reload, public-track false alarms, frame isolation and native warning/footer sizing. The business browser checker exercises the warning, service shortcut and its lifecycle at desktop and 320px Chinese layouts and saves `business-idle-line-*.png`. Notices do not block deliberate suspension or mutate finances.
+
+For New game, run `go test -p 1 ./internal/application ./pkg/ui ./pkg/app -run 'Test(NewGame|NativeNewGame)' -count=1`. This covers a populated campaign reset, atomic failed writes, restart after campaign completion, stale command rejection, durable reload, first-month income, cleared drafts, retained preferences, and native confirmation/cancel sizing down to 320×480. After building browser/headless targets and starting the test server, run `NODE_OPTIONS=--max-old-space-size=1536 node tools/check-new-game.cjs` (optional URL argument). It uses actual Company/confirmation controls for cancellation, errors/retry, English/Chinese layouts, reload, offline restart and native-headless/WASM replay; evidence is `docs/validation/new-game-*`. Its browser context is isolated from the player's real save.
+
+For native window preferences, run `go test -p 1 ./pkg/app -run '^TestNativeWindow' -count=1`. Checks cover normal and invalid bounds, disconnected/reordered/duplicate-named displays, legacy flat UI preferences, reload, failed writes/retry, New game preservation and unchanged campaign state. After rebuilding the native app, move/resize it through OS window controls, quit and reopen, then compare the observed `ui.json` placement. [Recorded macOS verification](docs/validation/window-checks.json) restored exact bounds. Physical monitor unplugging, Windows/Linux runtime, maximize/fullscreen transitions and forced termination remain separate qualification; the debounce can lose the latest fraction of a second on a crash.
+
+For appearance, run `go test -p 1 ./pkg/ui ./pkg/app -count=1`. These focused packages cover explicit/system overrides, representative text contrast of at least 4.5:1 in both palettes, preference retention and native sizing at 320–1920px in both languages/modes. Build browser/native targets, serve the browser bundle, then run `NODE_OPTIONS=--max-old-space-size=1536 node tools/check-theme.cjs` (optional URL argument). It checks real System/Light/Dark controls, emulated live OS changes, changed map pixels, shared palette use, all five views at 320px Chinese, dialogs, expanded planning, restart, offline use, New game retention and unchanged campaign checkpoints for theme-only actions. Results and screenshots are `docs/validation/theme-*`; native system-dark rendering was also visually inspected on macOS. Physical devices, live native OS transitions and other desktop operating systems remain unqualified.
+
+For construction funding explanations, `go test -p 1 ./pkg/ui -run '^TestFunding' -count=1` checks cents, reversed city selection, the named default alignment, available/negative cash, zero-floor behavior and committed/public exclusions. Native sizing uses the existing panel checks. After rebuilding and serving the browser bundle, `NODE_OPTIONS=--max-old-space-size=1536 node tools/check-funding.cjs` checks named-route arithmetic, signed deductions, review/alternative selection, exact-gap borrowing, clearing a real simulated cash deficit, committed-line exclusion and the 320px Chinese dark layout. Evidence is `docs/validation/funding-*`. The native build compiled; its updated funding flow was not visually qualified because the user was actively playing the running prior build.
+
+For regional terrain changes, run `go test -p 1 ./pkg/terrain ./pkg/mapview ./pkg/ui`, rebuild the browser bundle and run `NODE_OPTIONS=--max-old-space-size=1536 node tools/check-terrain.cjs` against that server. Inspect Hokkaido desktop/phone and Kansai screenshots. The checker records toggle persistence, actual canvas changes, unchanged quotes/checkpoints, Chinese layouts and offline terrain/credits. See [terrain provenance](assets/terrain/README.md); shading is context, not engineering qualification.
+
+For alignment geometry, install `tools/requirements-geography.txt` and run `python3 tools/check-route-geography.py`. This checks all six current paths against pinned land/lake masks in geographic and Equal Earth space, including the drawn coastline, with negative fixtures for the former bay/lake shortcuts and missing coverage. See [scope and provenance](data/geography/README.md). The terrain browser checker also compares every live WASM path with the checked catalog. Inspect both Hokkaido options and the Lake Biwa approaches after changes.
+
+The earlier prototype checks below remain independently runnable.
 
 | Area | Runnable check / evidence | What it establishes |
 | --- | --- | --- |
@@ -42,7 +90,7 @@ Keep the raw 96-record attachment unchanged. Current derived output contains 94 
 
 ### State and save contracts
 
-From the repository root, run only the reference package (the root still has no game Go module):
+From the repository root, run only the reference package:
 
 ```sh
 GO111MODULE=off GOWORK=off GOMEMLIMIT=768MiB GOMAXPROCS=2 go test -p 1 ./docs/contracts -count=1
@@ -157,11 +205,11 @@ Run bounded, scoped mutation jobs in hosted CI or deliberately scheduled qualifi
 
 ## CI and release qualification
 
-No CI configuration is present yet. When implementation starts, establish hosted gates for native/browser builds, domain/API tests, bounded fuzzing, architecture boundaries, save compatibility, browser workflows, and cross-target canonical checkpoints. Include the dedicated server without a display/audio device and offline single-player with networking unavailable. Add full suites to hosted CI rather than silently running them through local hooks.
+The [walking-skeleton workflow](.github/workflows/milestone1.yml) establishes hosted gates for initial domain/API tests, race checks, bounded fuzzing, architecture boundaries, native/browser builds, browser workflows, and the native-headless/WASM checkpoint. Extend it with production-save compatibility, full scenario policies, and dedicated-server/display-free checks as those systems arrive. Keep full suites in hosted CI rather than silently running them through local hooks.
 
 Measure performance on named hardware and pinned browsers using the workload in [the design](docs/DESIGN.md#initial-budgets-to-qualify). The 60 FPS ordinary / 30 FPS stress replay goals, cached preview under 200 ms, and full forecast/month under 2 seconds are targets, not prototype results. Record peak memory and compressed shipped WASM size. Do not treat the renderer spike's raw size or Africa2ice's budgets as qualification of the game.
 
-Before release, qualify actual iOS Safari and Android Chrome, software keyboards/IME, safe-area and keyboard occlusion, background termination/resume, storage recovery, and the complete 320px workflow. Repeat on desktop with keyboard-only use, text scaling, and fractional/2× device scales. Test screen-reader and native accessibility through actual semantic controls. The current canvas exposes no semantic management interface; touch emulation and a native compile do not close these gates.
+Before release, qualify actual iOS Safari and Android Chrome, software keyboards/IME, safe-area and keyboard occlusion, background termination/resume, storage recovery, and the complete 320px workflow. Repeat on desktop with keyboard-only use, text scaling, and fractional/2× device scales. Test screen-reader and native accessibility through actual semantic controls. The native canvas exposes no semantic management interface; the browser now has semantic HTML controls. Touch emulation and a native compile do not close these gates.
 
 First-time-player sessions must cover both starting strategies without a required tutorial, plus experienced play with hints disabled. Verify that drafts carry from the planning lobby across host start and several live month boundaries. A stable online company must survive a 30-minute absence at the proposed default and eight hours at the 15-minute host setting. Use injected clocks for correctness checks and qualify real host timing separately.
 

@@ -12,7 +12,30 @@ Single-player runs offline. Optional multiplayer connects competing companies to
 
 Committed construction is visible to every company. Owners can offer paid track access on new private lines. Online auctions give players at least three real minutes to bid. Every station is open access at regulated fees.
 
-The [game design specification](docs/DESIGN.md) records the current design, confirmed choices, proposed rules, and delivery milestones. The repository is at the specification stage, with isolated map and widget feasibility prototypes.
+The first playable business slice now runs in East Asia: operate the Tokyo–Nagoya starter service, adjust fares and frequency, lease trains, borrow for construction, compare terrain-aware alignments, build a new line, and collect passenger revenue in monthly reports. Native controls use ebitenui; the browser has semantic HTML controls over the same Go/Ebitengine map and rules. English and Simplified Chinese are bundled.
+
+To start over, open **Company → New game** and confirm replacing the current save. This restores the January 2029 starting company and starter service while keeping display preferences.
+
+Choose **Company → Appearance** for System, Light or Dark mode. System follows your device; the saved choice covers controls, the map and terrain, including offline play.
+
+Run the native client from this checkout:
+
+```sh
+go run ./cmd/wwhsrt
+```
+
+Or build and serve the browser version:
+
+```sh
+sh tools/build-web.sh
+go run ./cmd/webserve
+```
+
+Open `http://127.0.0.1:8765/`. Once its offline cache has installed, the browser client can reload and play without networking. Native play has no network requirement. `sh tools/build-native.sh` also produces a native executable and a macOS development app bundle on macOS.
+
+The [first-business notes](docs/validation/FIRST_BUSINESS.md) explain controls, funding, model assumptions, save locations and remaining qualification. [TESTING.md](TESTING.md#first-business-slice) lists focused checks. The graphics-free CLI uses the same application: `go run ./cmd/headless -advance 2`.
+
+The [game design specification](docs/DESIGN.md) records the current design, confirmed choices, proposed rules, and delivery milestones. The broader worldwide game and multiplayer server remain planned.
 
 The [architecture](ARCHITECTURE.md) describes system boundaries, offline/server execution, data preparation, presentation, and persistence. The [testing guide](TESTING.md) separates current runnable prototype checks from planned implementation and release gates.
 

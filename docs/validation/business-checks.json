@@ -1,0 +1,17 @@
+{
+  "date": "2026-11-12T00:54:09.243Z",
+  "browser": "153.0.8010.12",
+  "wasm_sha256": "10618d11b64ef201d2a7c8788c8a352aeff33df726df15a8b88a6693071218cf",
+  "checks": [
+    "Fresh company has an active starter service; map selection, AX names and keyboard advancement work; first month carries passengers, collects fares and posts costs",
+    "Two-endpoint reverse-order planning and route focus; alternative engineering prices; single exact-shortfall loan, editable custom loans with cents and credit-limit validation, and 90% grant; committed lines disappear from opportunities immediately and stay absent after completion/reload while project progress remains visible; construction progress across 48 months; opening eligibility; persistent idle-line warnings with actual upkeep/idle-lease costs, 320px Chinese footer, service shortcut, accepted-service clearing and suspension reappearance; dedicated train lease; accepted service earns new-line revenue and pays upkeep; every report reconciles",
+    "Native-headless and real WASM replay identical accepted commands to an identical checkpoint; Chinese composition and draft retention; 320–1920px reflow; fleet shortage blocks an infeasible service",
+    "Rejected storage write preserves accepted financial state; second tab excluded; company, projects, fleet and drafts resume; cached application opens offline and continues earning revenue"
+  ],
+  "limitations": [
+    "Synthetic desktop/touch/IME inputs; physical phones and native IME remain unqualified.",
+    "Native canvas accessibility is still incomplete."
+  ],
+  "checkpoint": "1ba3dca20881720c77737dfc7abb507f0d5b9650557380800838071ab90af2a6",
+  "result": "passed"
+}

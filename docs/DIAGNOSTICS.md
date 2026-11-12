@@ -1,6 +1,6 @@
 # Diagnostic logging and event history
 
-Pervasive, structured event logging is a product requirement for debugging after the fact. Record enough context to connect a player's action to validation, authoritative commit, month resolution, storage and visible feedback. This is the implementation contract; runtime logging/adapters are not implemented yet.
+Pervasive, structured event logging is a product requirement for debugging after the fact. Record enough context to connect a player's action to validation, authoritative commit, month resolution, storage and visible feedback. Milestone 1 emits structured startup, command received/rejected/committed and storage-failure events with revisions, scenario identity and checkpoints; company-name text is omitted. Native/headless events go to stderr and browser events to the console. Bounded diagnostic stores, support bundles, server audit transactions and the broader coverage below remain planned.
 
 ## Two complementary records
 

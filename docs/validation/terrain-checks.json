@@ -1,0 +1,16 @@
+{
+  "date": "2026-11-12T00:01:17.746Z",
+  "browser": "153.0.8010.12",
+  "wasm_sha256": "6d6275ad77f4752fd156ef901a3c84798af9402fd8389380d3746b90ab6f7a27",
+  "checks": [
+    "All six WASM frame alignments exactly match the geography-checked shipped paths",
+    "Both Hokkaido alignment explanations disclose their tunnel kilometres; terrain changes actual canvas pixels; toggle persists on reload; quotes, cash and checkpoint stay unchanged",
+    "Kansai relief and Lake Biwa inspected; Simplified Chinese Hokkaido map; 320–1920px layouts keep terrain toggle visible without horizontal overflow",
+    "Embedded terrain and attribution open offline with the same company checkpoint"
+  ],
+  "limitations": [
+    "Regional cartographic context, not an engineering survey or route feasibility proof.",
+    "Synthetic browser inputs; physical phones and native controls remain separate qualification."
+  ],
+  "result": "passed"
+}

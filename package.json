@@ -1,0 +1,11 @@
+{
+  "name": "wwhsrt-browser-checks",
+  "private": true,
+  "scripts": {
+    "check:m1": "node tools/check-milestone1.cjs",
+    "check:business": "node tools/check-business.cjs"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  }
+}

@@ -34,3 +34,14 @@ go.work.sum
 # Editor/IDE
 # .idea/
 # .vscode/
+
+# Walking-skeleton build outputs
+/web/main.wasm
+/web/wasm_exec.js
+/web/rail-ui.ttf
+/web/favicon.svg
+/web/sw.js
+/build/
+/node_modules/
+
+/web/terrain-credits.txt

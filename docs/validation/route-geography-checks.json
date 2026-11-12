@@ -1,0 +1,74 @@
+{
+  "result": "passed",
+  "business_sha256": "4c08dd6376df93279f6d63be517f09d0c0d3bee21d025c9f8223ec855032780b",
+  "mask_sha256": "d6cd55fc2601950b042222108e9c25d778fc251cd898f9d3b7ed6d6af741360b",
+  "drawn_coast_sha256": "f87605f4b75118aa6174bda395acebe1934eb260079755f329801736974d0e38",
+  "routes": [
+    {
+      "corridor": "tokyo-nagoya",
+      "alignment": "tokaido-east",
+      "existing": true,
+      "vertices": 3,
+      "drawn_geodesic_km": 269.57,
+      "scenario_rail_km": 366,
+      "errors": []
+    },
+    {
+      "corridor": "nagoya-osaka",
+      "alignment": "tokaido-west",
+      "existing": true,
+      "vertices": 17,
+      "drawn_geodesic_km": 167.11,
+      "scenario_rail_km": 186,
+      "errors": []
+    },
+    {
+      "corridor": "tsuruga-osaka",
+      "alignment": "mountain",
+      "existing": false,
+      "vertices": 10,
+      "drawn_geodesic_km": 135.32,
+      "scenario_rail_km": 205,
+      "errors": []
+    },
+    {
+      "corridor": "tsuruga-osaka",
+      "alignment": "valley",
+      "existing": false,
+      "vertices": 18,
+      "drawn_geodesic_km": 149.76,
+      "scenario_rail_km": 260,
+      "errors": []
+    },
+    {
+      "corridor": "hokkaido-extension",
+      "alignment": "mountain",
+      "existing": false,
+      "vertices": 15,
+      "drawn_geodesic_km": 208.68,
+      "scenario_rail_km": 212,
+      "errors": []
+    },
+    {
+      "corridor": "hokkaido-extension",
+      "alignment": "valley",
+      "existing": false,
+      "vertices": 31,
+      "drawn_geodesic_km": 272.97,
+      "scenario_rail_km": 300,
+      "errors": []
+    }
+  ],
+  "checks": [
+    "All shipped paths, including existing lines and both alternatives, connect their endpoints",
+    "No mapped sea/lake or conservative lake-envelope crossings in geographic and Equal Earth space",
+    "Both source shoreline and actually rendered coast checked; unknown coverage rejected",
+    "Old Uchiura Bay and Lake Biwa shortcuts rejected by negative fixtures",
+    "Drawn geodesic lengths do not exceed priced scenario rail kilometres"
+  ],
+  "limitations": [
+    "Cartographic regional review, not a surveyed engineering alignment or gradient/curvature qualification.",
+    "Natural Earth coastline and Lake Biwa plus authored avoidance envelopes for Toya, Shikotsu and Onuma; small rivers/other unmapped waters are outside this mask.",
+    "There are no approved sea/lake crossing exceptions in the current scenario. Future exceptions need explicit reviewed engineering, not a generic water bypass."
+  ]
+}

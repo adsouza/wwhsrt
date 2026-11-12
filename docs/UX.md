@@ -10,6 +10,8 @@ The recurring interaction is **inspect → try a plan → understand its consequ
 
 Keep one clear next action for the selected task. Offer expert detail on demand. Experienced players can immediately use all available tools; learning cues never unlock gameplay features, demand a prescribed route, or block a business month.
 
+**Starting over (implemented in the local first-business slice):** Company → New game opens a confirmation identifying the company and date being replaced, with explicit loss and fresh-start details. Cancel receives initial focus; Cancel/Escape leave the save and drafts untouched. Confirmation replaces the local campaign only after its save commits. A storage error leaves the existing game intact and offers retry. The fresh company returns to the East Asia map with onboarding cues restored; language, motion and terrain preferences remain. Both native and semantic browser controls support this flow, including narrow portrait layouts. This is also available after the campaign ends and is not an online world-deletion control.
+
 ### A few minutes of ordinary play
 
 1. Open the map and see the company objective, available cash, and a few relevant opportunities. Select a city or search for one.
@@ -33,6 +35,8 @@ Use four stable destinations on every device. On desktop they form a compact lef
 | Reports | Understand resolved results | Monthly summary, trends, changes, project milestones, contextual explanations |
 
 Fleet is a named section within Services and is directly reachable from a fleet shortage. Finance is a named section within Company and is directly reachable from any funding gap. Avoid another permanent navigation item for each subsystem. Settings, saves, help, and leave-world actions live in the company/menu control; campaign finance and presentation settings remain distinct.
+
+The local first-business slice's funding preview always identifies its city pair and alignment. Build and Company show total construction cost, a signed grant deduction, the resulting company contribution, available cash, any existing negative-cash deficit and the remaining amount needed (minimum zero). Company offers **Review this route** to inspect/change that plan without a financial command. **Borrow funding shortfall** takes the whole displayed gap in one loan; its added monthly interest is labeled separately from the editable custom loan's interest. Accepted construction/public lines do not generate another construction-funding preview. These displays explain current scenario prices and finance rules.
 
 The top status strip always identifies the business month and unrestricted cash. Offline it provides **Advance month**; online it provides the next deadline and the player's acknowledgment state. Wider layouts add last-month operating cash flow, cash runway, and debt. On phones those additional values are one tap away in Company. Never shorten billions to millions without an explicit unit or conceal negative signs.
 
@@ -240,6 +244,8 @@ Standing services continue while the player is away. The interface helps prepare
 ## 8. Input, accessibility, and visual density
 
 Use a cheerful contemporary transport-map style with bright railway blue, teal, sunflower yellow, coral and violet accents, fresh map colors, and readable deep-ink typography. Clear labels, distinct railway line styles, readable numerals, light and dark appearances, and purposeful motion keep it usable. Station activity and the representative day provide character. Keep financial panels calm enough to read. High resolution improves detail and available workspace rather than shrinking controls. The [presentation specification](PRESENTATION.md) and [theme manifest](../data/ui/theme.v1.json) define the initial palette and semantic roles.
+
+The implemented local slice exposes **Company → Appearance: System / Light / Dark**, defaulting to System. The native control cycles between the three choices; the semantic browser control is a select. A shared runtime palette in `pkg/ui/theme.go` covers the map, terrain, stations/routes and management controls, including financial forms, warnings, active states, scrollbars and confirmation dialogs. System tracks OS/browser changes; an explicit choice takes precedence and persists across restart and New game. Dark mode uses deep navy surfaces, subdued terrain and bright railway accents with readable labels. It is a presentation preference and cannot change economic state.
 
 All visible actions, keyboard commands, and touch controls emit the same intent with the same validation. Escape/Back closes one transient layer or returns within a task; it never silently applies or discards a draft. Text editing owns its shortcuts. Avoid a bare Space shortcut for month advancement, where a player may intend to pause replay. Any advance shortcut is documented, guarded against key-repeat, and unavailable inside editors/modals.
 

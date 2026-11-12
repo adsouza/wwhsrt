@@ -2,6 +2,32 @@
 
 **Date:** 2026-11-08. Prototype evidence, not release qualification or a completed game.
 
+## Current first-business slice
+
+The [first-business notes](FIRST_BUSINESS.md) and [browser results](business-checks.json) cover the playable construction/funding/service/revenue loop.
+
+The [New game checks](new-game-checks.json) cover Company → New game, confirmation/cancellation, failed-save retry, a fresh starter company, reload, offline restart and native-headless/WASM replay. [Desktop confirmation](new-game-desktop.png) · [320×480 Chinese confirmation](new-game-phone-zh.png). Native widget checks cover layout and Cancel; native OS pointer/keyboard input and physical phones remain outside this automated evidence.
+
+[Native window checks](window-checks.json) record a macOS OS-menu move/resize and quit/relaunch with the exact saved size and position restored, while campaign bytes stayed unchanged. Focused Go fixtures cover preference compatibility, failure/retry and monitor fallback. This does not qualify physical monitor removal or other desktop operating systems.
+
+[Appearance checks](theme-checks.json) cover System/Light/Dark selection, live emulated browser appearance changes, shared native/browser colours, map pixels, persistence, offline play and New game retention without theme-only economic changes. Representative text contrast and native layout checks pass in both palettes. Native macOS system-dark rendering was visually observed; live native OS theme switching and physical phones remain unqualified. [Dark terrain](theme-dark-terrain-desktop.png) · [Dark services](theme-dark-services-desktop.png) · [Chinese phone report](theme-dark-report-phone-zh.png) · [Chinese phone dialog](theme-dark-dialog-phone-zh.png).
+
+[Funding explanation checks](funding-checks.json) cover the named route/alignment, signed cost/grant/cash arithmetic, route review, alternative selection, exact-gap loans, clearing a simulated negative balance and committed-line exclusion. [Desktop](funding-breakdown-desktop.png) · [320px Chinese breakdown](funding-breakdown-phone-zh.png). Native width checks and builds pass; the prior native app was left open during active play, so the updated native flow still needs runtime inspection after restart.
+
+Idle-line warnings are covered by the application lifecycle checks, native widget
+layout/action checks, and the business browser workflow. They disclose ongoing
+costs for open owned lines or idle public-track leases, remain beside time controls,
+and link to Services. [Desktop warning](business-idle-line-desktop.png) ·
+[320px Chinese warning](business-idle-line-phone-zh.png).
+
+[Regional terrain checks](terrain-checks.json) cover the Hokkaido/Kansai relief layer, Chinese phone layout, persisted visibility, unchanged quotes/company checkpoint and offline assets/credits. [Provenance and scope](../../assets/terrain/README.md) distinguish this cartography from engineering qualification. [Hokkaido desktop](terrain-hokkaido-desktop.png) · [Hokkaido phone](terrain-hokkaido-phone-zh.png) · [Kansai](terrain-kansai-desktop.png).
+
+[Route geography checks](route-geography-checks.json) audit all six current business alignments for mapped sea/lake crossings, including projected straight segments and the actually drawn coastline. Five paths were corrected. [Regional mask provenance and limits](../../data/geography/README.md) document the authored waypoints and conservative lake envelopes. The earlier sketches are not qualified routes; these checks do not replace production engineering review.
+
+## Historical milestone 1
+
+The [2026-11-11 walking-skeleton notes](MILESTONE_1.md) describe the actual native/browser/headless implementation, beginning in East Asia. [Focused browser results](milestone1-checks.json) and screenshots accompany the new Go checks. This evidence is separate from the earlier isolated prototypes below; physical-device and native accessibility gaps are recorded explicitly.
+
 ## State and storage contracts
 
 The [state/storage design](../STATE_AND_STORAGE.md) selects SQLite for the dedicated server and defines portable save v1. The focused Go reference checks compile its type declarations, compare generated schema/example output, and exercise wide-integer round trips, checksum/version handling and duplicate/trailing JSON rejection.

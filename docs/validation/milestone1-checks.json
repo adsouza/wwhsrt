@@ -1,0 +1,19 @@
+{
+  "date": "2026-11-11T13:12:37.610Z",
+  "browser": "153.0.8010.12",
+  "scope": "Milestone 1 Go/WASM and semantic browser HUD; emulated input, not physical devices",
+  "wasm_sha256": "2f1cd0674fe4b16d935f0dc098fc91bc815918f6134ba2a734af34912f8641b7",
+  "checks": [
+    "Semantic controls and AX labels; keyboard month advance; Go-map pointer selection; drag does not select; zoom/fit; zero-service report reconciliation",
+    "CDP Chinese composition and Enter guard; Chinese name accepted by Go; language/rotation preserve unapplied draft; bilingual search; 320–1920px reflow and 44px action; touch-emulated map selection; expanded map; month advancement with map hidden",
+    "Injected IndexedDB write rejection preserves both month and checkpoint; identical native-headless/WASM command sequence yields identical checkpoint",
+    "Second tab excluded by Web Lock; committed world, selection, hint and unapplied name resume after reload; full cached page/WASM/fonts cold-launch and commit with networking disabled",
+    "Malformed saved game blocks startup and original stored bytes remain intact"
+  ],
+  "limitations": [
+    "Native canvas widgets do not expose management semantics to macOS accessibility.",
+    "Physical iOS/Android keyboards, lifecycle termination and real native Chinese IME still require human/device qualification."
+  ],
+  "checkpoint": "746e5c993d1477a1a3035828b495cff09d911a9fe053d9609643d3461f6b3091",
+  "result": "passed"
+}

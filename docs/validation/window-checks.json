@@ -1,0 +1,43 @@
+{
+  "date": "2026-11-12T01:56:03.473128+00:00",
+  "result": "passed",
+  "platform": "macOS arm64",
+  "initial_window": {
+    "width": 1200,
+    "height": 800,
+    "x": 1320,
+    "y": 453,
+    "monitor_name": "LEN T32p-20",
+    "monitor_index": 0,
+    "maximized": false
+  },
+  "before_restart": {
+    "width": 1201,
+    "height": 801,
+    "x": 0,
+    "y": 64,
+    "monitor_name": "LEN T32p-20",
+    "monitor_index": 0,
+    "maximized": false
+  },
+  "after_restart": {
+    "width": 1201,
+    "height": 801,
+    "x": 0,
+    "y": 64,
+    "monitor_name": "LEN T32p-20",
+    "monitor_index": 0,
+    "maximized": false
+  },
+  "campaign_unchanged": true,
+  "checks": [
+    "Native OS Window menu changed window dimensions and position; updated placement committed to ui.json",
+    "Quit and relaunch restored the exact monitor-relative device-independent bounds",
+    "Campaign save bytes unchanged",
+    "Focused Go checks: legacy preferences, atomic failed writes/retry, normal bounds, invalid dimensions, disconnected/reordered/duplicate-named monitors"
+  ],
+  "limitations": [
+    "Monitor disconnect/reorder recovery covered by pure Go fixtures, not a physical unplug test",
+    "Windows/Linux runtime and fullscreen/maximize transitions not manually qualified"
+  ]
+}

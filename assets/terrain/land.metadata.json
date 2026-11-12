@@ -1,0 +1,8 @@
+{
+  "source_url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_admin_0_countries.geojson",
+  "source_sha256": "239eec57ac17f100a11e2536cffc56752c318b50ae765b0918ff7aab4ce8f255",
+  "output_sha256": "f87605f4b75118aa6174bda395acebe1934eb260079755f329801736974d0e38",
+  "role": "Display-only Japan shoreline refinement; no gameplay or political boundaries.",
+  "simplification_degrees": 0.003,
+  "license": "Natural Earth public domain"
+}

@@ -1,0 +1,12 @@
+{
+  "date": "2026-11-12T02:49:53.674Z",
+  "wasm_sha256": "68fbfe660de00302edaa37dcc16d68ff15e4dd6a130191d131bf6aab52a8cc67",
+  "checks": [
+    "Company names default route/alignment; signed cost minus grant minus cash reconciles to exact gap; review link and alternative choice update the quote without mutation; one exact-gap loan leaves zero gap; committed project stops offering construction funding",
+    "Actual suspended service produces a negative balance; breakdown separates zero available cash and existing deficit; exact-gap loan clears that deficit and funds the company contribution; Chinese dark phone layout fits 320px"
+  ],
+  "limitations": [
+    "Browser controls and phone viewport are emulated; physical devices remain unqualified."
+  ],
+  "result": "passed"
+}

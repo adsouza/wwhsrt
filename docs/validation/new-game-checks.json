@@ -1,0 +1,15 @@
+{
+  "date": "2026-11-12T01:41:41.831Z",
+  "browser": "153.0.8010.12",
+  "wasm_sha256": "16a05a3203a1570ec3606f560d5ae1088e0f5e074e669cb19649f543ec954383",
+  "checks": [
+    "Company entry opens a labeled confirmation with current company and date; Cancel and Escape preserve accepted state, drafts and save bytes; Cancel receives initial focus",
+    "320x480 Simplified Chinese dialog reflows and actions remain reachable; in-flight restart cannot be dismissed; failed save preserves current company and durable bytes, displays the error, and can be retried; successful restart clears all business state/drafts and restores onboarding while retaining language, reduced motion and terrain preferences",
+    "Restarted save survives reload and earns starter-service revenue; cached app can restart and continue offline; identical restart command sequence matches native headless checkpoint"
+  ],
+  "limitations": [
+    "Synthetic browser inputs; physical phones and native OS input are not qualified by this check."
+  ],
+  "checkpoint": "faa763806365000b8b33bc92f9ecf79b11aba7f0775e009e1e7379e22726dd44",
+  "result": "passed"
+}

@@ -1,0 +1,78 @@
+name: First business
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  rules-and-browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.27.1'
+          cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: go test -p 1 ./...
+        env:
+          GOMEMLIMIT: 768MiB
+          GOMAXPROCS: '2'
+      - run: python3 tools/check-boundaries.py
+      - run: |
+          python3 -m pip install -r tools/requirements-geography.txt
+          python3 tools/check-route-geography.py
+      - run: go test -race ./internal/application ./internal/adapters/filestore
+      - run: go test ./internal/application -run '^$' -fuzz FuzzRestoreNeverPanics -fuzztime 10s -parallel 2
+      - run: go test ./pkg/mapview -run '^$' -fuzz FuzzProjectionIsFinite -fuzztime 10s -parallel 2
+      - run: sh tools/build-web.sh
+      - run: mkdir -p build && go build -o build/headless ./cmd/headless && go build -o build/webserve ./cmd/webserve
+      - run: npm ci --ignore-scripts --no-audit --no-fund && npx playwright install --with-deps chromium
+      - name: Browser acceptance
+        run: |
+          build/webserve > /tmp/wwhsrt-http.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid"' EXIT
+          NODE_OPTIONS=--max-old-space-size=1536 node tools/check-business.cjs
+          NODE_OPTIONS=--max-old-space-size=1536 node tools/check-new-game.cjs
+          NODE_OPTIONS=--max-old-space-size=1536 node tools/check-theme.cjs
+          NODE_OPTIONS=--max-old-space-size=1536 node tools/check-funding.cjs
+          NODE_OPTIONS=--max-old-space-size=1536 node tools/check-terrain.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: first-business-evidence
+          path: |
+            docs/validation/business-*
+            docs/validation/new-game-*
+            docs/validation/theme-*
+            docs/validation/funding-*
+            docs/validation/milestone1-*
+            docs/validation/terrain-*
+            docs/validation/route-geography-*
+  native-builds:
+    strategy:
+      matrix:
+        include:
+          - {os: macos-latest, target: darwin, arch: arm64}
+          - {os: ubuntu-latest, target: linux, arch: amd64}
+          - {os: windows-latest, target: windows, arch: amd64}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.27.1'
+      - run: go build -p 1 ./cmd/wwhsrt
+        env:
+          GOOS: ${{ matrix.target }}
+          GOARCH: ${{ matrix.arch }}
+          GOMEMLIMIT: 768MiB
+          GOMAXPROCS: '2'
+      - name: Validate macOS app packaging
+        if: matrix.target == 'darwin'
+        run: |
+          sh tools/build-native.sh
+          plutil -lint 'build/World-wide High-speed Rail Tycoon.app/Contents/Info.plist'
+          test -s 'build/World-wide High-speed Rail Tycoon.app/Contents/Resources/AppIcon.icns'

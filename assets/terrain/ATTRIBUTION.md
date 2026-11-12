@@ -1,0 +1,27 @@
+# Terrain credits
+
+Elevation: Mapzen Terrain Tiles, distributed through the AWS Open Data registry.
+SRTM and GMTED2010 terrain data courtesy of the U.S. Geological Survey.
+Ocean bathymetry source: NOAA ETOPO1; oceans are transparent in these relief overlays.
+
+Dataset: https://registry.opendata.aws/terrain-tiles/
+Formats and decoding: https://github.com/tilezen/joerd/blob/master/docs/formats.md
+Source and license details: https://github.com/tilezen/joerd/blob/master/docs/attribution.md
+
+SRTM and GMTED2010 are United States Government material, not subject to copyright
+protection under Title 17 U.S.C. within the United States. SRTM's source terms
+also state: copyright by the United States Government; no copyright claimed under
+Title 17 U.S.C. See the linked source terms for distribution outside the US.
+
+Lake Biwa outline and Japan shoreline: Natural Earth 1:10m lakes and countries,
+public domain. Other countries retain the prior 1:110m display geometry.
+https://www.naturalearthdata.com/about/terms-of-use/
+https://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-admin-0-countries/
+
+Regional reference labels use the Japan Ministry of the Environment's park maps:
+https://www.env.go.jp/park/content/000169509.pdf
+Labels and small lake point symbols are approximate context, not surveyed locations.
+
+Raster sources, SHA-256 identities, imagery-source headers and generation details
+are recorded in terrain.json and tools/prepare-terrain.py. Ordinary game builds
+and offline play use the checked-in derived assets without downloading terrain.

@@ -2,6 +2,10 @@
 
 **Decision:** use a typed Go world, portable versioned JSON saves, and an embedded SQLite database for the private multiplayer server. Start with save schema **1**, host-record schema **1**, and database schema **1**. There are no released game saves to migrate.
 
+The [first-business slice](validation/FIRST_BUSINESS.md#running-and-storage) uses a distinct, bounded `wwhsrt-first-business` version-2 development snapshot for its company, finance, construction, fleet and direct-service subset. The user requested a fresh company, so no walking-skeleton migration is required. This is not the full production envelope below; SQLite and the broader state model remain planned.
+
+The development slice's explicit `new_game` command replaces the current campaign through the same persist-before-acknowledgment transaction as other commands. It resets economic state to the scenario start, including the calendar and starter services/fleet, while retaining a monotonically increasing command revision so stale commands cannot become valid across resets. It remains usable after campaign completion, subject to the development action limit. Commit failure preserves both the prior in-memory game and durable snapshot. The snapshot format remains version 2; no migration or delete-before-write operation is needed. Presentation drafts and onboarding reset only after a successful command; device display preferences are retained. This local command does not define multiplayer world deletion.
+
 This is the implementation contract for the [architecture](../ARCHITECTURE.md). The [reference Go types](contracts/state.go), [server port/types](contracts/server.go), [structural JSON Schema](contracts/save-v1.schema.json), [example save](contracts/fixtures/minimal-save-v1.json), and [initial SQL schema](contracts/server-v1.sql) make it concrete. The examples are compile/checkable design artifacts; they are not a game engine, a complete restore validator, or a running storage adapter.
 
 ## 1. Ownership and representation

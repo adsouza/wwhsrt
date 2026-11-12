@@ -517,6 +517,17 @@ The railway reference adapts Africa2ice's Field Notes into explanations beside r
 
 Map layers cover potential demand, time advantage, occupancy, infrastructure capacity, and construction difficulty. The construction layer shows terrain, barriers, engineering components, and the selected alignment's profile and cost breakdown. Keep demand, carried passengers, and capacity visually distinct. Red is not the only signal: use labels, patterns, and explicit counts.
 
+Warn persistently about open company-owned lines with no running train service:
+name affected corridors, disclose continuing upkeep and idle-fleet lease costs,
+and link directly to service planning. Keep a compact warning visible beside
+time controls. Warn on idle company leases on public track without treating every
+unused public section as a company problem. Derive warnings from accepted plans
+and actual fleet, not unsaved drafts; leasing alone does not constitute service.
+Clear the notice when operation begins and restore it on suspension. Construction
+is not idle operation before opening. Permit deliberate suspension without a
+mandatory confirmation dialog. The first-business slice implements this notice
+through the read-only `Frame.idle_lines` projection.
+
 Selecting a service highlights every track section used and each called station. Selecting a congested section lists every contributing service. A passenger-flow inspector explains one OD market from demand generation through mode choice to seat allocation and revenue.
 
 ### Input and accessibility
@@ -727,7 +738,11 @@ Candidate basemap: [Natural Earth](https://www.naturalearthdata.com/about/terms-
 
 A [content-addressed 1:110m prototype snapshot](../data/prototypes/natural-earth-110m.metadata.json) now supports the Equal Earth mockup. It retains country geometry and names, with source/content hashes and processing notes. This does not qualify production regional detail, terrain costs, or railway topology. [World/regional evidence](validation/README.md) confirms use of the 94 playable metros derived from the 96-record source without altering their estimates. The playable selection policy records the Manila scope exclusion and Brasília population exclusion.
 
-Candidate elevation input: [Copernicus DEM GLO-90](https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM), a global 90-metre digital surface model. The provider states that it includes buildings, infrastructure, and vegetation, so surface samples are not automatically a bare-earth rail alignment. Use a pinned release to inform offline terrain classification and corridor review; no elevation product has been imported or qualified for the game yet. Record vertical units/datum, coverage, void handling, and applicable attribution/redistribution terms alongside the processed version.
+The playable first-business slice now ships [display-only regional terrain](../assets/terrain/README.md) from pinned Mapzen Terrain Tiles (SRTM/GMTED2010/ETOPO1), with relief, 500 m contours, named highlands/lowlands and finer Japanese coastlines around Hokkaido and Kansai. These offline assets render in Equal Earth and remain outside economic data and save hashes. Unshaded areas do not imply flat terrain. Approximate route sketches and terrain artwork do not qualify engineering profiles or crossings.
+
+The first-business [route-water check](../tools/check-route-geography.py) audits all six current alignments against pinned regional land/lake geometry, in geographic and Equal Earth coordinates and against the coastline actually drawn. Current paths have no approved sea/lake crossings; the old Uchiura Bay and Lake Biwa shortcuts are regression fixtures. [Coverage and provenance](../data/geography/README.md) explicitly separate mapped water checks and conservative lake avoidance bounds from full engineering qualification. Production corridors need equivalent covered checks and explicit engineering for any intended crossing.
+
+Candidate engineering elevation input: [Copernicus DEM GLO-90](https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM), a global 90-metre digital surface model. The provider states that it includes buildings, infrastructure, and vegetation, so surface samples are not automatically a bare-earth rail alignment. Use a pinned release to inform offline terrain classification and corridor review; no elevation product has been qualified for the engineering pipeline yet. Record vertical units/datum, coverage, void handling, and applicable attribution/redistribution terms alongside the processed version.
 
 The offline corridor pipeline combines terrain profiles with water/shoreline geometry and authored urban, ground-condition, and restriction data. It emits compact engineering intervals, rail profiles, named barrier crossings, speed limits, schedules, and maintenance quantities for every alternative. Review catalog crossings explicitly; elevation by itself does not identify ocean depth, rock conditions, bridge clearances, or legal buildability. Missing terrain/water coverage marks an alternative unqualified, rather than treating a void or missing tile as zero-elevation land. Ship reviewed profiles and map-level terrain detail sufficient for offline play instead of loading global full-resolution elevation rasters at runtime.
 
@@ -767,6 +782,7 @@ Multi-tab browser play has one storage writer; other tabs remain visibly read-on
 First targets: macOS arm64, Windows amd64, Linux amd64, and desktop plus smartphone browsers via WebAssembly. Complete core gameplay must reflow to a 320 CSS px width, with portrait and landscape support. Native phone-app packaging is a separate delivery decision. Start phone layout, touch/text entry, background/resume, and storage qualification in the first milestone rather than treating them as late polish. Larger displays add useful map area and optional simultaneous comparison/report views. See [UX.md](UX.md) for proposed layout bands and accessibility/validation requirements.
 
 - For Flatpak, install the app icon at `/app/share/icons/hicolor/scalable/apps/<APP_ID>.svg`. Use the Flatpak application ID as the desktop entry's `Icon` value. [App icon SVG](../assets/branding/app-icon.svg)
+- For macOS, bundle [app-icon.icns](../assets/branding/app-icon.icns) as `Contents/Resources/AppIcon.icns` and set `CFBundleIconFile` to `AppIcon.icns` in `Contents/Info.plist`. The native build script packages the icon; regenerate its 16–1024 px representations from the SVG with `tools/build-icons.sh`.
 - For the browser build, place `favicon.svg` in the web build's public root, serve it as `image/svg+xml`, and reference it from the document head with `rel="icon"`. [Favicon SVG](../assets/branding/favicon.svg)
 
 Desktop and web share rules, content versions, saves, and checkpoints. Browser execution yields between bounded calculation stages so forecasts and monthly resolution do not freeze controls indefinitely. Native and browser builds must not depend on divergent domain code paths.
@@ -855,12 +871,14 @@ CI verifies native builds, optimized browser builds, focused and full automated 
 
 | Milestone | Playable result | Exit evidence |
 | --- | --- | --- |
-| 1. Walking skeleton | One small map, cities, selection, a monthly clock, basic report, and a train illustration. Include a localization and phone/accessibility feasibility spike. | Same commands work headlessly and in desktop/browser hosts. Qualify narrow-screen selection, Simplified Chinese glyphs and IME input, semantic controls, and resume behavior. |
+| 1. Walking skeleton | One East Asia map, cities, selection, a monthly clock, basic report, and a train illustration. Include a localization and phone/accessibility feasibility spike. | Same commands work headlessly and in desktop/browser hosts. Qualify narrow-screen selection, Simplified Chinese glyphs and IME input, semantic controls, and resume behavior. |
 | 2. First business | 8–12 cities, a real existing HSR starter section, an independent unserved-city pair, terrain-aware corridor alternatives including a substantial barrier, construction, stations, one train family, direct service, fares, access charges, costs, loan, grant, saves; contextual onboarding throughout | Existing-track operation and independent A–B construction both work on phone and desktop; finances and terrain tradeoffs are explainable without a tutorial; quotes reconcile; continuation resumes correctly |
 | 3. Network game | Shared track, multiple services, transfers, competing modes, fleet/capacity constraints, full representative day | Through-journey, feeder-value, and bottleneck scenarios pass |
 | 4. Shared-world competition | Headless authoritative server, remote port, invites, private plans, fixed scheduler, standing operations, common demand and capacity | Two human companies compete; disconnect/retry/restart and unattended-company tests pass; offline still works independently |
 | 5. Regional campaign | Several starting offers, legacy-line auctions, grants, upgraded assets, campaign objectives, restructuring, extended contextual guidance | Independent regional strategies can finish; acquisition preserves access and its ledger reconciles; guidance covers different starting paths |
 | 6. Worldwide release | Qualified existing HSR inventory and six-region city/corridor catalog, concessions, disconnected regional networks, complete platform delivery, and Simplified Chinese localization | Region viability, multiplayer stress workload, compatible saves, cross-target checkpoints, and Simplified Chinese localization checks pass |
+
+The [first-business implementation notes](validation/FIRST_BUSINESS.md) record the playable portion of milestone 2: the East Asia starter service, construction alternatives, funding, dedicated leases and revenue, plus remaining qualification. The [milestone 1 notes](validation/MILESTONE_1.md) retain historical evidence.
 
 Deliver breadth at working depth before expanding data or adding crises. Model company identity, ownership, and shared markets from milestone 1, even while there is only one player. Milestone 2 may be a deliberately limited development slice; milestone 6 is the scope promised by the product's worldwide title. Multiplayer is implemented after the core loop is playable, while its domain boundaries are established from the beginning. Detailed implementation plans follow review of this specification.
 

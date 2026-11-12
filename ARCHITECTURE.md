@@ -1,6 +1,6 @@
 # Architecture
 
-This document describes the intended implementation of World-wide High-speed Rail Tycoon. The repository currently contains specifications, versioned prototype data, an HTML map prototype checker, and an isolated Go/ebitenui rendering spike. The game packages and server described below are not implemented yet.
+This document describes the architecture of World-wide High-speed Rail Tycoon. The [first-business slice](docs/validation/FIRST_BUSINESS.md) implements domain/application/API boundaries, direct-service demand and finance, construction and funding, dedicated train leases, native ebitenui controls, an Ebitengine map, a semantic browser HUD, a headless CLI and development saves. Transfer markets, the worldwide data pipeline, production save contract and multiplayer server remain planned. Earlier map and widget prototypes remain separate reference artifacts.
 
 The [game design](docs/DESIGN.md) owns gameplay rules and domain invariants; [UX](docs/UX.md) owns interaction behavior; [testing](TESTING.md) records verification commands and release gates. The [state/storage contract](docs/STATE_AND_STORAGE.md) defines Go type shapes, portable save v1, the SQLite server backend and migration policy. Numeric camera settings and cost assumptions live in their linked manifests. This document explains the system boundaries that realize those requirements. Proposed balance and recovery policies retain their status from the design; listing them here does not make them calibrated or implemented.
 
@@ -37,7 +37,7 @@ Local and server worlds are separate instances using the same rules code. Offlin
 
 ## Package boundaries
 
-The following is the proposed layout, not an inventory of existing packages.
+The following is the target layout. Milestone 1 implements a small subset; its actual inventory and qualification are linked above.
 
 | Package | Responsibility | Boundary |
 | --- | --- | --- |
@@ -115,7 +115,7 @@ Camera, selection, dismissed hints, replay position, and drafts are local UI sta
 
 Localize in the client using stable message keys, typed arguments, and display names keyed by catalog ID. Frames, commands, saves, and server events carry canonical IDs, quantities, and reason codes so the client can render them in its own language. Keep the language preference outside campaign state. Bundle translation catalogs and fonts with the desktop and web clients. Use English as the fallback for missing interface messages and the source label for untranslated catalog names. [Localization requirements](docs/DESIGN.md#localization)
 
-The current ebitenui spike proves visual layout and selected input paths, not accessible management controls or physical-phone behavior. Keep the semantic HTML browser-HUD fallback open; native accessibility also needs qualification. Resolve this host decision in the first milestone before building a large inventory of canvas forms.
+Milestone 1 selects ebitenui for native management controls and semantic HTML for the browser HUD; both use the same application commands and frame DTOs. Browser command handling runs independently of the renderer's update loop, so hiding the map cannot suspend a business command. Native company-name entry adapts Ebitengine's IME field into the ebitenui presentation instead of relying on raw character input. The native macOS accessibility tree currently exposes the window but no canvas management controls; browser semantics provide the accessible host for this slice. Physical-phone and actual native IME/screen-reader qualification remain open.
 
 The [presentation contract](docs/PRESENTATION.md) requires a cheerful bright palette and state-grounded construction/train animation and sound. Renderer/audio consume frames and deduplicated presentation cues, never mutate campaign state, and honor reduced motion, mute and lifecycle preferences.
 

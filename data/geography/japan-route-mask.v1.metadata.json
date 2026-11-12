@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "output_sha256": "d6cd55fc2601950b042222108e9c25d778fc251cd898f9d3b7ed6d6af741360b",
+  "coast_source_url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_admin_0_countries.geojson",
+  "coast_source_sha256": "239eec57ac17f100a11e2536cffc56752c318b50ae765b0918ff7aab4ce8f255",
+  "lake_reference_sha256": "701feccb590daf282d424ca414a06359a320b5d309ce3a695f27e00110ca4cc2",
+  "lake_source_sha256": "2d036f53dedec578001c5c30c2959ee7d4eebc1306900fa4367c49929ec8f2d9",
+  "lake_reference_sources": [
+    "https://www.env.go.jp/park/content/000169509.pdf",
+    "https://www.env.go.jp/en/np/",
+    "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_lakes.geojson"
+  ],
+  "envelopes_note": "Approximate conservative review bounds for Toya, Shikotsu and Onuma; not surveyed or drawn shorelines.",
+  "license": "Natural Earth public domain; envelopes are authored reference bounds."
+}
