@@ -58,6 +58,7 @@ func (h *host) financeForm(
 			func(a *widget.TextInputChangedEventArgs) { g.State.LoanAmount = a.InputText; h.persist(g); update() },
 		),
 	)
+	shareMaskBuffer(input, &h.inputMask)
 	input.SetText(g.State.LoanAmount)
 	h.loanInput = input
 	content.AddChild(input)

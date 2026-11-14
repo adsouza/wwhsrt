@@ -120,6 +120,7 @@ func (h *host) buildNewGame(g *Game) {
 		),
 		widget.ScrollContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(r)),
 	)
+	shareMaskBuffer(scroll, &h.scrollMask)
 	scroll.SetLocation(r)
 	if h.scroll != nil {
 		scroll.ScrollTop = h.scroll.ScrollTop

@@ -105,16 +105,19 @@ type host struct {
 	scrollbar              *widget.Slider
 	lastView               string
 	loanInput              *widget.TextInput
-	confirmNewGame         bool
-	window                 *windowPlacement
-	windowConfigured       bool
-	windowClosing          bool
-	windowDirty            bool
-	windowPoll             time.Time
-	windowChanged          time.Time
-	windowAttempt          time.Time
-	appearanceMode         string
-	appearancePoll         time.Time
+	// scrollMask and inputMask outlive rebuilds: see shareMaskBuffer. The loan field is drawn inside
+	// the scroll area, so it needs a buffer of its own.
+	scrollMask, inputMask *uimage.MaskedRenderBuffer
+	confirmNewGame        bool
+	window                *windowPlacement
+	windowConfigured      bool
+	windowClosing         bool
+	windowDirty           bool
+	windowPoll            time.Time
+	windowChanged         time.Time
+	windowAttempt         time.Time
+	appearanceMode        string
+	appearancePoll        time.Time
 }
 type commandResult struct {
 	frame gameapi.Frame
@@ -626,6 +629,7 @@ func (h *host) build(g *Game) {
 		),
 		widget.ScrollContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(scrollRect)),
 	)
+	shareMaskBuffer(scroll, &h.scrollMask)
 	scroll.SetLocation(scrollRect)
 	scroll.ScrollTop = oldScroll
 	h.scroll = scroll
