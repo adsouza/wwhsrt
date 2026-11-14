@@ -1,0 +1,6 @@
+# Commits that only change layout. `git blame` skips them when run with
+#   git config blame.ignoreRevsFile .git-blame-ignore-revs
+# GitHub's blame view reads this file automatically.
+
+# Reflow source lines to 120 columns
+78823ad0d66de100700780e42e2e8fce0e44682b
