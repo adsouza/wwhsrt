@@ -215,15 +215,16 @@ off drawn land before and after; the number should fall.
   relief is drawn over the scene. Because relief is cut to the basemap, lakes
   can be part of that cached image.
 - `tools/import-public-network.py --check` regenerates and compares
-  `world-land.json` today, and `docs/validation/launch-prospects-checks.json`
-  pins its hash. Both follow the file to its new tool.
+  `world-land.json` today; that moves to the new tool.
+  `docs/validation/launch-prospects-checks.json` and
+  `docs/validation/coastline-checks.json` record earlier browser checks and
+  hold the old basemap's hash. They are left as records and described as such.
 - Every outline is projected and clipped on each redraw, on screen or not, and
   each outline is its own fill and stroke. Outline count matters as well as
   point count.
 - The basemap is display-only and outside scenario hashes.
-- The Python tools need the isolated environment in
-  `tools/requirements-terrain.txt` (shapely is not in this machine's default
-  Python).
+- The Python tools need shapely 2.1.2 (`tools/requirements-geography.txt`) and
+  scipy. Both are installed for this machine's `python3` (3.12).
 - Memory-heavy tools are run one at a time under the limits in `TESTING.md`.
 
 ## Left to the builder
