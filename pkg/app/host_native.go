@@ -69,6 +69,10 @@ type host struct {
 	resizing      bool
 	idleAction    *widget.Button
 
+	routeBoxCache    map[string]ui.Box
+	routeBoxRevision uint64
+	routeBoxReady    bool
+
 	helpFocus              string
 	helpFocusScroll        bool
 	helpOpen               bool
