@@ -2,11 +2,14 @@
 
 Status: approved 2026-11-14. Nothing is built. Coastline refinement is to be
 built first; the build plan for this design is written after that.
+Amended 2026-11-14 and the amendment approved the same day: relief is cut to the land the refined
+basemap draws (the user's decision), and "a line" gained the two older
+Japanese routes (my call). See Behaviour 1 and 4.
 Size: a project (a new tile format, a reworked generator, an on-demand loader,
 renderer changes, documentation and checks).
-Depends on: nothing to build it. Its appearance at coasts depends on a separate
-project, coastline refinement, which the user asked for on 2026-11-14 and which
-has no design yet (see Non-goals).
+Depends on: coastline refinement
+(`2026-11-14-coastline-refinement-design.md`). The tile generator reads the
+basemap that project produces, so this is built second.
 
 ## Intent
 
@@ -55,9 +58,8 @@ today, and coarser relief on all other land.
   and Tangier as sea, and San Francisco Bay and the Thames estuary as land.
   Relief follows the real coast, so the two disagree there. The user chose to
   fix this by refining coastlines for every country with lines, as a separate
-  project. This design does not clip relief to the drawn land and does not
-  change the basemap. Until that project ships, relief shows as an unoutlined
-  shape beyond coarse coasts.
+  project that is built first. This design does not change the basemap; it
+  reads the refined one (Behaviour 4).
 - Running the browser check. `TESTING.md` blocks full browser/WASM startup
   under the unresolved 2 GiB cap. The user chose to build the web bundle and
   state that relief in the browser is unverified.
@@ -85,9 +87,11 @@ Relief is stored as 256×256 tiles on the Web Mercator grid, at seven levels:
 | 6 and 7 | 2.4 km and 1.2 km per pixel | the parents of every level-8 tile |
 | 8 | 0.6 km per pixel | every tile within 60 km of a line, plus today's Hokkaido and Kansai boxes |
 
-"A line" means every path in `assets/scenario/playable-rail-map.json` and every
-alignment path in `data/construction/compiled-prospects.v1.json`. Paths are
-followed along their length, not only at their vertices.
+"A line" means every path in `assets/scenario/playable-rail-map.json`, every
+alignment path in `data/construction/compiled-prospects.v1.json`, and every
+alignment path of `hokkaido-extension` and `tsuruga-osaka` in
+`assets/scenario/public-network.json`. Paths are followed along their length,
+not only at their vertices. The coastline design uses the same definition.
 
 The Hokkaido box is tiles x 227–228, y 93–95 and the Kansai box is x 224–225,
 y 100–101, both at level 8. They stay covered even where no line passes.
@@ -128,9 +132,15 @@ brightness between the two.
 ### 4. Storage
 
 - Each tile's colour is a JPEG at quality 80.
-- A tile that contains sea also has a one-bit mask marking land, taken from
-  elevation above 1 m as today. Sea pixels are drawn fully clear. In the JPEG, sea pixels carry the flat lowland colour so
-  there is no hard edge for compression to smear.
+- A tile that is not all land has a one-bit mask. A pixel is marked land when
+  its elevation is above 1 m, as today, and it lies on land drawn by the
+  refined basemap (`assets/terrain/world-land.json`: land outlines minus drawn
+  lakes). Other pixels are drawn fully clear. Relief therefore never appears
+  without drawn land beneath it, and never on a drawn lake.
+- The manifest records the basemap's hash. A Go test fails if it differs from
+  the embedded basemap, so a changed coast forces the tiles to be regenerated.
+- In the tile's JPEG, clear pixels carry the flat lowland colour so there is
+  no hard edge for compression to smear.
 - Land keeps today's fixed 225/255 opacity, applied when the tile is loaded or
   drawn, and the existing zoom-dependent opacity on top of that.
 - All tiles ship inside the binary on both targets.
