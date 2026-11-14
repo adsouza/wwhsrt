@@ -206,6 +206,8 @@
   "appearance_system": "System",
   "appearance_light": "Light",
   "appearance_dark": "Dark",
+  "textSize": "Text size",
+  "textSizeApplied": "%d%% chosen · %d%% fits this window",
   "fundingPlan": "Funding for this line",
   "fundingCash": "Cash available",
   "fundingDeficit": "Existing cash deficit",

@@ -210,6 +210,8 @@
   "appearance_system": "跟随系统",
   "appearance_light": "浅色",
   "appearance_dark": "深色",
+  "textSize": "文字大小",
+  "textSizeApplied": "已选 %d%% · 此窗口可用 %d%%",
   "fundingPlan": "此线路的资金明细",
   "fundingCash": "可用现金",
   "fundingDeficit": "现有现金缺口",

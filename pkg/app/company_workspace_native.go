@@ -67,6 +67,15 @@ func (h *host) buildCompany(
 			h.refreshAppearance(g)
 			h.workspaceChanged(g)
 		})
+		chosen := ui.TextStep(g.State.TextSize)
+		button(fmt.Sprintf("%s · %d%%", t("textSize"), chosen), func() {
+			g.State.TextSize = ui.NextTextStep(g.State.TextSize)
+			h.workspaceChanged(g)
+		})
+		if applied := h.workspace.Step; applied < chosen {
+			// The window is too small for the chosen step; say which one it is showing.
+			label(fmt.Sprintf(t("textSizeApplied"), chosen, applied), 13)
+		}
 		for _, setting := range []struct {
 			key   string
 			value bool
