@@ -69,11 +69,17 @@ to narrow it: the list offers the routes you are looking at.
      region here also moves the map for when it is shown again.
    - Changed during implementation and review: the region's frame is what the
      Map panel would show for that region in the current window, not the
-     bounding box of the region's defining points. Japan and Korea are defined
-     by two corner points, and the projection narrows that box until it
-     excludes Tokyo; a tall stand-in shape likewise clipped Seoul and Busan.
+     bounding box of the region's defining points. Japan and Korea were
+     defined by two corner points, and the projection narrows that box until
+     it excluded Tokyo; a tall stand-in shape likewise clipped Seoul and Busan.
      On a 390x844 phone the regions hold: China 2,407 routes, Africa 266,
-     Japan 224, North America East 92, Korea 18.
+     Japan 160, North America East 92, Korea 18.
+   - Changed 2026-11-14: Tokyo and Fukuoka were added as defining points for
+     Japan, so the points' bounding box now holds all 14 Japanese cities. The
+     region's view moved east, which dropped 64 routes in north-east China
+     and the Yangtze delta from Japan's phone list (224 to 160) and no
+     Japanese route. The frame stays the Map panel's view: Korea and China
+     are still defined by two corners.
    - Changed during implementation: the ordinary phone plan must fit one
      screen (an existing requirement), so the Region dropdown and the
      "showing N of M" advice sit inside the route-search disclosure, titled

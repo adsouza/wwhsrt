@@ -94,8 +94,8 @@ func TestRegionFrameIsWhatTheMapWouldShow(t *testing.T) {
 		if !frame.Contains(ui.Box{MinX: c.Min.X, MinY: c.Min.Y, MaxX: c.Max.X, MaxY: c.Max.Y}) {
 			t.Fatal("the frame must cover the region's defining points", portrait)
 		}
-		// Japan is defined by two corner points; the projection narrows their
-		// bounding box, so the frame has to be what the map actually shows.
+		// The projection narrows the bounding box of a region's corner points (Japan needed Tokyo and
+		// Fukuoka added), so the frame has to be what the map actually shows.
 		if !frame.Contains(boxes["tokyo-nagoya"]) {
 			t.Fatal("Japan's frame must cover Tokyo–Nagoya", portrait, frame, boxes["tokyo-nagoya"])
 		}
