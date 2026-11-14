@@ -125,9 +125,9 @@ brightness between the two.
   Non-goals). If Go's decoder proves slow there, the remedy is slower fill-in
   with the coarser tile shown for longer. A different format or a browser-side
   decoder is outside this design and needs the user's agreement.
-- Frames without the public network (the legacy fixture frames, which draw
-  only the Japan, China and Taiwan land) draw relief only inside the Hokkaido
-  and Kansai boxes, as today (my call).
+- Every frame draws relief the same way. The coastline project gives frames
+  without the public network, which only tests produce, the same basemap as
+  the rest (amended 2026-11-14).
 
 ### 4. Storage
 

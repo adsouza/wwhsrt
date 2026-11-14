@@ -1,6 +1,8 @@
 # Coastline refinement (worldwide basemap)
 
 Status: approved 2026-11-14. Nothing is built.
+Amended 2026-11-14 at the user's request: the regional Japan files and the
+test-only frames that draw them are folded into the new basemap (Behaviour 5).
 Size: a small project (one tool reworked, one asset replaced, a small renderer
 change, checks and documents).
 Order: built before worldwide terrain
@@ -39,8 +41,6 @@ only where the game has lines.
   outlining each country. The user chose to drop them (2026-11-14). If wanted
   later they return as their own line layer, drawn once per border.
 - Rivers.
-- The regional files `assets/terrain/land.json` and `assets/scenario/land.json`
-  and the legacy fixture frames that draw them. They are unchanged (my call).
 - The land mask used for pricing and route review
   (`data/construction/route-land.v1.json.gz`). It is read, not changed.
 - Running the browser check. `tools/check-coastlines.cjs` is updated but not
@@ -121,8 +121,24 @@ goal of about 73,000 points and 2,000 outlines.
 
 `assets/terrain/world-land.json` is replaced entirely, with its metadata file.
 The earlier per-country replacements for Japan, China, Taiwan, Australia, South
-Africa and Chile inside it are superseded by the single rule. Frames with the
-public network draw the new basemap; frames without it are unchanged.
+Africa and Chile inside it are superseded by the single rule.
+
+There is one basemap. Every frame draws it, with or without the public
+network. Frames without the public network are produced only by tests: the
+native app, the browser build and the headless tool all open the game through
+`application.Open`, which always turns the network on. So:
+
+- the branch in `pkg/render/map.go` that draws the regional outlines is
+  removed;
+- `assets/terrain/land.json`, `assets/terrain/land.metadata.json` and
+  `tools/prepare-shorelines.py` are removed, and the regional file leaves the
+  binary (345 KB);
+- `assets/scenario/land.json`, the coarse regional base, is removed if nothing
+  still needs it once its two tool readers are changed;
+- `tools/check-route-geography.py`, which checks the six Japanese alignments
+  against the regional file as "the drawn coast", checks the new basemap
+  instead, and its recorded results are regenerated;
+- `pkg/render/coastline_test.go` is rewritten for the new basemap.
 
 ### 6. Buildable routes stay on land
 
@@ -161,6 +177,9 @@ off drawn land before and after; the number should fall.
   Osaka Bay are water; a point in Lake Michigan is a lake.
 - A Go test checks that every city in the public catalogue is on drawn land,
   with any exceptions listed by name and reason.
+- A Go test confirms a frame without the public network draws the same land
+  as one with it.
+- No file in the repository still refers to the removed regional files.
 - The hashes of `public-network.json`, the scenario files and the campaign
   checkpoints are shown unchanged.
 - Land redraw time is measured in the native app at 3737×2029 on a copy of a
@@ -170,8 +189,9 @@ off drawn land before and after; the number should fall.
 
 ### 9. Documents
 
-`assets/terrain/README.md`, `assets/terrain/ATTRIBUTION.md`, `ARCHITECTURE.md`
-and `data/imports/README.md` describe the basemap and are updated.
+`assets/terrain/README.md`, `assets/terrain/ATTRIBUTION.md`, `ARCHITECTURE.md`,
+`data/imports/README.md` and the route-geography passages in `TESTING.md` and
+`docs/validation` describe the basemap or the regional files and are updated.
 
 ## Approaches considered
 
