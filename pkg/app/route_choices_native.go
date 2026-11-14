@@ -153,3 +153,29 @@ func (h *host) serviceRouteChoices(g *Game) (ui.RouteChoices, bool) {
 	h.routeView, h.routeViewUsed = view, mapShown
 	return h.routeChoices, mapShown
 }
+
+// routeViewSettleTicks is how long the map must hold still before the route
+// list follows it: 0.2 s at 60 updates per second.
+const routeViewSettleTicks = 12
+
+// routeListStale reports true once when the Services list was built for a
+// different map view and the camera has since held still. Rebuilding on every
+// frame of a drag or wheel spin would move the list under the pointer.
+func (h *host) routeListStale(g *Game) bool {
+	if g.State.View != "services" || g.State.Help.Open || h.workspace.Map.Empty() || !h.routeViewUsed ||
+		g.drag || g.touching || g.pinch > 0 {
+		h.routeStableTicks = 0
+		return false
+	}
+	view := viewBox(g.Camera)
+	if view == h.routeView {
+		h.routeStableTicks = 0
+		return false
+	}
+	if view != h.routePendingView || h.routeStableTicks == 0 {
+		h.routePendingView, h.routeStableTicks = view, 1
+		return false
+	}
+	h.routeStableTicks++
+	return h.routeStableTicks == routeViewSettleTicks
+}

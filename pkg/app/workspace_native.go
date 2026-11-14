@@ -373,8 +373,9 @@ func (h *host) addMapTools(g *Game, root *widget.Container) {
 			case "showMap":
 				g.State.Expanded = true
 				h.layout(g)
-				g.dirty = true
 			}
+			// Every map tool moves the view, which the Services route list follows.
+			g.dirty = true
 			h.persist(g)
 		})
 		h.mapControls = append(h.mapControls, r)

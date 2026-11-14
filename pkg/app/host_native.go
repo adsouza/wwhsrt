@@ -75,6 +75,8 @@ type host struct {
 	routeChoices     ui.RouteChoices
 	routeView        ui.Box
 	routeViewUsed    bool
+	routePendingView ui.Box
+	routeStableTicks int
 
 	helpFocus              string
 	helpFocusScroll        bool
@@ -254,6 +256,9 @@ func (h *host) update(g *Game) {
 		}
 	}
 	h.refreshAppearance(g)
+	if h.routeListStale(g) {
+		g.dirty = true
+	}
 	if h.resizeWorkspace(g) {
 		if g.dirty && g.width > 0 {
 			h.build(g)

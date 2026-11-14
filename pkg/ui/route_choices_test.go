@@ -137,7 +137,8 @@ func TestRouteChoiceHint(t *testing.T) {
 	if got := RouteChoiceHint("en", more, false); got != want {
 		t.Fatal(got)
 	}
-	if got := RouteChoiceHint("en", none, false); got != "No route fits in this region. Choose another region or search by name." {
+	want = "No route fits in this region. Choose another region or search by name."
+	if got := RouteChoiceHint("en", none, false); got != want {
 		t.Fatal(got)
 	}
 	// Search and track taps ignore the view, so zooming or changing region would not narrow them.

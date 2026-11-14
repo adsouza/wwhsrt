@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/ebitenui/ebitenui/event"
 	"github.com/ebitenui/ebitenui/widget"
 	"wwhsrt/internal/application"
 	"wwhsrt/pkg/gameapi"
@@ -172,7 +173,8 @@ func TestNativeServiceRoutesFollowTheMapView(t *testing.T) {
 	}
 	wide := g.host.routeChoices
 	ids := listedRouteIDs(g)
-	if !wide.InView || len(ids) < 2 || len(ids) > ui.RouteChoiceLimit+1 || !strings.Contains(strings.Join(ids, " "), "tokyo-nagoya") {
+	if !wide.InView || len(ids) < 2 || len(ids) > ui.RouteChoiceLimit+1 ||
+		!strings.Contains(strings.Join(ids, " "), "tokyo-nagoya") {
 		t.Fatal("want a short in-view list that keeps the selection", wide.InView, len(ids), ids)
 	}
 	boxes, view := g.host.boxesFor(g.Frame), viewBox(g.Camera)
@@ -275,5 +277,85 @@ func TestNativeServiceRoutesExplainAnEmptyView(t *testing.T) {
 	}
 	if !panelShows(g, ui.Text("en", "routeChoicesNone")) {
 		t.Fatal("an empty view must explain itself")
+	}
+}
+
+func TestNativeServiceRouteListRefreshesAfterTheViewSettles(t *testing.T) {
+	g := servicesGame(t, 1280, 850, "")
+	centre := mapview.Point{X: g.Camera.Width / 2, Y: g.Camera.Height / 2}
+	quiet := func(calls int, why string) {
+		t.Helper()
+		for i := 0; i < calls; i++ {
+			if g.host.routeListStale(g) {
+				t.Fatal(why, "call", i+1)
+			}
+		}
+	}
+	quiet(30, "a freshly built list is not stale")
+
+	g.Camera.ZoomAt(2, centre)
+	quiet(routeViewSettleTicks-1, "the list must wait for the view to settle")
+	if !g.host.routeListStale(g) {
+		t.Fatal("the list must refresh once the view has settled")
+	}
+	quiet(30, "one settle refreshes once")
+
+	g.host.build(g)
+	g.Camera.ZoomAt(2, centre)
+	quiet(routeViewSettleTicks/2, "still settling")
+	g.Camera.ZoomAt(1.5, centre)
+	quiet(routeViewSettleTicks-1, "a further move restarts the wait")
+	if !g.host.routeListStale(g) {
+		t.Fatal("the list must refresh after the second move settles")
+	}
+
+	g.host.build(g)
+	g.Camera.ZoomAt(0.5, centre)
+	g.drag = true
+	quiet(60, "never refresh under a drag")
+	g.drag = false
+	quiet(routeViewSettleTicks-1, "the wait starts when the drag ends")
+	if !g.host.routeListStale(g) {
+		t.Fatal("the list must refresh after the drag ends")
+	}
+
+	g.host.build(g)
+	quiet(30, "a rebuilt list is fresh again")
+	g.Camera.ZoomAt(2, centre)
+	g.State.View = "map"
+	quiet(30, "other panels have no route list to refresh")
+}
+
+func TestNativeRouteListIgnoresTheCameraWithoutAMap(t *testing.T) {
+	g := servicesGame(t, 390, 844, "japan")
+	g.Camera.ZoomAt(2, mapview.Point{X: g.Camera.Width / 2, Y: g.Camera.Height / 2})
+	for i := 0; i < 30; i++ {
+		if g.host.routeListStale(g) {
+			t.Fatal("with no map the list follows the region, not the camera")
+		}
+	}
+}
+
+func TestNativeMapToolButtonsRefreshTheRouteListAtOnce(t *testing.T) {
+	for _, key := range []string{"fit", "focusRoute", "zoomIn", "zoomOut"} {
+		g := servicesGame(t, 1280, 850, "")
+		g.dirty = false
+		clicked := false
+		for _, child := range g.host.ui.Container.Children() {
+			b, ok := child.(*widget.Button)
+			if !ok {
+				continue
+			}
+			b.Validate() // root-level buttons build their text on first validation
+			if b.Text() == nil || strings.Join(strings.Fields(b.Text().Label), " ") != ui.Text("en", key) {
+				continue
+			}
+			b.ClickedEvent.Fire(&widget.ButtonClickedEventArgs{Button: b})
+			event.ExecuteDeferred()
+			clicked = true
+		}
+		if !clicked || !g.dirty {
+			t.Fatal("map tool must mark the panel for rebuild", key, clicked, g.dirty)
+		}
 	}
 }
