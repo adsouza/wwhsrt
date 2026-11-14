@@ -62,6 +62,10 @@ func (m *Map) Camera(w, h float64, portrait bool) mapview.Camera {
 	for _, p := range m.anchors[key] {
 		points = append(points, mapview.Project(p[0], p[1]))
 	}
+	if len(points) == 0 {
+		// No scenario anchors loaded: frame the built-in default region.
+		return mapview.New(w, h)
+	}
 	return mapview.Fit(w, h, points)
 }
 func (m *Map) Label(dst *ebiten.Image, s string, x, y, size float64, c color.Color) {

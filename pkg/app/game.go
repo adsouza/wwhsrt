@@ -339,8 +339,11 @@ func (g *Game) Layout(w, h int) (int, int) {
 
 // Preserve an explicitly chosen region when rotating or starting over.
 func (g *Game) regionCamera(portrait bool) mapview.Camera {
-	if g.State.Region != "" && g.State.Region != "east-asia" {
-		return mapview.RegionCamera(g.Camera.Width, g.Camera.Height, g.State.Region, portrait)
+	return g.cameraForRegion(g.State.Region, portrait)
+}
+func (g *Game) cameraForRegion(id string, portrait bool) mapview.Camera {
+	if id != "" && id != "east-asia" {
+		return mapview.RegionCamera(g.Camera.Width, g.Camera.Height, id, portrait)
 	}
 	return g.Map.Camera(g.Camera.Width, g.Camera.Height, portrait)
 }

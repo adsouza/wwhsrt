@@ -61,3 +61,21 @@ func TestWorkspaceDisclosuresAreBoundedAndTaskLinksChoosePane(t *testing.T) {
 		t.Fatal("expanded map still has panels", l)
 	}
 }
+
+// The native Services panel gates route search and the region filter behind
+// this disclosure, so the player must be able to open and close it.
+func TestRouteSearchDisclosureCanOpenAndClose(t *testing.T) {
+	s := State{}
+	SetDisclosure(&s, "route-search", true)
+	if !Disclosure(s, "route-search") {
+		t.Fatal("route search disclosure did not open")
+	}
+	SetDisclosure(&s, "capacity", true)
+	if !Disclosure(s, "route-search") || !Disclosure(s, "capacity") {
+		t.Fatal("opening another disclosure must not close route search")
+	}
+	SetDisclosure(&s, "route-search", false)
+	if Disclosure(s, "route-search") {
+		t.Fatal("route search disclosure did not close")
+	}
+}

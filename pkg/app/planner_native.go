@@ -7,7 +7,6 @@ import (
 	uimage "github.com/ebitenui/ebitenui/image"
 	"github.com/ebitenui/ebitenui/widget"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
-	"strings"
 	"wwhsrt/pkg/gameapi"
 	"wwhsrt/pkg/ui"
 )
@@ -208,7 +207,16 @@ func (h *host) buildPlanner(g *Game, t func(string) string, label nativeLabel, b
 func (h *host) buildServices(g *Game, t func(string) string, label nativeLabel, button nativeButton) {
 	label(t("services"), 20)
 	h.taskTabs(g, "services", []string{"plan", "fleet", "analysis"}, button)
-	if h.disclosure(g, "route-search", t("searchRoutes"), button) {
+	choices, mapShown := h.serviceRouteChoices(g)
+	hint := ui.RouteChoiceHint(g.State.Locale, choices, mapShown)
+	capped := choices.Matching > ui.RouteChoiceLimit
+	// With no map on screen the list follows a region. The ordinary phone plan
+	// must fit one screen, so the region dropdown and the advice live here.
+	finder := t("searchRoutes")
+	if !mapShown {
+		finder = t("narrowRoutes")
+	}
+	if h.disclosure(g, "route-search", finder, button) {
 		label(t("routeSearch"), 13)
 		h.routeSearch = newNameInput(
 			&h.routeSearchField,
@@ -217,24 +225,26 @@ func (h *host) buildServices(g *Game, t func(string) string, label nativeLabel, 
 			ui.PaletteFor(g.State),
 		)
 		h.content.AddChild(h.routeSearch)
+		if !mapShown {
+			h.serviceRegionPicker(g, label)
+			if capped {
+				label(hint, 13)
+			}
+		}
 	}
 	if len(g.State.ServiceMapSections) > 0 {
 		label(t("mapServiceChoices"), 13)
 		b := button(t("allServiceRoutes"), func() { g.State.ServiceMapSections = nil; h.workspaceChanged(g) })
 		h.actions["all-service-routes"] = b
 	}
-	label(t("chooseRoute"), 13)
+	routeLabel := t("chooseRoute")
+	if !mapShown && capped {
+		routeLabel = fmt.Sprintf(t("chooseRouteCapped"), ui.RouteChoiceLimit, choices.Matching)
+	}
+	label(routeLabel, 13)
 	options := []choice{}
-	for _, r := range ui.MapServiceRoutes(g.Frame, g.State) {
-		matches := true
-		for _, word := range strings.Fields(strings.ToLower(g.State.ServiceQuery)) {
-			if !strings.Contains(strings.ToLower(ui.RouteName(r, g.State.Locale)), word) {
-				matches = false
-			}
-		}
-		if r.Open && (matches || r.ID == g.State.ServiceCorridor) {
-			options = append(options, choice{r.ID, ui.RouteName(r, g.State.Locale)})
-		}
+	for _, r := range choices.Routes {
+		options = append(options, choice{r.ID, ui.RouteName(r, g.State.Locale)})
 	}
 	h.selectChoice(
 		g,
@@ -242,6 +252,9 @@ func (h *host) buildServices(g *Game, t func(string) string, label nativeLabel, 
 		options,
 		func(id string) { ui.DraftService(&g.State, g.Frame, id); h.workspaceChanged(g) },
 	)
+	if hint != "" && (mapShown || !capped) {
+		label(hint, 13)
+	}
 	r, routeOK := ui.ServiceRoute(g.Frame, g.State.ServiceCorridor)
 	if routeOK {
 		label(fmt.Sprintf("%d km · %d min", r.KM, r.Minutes), 13)

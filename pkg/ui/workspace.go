@@ -106,6 +106,7 @@ func SetDisclosure(s *State, id string, open bool) {
 		"city-list":       true,
 		"station":         true,
 		"build-details":   true,
+		"route-search":    true,
 	}
 	if !allowed[id] {
 		return

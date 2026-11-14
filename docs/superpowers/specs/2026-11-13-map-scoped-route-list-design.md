@@ -59,20 +59,25 @@ to narrow it: the list offers the routes you are looking at.
    immediately.
 
 8. **Map not shown** (decided: filter by region). On compact layouts the
-   Services panel can be open with no map on screen. The panel then shows a
-   Region dropdown above the route list, and the list behaves as if the map
-   were showing that whole region: a route is listed when it fits entirely
-   inside the region's map frame (the frame the region picker already uses,
-   with a 10% margin), ranked by span and capped at 25.
+   Services panel can be open with no map on screen. The list then behaves as
+   if the map were showing the whole chosen region: a route is listed when it
+   fits entirely inside what the map would show for that region, ranked by
+   span and capped at 25.
    - It is the same region setting as the Map panel's picker, so choosing a
      region here also moves the map for when it is shown again.
-   - My calls, not yet confirmed: the dropdown offers only regions that have at
-     least one open route fitting their frame, plus the current region; and the
-     hint line says "choose another region" instead of "zoom" in this mode.
-   - On the current catalog 3,067 of the 3,218 open routes fit some region's
-     frame (East Asia 2,343, China 2,185, Frangistan 614, North America 92,
-     Japan 75, Africa 23, Korea 18, Uzbekistan 11). The other 151 cross
-     region frames and are found by search.
+   - Changed during implementation: the region's frame is the map's view of
+     the region at a standard window shape, not the bounding box of the
+     region's defining points. Japan and Korea are defined by two corner
+     points, and the projection narrows that box until it excludes Tokyo.
+   - Changed during implementation: the ordinary phone plan must fit one
+     screen (an existing requirement), so the Region dropdown and the
+     "showing N of M" advice sit inside the route-search disclosure, titled
+     "Narrow the route list" in this mode. The count itself rides on the Route
+     label ("Route · showing 25 of 75"). An empty list always explains itself.
+   - The dropdown offers only regions that have at least one open route
+     fitting them, plus the current region.
+   - A capped search or track tap gets its own wording ("add a word to the
+     search"), since neither zooming nor changing region narrows it.
 
 ## Approaches considered
 

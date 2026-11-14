@@ -72,6 +72,9 @@ type host struct {
 	routeBoxCache    map[string]ui.Box
 	routeBoxRevision uint64
 	routeBoxReady    bool
+	routeChoices     ui.RouteChoices
+	routeView        ui.Box
+	routeViewUsed    bool
 
 	helpFocus              string
 	helpFocusScroll        bool
@@ -525,32 +528,7 @@ func (h *host) build(g *Game) {
 	} else if g.State.View == "map" {
 		h.helpSlot(g, "start", label, button)
 		h.helpSlot(g, "idle", label, button)
-		label(t("region"), 13)
-		regions := []choice{}
-		for _, r := range mapview.VisibleRegions(g.State.Portrait) {
-			if r.ID == "world" && g.State.Portrait {
-				continue
-			}
-			name := r.Name
-			if g.State.Locale == "zh-Hans" {
-				name = r.Chinese
-			}
-			regions = append(regions, choice{r.ID, name})
-		}
-		region := g.State.Region
-		if region == "" {
-			region = "east-asia"
-		}
-		h.selectChoice(g, region, regions, func(id string) {
-			g.State.Region = id
-			if id == "east-asia" {
-				g.Camera = g.Map.Camera(g.Camera.Width, g.Camera.Height, g.State.Portrait)
-			} else {
-				g.Camera = mapview.RegionCamera(g.Camera.Width, g.Camera.Height, id, g.State.Portrait)
-			}
-			g.dirty = true
-			h.persist(g)
-		})
+		h.regionPicker(g, label, func(string) bool { return true })
 		if stop := g.Map.PublicStop(g.State.SourceStation); stop != nil {
 			label(stop.Name, 18)
 			label(t("sourceStationInfo"), 13)
