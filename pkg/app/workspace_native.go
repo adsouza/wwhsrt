@@ -397,14 +397,20 @@ func (h *host) resizeWorkspace(g *Game) bool {
 		return false
 	}
 	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
-		g.State.PanelWidth = ui.PanelWidth(g.width - x)
-		h.layout(g)
-		g.dirty = true
+		h.dragPanelTo(g, x)
 	} else {
 		h.resizing = false
 		h.persist(g)
 	}
 	return true
+}
+
+// dragPanelTo moves the inspector's inner edge to window x. The preference is kept in 100% units so it
+// means the same panel at every text step.
+func (h *host) dragPanelTo(g *Game, x int) {
+	g.State.PanelWidth = ui.PanelWidth((g.width - x) * 100 / max(100, h.workspace.Step))
+	h.layout(g)
+	g.dirty = true
 }
 
 func (h *host) stepper(g *Game, id, title, value string, minus, plus func()) {

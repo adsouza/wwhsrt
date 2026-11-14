@@ -120,3 +120,33 @@ func TestNativeMapCoordinatesAccountForDockOrigin(t *testing.T) {
 		}
 	}
 }
+
+func TestNativeDividerDragStoresPanelWidthAt100(t *testing.T) {
+	old := preferencesPath
+	preferencesPath = filepath.Join(t.TempDir(), "ui.json")
+	t.Cleanup(func() { preferencesPath = old })
+	p, _ := application.Open(nil, nil)
+	m, e := render.New()
+	if e != nil {
+		t.Fatal(e)
+	}
+	g := &Game{
+		Port:   p,
+		Frame:  p.Snapshot(),
+		Map:    m,
+		width:  3840,
+		height: 2160,
+		Camera: mapview.New(800, 700),
+		State:  ui.State{View: "map", TextSize: 200},
+	}
+	g.host.layout(g)
+	g.host.dragPanelTo(g, 2840)
+	if g.State.PanelWidth != 500 || g.host.workspace.Inspector.Dx() != 1000 {
+		t.Fatal("a 1000 px panel at 200% is stored as 500", g.State.PanelWidth, g.host.workspace.Inspector)
+	}
+	g.State.TextSize = 100
+	g.host.layout(g)
+	if g.host.workspace.Inspector.Dx() != 500 {
+		t.Fatal("back at 100% the panel is the dragged width divided by the step", g.host.workspace.Inspector)
+	}
+}

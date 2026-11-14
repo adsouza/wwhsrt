@@ -8,6 +8,8 @@ type WorkspaceLayout struct {
 	Header, Dock, Map, Inspector, Divider, Footer image.Rectangle
 	DockLeft, Compact                             bool
 	PanelWidth                                    int
+	// Step is the applied text step in percent. Rectangles and PanelWidth are in window pixels.
+	Step int
 }
 
 func PanelWidth(preferred int) int {
@@ -16,10 +18,38 @@ func PanelWidth(preferred int) int {
 	}
 	return max(320, min(800, preferred))
 }
+
+// Workspace lays out a window. A text step of k is the 100% layout of a window 1/k the size with every
+// coordinate multiplied by k; the reduced window's far edges land exactly on the real window's.
 func Workspace(w, h int, s State) WorkspaceLayout {
 	w = max(1, w)
 	h = max(1, h)
-	l := WorkspaceLayout{Compact: w < 800}
+	step := AppliedTextStep(w, h, s.TextSize)
+	if step == 100 {
+		return workspaceAt100(w, h, s)
+	}
+	rw, rh := w*100/step, h*100/step
+	l := workspaceAt100(rw, rh, s)
+	l.Step = step
+	scale := func(n, reduced, full int) int {
+		if n == reduced {
+			return full
+		}
+		return (n*step + 50) / 100
+	}
+	for _, r := range []*image.Rectangle{&l.Header, &l.Dock, &l.Map, &l.Inspector, &l.Divider, &l.Footer} {
+		if r.Empty() {
+			*r = image.Rectangle{}
+			continue
+		}
+		*r = image.Rect(scale(r.Min.X, rw, w), scale(r.Min.Y, rh, h), scale(r.Max.X, rw, w), scale(r.Max.Y, rh, h))
+	}
+	l.PanelWidth = scale(l.PanelWidth, rw, w)
+	return l
+}
+
+func workspaceAt100(w, h int, s State) WorkspaceLayout {
+	l := WorkspaceLayout{Compact: w < 800, Step: 100}
 	if s.Expanded {
 		bottom := 0
 		if s.View == "build" {

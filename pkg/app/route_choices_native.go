@@ -75,7 +75,7 @@ func viewBox(c mapview.Camera) ui.Box {
 // shape decide how much around them is visible, so the frame is taken from a
 // camera of the Map panel's own size rather than from the points themselves.
 func (g *Game) regionFrame(id string, portrait bool) ui.Box {
-	panel := ui.Workspace(g.width, g.height, ui.State{View: "map", CommandDock: g.State.CommandDock}).Map
+	panel := ui.Workspace(g.width, g.height, ui.State{View: "map", CommandDock: g.State.CommandDock, TextSize: g.State.TextSize}).Map
 	width, height := float64(panel.Dx()), float64(panel.Dy())
 	if width < 100 || height < 100 {
 		// No usable Map panel in this window: fall back to a phone's.
