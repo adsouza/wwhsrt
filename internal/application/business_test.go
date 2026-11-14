@@ -8,7 +8,7 @@ import (
 
 func act(t *testing.T, g *Game, c gameapi.Command) gameapi.Frame {
 	t.Helper()
-	c.Revision = g.Snapshot().Revision
+	c.Revision = revision(g)
 	f, e := g.Apply(c)
 	if e != nil {
 		t.Fatalf("%s: %v", c.Kind, e)
@@ -18,7 +18,7 @@ func act(t *testing.T, g *Game, c gameapi.Command) gameapi.Frame {
 func rejected(t *testing.T, g *Game, c gameapi.Command, code string) {
 	t.Helper()
 	before := g.Snapshot().Checkpoint
-	c.Revision = g.Snapshot().Revision
+	c.Revision = revision(g)
 	if _, e := g.Apply(c); e == nil || e.Error() != code {
 		t.Fatalf("%s: wanted %s, got %v", c.Kind, code, e)
 	}

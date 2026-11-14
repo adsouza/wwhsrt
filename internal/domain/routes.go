@@ -163,27 +163,30 @@ func (w World) UpgradeCatalog(c Catalog) (World, error) {
 		at,
 	)
 }
+func corridorRoute(co gameapi.Corridor) gameapi.Route {
+	return gameapi.Route{
+		InfrastructureKind: co.InfrastructureKind,
+		ID:                 co.ID,
+		Sections:           []string{co.ID},
+		Cities:             []gameapi.CityID{co.FromCity, co.ToCity},
+		Stops:              []gameapi.CityID{co.FromCity, co.ToCity},
+	}
+}
 func (w World) route(id string) (gameapi.Route, bool) {
-	var route gameapi.Route
 	if co, ok := w.catalog.find(id); ok {
-		route = gameapi.Route{
-			InfrastructureKind: co.InfrastructureKind,
-			ID:                 co.ID,
-			Sections:           []string{co.ID},
-			Cities:             []gameapi.CityID{co.FromCity, co.ToCity},
-			Stops:              []gameapi.CityID{co.FromCity, co.ToCity},
-		}
-	} else {
-		for _, r := range w.catalog.network.Routes {
-			if r.ID == id {
-				route = r
-				break
-			}
+		return w.resolveRoute(corridorRoute(co)), true
+	}
+	for i := range w.catalog.network.Routes {
+		if w.catalog.network.Routes[i].ID == id {
+			return w.resolveRoute(w.catalog.network.Routes[i]), true
 		}
 	}
-	if route.ID == "" {
-		return route, false
-	}
+	return gameapi.Route{}, false
+}
+
+// resolveRoute fills in the length, timing and open state of a catalog route
+// for this world, on private copies of its slices.
+func (w World) resolveRoute(route gameapi.Route) gameapi.Route {
 	route.Sections = append([]string{}, route.Sections...)
 	route.Cities = append([]gameapi.CityID{}, route.Cities...)
 	route.Stops = append([]gameapi.CityID{}, route.Stops...)
@@ -204,17 +207,20 @@ func (w World) route(id string) (gameapi.Route, bool) {
 		route.Open = route.Open && w.operational(co)
 	}
 	route.Minutes += (len(route.Stops) - 2) * w.catalog.network.DwellMinutes
-	return route, true
+	return route
 }
+
+// Routes resolves every catalog entry directly. Looking each one up by ID
+// would rescan the route list once per route.
 func (w World) Routes() []gameapi.Route {
-	result := []gameapi.Route{}
+	result := make([]gameapi.Route, 0, len(w.catalog.corridors)+len(w.catalog.network.Routes))
 	for _, co := range w.catalog.corridors {
-		r, _ := w.route(co.ID)
+		r := w.resolveRoute(corridorRoute(co))
 		w.suggest(&r)
 		result = append(result, r)
 	}
-	for _, r := range w.catalog.network.Routes {
-		r, _ = w.route(r.ID)
+	for i := range w.catalog.network.Routes {
+		r := w.resolveRoute(w.catalog.network.Routes[i])
 		w.suggest(&r)
 		result = append(result, r)
 	}

@@ -488,7 +488,7 @@ func (g *Game) frame() gameapi.Frame {
 		Projects:       g.w.Projects(),
 		Services:       g.w.Services(),
 		Fleet:          g.w.Fleet(),
-		IdleLines:      g.w.IdleLines(),
+		IdleLines:      g.w.IdleLinesAmong(routes),
 		Debt:           g.w.Debt(),
 		DebtLimit:      domain.DebtLimit,
 		Pending:        g.w.Pending(),

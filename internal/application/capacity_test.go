@@ -61,7 +61,7 @@ func TestCapacityExplanationMatchesRejectionAndFreedSpace(t *testing.T) {
 	_, err = g.Apply(
 		gameapi.Command{
 			Kind:       gameapi.SetService,
-			Revision:   g.Snapshot().Revision,
+			Revision:   revision(g),
 			CorridorID: q.CorridorID,
 			Frequency:  q.Frequency,
 			Fare:       q.Fare,

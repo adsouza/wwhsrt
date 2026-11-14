@@ -30,7 +30,7 @@ func openTest(t *testing.T, s Store) *Game {
 }
 func applyTest(t *testing.T, g *Game, k, name string) gameapi.Frame {
 	t.Helper()
-	f, e := g.Apply(gameapi.Command{Kind: k, Name: name, Revision: g.Snapshot().Revision})
+	f, e := g.Apply(gameapi.Command{Kind: k, Name: name, Revision: revision(g)})
 	if e != nil {
 		t.Fatal(e)
 	}

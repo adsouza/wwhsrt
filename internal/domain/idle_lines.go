@@ -4,9 +4,12 @@ import "wwhsrt/pkg/gameapi"
 
 // Physical upkeep is charged once per line, and idle train leases once per
 // service pattern. Through-running on a line clears its no-service warning.
-func (w World) IdleLines() []gameapi.IdleLine {
+func (w World) IdleLines() []gameapi.IdleLine { return w.IdleLinesAmong(w.Routes()) }
+
+// IdleLinesAmong takes the already resolved Routes() of this world, so a
+// caller that needs both builds the route list once.
+func (w World) IdleLinesAmong(routes []gameapi.Route) []gameapi.IdleLine {
 	result := []gameapi.IdleLine{}
-	routes := w.Routes()
 	for _, co := range w.catalog.corridors {
 		owned := false
 		for _, p := range w.projects {

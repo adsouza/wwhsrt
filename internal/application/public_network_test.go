@@ -17,9 +17,16 @@ func openPublic(t *testing.T, store Store) *Game {
 	}
 	return g
 }
+
+// revision reads the current revision without building a whole frame.
+func revision(g *Game) uint64 {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	return g.w.Revision()
+}
 func publicCommand(t *testing.T, g *Game, c gameapi.Command) gameapi.Frame {
 	t.Helper()
-	c.Revision = g.Snapshot().Revision
+	c.Revision = revision(g)
 	f, e := g.Apply(c)
 	if e != nil {
 		t.Fatalf("%+v: %v", c, e)
