@@ -65,3 +65,55 @@ func FuzzProjectionIsFinite(f *testing.F) {
 		}
 	})
 }
+
+// Dragging at zoom 1 can show half a screen beyond the fitted frame on each side. Zooming in must not
+// put any of that out of reach: the world position of each screen edge, with the map dragged as far as
+// it goes, is the same at every zoom.
+func TestPanLimitDoesNotShrinkWithZoom(t *testing.T) {
+	for _, id := range []string{"world", "east-asia", "japan"} {
+		edges := func(zoom float64) [4]float64 {
+			var out [4]float64
+			for i, pan := range [][2]float64{{-1e12, 0}, {1e12, 0}, {0, -1e12}, {0, 1e12}} {
+				c := RegionCamera(2929, 1861, id, false)
+				c.ZoomAt(zoom, Point{X: c.Width / 2, Y: c.Height / 2})
+				c.PanX, c.PanY = pan[0], pan[1]
+				c.Clamp()
+				switch i {
+				case 0:
+					out[i] = c.World(Point{X: c.Width, Y: c.Height / 2}).X
+				case 1:
+					out[i] = c.World(Point{X: 0, Y: c.Height / 2}).X
+				case 2:
+					out[i] = c.World(Point{X: c.Width / 2, Y: c.Height}).Y
+				default:
+					out[i] = c.World(Point{X: c.Width / 2, Y: 0}).Y
+				}
+			}
+			return out
+		}
+		base := edges(1)
+		for _, zoom := range []float64{2, 8, 32} {
+			for i, edge := range edges(zoom) {
+				if math.Abs(edge-base[i]) > 1e-9 {
+					t.Errorf("%s at zoom %v: dragged fully, edge %d reaches %.4f but zoom 1 reaches %.4f", id, zoom, i, edge, base[i])
+				}
+			}
+		}
+	}
+}
+
+// The reported case: the World view on a 3737x2029 window with an 800 px panel.
+func TestTokyoStaysReachableInTheWorldViewAtMaximumZoom(t *testing.T) {
+	tokyo := Project(35.685, 139.7514)
+	for _, zoom := range []float64{1, 4, 16, 32} {
+		c := RegionCamera(2929, 1861, "world", false)
+		c.ZoomAt(zoom, Point{X: c.Width / 2, Y: c.Height / 2})
+		// Drag west as far as the map goes, then level Tokyo's latitude with the middle of the screen.
+		c.PanX = -1e12
+		c.PanY += c.Height/2 - c.Screen(tokyo).Y
+		c.Clamp()
+		if at := c.Screen(tokyo); at.X > c.Width || at.Y < 0 || at.Y > c.Height {
+			t.Errorf("zoom %v: Tokyo is at %.0f,%.0f, off a %.0fx%.0f map", zoom, at.X, at.Y, c.Width, c.Height)
+		}
+	}
+}

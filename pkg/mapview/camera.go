@@ -92,9 +92,14 @@ func (c *Camera) ZoomAt(factor float64, at Point) {
 	c.PanY += at.Y - after.Y
 	c.Clamp()
 }
+
+// Clamp keeps the view inside the area that dragging can show at zoom 1: the fitted frame and half a
+// screen beyond it on each side. The limit grows with zoom so that the same area stays reachable;
+// a limit of half a screen per zoom step would let a place be seen from afar but not approached.
 func (c *Camera) Clamp() {
-	c.PanX = math.Max(-c.Width*c.Zoom/2, math.Min(c.Width*c.Zoom/2, c.PanX))
-	c.PanY = math.Max(-c.Height*c.Zoom/2, math.Min(c.Height*c.Zoom/2, c.PanY))
+	reach := math.Max(1, c.Zoom) - 0.5
+	c.PanX = math.Max(-c.Width*reach, math.Min(c.Width*reach, c.PanX))
+	c.PanY = math.Max(-c.Height*reach, math.Min(c.Height*reach, c.PanY))
 }
 func (c *Camera) Focus(points []Point) {
 	if len(points) < 2 {
