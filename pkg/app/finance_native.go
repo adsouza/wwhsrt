@@ -16,19 +16,6 @@ func (h *host) financeForm(g *Game, t func(string) string, label nativeLabel, bu
 	p := ui.PaletteFor(g.State)
 	remaining := g.Frame.DebtLimit - g.Frame.Debt
 	label(t("creditAvailable")+"\n"+ui.Cash(remaining), 15)
-	if q, ok := ui.FundingBreakdown(g.Frame, g.State); ok {
-		fundingLabels(g, q, label)
-		button(t("reviewFundingPlan"), func() { g.State.AlignmentID = q.AlignmentID; g.State.View = "build"; g.dirty = true; h.persist(g) })
-		if gap := q.Shortfall; gap > 0 {
-			label(t("shortfallInterest")+"\n"+ui.Cash((g.Frame.Debt+gap+599)/600-(g.Frame.Debt+599)/600), 14)
-			b := button(t("borrowShortfall")+"\n"+ui.Cash(gap), func() { g.State.LoanAmount = ui.DollarInput(gap); h.send(g, gameapi.TakeLoan) })
-			b.GetWidget().Disabled = h.busy || gap > remaining
-		}
-		label(t("fundingLoanHelp"), 14)
-	} else {
-		label(t("fundingChoosePlan"), 14)
-		button(t("build"), func() { g.State.View = "build"; g.dirty = true; h.persist(g) })
-	}
 	label(t("loanAmount"), 16)
 	var face text.Face = &text.GoTextFace{Source: g.Map.Font, Size: 16}
 	note := widget.NewText(widget.TextOpts.Text("", &face, p.Text), widget.TextOpts.MaxWidth(float64(width)))
@@ -54,4 +41,28 @@ func (h *host) financeForm(g *Game, t func(string) string, label nativeLabel, bu
 	content.AddChild(note)
 	borrow = button(t("borrow"), func() { h.send(g, gameapi.TakeLoan) })
 	update()
+}
+
+func (h *host) financeProject(g *Game, t func(string) string, label nativeLabel, button nativeButton) {
+	if !h.disclosure(g, "company-funding", t("fundingPlan"), button) {
+		return
+	}
+	if q, ok := ui.FundingBreakdown(g.Frame, g.State); ok {
+		fundingLabels(g, q, label)
+		button(t("reviewFundingPlan"), func() {
+			g.State.AlignmentID = q.AlignmentID
+			g.State.BuildPane = "plan"
+			g.State.View = "build"
+			h.workspaceChanged(g)
+		})
+		if gap := q.Shortfall; gap > 0 {
+			label(t("shortfallInterest")+"\n"+ui.Cash((g.Frame.Debt+gap+599)/600-(g.Frame.Debt+599)/600), 14)
+			b := button(t("borrowShortfall")+"\n"+ui.Cash(gap), func() { g.State.LoanAmount = ui.DollarInput(gap); h.send(g, gameapi.TakeLoan) })
+			b.GetWidget().Disabled = h.busy || gap > g.Frame.DebtLimit-g.Frame.Debt
+		}
+		label(t("fundingLoanHelp"), 14)
+	} else {
+		label(t("fundingChoosePlan"), 14)
+		button(t("build"), func() { g.State.BuildPane = "plan"; g.State.View = "build"; h.workspaceChanged(g) })
+	}
 }

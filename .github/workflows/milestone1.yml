@@ -27,8 +27,17 @@ jobs:
       - run: |
           python3 -m pip install -r tools/requirements-geography.txt
           python3 tools/check-route-geography.py
+          python3 -m pip install -r tools/requirements-public-network.txt
+          python3 tools/prepare-network-repairs.py --check
+          python3 tools/prepare-launch-prospects.py --check
+          python3 tools/import-public-network.py --check
+          python3 tools/check-launch-prospects.py
+          python3 tools/check-regional-network.py
+          python3 tools/test-network-coverage.py
+          python3 tools/audit-public-network.py --check --strict
       - run: go test -race ./internal/application ./internal/adapters/filestore
       - run: go test ./internal/application -run '^$' -fuzz FuzzRestoreNeverPanics -fuzztime 10s -parallel 2
+      - run: go test ./internal/domain -run '^$' -fuzz FuzzNetworkConservation -fuzztime 10s -parallel 2
       - run: go test ./pkg/mapview -run '^$' -fuzz FuzzProjectionIsFinite -fuzztime 10s -parallel 2
       - run: sh tools/build-web.sh
       - run: mkdir -p build && go build -o build/headless ./cmd/headless && go build -o build/webserve ./cmd/webserve
@@ -38,7 +47,21 @@ jobs:
           build/webserve > /tmp/wwhsrt-http.log 2>&1 &
           server_pid=$!
           trap 'kill "$server_pid"' EXIT
+          NODE_OPTIONS=--max-old-space-size=1536 node tools/check-economy.cjs
+          NODE_OPTIONS=--max-old-space-size=1536 node tools/check-map-services.cjs
+          NODE_OPTIONS=--max-old-space-size=1536 node tools/check-prospects.cjs
+          NODE_OPTIONS=--max-old-space-size=1536 node tools/check-campaign-completion.cjs --layout
+          NODE_OPTIONS=--max-old-space-size=1536 node tools/check-coastlines.cjs
+          NODE_OPTIONS=--max-old-space-size=1536 node tools/check-playable-map.cjs
+          NODE_OPTIONS=--max-old-space-size=1536 node tools/check-existing-connections.cjs
+          NODE_OPTIONS=--max-old-space-size=1536 node tools/check-osaka-map.cjs
+          NODE_OPTIONS=--max-old-space-size=1536 node tools/check-public-network.cjs
+          NODE_OPTIONS=--max-old-space-size=1536 node tools/check-workspace.cjs
+          NODE_OPTIONS=--max-old-space-size=1536 node tools/check-capacity.cjs
+          NODE_OPTIONS=--max-old-space-size=1536 node tools/check-idle-review.cjs
+          NODE_OPTIONS=--max-old-space-size=1536 node tools/check-onboarding.cjs
           NODE_OPTIONS=--max-old-space-size=1536 node tools/check-milestone2.cjs
+          NODE_OPTIONS=--max-old-space-size=1536 node tools/check-milestone3.cjs
           NODE_OPTIONS=--max-old-space-size=1536 node tools/check-business.cjs
           NODE_OPTIONS=--max-old-space-size=1536 node tools/check-new-game.cjs
           NODE_OPTIONS=--max-old-space-size=1536 node tools/check-theme.cjs
@@ -49,12 +72,28 @@ jobs:
         with:
           name: first-business-evidence
           path: |
+            docs/validation/network-repair-*
+            docs/validation/network-repairs-*
+            docs/validation/network-topology-*
+            docs/validation/economy-*
             docs/validation/business-*
             docs/validation/new-game-*
             docs/validation/theme-*
             docs/validation/funding-*
             docs/validation/milestone1-*
             docs/validation/milestone2-*
+            docs/validation/milestone3-*
+            docs/validation/capacity-*
+            docs/validation/idle-review-*
+            docs/validation/onboarding-*
+            docs/validation/workspace-*
+            docs/validation/public-network-*
+            docs/validation/osaka-station-*
+            docs/validation/existing-connection-*
+            docs/validation/playable-map-*
+            docs/validation/map-services-*
+            docs/validation/prospects-*
+            docs/validation/coastline-*
             docs/validation/terrain-*
             docs/validation/route-geography-*
   native-builds:

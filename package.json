@@ -3,7 +3,22 @@
   "private": true,
   "scripts": {
     "check:m1": "node tools/check-milestone1.cjs",
-    "check:business": "node tools/check-business.cjs"
+    "check:business": "node tools/check-business.cjs",
+    "check:m3": "node tools/check-milestone3.cjs",
+    "check:onboarding": "node tools/check-onboarding.cjs",
+    "check:idle-review": "node tools/check-idle-review.cjs",
+    "check:capacity": "node tools/check-capacity.cjs",
+    "check:workspace": "node tools/check-workspace.cjs",
+    "check:public-network": "node tools/check-public-network.cjs",
+    "check:osaka-map": "node tools/check-osaka-map.cjs",
+    "check:existing-connections": "node tools/check-existing-connections.cjs",
+    "check:playable-map": "node tools/check-playable-map.cjs",
+    "check:map-services": "node tools/check-map-services.cjs",
+    "check:prospects": "node tools/check-prospects.cjs",
+    "check:coastlines": "node tools/check-coastlines.cjs",
+    "check:economy": "node tools/check-economy.cjs",
+    "check:network-repairs": "node tools/check-network-repairs.cjs",
+    "check:network-repairs:phone": "node tools/check-network-repairs.cjs http://127.0.0.1:8765/ phone && node tools/check-network-repairs.cjs http://127.0.0.1:8765/ offline"
   },
   "devDependencies": {
     "playwright": "1.63.0"

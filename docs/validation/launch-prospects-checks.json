@@ -1,0 +1,147 @@
+{
+  "recorded_at": "2026-11-13T14:03:21.092964+00:00",
+  "scope": "All 70 launch construction prospects; Moroccan starting HSR limited to Tangier\u2013Kenitra; separate Lisbon\u2013Porto dedicated HSR; save v8 construction cutover",
+  "catalog": {
+    "cities": 287,
+    "starting_public_corridors": 292,
+    "construction_prospects": 70,
+    "construction_alignments": 72,
+    "multi_section_templates": 3323,
+    "moroccan_starting_hsr": [
+      "public_kenitra__tangier"
+    ]
+  },
+  "sha256": {
+    "data/construction/launch-prospects.v1.json": "427ce6ca1c376caff39b7f956434d65e534d811370d59309565476b4437c5ebd",
+    "data/construction/compiled-prospects.v1.json": "affe0918b1137e97059e814fea77f16f9393265ddf0fdb45a0e452a96ca7f0df",
+    "data/construction/route-land.v1.json.gz": "4ce8321410e45877cdf11c8d28e49eb0eb46b77d6662f883df7efdf2b008f91a",
+    "data/costs/construction_costs.v1.json": "6724a03f289db3d30bac6ef50e31a4da55968527a59e2955a16026eec4d64db5",
+    "assets/scenario/public-network.json": "0d74a64753d4ec70d353decfd80584cc17c6fc49adfb7c4bd640864d331ba5e9",
+    "assets/scenario/playable-rail-map.json": "da9c3e1ae9da3f1c0b233fffc4f2209980a0e3b7927c35579ffd6b4e5888dd2e",
+    "assets/terrain/world-land.json": "6f69e6232469bc5034a5d5fca25dfb71452c0838ccf969c40a4aa10de40676a9",
+    "assets/scenario/public-network-v3.json.gz": "6b172890351b8cb54d18d98191df3ea32a8b3a0ec00220a0e8f939e2ef837999",
+    "web/main.wasm": "a622a525ef8ed72ddcfa10ba6900aa7184f80c7bf34e593a743041e09d3f49ed",
+    "web/app.js": "064cdf2646f84fb9b0ac89f85364d841436372930d15381256d388a83befe41d",
+    "build/wwhsrt": "afecc7291273c11a3e6504841160c94c4e329f6b060d7e7ca79b8b7c47072bf2",
+    "build/headless": "df498ea9f7ea8f8c0730d4d8a6a02d8681e60fd3a0a836399d457ab3b1f86a10"
+  },
+  "archived_v7_uncompressed_sha256": "b5940f7c0c130ec255f0783da9c09e12355b6c61131396a1b5f590c4c72ce2f8",
+  "checks": [
+    {
+      "command": "python3 tools/prepare-network-repairs.py --check",
+      "result": "passed"
+    },
+    {
+      "command": "python3 tools/prepare-launch-prospects.py --check",
+      "result": "passed after frozen-source/cache-directory fix; corridor, terminal and review payloads unchanged"
+    },
+    {
+      "command": "python3 tools/import-public-network.py --check",
+      "result": "passed against final runtime assets"
+    },
+    {
+      "command": "python3 tools/check-launch-prospects.py",
+      "result": "passed all 70 identities, 68 new alignments in geographic/Equal Earth/drawn-map geometry, regional quantity/crossing budgets and negative fixtures"
+    },
+    {
+      "command": "python3 tools/test-network-coverage.py",
+      "result": "passed six tests including deliberately damaged networks"
+    },
+    {
+      "command": "python3 tools/audit-public-network.py --check --strict",
+      "result": "passed all ten whole-network contracts and seven pair checks"
+    },
+    {
+      "command": "python3 tools/check-route-geography.py",
+      "result": "passed 12 legacy/current Japanese paths and negative fixtures"
+    },
+    {
+      "command": "GOMEMLIMIT=768MiB GOMAXPROCS=2 go test -p 1 ./internal/domain ./internal/application ./pkg/ui ./pkg/mapview ./pkg/app ./pkg/render",
+      "result": "passed; final package seconds 0.453, 21.050, 0.173, 0.154, 53.583, 0.941"
+    },
+    {
+      "command": "GOMEMLIMIT=768MiB GOMAXPROCS=2 go test -p 1 ./pkg/render",
+      "result": "passed again after render-only shoreline refinement; 1.023 seconds"
+    },
+    {
+      "command": "python3 tools/check-boundaries.py",
+      "result": "passed"
+    },
+    {
+      "command": "Python AST parse; node --check web/app.js, tools/check-prospects.cjs, tools/check-network-completion.cjs; git diff --check",
+      "result": "passed"
+    },
+    {
+      "command": "sh tools/build-web.sh; sh tools/build-native.sh; GOMEMLIMIT=768MiB GOMAXPROCS=2 go build -p 1 -trimpath -o build/headless ./cmd/headless",
+      "result": "passed sequentially; web cache ca0717335e08417b; native bundle executable/icon equal build/source"
+    },
+    {
+      "command": "Rebuilt headless binary: fresh one-month run and isolated genuine v7 Moroccan fixture advanced one month",
+      "result": "passed; 70 prospects, positive starter revenue, v8 writes, two prior reports exact, retired Moroccan plans/trains removed, two unrelated trains retained"
+    }
+  ],
+  "memory_receipts_mib": {
+    "audit-check": {
+      "peak_rss_mib": 108.5,
+      "stopped": false,
+      "exit_code": 0
+    },
+    "audit": {
+      "peak_rss_mib": 109.0,
+      "stopped": false,
+      "exit_code": 0
+    },
+    "authoring-final": {
+      "peak_rss_mib": 896.2,
+      "stopped": false,
+      "exit_code": 0
+    },
+    "authoring": {
+      "peak_rss_mib": 859.6,
+      "stopped": false,
+      "exit_code": 0
+    },
+    "catalog-final": {
+      "peak_rss_mib": 463.6,
+      "stopped": false,
+      "exit_code": 0
+    },
+    "catalog": {
+      "peak_rss_mib": 264.8,
+      "stopped": false,
+      "exit_code": 0
+    },
+    "coverage": {
+      "peak_rss_mib": 102.8,
+      "stopped": false,
+      "exit_code": 0
+    },
+    "geography-final": {
+      "peak_rss_mib": 750.2,
+      "stopped": false,
+      "exit_code": 0
+    },
+    "geography": {
+      "peak_rss_mib": 689.4,
+      "stopped": false,
+      "exit_code": 0
+    },
+    "japan": {
+      "peak_rss_mib": 1.5,
+      "stopped": false,
+      "exit_code": 0
+    },
+    "source": {
+      "peak_rss_mib": 1745.9,
+      "stopped": false,
+      "exit_code": 0
+    }
+  },
+  "limits": [
+    "Browser/WASM startup interaction not rerun: prior check stopped at 2068 MiB combined checker RSS, above 2 GiB policy; no material browser memory fix in this task.",
+    "Native widget/event/layout tests and builds passed; foreground native OS input and physical phones were not qualified.",
+    "Full local root suite, race/fuzz campaigns and remote CI not run or claimed.",
+    "Strategic alignments and engineering shares are game assumptions with cartographic screening, not surveyed grades/curvature, land rights or procurement estimates.",
+    "Existing user campaign and running native process were not modified; restart rebuilt app to load catalog."
+  ]
+}

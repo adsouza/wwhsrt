@@ -1,0 +1,231 @@
+{
+  "date": "2026-11-13T01:03:36.359Z",
+  "passed": true,
+  "wasm_sha256": "d59f34467de84a51d7f063f7916fc8707ce696cec6842335ccfb59b2092a879c",
+  "world_land_sha256": "bd178019874d9e692f2e1ba3e1ca0617d825a4e7e31615feb317554b446e74c4",
+  "checks": [
+    {
+      "country": "Japan",
+      "mode": "light",
+      "terrain": false,
+      "checkedWater": 1,
+      "correctWater": 1,
+      "shoreHits": 20,
+      "boundaryHits": 49,
+      "samples": [
+        {
+          "pixel": [
+            121,
+            126
+          ],
+          "rgb": [
+            205,
+            238,
+            255
+          ],
+          "expected": [
+            205,
+            238,
+            255
+          ]
+        }
+      ]
+    },
+    {
+      "country": "Japan",
+      "mode": "light",
+      "terrain": true,
+      "checkedWater": 1,
+      "correctWater": 1,
+      "shoreHits": 8,
+      "boundaryHits": 41,
+      "samples": [
+        {
+          "pixel": [
+            121,
+            126
+          ],
+          "rgb": [
+            205,
+            238,
+            255
+          ],
+          "expected": [
+            205,
+            238,
+            255
+          ]
+        }
+      ]
+    },
+    {
+      "country": "Japan",
+      "mode": "dark",
+      "terrain": false,
+      "checkedWater": 1,
+      "correctWater": 1,
+      "shoreHits": 20,
+      "boundaryHits": 49,
+      "samples": [
+        {
+          "pixel": [
+            121,
+            126
+          ],
+          "rgb": [
+            12,
+            36,
+            56
+          ],
+          "expected": [
+            12,
+            36,
+            56
+          ]
+        }
+      ]
+    },
+    {
+      "country": "Japan",
+      "mode": "dark",
+      "terrain": true,
+      "checkedWater": 1,
+      "correctWater": 1,
+      "shoreHits": 9,
+      "boundaryHits": 41,
+      "samples": [
+        {
+          "pixel": [
+            121,
+            126
+          ],
+          "rgb": [
+            12,
+            36,
+            56
+          ],
+          "expected": [
+            12,
+            36,
+            56
+          ]
+        }
+      ]
+    },
+    {
+      "country": "China",
+      "mode": "light",
+      "terrain": false,
+      "checkedWater": 1,
+      "correctWater": 1,
+      "shoreHits": 14,
+      "boundaryHits": 28,
+      "samples": [
+        {
+          "pixel": [
+            744,
+            506
+          ],
+          "rgb": [
+            205,
+            238,
+            255
+          ],
+          "expected": [
+            205,
+            238,
+            255
+          ]
+        }
+      ]
+    },
+    {
+      "country": "China",
+      "mode": "light",
+      "terrain": true,
+      "checkedWater": 1,
+      "correctWater": 1,
+      "shoreHits": 14,
+      "boundaryHits": 28,
+      "samples": [
+        {
+          "pixel": [
+            744,
+            506
+          ],
+          "rgb": [
+            205,
+            238,
+            255
+          ],
+          "expected": [
+            205,
+            238,
+            255
+          ]
+        }
+      ]
+    },
+    {
+      "country": "China",
+      "mode": "dark",
+      "terrain": false,
+      "checkedWater": 1,
+      "correctWater": 1,
+      "shoreHits": 14,
+      "boundaryHits": 28,
+      "samples": [
+        {
+          "pixel": [
+            744,
+            506
+          ],
+          "rgb": [
+            12,
+            36,
+            56
+          ],
+          "expected": [
+            12,
+            36,
+            56
+          ]
+        }
+      ]
+    },
+    {
+      "country": "China",
+      "mode": "dark",
+      "terrain": true,
+      "checkedWater": 1,
+      "correctWater": 1,
+      "shoreHits": 14,
+      "boundaryHits": 28,
+      "samples": [
+        {
+          "pixel": [
+            744,
+            506
+          ],
+          "rgb": [
+            12,
+            36,
+            56
+          ],
+          "expected": [
+            12,
+            36,
+            56
+          ]
+        }
+      ]
+    }
+  ],
+  "verified": [
+    "Former coarse-land coastal points are water; detailed shorelines remain visible in Japan and China",
+    "Light/dark and terrain on/off all use the same replacement geometry; exact save bytes/checkpoint unchanged"
+  ],
+  "limitations": [
+    "Synthetic browser interaction; native OS graphics/input and surveyed shoreline accuracy are not qualified."
+  ]
+}

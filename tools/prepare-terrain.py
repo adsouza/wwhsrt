@@ -107,27 +107,6 @@ manifest={"schema_version":1,"role":"Display context only; never pricing, feasib
 (OUT/"terrain.json").write_text(json.dumps(manifest,separators=(",",":"))+"\n")
 print("Prepared",len(regions),"terrain regions from",sum(len(r["sources"]) for r in regions),"pinned tiles")
 
-# Regional relief needs a coastline finer than the old world-scale polygons.
-# Replace only Japan's 1:110m exterior rings; other countries stay identical.
-from shapely.geometry import Polygon
-coast_url = 'https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_admin_0_countries.geojson'
-coast_file = CACHE / 'ne_10m_admin_0_countries.geojson'
-coast_meta = OUT / 'land.metadata.json'
-if not coast_file.exists():
-    subprocess.run(['curl','--fail','--silent','--show-error','--location','--max-time','45','--output',str(coast_file),coast_url],check=True)
-coast_raw = coast_file.read_bytes()
-coast_sha = hashlib.sha256(coast_raw).hexdigest()
-if coast_meta.exists() and json.loads(coast_meta.read_text())['source_sha256'] != coast_sha:
-    raise SystemExit('Coastline source changed; review before repinning')
-coarse = json.loads((ROOT / 'data/prototypes/natural-earth-110m.countries.geojson').read_text())
-old = next(f for f in coarse['features'] if f['properties']['name'] == 'Japan')['geometry']['coordinates']
-old_rings = [p[0] for p in old]
-base = json.loads((ROOT / 'assets/scenario/land.json').read_text())
-base = [r for r in base if r not in old_rings]
-japan = next(f for f in json.loads(coast_raw)['features'] if f['properties']['ADMIN'] == 'Japan')['geometry']['coordinates']
-for p in japan:
-    ring = Polygon(p[0]).simplify(.003, preserve_topology=True).exterior.coords
-    base.append([[round(x,6),round(y,6)] for x,y in ring])
-land_bytes = (json.dumps(base,separators=(',',':'))+'\n').encode()
-(OUT/'land.json').write_bytes(land_bytes)
-coast_meta.write_text(json.dumps({'source_url':coast_url,'source_sha256':coast_sha,'output_sha256':hashlib.sha256(land_bytes).hexdigest(),'role':'Display-only Japan shoreline refinement; no gameplay or political boundaries.','simplification_degrees':.003,'license':'Natural Earth public domain'},indent=2)+'\n')
+# Shoreline preparation is shared with the worldwide basemap and can also run
+# independently, without rebuilding or downloading relief tiles.
+subprocess.run(["python3",str(ROOT/"tools/prepare-shorelines.py")],check=True)

@@ -1,0 +1,402 @@
+{
+  "passed": true,
+  "catalog_sha256": "df6df65b2f9a9be5f26cb416d174025652b3bd76c5655f3b49e44a2b4e302a1a",
+  "cities": 291,
+  "existing_corridors": 300,
+  "prospects": 74,
+  "service_templates": 3937,
+  "mapped_stations": 2548,
+  "station_inventory": 4333,
+  "networks": [
+    {
+      "id": "nec",
+      "source": "https://media.amtrak.com/wp-content/uploads/2025/08/NextGen-Acela_NEC-Map.pdf",
+      "cities": [
+        "washington",
+        "stop_node_6097540129",
+        "baltimore",
+        "wilmington",
+        "philadelphia",
+        "metropark",
+        "newark",
+        "new_york",
+        "stamford",
+        "new_haven",
+        "providence",
+        "route_128",
+        "boston_back_bay",
+        "boston"
+      ],
+      "missing": [],
+      "connected": true,
+      "service_id": "network_nec_all_stops",
+      "ordered_service": true
+    },
+    {
+      "id": "uzbek-main",
+      "source": "https://uzrailpass.uz/en/pages/poezd-jadvali",
+      "cities": [
+        "tashkent",
+        "stop_node_2279305298",
+        "stop_node_8328285677",
+        "urgench",
+        "khiva"
+      ],
+      "missing": [],
+      "connected": true,
+      "service_id": "network_uzbek_main_all_stops",
+      "ordered_service": true
+    },
+    {
+      "id": "uzbek-branch",
+      "source": "https://uzrailpass.uz/en/pages/poezd-jadvali",
+      "cities": [
+        "stop_node_2279305298",
+        "qarshi",
+        "shahrisabz"
+      ],
+      "missing": [],
+      "connected": true,
+      "service_id": "network_uzbek_branch_all_stops",
+      "ordered_service": true
+    },
+    {
+      "id": "german-ice",
+      "source": "https://www.bahn.de/service/ueber-uns/zugtypen/ice",
+      "cities": [
+        "rhine_ruhr",
+        "koln",
+        "frankfurt_am_main",
+        "berlin",
+        "munich",
+        "hamburg"
+      ],
+      "missing": [],
+      "connected": true
+    },
+    {
+      "id": "austrian-railjet",
+      "source": "https://www.oebb.at/en/reiseplanung-services/oebb-zugverbindungen",
+      "cities": [
+        "vienna",
+        "munich"
+      ],
+      "missing": [],
+      "connected": true
+    },
+    {
+      "id": "turkey-yht",
+      "source": "https://www.tcddtasimacilik.gov.tr/seferler/yuksek-hizli-tren",
+      "cities": [
+        "istanbul",
+        "ankara",
+        "konya"
+      ],
+      "missing": [],
+      "connected": true
+    },
+    {
+      "id": "sapsan",
+      "source": "https://rzdtour.com/assets/pdf/rzd-mag/RZD_Mag_07_2025.pdf",
+      "cities": [
+        "moscow",
+        "saint_petersburg"
+      ],
+      "missing": [],
+      "connected": true
+    },
+    {
+      "id": "alfa-pendular",
+      "source": "https://www.cp.pt/info/documents/d/cp/precos-alfa-pendular-lisboa-porto-braga-1",
+      "cities": [
+        "lisbon",
+        "porto"
+      ],
+      "missing": [],
+      "connected": true
+    },
+    {
+      "id": "al-boraq",
+      "source": "https://www.oncf.ma/content/download/120129/2802244/file/Plan%20de%20transport%20Al%20Boraq%20CAN.pdf",
+      "cities": [
+        "tangier",
+        "kenitra"
+      ],
+      "missing": [],
+      "connected": true,
+      "service_id": "public_kenitra__tangier",
+      "ordered_service": true
+    },
+    {
+      "id": "china-hubs",
+      "source": "https://www.nra.gov.cn/",
+      "cities": [
+        "kunming",
+        "kaifeng",
+        "xuchang",
+        "beijing",
+        "shanghai",
+        "hong_kong"
+      ],
+      "missing": [],
+      "connected": true
+    },
+    {
+      "id": "taiwan-hsr",
+      "source": "https://en.thsrc.com.tw/corp/c33f8d02-7c8a-44f0-8866-b3f8c9707ff9",
+      "cities": [
+        "taipei",
+        "taichung",
+        "tainan",
+        "kaohsiung"
+      ],
+      "missing": [],
+      "connected": true,
+      "service_id": "network_taiwan_hsr_all_stops",
+      "ordered_service": true
+    },
+    {
+      "id": "tokaido-junction",
+      "source": "https://global.jr-central.co.jp/en/info/route-map/",
+      "cities": [
+        "osaka",
+        "kyoto",
+        "maibara",
+        "nagoya"
+      ],
+      "missing": [],
+      "connected": true,
+      "service_id": "network_tokaido_junction_all_stops",
+      "ordered_service": true
+    },
+    {
+      "id": "italian-hsr",
+      "source": "https://www.fsitaliane.it/content/dam/fsitaliane/Documents/old-media-ed-eventi/comunicati-stampa-e-news/anno-2019/giugno/2019_06_03_NS_10_anni_AV.pdf",
+      "cities": [
+        "turin",
+        "milan",
+        "bologna",
+        "florence",
+        "rome",
+        "naples"
+      ],
+      "missing": [],
+      "connected": true,
+      "service_id": "network_italian_hsr_all_stops",
+      "ordered_service": true
+    },
+    {
+      "id": "catalan-hsr",
+      "source": "https://www.ecologie.gouv.fr/sites/default/files/documents/CP_-_LVG_Perpignan-Figueras_-_21-12-2016.pdf",
+      "cities": [
+        "camp_de_tarragona",
+        "barcelona",
+        "figueres",
+        "perpignan"
+      ],
+      "missing": [],
+      "connected": true,
+      "service_id": "network_catalan_hsr_all_stops",
+      "ordered_service": true
+    }
+  ],
+  "public_repairs": [
+    "public_milan__turin",
+    "public_figueres__perpignan",
+    "public_barcelona__figueres",
+    "public_barcelona__camp_de_tarragona",
+    "public_kyoto__maibara",
+    "public_maibara__nagoya"
+  ],
+  "new_prospects": [
+    "launch_72_tsuruga__maibara",
+    "launch_73_valencia__camp_de_tarragona",
+    "launch_74_porto__vigo"
+  ],
+  "platform_adapters": [
+    {
+      "city_id": "barcelona",
+      "way_id": 395889346,
+      "distance_m": 29.73
+    },
+    {
+      "city_id": "barcelona",
+      "way_id": 772266514,
+      "distance_m": 26.84
+    },
+    {
+      "city_id": "barcelona",
+      "way_id": 772266520,
+      "distance_m": 40.57
+    },
+    {
+      "city_id": "barcelona",
+      "way_id": 774727419,
+      "distance_m": 56.69
+    },
+    {
+      "city_id": "camp_de_tarragona",
+      "way_id": 192152757,
+      "distance_m": 57.34
+    },
+    {
+      "city_id": "camp_de_tarragona",
+      "way_id": 192152758,
+      "distance_m": 52.46
+    },
+    {
+      "city_id": "camp_de_tarragona",
+      "way_id": 541914223,
+      "distance_m": 48.12
+    },
+    {
+      "city_id": "camp_de_tarragona",
+      "way_id": 541914250,
+      "distance_m": 61.98
+    },
+    {
+      "city_id": "figueres",
+      "way_id": 223533769,
+      "distance_m": 2.33
+    },
+    {
+      "city_id": "figueres",
+      "way_id": 223533776,
+      "distance_m": 2.46
+    },
+    {
+      "city_id": "figueres",
+      "way_id": 333986488,
+      "distance_m": 8.07
+    },
+    {
+      "city_id": "figueres",
+      "way_id": 333986489,
+      "distance_m": 8.28
+    },
+    {
+      "city_id": "kaohsiung",
+      "way_id": 197666421,
+      "distance_m": 9.61
+    },
+    {
+      "city_id": "kaohsiung",
+      "way_id": 501135661,
+      "distance_m": 2.48
+    },
+    {
+      "city_id": "kyoto",
+      "way_id": 41750762,
+      "distance_m": 83.53
+    },
+    {
+      "city_id": "kyoto",
+      "way_id": 357704833,
+      "distance_m": 79.44
+    },
+    {
+      "city_id": "maibara",
+      "way_id": 265176832,
+      "distance_m": 47.15
+    },
+    {
+      "city_id": "maibara",
+      "way_id": 608693622,
+      "distance_m": 52.28
+    },
+    {
+      "city_id": "nagoya",
+      "way_id": 705211190,
+      "distance_m": 17.19
+    },
+    {
+      "city_id": "nagoya",
+      "way_id": 705211191,
+      "distance_m": 17.31
+    },
+    {
+      "city_id": "nagoya",
+      "way_id": 859360753,
+      "distance_m": 17.42
+    },
+    {
+      "city_id": "nagoya",
+      "way_id": 859360756,
+      "distance_m": 17.08
+    },
+    {
+      "city_id": "osaka",
+      "way_id": 111069163,
+      "distance_m": 15.0
+    },
+    {
+      "city_id": "osaka",
+      "way_id": 200889426,
+      "distance_m": 24.72
+    },
+    {
+      "city_id": "osaka",
+      "way_id": 1461496262,
+      "distance_m": 87.53
+    },
+    {
+      "city_id": "osaka",
+      "way_id": 1461496263,
+      "distance_m": 83.55
+    },
+    {
+      "city_id": "taichung",
+      "way_id": 23638395,
+      "distance_m": 3.08
+    },
+    {
+      "city_id": "taichung",
+      "way_id": 199770402,
+      "distance_m": 2.95
+    },
+    {
+      "city_id": "tainan",
+      "way_id": 197614576,
+      "distance_m": 42.21
+    },
+    {
+      "city_id": "tainan",
+      "way_id": 197665127,
+      "distance_m": 46.74
+    },
+    {
+      "city_id": "taipei",
+      "way_id": 593871149,
+      "distance_m": 44.13
+    },
+    {
+      "city_id": "taipei",
+      "way_id": 615600478,
+      "distance_m": 38.39
+    },
+    {
+      "city_id": "taipei",
+      "way_id": 615600481,
+      "distance_m": 38.37
+    },
+    {
+      "city_id": "ulsan",
+      "way_id": 128255583,
+      "distance_m": 2.26
+    },
+    {
+      "city_id": "ulsan",
+      "way_id": 407204571,
+      "distance_m": 6.75
+    }
+  ],
+  "negative_fixtures": [
+    "public_milan__turin severed",
+    "public_figueres__perpignan severed",
+    "public_kyoto__maibara severed"
+  ],
+  "limits": [
+    "Pinned source topology and bounded strategic station aggregation, not physical crossover engineering.",
+    "New construction uses authored game terrain quantities and durations; profitability depends on fares, feeder services, grants and financing."
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "id": "regional-balance-v1",
+  "lease_monthly": 12000000,
+  "running_per_km": 650,
+  "public_access_per_km": 250,
+  "trip_scale": 3,
+  "catchment_bonus_cap": 6000,
+  "daily_trip_cap": 400000,
+  "gravity_padding_km": 120,
+  "domestic_weight": 4,
+  "wait_numerator": 240,
+  "fare_base": 400,
+  "fare_per_km": 14
+}

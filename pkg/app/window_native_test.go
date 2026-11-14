@@ -63,6 +63,7 @@ func TestNativeWindowPreferencesPreserveLegacyUIAndFailedWrites(t *testing.T) {
 	}
 	g := &Game{Port: port, Frame: frame}
 	g.host.init(g)
+	ui.NormalizeHelp(&state)
 	if !reflect.DeepEqual(g.State, state) || g.host.window != nil {
 		t.Fatal("legacy UI preferences changed")
 	}

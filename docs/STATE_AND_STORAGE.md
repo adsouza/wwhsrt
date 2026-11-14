@@ -1,10 +1,14 @@
 # Game state and storage
 
-**Decision:** use a typed Go world, portable versioned JSON saves, and an embedded SQLite database for the private multiplayer server. Start with save schema **1**, host-record schema **1**, and database schema **1**. There are no released game saves to migrate.
+**Decision:** use a typed Go world, portable versioned JSON saves, and an embedded SQLite database for the private multiplayer server. Start with save schema **1**, host-record schema **1**, and database schema **1**. There are no released production saves to migrate; development compatibility is handled separately below.
 
-The [first-business slice](validation/FIRST_BUSINESS.md#running-and-storage) uses a distinct, bounded `wwhsrt-first-business` version-2 development snapshot for its company, finance, construction, fleet and direct-service subset. The user requested a fresh company, so no walking-skeleton migration is required. This is not the full production envelope below; SQLite and the broader state model remain planned.
+The [first-business slice](validation/FIRST_BUSINESS.md#running-and-storage) uses a distinct, bounded `wwhsrt-first-business` version-10 development snapshot for company, finance, construction, fleet and network services. It strictly opens version-2/3/4/5/6/7/8/9 development saves, retains their historical accounts/company/fleet and begins using the expanded prototype catalog with the next month. `public_sha256` pins the imported catalog, while `catalog_since` selects the frozen original catalog when validating/rebuilding older network reports. Version 10 has a bounded 16 MiB envelope limit. The next successful command writes the upgrade atomically; opening or failed commits preserve the original save. Network inputs are pinned by `network_sha256`, with `network_since` separating original legacy reports from new network reports. This is not the full production envelope below; SQLite and the broader state model remain planned.
 
-The development slice's explicit `new_game` command replaces the current campaign through the same persist-before-acknowledgment transaction as other commands. It resets economic state to the scenario start, including the calendar and starter services/fleet, while retaining a monotonically increasing command revision so stale commands cannot become valid across resets. It remains usable after campaign completion, subject to the development action limit. Commit failure preserves both the prior in-memory game and durable snapshot. The snapshot format remains version 2; no migration or delete-before-write operation is needed. Presentation drafts and onboarding reset only after a successful command; device display preferences are retained. This local command does not define multiplayer world deletion.
+The v5 development payload adds `economy_sha256` (exact embedded `assets/scenario/economy.json` bytes), `economy_since` (first zero-based resolved-month index using those rules), and rules `network-v5`. A v4 save opens with cutover equal to its saved `months`, preserving every historical report, company balance, fleet and accepted service plan. Earlier months replay with their original demand, waiting and cost coefficients; future months use the new policy. Restore rejects an unknown policy hash, a cutover before the expanded-catalog epoch, a future cutover, or historical figures that do not reconcile. A failed save commits neither the upgrade nor its command. New worlds start at cutover 0. This does not migrate or implement the production SQLite schema. The [frozen v4 fixture](../internal/application/testdata/README.md) and [economics evidence](validation/ECONOMY.md) document compatibility qualification.
+
+The v6 development payload extends that record with `topology_since`, `prior_public_sha256`, the repaired `public_sha256` and rules `network-v6`. The frozen pre-repair expanded catalog is retained byte-for-byte. Old v4/v5 snapshots are validated against it, then upgraded at their saved month; historical catalog and economy cutovers remain independent. Current route IDs, accepted plans and original game timings remain compatible, preserving fleet requirements. Both catalog hashes and the cutover range are mandatory. v2/v3 history still uses the original small catalog. A successful next command commits all metadata atomically; opening or a failed write changes no durable bytes. See [topology evidence](validation/NETWORK_TOPOLOGY.md).
+
+The development slice's explicit `new_game` command replaces the current campaign through the same persist-before-acknowledgment transaction as other commands. It resets economic state to the scenario start, including the calendar and starter services/fleet, while retaining a monotonically increasing command revision so stale commands cannot become valid across resets. It remains usable after campaign completion, subject to the development action limit. Commit failure preserves both the prior in-memory game and durable snapshot. New game uses the current version-6 snapshot and requires no delete-before-write operation. Presentation drafts and learning action completion reset only after a successful command; device display preferences, explicit concept dismissals and the independent suggestion mute setting are retained. Version-1 local help preferences store seen/dismissed/explained/completed concept flags and reference navigation state. They are excluded from campaign schema, exports, replay and hashes; upgrading legacy global hint dismissal to muted suggestions requires no campaign migration. The task workspace adds preferred inspector width, top/left dock placement, subtab selection and a bounded set of disclosure flags to the same local UI record. Missing fields use compatible defaults; compact fallback does not overwrite desktop preferences, and New game retains width/dock while clearing task drafts. No campaign migration is needed. This local command does not define multiplayer world deletion.
 
 This is the implementation contract for the [architecture](../ARCHITECTURE.md). The [reference Go types](contracts/state.go), [server port/types](contracts/server.go), [structural JSON Schema](contracts/save-v1.schema.json), [example save](contracts/fixtures/minimal-save-v1.json), and [initial SQL schema](contracts/server-v1.sql) make it concrete. The examples are compile/checkable design artifacts; they are not a game engine, a complete restore validator, or a running storage adapter.
 
@@ -185,3 +189,81 @@ Future SQL migrations run with the server stopped, a verified whole-database bac
 The focused reference Go checks compile the types, compare the generated structural schema/example, check exact wide-integer round trips, reject duplicate/trailing JSON and tampered/future-schema envelopes. The Python contract checker validates the schema/example and fixture hashes and exercises SQLite bootstrap, atomic world/receipt/audit rollback, generation conflicts, deduplication without duplicate events, close/reopen and backup consistency.
 
 These checks do not implement world mapping, complete semantic restore validation, the selected Go SQL driver, production native/browser storage, authentication, process locking or a server coordinator. Those are implementation tasks with the contracts above fixed for the first slice. Qualify real driver/filesystem/browser fault recovery and abrupt-process/power-loss behavior before claiming production durability. Follow [TESTING.md](../TESTING.md) for the focused commands and remaining gates.
+
+
+### Connectivity completion: development save v7
+
+Version 7 (`network-v7`) adds `connectivity_since` and
+`previous_repair_sha256`. The latter pins the decompressed bytes of
+`assets/scenario/public-network-v2.json.gz` (the exact v6 catalog), SHA-256
+`9fcd93c3356bd5545896684e98e102cf7d22144884bf984abd80998cffe942f5`.
+The v1 expanded catalog and original small catalog remain immutable too.
+Restoration selects the v2 catalog before the connectivity cutover, then the
+v1 catalog before the topology cutover, then the small catalog before the
+original catalog cutover; economy selection remains independent. A v6 save is
+validated with v2 before adopting current connectivity at its saved month.
+v4/v5 saves go straight to current data at that month with equal topology and
+connectivity boundaries. Existing service IDs/stops/sections and game journey
+lengths/times remain valid. Past reports and active fleets are preserved.
+Opening performs no write; failed commits preserve bytes and memory state.
+Only the next successful command writes v7. Historical catalogs load lazily when
+needed; new campaigns do not parse all archived route geometry. Full source graph
+and audit inventories remain build inputs, outside each player's snapshot.
+
+
+### Worldwide construction: development save v8
+
+Version 8 (`network-v8`) adds `construction_since` and `launch_prior_sha256`.
+The latter pins the decompressed v7 catalog in
+`assets/scenario/public-network-v3.json.gz`, SHA-256
+`b5940f7c0c130ec255f0783da9c09e12355b6c61131396a1b5f590c4c72ce2f8`.
+Historical month selection applies this boundary before connectivity, topology,
+original-catalog and economy boundaries. Earlier v2–v7 envelopes remain readable;
+opening and failed writes never replace their bytes. A successful command writes
+v8 atomically. New games reset every boundary to zero. Histories load lazily.
+
+New construction quantities, regional rates, names, station anchors and future
+service templates are pinned by the current public-catalog hash. Existing Japanese
+quotes, alignments and construction durations stay frozen. A v7 save is validated
+against its exact archived catalog before adopting the construction expansion.
+Unrelated services, projects, fleet, cash and every resolved report remain intact.
+Withdrawn conventional Moroccan services and their leased trains are retired;
+there is no retroactive charge or rewritten report. Historical report validation
+and representative-day derivation use the original catalog for that month. The
+client omits retired services from the current map animation and identifies them
+as earlier services in historical views.
+
+
+### Regional expansion: development save v9
+
+Version 9 (`network-v9`) embeds the v8 payload and adds `regional_since` and
+`regional_prior_sha256`. The latter pins the uncompressed archived v8 catalog:
+`0d74a64753d4ec70d353decfd80584cc17c6fc49adfb7c4bd640864d331ba5e9`, shipped as
+`assets/scenario/public-network-v4.json.gz`. The new boundary is at least the
+construction boundary and at most the saved month. `World.atMonth` selects the
+regional prior before earlier catalogs/epochs. Restoring v8 first validates its
+exact old inputs and reports, then upgrades in memory at the saved month; Taipei's
+new demand applies prospectively. Company cash, projects, plans, fleet, debt and
+pending flows survive. The older v4–v7 transitions also set this boundary; v2/3 histories retain their original-catalog boundary.
+
+New games start all boundaries at zero. Unknown/missing hashes, invalid boundaries,
+unknown fields and malformed saves remain rejected. Opening and failed writes
+preserve the old save; successful commands write v9 atomically. Genuine anonymous
+v8 fixtures include both a fresh-world history and a previous v7→v8 cutover, so
+nested historical report selection is tested.
+
+
+### Network connectors: development save v10
+
+Version 10 (`network-v10`) embeds the v9 payload and adds `connector_since` and
+`connector_prior_sha256`. The hash pins the uncompressed v9 catalog:
+`f4d94ee8afa0239270975e78033cad2458de90fa012f3037e5adc39b07acdad1`, shipped as
+`assets/scenario/public-network-v5.json.gz`. The boundary is at least
+`regional_since` and no later than the saved month. Historical report validation
+selects this catalog before earlier boundaries. Restoring v9 validates against
+its exact archived inputs, then upgrades at the saved month without rewriting
+cash, reports, projects, service plans, fleet, debt or pending flows. Older save
+upgrades also set the new boundary. New games reset it to zero. Failed writes and
+reads preserve original bytes; successful commands write v10 atomically.
+Published service templates retain exact section/city/stop identities. A shorter
+new route gets a separate identity and stays closed until all its works open.

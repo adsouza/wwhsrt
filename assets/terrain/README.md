@@ -4,8 +4,8 @@ Native and browser maps share offline shaded relief around the current Hokkaido
 and Kansai construction corridors. Elevation tint, northwest hillshade, 500 m
 contours, named peaks/uplands and lowland labels help explain route choices.
 Lake Biwa has a Natural Earth outline; Toya and Shikotsu use **point symbols**,
-not invented lake boundaries. Japan's finer shoreline keeps world-scale coastal
-polygons from obscuring local terrain.
+not invented lake boundaries. The finer Japan and China/Taiwan shorelines replace the world-scale outlines.
+A single basemap prevents coarse coast polygons from obscuring local terrain.
 
 This is presentation data, outside scenario hashes, costs, gradients, schedules
 and save compatibility. Railway sketches and engineering quantities remain authored
@@ -30,8 +30,10 @@ remain visible through relief tint and shading.
 
 `terrain.json` pins source URLs, raw hashes, imagery headers, dimensions and derived
 image hashes. `land.metadata.json` pins the Natural Earth countries source and
-derived coastline hash. Japan exterior rings, simplified by 0.003 degrees, replace
-its old 1:110m rings; other countries retain their previous geometry. Sources cache
+derived coastline hash. Japan, China (including Hong Kong/Macao physical land)
+and Taiwan exterior rings, simplified by 0.003 degrees, replace their old 1:110m
+rings; other countries retain their previous geometry. Hong Kong/Macao are unioned
+with the adjacent physical land to avoid internal overlay seams. Sources cache
 under ignored `build/terrain-source`. Changed inputs require provenance review before
 repinning. `features.json` contains approximate reference labels and the Natural Earth
 Lake Biwa extraction, with source links/hash; the script does not generate that file.
@@ -53,3 +55,21 @@ and run `node tools/check-terrain.cjs`. Screenshots and `docs/validation/terrain
 record the WASM hash, toggle persistence, unchanged financial state/quotes, narrow
 layouts, Chinese labels and offline continuation. Inspect the screenshots; synthetic
 browser checks cannot qualify physical phones or native accessibility.
+
+`python3 tools/prepare-shorelines.py` regenerates only those shoreline refinements
+from the pinned local Natural Earth 1:10m source (fetching/hash-checking it if the
+cache is absent). `--check` verifies identical output. The full relief preparer
+calls the same helper. Then run `python3 tools/import-public-network.py` to compose
+`world-land.json`: remove all 17 replaced coarse regional rings, append the refined
+regional set exactly once, and record source/output hashes in
+`world-land.metadata.json`. Runtime public-network frames draw that combined
+basemap only; legacy fixture frames draw only the regional set. Neither depends on
+the terrain visibility toggle, and neither changes economic/save inputs.
+
+
+The worldwide map also replaces coarse Australia, South Africa and Chile
+shorelines using the same pinned Natural Earth 1:10m country source in the launch
+construction mask. These corrections keep four new land alignments from appearing
+offshore. The public compiler records simplification/source metadata and removes
+the old rings; the construction checker tests the actual drawn geometry in both
+coordinate spaces. This remains presentation-only data, outside campaign hashes.

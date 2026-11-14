@@ -1,0 +1,13 @@
+# Capacity explanations
+
+Private-section/station rejection previously returned only `track_capacity` / `station_capacity`, and the browser retained the preceding successful financial preview. Forecasts and validation now share authoritative requested-path/call accounting. A diagnostic identifies the affected resource, requested and available capacity, excess, other services' requests, each service's contribution, the draft's contribution and the frequency that fits at that resource with other services unchanged.
+
+Native and browser clients place this breakdown beside frequency controls in English/Simplified Chinese. Through and express services use their actual sections/stops, with named patterns. An edited service is counted once; replacing a source service excludes its previous frequency. Over-capacity drafts cannot Apply and have no stale revenue estimate; critical errors suppress learning cues. Public sections remain provisional and private limits/settlement behavior are unchanged. This is a projection-only API addition, requiring no save migration or campaign reset.
+
+Verification:
+
+- `GOMEMLIMIT=768MiB GOMAXPROCS=2 go test -p 1 ./internal/domain ./internal/application ./pkg/ui ./pkg/app -count=1`: full focused packages, including exact 4+4+4+1 accounting/rejection, no-save-mutation, freed capacity, response isolation, replacement semantics, station-call units, public provisional policy, localization and native real-panel sizing/content at 320–1920px in both palettes/languages.
+- `node tools/check-capacity.cjs <test-server-url>`: real controls create three services using four daily returns apiece on Tsuruga–Osaka, then request a fourth service at one daily return. The interface shows 13/12, names contributors and identifies zero remaining frequency. It clears old revenue, disables Apply, preserves exact campaign bytes while previewing, reflows in Chinese at 320px and survives reload. Reducing one contributor to three frees one path and permits the new service. Accepted commands replay to an identical native-headless/WASM checkpoint. [Results](capacity-checks.json) pin the tested build; screenshots are `capacity-overload-desktop.png` and `capacity-overload-phone-zh.png`.
+- Native/browser/headless builds compile, and boundary checks pass. The player's native campaign was inspected read-only to identify the reported conflict; it was not opened through a state-writing adapter or changed by these tests.
+
+No full local repository suite or native OS interaction check was run. Browser input/phone layouts are synthetic, and physical devices remain unqualified.

@@ -1,10 +1,66 @@
+Current regional update: [Taipei, Houston–Austin and the Yeongcheon repair](REGIONAL_NETWORK.md), [data checks](regional-network-checks.json). The catalog has 288 cities, 293 existing corridors and 71 construction prospects; save v9 preserves pre-expansion accounts. Older ledgers below retain their historical hashes.
+
+Current worldwide construction: [71-project report](LAUNCH_PROSPECTS.md), [original 70-project checks](launch-prospects-checks.json), [geography and pricing admission](launch-prospects-geography.json). Morocco starts with Tangier–Kenitra HSR only; v7 network-completion artifacts below retain their historical scope.
+
+[Campaign completion feedback](CAMPAIGN_COMPLETION.md) records the persistent
+30-year endpoint notice and confirmed restart affordance, with focused native
+widget and isolated browser-footer checks.
+
+[Shared track rendering](SHARED_TRACK.md) fixes winding cancellation on overlapping
+public routes, with before/after native renders of the Shijiazhuang–Jinan approach.
+
+Current whole-network completion and compatibility results: [NETWORK_TOPOLOGY.md](NETWORK_TOPOLOGY.md), [local ledger](network-completion-checks.json), [focused browser ledger](network-completion-browser-checks.json), [35 unverified proximity candidates](PROXIMITY_REVIEW.md). These supersede earlier catalog counts and v6 repair results for current builds; historical evidence below retains its original hashes.
+
 # Map and widget feasibility evidence
 
 **Date:** 2026-11-08. Prototype evidence, not release qualification or a completed game.
 
 ## Current first-business slice
 
-[Milestone 2 implementation/evidence](MILESTONE_2.md) and [its workflow results](milestone2-checks.json) cover the full limited first-business feature scope, including station lifecycle, the named train family, component quotes, contextual guidance and independent operation. The existing business regression also passes on that WASM. The rebuilt native macOS service panel was visually inspected in isolation; automated native input did not reliably activate controls. Native interaction, physical devices and native accessibility remain unqualified. Through-running and transfers remain milestone 3.
+[Economy calibration](ECONOMY.md) records bounded demand, revised train costs, route-based starting plans, monthly break-even targets and version-5 historical-save compatibility. The diagnostic compares all existing direct routes independently; it does not certify campaign balance or real-world ridership.
+
+
+[Public-network repairs](NETWORK_TOPOLOGY.md) now pass all seven required metropolitan journeys and preserve historical saves. The source-node graph resolves 54 of the original 92 proximity sites; the remaining 38 are unverified and stay unjoined. These targeted passes do not establish worldwide completeness or exact terminal/timetable fidelity.
+
+[Service selection from map track](MAP_SERVICES.md) opens a scoped direct/through
+route chooser from operating rail, retaining draft values and phone map context.
+
+[Construction prospects](PROSPECTS.md) replaces arbitrary city-pair selection with
+dotted, selectable reviewed corridors and a matching named list in both clients.
+
+[Representative-day playback](REPLAY_PLAYBACK.md) records the native Play button
+regression, slider render/event checks, rebuilt app and qualification limits.
+
+[Coastline replacement and China refinement](COASTLINES.md) removes duplicate
+coarse/fine shoreline layers and extends the detailed source to China/Taiwan.
+The [coastline ledger](coastline-checks.json) records palette/terrain pixel checks.
+
+
+[Playable map filtering](PLAYABLE_MAP.md) removes source-only rail fragments and
+unrelated station dots while retaining operating through corridors. Its
+[ledger](playable-map-checks.json) pins the newer map build.
+
+
+[Existing public connection clarification](EXISTING_CONNECTIONS.md) explains why
+Beijing–Tianjin and the two Chengdu pairs belong to the operating network and adds
+a direct service-planning action when they are inspected in Build. Its
+[ledger](existing-connection-checks.json) pins the newer presentation build.
+
+
+[Kyoto–Osaka station connection correction](OSAKA_STATION.md) aligns the legacy
+Japan drawings/highlights/train replay with the imported stations. Its
+[ledger](osaka-station-checks.json) pins the newer build; prior ledgers retain their
+own build identity.
+
+
+[Public-network integration](PUBLIC_NETWORK.md) makes the prototype network playable, including Chinese corridors, source stations and connected through-service templates. Its [browser ledger](public-network-checks.json) pins the tested catalog/build; older evidence below retains its historical scope.
+
+
+[Task workspace redesign](WORKSPACE.md) separates the command dock and resizable task inspector, with focused subtabs, selective detail and retained top/left placement. [Workflow results](workspace-checks.json) pin their build; previous screenshots remain historical observations.
+
+[Milestone 3 implementation/evidence](MILESTONE_3.md) and [workflow results](milestone3-checks.json) cover through-running, transfers, finite mode competition, feeder journeys, shared capacity, representative-day controls and version-2 continuation. Native-headless/WASM replay parity and focused Go/native-widget checks accompany the browser workflow. Native OS input, actual phones and native accessibility remain separate qualification.
+
+[Milestone 2 implementation/evidence](MILESTONE_2.md) and [its workflow results](milestone2-checks.json) cover the full limited first-business feature scope, including station lifecycle, the named train family, component quotes, contextual guidance and independent operation. The existing business regression also passes on that WASM. The rebuilt native macOS service panel was visually inspected in isolation; automated native input did not reliably activate controls. Native interaction, physical devices and native accessibility remain unqualified. The earlier milestone-2 evidence is historical; milestone 3 supersedes its independent corridor demand model.
 
 The [first-business notes](FIRST_BUSINESS.md) and [browser results](business-checks.json) cover the playable construction/funding/service/revenue loop.
 
@@ -18,7 +74,7 @@ The [New game checks](new-game-checks.json) cover Company → New game, confirma
 
 Idle-line warnings are covered by the application lifecycle checks, native widget
 layout/action checks, and the business browser workflow. They disclose ongoing
-costs for open owned lines or idle public-track leases, remain beside time controls,
+costs for open owned lines or idle public-track leases, appear as a compact header review badge,
 and link to Services. [Desktop warning](business-idle-line-desktop.png) ·
 [320px Chinese warning](business-idle-line-phone-zh.png).
 
@@ -106,3 +162,11 @@ The [result ledger](ebitenui-checks.json) includes checks, browser identity, WAS
 **Conclusion:** ebitenui can render the proposed style and flexible compositions. Application code supplies responsive layout, explicit wrapping, theme images, input policy, state preservation, and platform adaptations. These visuals do not require an HTML-only widget renderer.
 
 This does not establish screen-reader support, actual iOS/Android keyboard behavior, safe-area/keyboard occlusion, native accessibility, background/resume, persistent saves, offline cold launch, or full-game performance. Browser touch checks use emulation, not handsets. Keep the HTML HUD fallback and first-milestone device/accessibility work until those requirements are resolved.
+
+Contextual onboarding implementation and its verification are recorded in [ONBOARDING.md](ONBOARDING.md), with per-concept progress, inline explanations and searchable native/browser Field Notes.
+
+Idle review map highlighting, named warnings, shared-track fleet distinctions and pixel-level verification are recorded in [IDLE_REVIEW.md](IDLE_REVIEW.md).
+
+Named capacity constraints, service contributions, actionable frequency limits and native/browser verification are recorded in [CAPACITY.md](CAPACITY.md).
+
+Network connector additions, inherited Italian/Catalan repairs, v10 compatibility and financial checks are recorded in [NETWORK_BRIDGES.md](NETWORK_BRIDGES.md).

@@ -1,0 +1,20 @@
+{
+  "date": "2026-11-12T12:49:18.290293+00:00",
+  "platform": "macOS arm64",
+  "binary_sha256": "254350d224e70bdc7bcb63a2105ba26edaa3f64376602600eed811f57400d488",
+  "isolated_bundle_identifier": "io.github.adsouza.wwhsrt.m3-validation",
+  "isolated_data_directory": "build/m3-native-validation-data",
+  "rendering_observed": [
+    "Simplified Chinese dark Services view with selected Tokyo-Nagoya-Osaka pattern",
+    "Called stations Tokyo, Nagoya and Osaka; 552 km, 156 min, six daily return trips, USD 138 end-to-end fare",
+    "All-stop and express pattern choices with readable wrapped labels",
+    "Through train markers and selected-train highlight on the real two-section path"
+  ],
+  "canonical_checkpoint_unchanged": true,
+  "player_campaign_reset": false,
+  "result": "native_rendering_observed",
+  "limitations": [
+    "Rendering observation only; native OS input and native IME/assistive technology are not qualified by this check",
+    "Physical phone input and other desktop runtime platforms remain unqualified"
+  ]
+}

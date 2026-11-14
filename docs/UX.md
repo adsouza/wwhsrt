@@ -15,7 +15,7 @@ Keep one clear next action for the selected task. Offer expert detail on demand.
 ### A few minutes of ordinary play
 
 1. Open the map and see the company objective, available cash, and a few relevant opportunities. Select a city or search for one.
-2. Choose **Plan connection**, select another city, and compare qualified alignments. Both cities may be unserved, even when the company has a different network elsewhere.
+2. Pick a dotted construction prospect on the map or choose its named list entry, and compare reviewed alignments. Both cities may be unserved, even when the company has a different network elsewhere.
 3. Compare the faster mountain crossing with the longer valley route. The quote names the barrier, engineering works, regional cost profile, stations, opening date, and total commitment.
 4. Commit a funded project, or save the draft and instead explore running trains on public track. Progress is measured in normal business months.
 5. When infrastructure and trains are available, create a service, choose stops, fare, and daily return trips, preview its costs and demand, and apply it.
@@ -48,16 +48,36 @@ Layout depends on available logical width and height, text scale, and pointer ca
 
 | Available logical width | Composition | Use of extra room |
 | --- | --- | --- |
-| 320–599 px | Compact: status, map or focused task, bottom navigation | One inspector at a time; summary sheet can expand to a full task screen |
-| 600–1023 px | Medium: map plus a compact inspector when height/width permit | Otherwise use the compact task flow; landscape phones remain supported |
-| 1024–1599 px | Desktop: navigation rail, map, roughly 320–400 px inspector | Optional results drawer below the map; panels have readable line lengths |
-| 1600+ px | Wide: desktop composition plus an optional pinned comparison/report pane | Compare alternatives or services without repeatedly replacing the selection |
+| 320–799 px | Compact: status, command dock, focused task with tabs | Map and city inspector share space; service/finance/report tasks use the available height |
+| 800–999 px | Map plus a resizable right inspector; command dock across the top | Keep at least 320 px of usable map width |
+| 1000+ px and 600+ px high | Map plus right inspector; command dock at the top or left, as preferred | Wider map and inspector; choose the dock location in Company → Settings |
+
+### Implemented task workspace
+
+Separate global navigation and time from the task being edited. A 48 px status strip shows company (desktop), month, cash, language and a compact idle warning. The command dock contains Map, Build, Services, Report, Company and Field Notes (one row at 390 px and wider, two rows on narrower phones); its active task is tinted. The footer owns status and month/year advancement. Only the inspector scrolls; these global controls remain available.
+
+On desktop the right inspector defaults to 440 logical px. Drag its 8 px inner divider or use **Company → Settings → Panel width** to choose 320–800 px; browser keyboard users can focus the separator and use arrows/Home/End. Clamp the displayed inspector width to leave at least 320 px for the map. The left dock is 164 px wide. Save the preferred width and top/left placement locally across restarts and new campaigns. Narrow/short windows temporarily use the top dock and compact inspector without overwriting desktop preferences. Phone map controls use a folded menu in a strip below the canvas so they do not cover a reviewed line. Expanded map hides both management panels; Restore/Escape returns to the same draft, and focus/zoom controls remain available.
+
+The city/station browsing task is labeled **Explore** (**探索** in Simplified Chinese) in both clients. It changes the inspector task; the map and full-screen map control remain separate. The internal `map` view identifier stays stable for saved preferences.
+
+Use task tabs to separate decisions that were previously stacked in one long column:
+
+| Task | Default tab | Secondary tabs |
+| --- | --- | --- |
+| Services | **Plan**: route, frequency, fare, assigned/required trains, quick lease/return, three forecast values and Apply | **Fleet**: family/specifications and lease management; **Analysis**: complete financial and capacity forecasts |
+| Build | **Plan**: available prospects, selected corridor/alignment, contribution/funding gap and commitment | **Costs**: component engineering and terrain; **Projects**: committed works and service links |
+| Company | **Finance**: debt, available credit, custom loan and repayment | **Identity**: name and New game; **Settings**: workspace, appearance, motion, terrain and learning preferences |
+| Report | **Overview**: passengers, revenue, costs and closing cash | **Accounts**: full reconciliation; **Network**: sections/stations; **Markets**: OD/traveler demand and journeys |
+
+Optional disclosures contain opportunity lists, called stops, detailed station facts, project funding arithmetic and capacity contributors. Keep a named resource and its requested/available capacity visible whenever owned capacity is relevant; an overload remains a warning with Apply disabled even when its detailed explanation is collapsed. Header idle warnings open Services Plan, expand the affected-line list and show the map even on phones. Ordinary pane changes preserve drafts; explicit task links choose the pane containing the relevant controls.
+
+Show one relevant inline concept cue (or one quiet Explain link) in a task pane. Expanding it reveals the explanation beside the controls; Field Notes supplies the complete searchable reference and can jump to the correct tab. Per-concept dismissal and global mute retain their earlier semantics. Optional content may require scrolling when expanded, on short screens, or with longer content/text; the ordinary service plan is designed to fit at 390×844 and desktop 1280×850 without inspector scrolling. This is a layout target, not first-time-player usability qualification.
 
 ### Compact / phone
 
-Keep branding lightweight. The app name can appear at the top of a phone view, but scrolls out of the way with the content. A compact sticky status strip retains the business month and unrestricted cash; online it also retains the deadline and acknowledgment state. Returning to the top restores the name. Prefer this stable positional behavior over making the header appear and disappear on every change of scroll direction. Its height follows content and text scale, and it must not obscure focused controls, errors, or financial review actions. Bottom navigation remains reachable while content scrolls. In focused editors, the task title takes priority over app branding.
+Keep branding lightweight. The implemented phone header omits the app name and retains the business month and unrestricted cash; online it also retains the deadline and acknowledgment state. Its height follows content and text scale, and it must not obscure focused controls, errors, or financial review actions. The top command dock and bottom time controls remain reachable while the inspector scrolls. In focused editors, the task title takes priority over app branding.
 
-The resting view is a map with a small status strip, a search control, and bottom navigation. Tapping an object opens a summary sheet with its name, defining facts, and primary action. The sheet has **Summary**, **Details**, and **Close** controls; dragging is an additional convenience. Expansion uses available space rather than a fixed percentage of every screen. If the visible map would become too small, Details becomes a full task view with a **Back to map** control.
+The resting view is a map with a small status strip, command dock, and a city inspector with optional search/list browsing. Tapping an object opens a summary sheet with its name, defining facts, and primary action. The sheet has **Summary**, **Details**, and **Close** controls; dragging is an additional convenience. Expansion uses available space rather than a fixed percentage of every screen. If the visible map would become too small, Details becomes a full task view with a **Back to map** control.
 
 A construction or service editor is a focused screen. Its header retains the task name and back control, its contents scroll vertically, and its footer contains the current financial summary and primary action above the safe area. Intermediate steps may collect endpoints, alignment, or service settings, but the review remains directly accessible and backtracking preserves inputs. The final review is ordinary page content, not another small dialog stacked on a sheet.
 
@@ -69,7 +89,7 @@ Respect browser chrome, notches, home indicators, the on-screen keyboard, and sh
 
 The map occupies the remaining workspace after navigation and the current inspector. It should gain usable geographical area as the window grows. The inspector stays readable instead of stretching paragraphs across an ultrawide display. An optional pinned pane compares an earlier alignment, a service, or a report with the active selection. Limit the first design to one active editor and one read-only pinned reference.
 
-Panels are resizable within safe limits and can be collapsed. Store these preferences per layout class. Compact layout does not inherit an impractically wide desktop pane. A small results drawer can remain open while a service is edited on desktop; on phones the same report is a separate view with a return link.
+Panels are resizable within safe limits and can be collapsed. Store the desktop preferences and retain them during compact fallback. Compact layout does not inherit an impractically wide desktop pane. A small results drawer can remain open while a service is edited on desktop; on phones the same report is a separate view with a return link.
 
 Reframing the map considers the actual unobscured rectangle. Opening a sheet or inspector does not hide a selected endpoint beneath it. Automatic camera changes occur on explicit focus/selection commands, not whenever a forecast refreshes. Let the player stop a camera transition and retain their chosen zoom.
 
@@ -77,11 +97,11 @@ Reframing the map considers the actual unobscured rectangle. Opening a sheet or 
 
 ### Selecting and moving
 
-- Single tap/click selects an object and opens its summary. Background tap clears selection unless a named endpoint-selection task is active. It never buys, demolishes, or applies a plan.
+- Single tap/click selects an object and opens its summary. Background taps preserve the construction draft. It never buys, demolishes, or applies a plan.
 - One-finger drag pans; pinch zooms. Mouse/trackpad pan and zoom have visible control equivalents. Zoom buttons and **Fit selected railway** work without gestures.
 - Tapping crowded markers opens a short named list with city/line/service type labels. Search and list pickers offer equivalent access without precise map targeting.
 - Hover can preview a label, but no necessary information or command depends on hover, double-click, right-click, long press, or a multipointer gesture.
-- Entering endpoint selection displays **Choose destination for [city]**, a search/list alternative, and Cancel. Existing network attachment is never an eligibility filter.
+- Construction selection uses dotted prospects and a named corridor list. Existing network attachment is never an eligibility filter.
 - Pointer-down on a sheet, button, or modal belongs to that surface through pointer-up; it cannot also pan or select the map. A pan or pinch ending over a city does not activate it.
 
 ### Showing the railway
@@ -132,43 +152,97 @@ The construction layer names barriers and highlights authored engineering interv
 
 ### Plan a connection
 
-**Endpoints → alignment → project package → funding/review → commit.** The desktop inspector may expose these as sections; the phone may use focused subviews. Every stage belongs to one persistent draft.
+**Available prospect → alignment → project package → funding/review → commit.**
+The construction UI starts from supported corridors rather than asking players to
+invent a city pair. This replaces the earlier A/B endpoint-picking interaction.
 
-#### Two endpoints and a persistent connection draft
+#### Pick a prospect and retain its draft
 
-The planner has two labeled endpoint slots, **A** and **B**, above the map. Opening it from a metro summary fills A and activates B. Opening it without a selected metro activates empty A. After the first selection, activate the other empty slot. Neither endpoint needs existing railway access. The same two metros in either order produce the same construction options and estimates. Directional service settings belong in the service planner.
+Show every supported, unstarted corridor as a dotted line in Map and Build views,
+using the actual reviewed alignment, including terrain and coastal detours. Show
+one representative alignment per corridor until selected. Use a contrasting,
+thicker highlight for the selected alternative and a text legend identifying the
+dots as available construction prospects. Existing public rail, accepted projects
+and operating lines retain their own styles; none is advertised as a new prospect.
 
-Tap either slot to make it the target for the next map selection or named metro search. A visible active border, pressed state, and “Choose B” / “Replace B” instruction identify the target. Choosing a replacement changes only that endpoint. **Clear A/B** empties the active slot. Reject choosing the other endpoint's metro with a clear message and preserve the current valid pair. Panning, zooming, background taps, and closing a metro picker never erase the draft. A drag ending over a marker must not select it. Nearby overlapping markers first open a named choice, then assign the chosen metro. The searchable/list alternative includes the whole playable catalog.
+Click or tap the line to select the whole corridor and open Build → Plan. Hit-test
+the continuous path, including the gaps between dots, with a forgiving screen-pixel
+target at every zoom level. Panning and drags never select a prospect. Map city
+inspection must not replace either construction endpoint. The Build inspector
+lists the same available corridors as named buttons, with a selected state, so
+keyboard and phone users can choose without precise map pointing. Remove the
+arbitrary-city dropdowns and Choose A/B controls. Preserve the persisted endpoint
+IDs internally for draft/save compatibility, and retain existing project inspection.
 
-As soon as two distinct metros are selected, request qualified alignments and a read-only estimate for that exact pair. While updating, remove stale financial values and disable Review. Identify results by endpoint IDs, alignment ID, quote/world revision, and assumptions; discard late responses from previous selections. Changing an alignment updates its highlighted geometry, package cost, opening estimate, and operating forecast together. Do not automatically move the camera when an estimate arrives. **Fit pair**, **Show A**, and **Show B** are explicit camera actions. Fit pair includes the selected alignment's detours in the unobscured map rectangle. If the portrait latitude/zoom cap prevents showing both endpoints, keep the cap, explain it, and offer Show A/B.
+Selecting a prospect identifies both endpoint names, the alternative alignment,
+its package cost, opening estimate and operating forecast. Neither endpoint needs
+existing railway access: supported disconnected corridors remain eligible. The
+current playable catalog has two construction prospects, Tsuruga–Osaka and
+Shin-Hakodate-Hokuto–Sapporo; expanding the reviewed catalog adds prospects through
+the same UI. More dots must never imply unsupported construction coverage.
+
+Compare alternative alignments after selecting a corridor. Remove stale quote
+values while updating and reject late responses for older corridor/alignment/world
+revisions. Selection and inspection cannot commit construction. Starting a project
+immediately removes that corridor from the available list and dotted map layer;
+show its accepted alignment and construction status instead, including after reload.
 
 #### Expanded map and full-screen behavior
 
-**Expand map** enters map-focused planning with one action; **Restore panels** returns with one action. Hide the app title/global navigation and large comparison inspector, retaining A/B, the active endpoint, map/region controls, an alignment selector, and a compact estimate strip. A compact search/list control opens from the active endpoint, rather than permanently occupying phone map space. Keep a visible restore control in a stable place. On desktop provide a discoverable keyboard shortcut (F); Escape or platform Back exits full-screen/map focus before canceling a draft. Typing in a field must not trigger the shortcut. Browser/system full-screen exit synchronizes the toggle. Native/browser full-screen is a platform enhancement: when unavailable or denied, map-focused layout still works and must not claim the operating system entered full-screen.
+**Browse prospects on the map** or **Expand map** enters map-focused planning;
+**Restore panels** returns with one action. Retain map/region controls, the selected
+corridor identity, contextual prospect help and a stable restore control. On phones,
+the named prospect list is the accessible alternative when paths are too small.
+Escape/Back restores the ordinary workspace before abandoning a draft. Preserve the
+selected corridor, alternative and geographic camera through expansion/restoration,
+subject to the existing orientation-aware bounds. Selecting a different prospect
+while expanded keeps the map expanded; restoring shows that project's estimate.
 
-Normal desktop mode uses map plus comparison inspector. A phone stacks the inspector below the map or opens it as a focused detail view. In expanded mode, the estimate strip stays adjacent to the map and outside its unobscured fitting rectangle; on a real full-screen phone it sits above the safe area. It shows **Build cost**, **forecast ticket revenue/month**, and **operating contribution/month before financing**, plus **Review project**. Show losses with a minus sign and text/color, and make clear that revenue is not profit. Retain an alignment switcher so costs and potential revenue can be compared without restoring the large inspector. Additional mandatory launch costs such as fleet remain explicit in the strip's expanded detail and funding review. The full cost breakdown, financing/payment schedule, and assumption controls remain one action away.
+The first-use cue says “Pick a dotted construction prospect or choose one from the
+list.” Explanations attach to prospect selection, alignment comparison and funding,
+with per-concept dismissal and Field Notes. Do not instruct players to choose an
+unsupported pair or suggest that a missing authored alignment is a gameplay mistake.
 
-Changing normal/expanded/full-screen layout preserves endpoints, active target, selected alignment, quote revision, forecast assumptions, and geographic camera center/scale where constraints permit. It does not implicitly refit or reset to the timezone default. Rotation may adapt the regional menu and enforce the established portrait limits. Restoring panels recomputes the unobscured map rectangle without resetting the project. **Review project** opens an ordinary funding-review view with a clear return to the same draft, never a purchase. **Keep draft** saves locally without submitting a multiplayer command. Exiting full-screen, changing alignment, or picking a metro cannot commit construction, order fleet, or create a service.
+Accepted rival projects remain visible as **Under construction**, with company,
+opening and any posted paid access. They leave the available-prospect set as soon
+as accepted. An explicitly supported competing alignment must be a separately
+reviewed offering with its competition forecast, rather than a duplicate dot.
 
-Contextual onboarding follows the task: an empty slot says “Choose the other city”; the first complete pair explains that a highlighted route is a proposed alignment; the estimate distinguishes revenue from operating contribution; the first funding review explains the gap and scheduled spending. These short cues attach to the relevant control, can be dismissed, and introduce no compulsory tutorial or modal sequence. Experienced players can turn them off. In expanded mode, keep only the active endpoint cue; use the relevant disabled-state reason for missing routes or estimates.
+Detours remain part of the selected alignment. Kinshasa–Lagos is the planned
+coastline-detour acceptance example: a qualified land detour may be offered without
+requiring an intermediate station. Missing catalog coverage is not proof that no
+land route exists. The earlier A/B connection-planning HTML is a historical
+illustration, superseded by this prospect selection model.
 
-The connection-planning interaction preview uses the real Equal Earth basemap and all playable metro coordinates, but only Delhi–Mumbai and Lagos–Kinshasa have illustrative fixture alignments/financials. Those fixtures do not qualify real-world routes or replace the construction-cost model. Other pairs honestly report **No authored route yet**. The shipping planner uses the reviewed corridor catalog and economic engine described in the design/storage contracts.
-
-The planner lists qualified candidate corridors, with explicit reasons when an endpoint pair has no reviewed alignment. It must distinguish **no authored route yet**, **missing concession**, **unsupported crossing**, and **insufficient funds**. It must not mislabel a disconnected city as unreachable merely because it is outside the current rail graph.
-
-Show accepted rival projects as dashed **Under construction** lines on the shared map. Their inspector shows the company, endpoints, target opening, and any posted paid access. Selecting A and B shows **Already being built** or **Line already operating** before project review. Offer **View rival project** and, where access is posted, **Plan service**. Players can draft that service before opening. A player who chooses a separate competing alignment sees the rival line and updated forecast before confirming. If a competing commitment appears while a draft is open, retain the draft and refresh the review.
-
-When a direct endpoint line crosses ocean but a qualified land detour exists, show the curved land alignment as a selectable project. Kinshasa–Lagos is the coastline-detour acceptance example. Explain the additional distance and actual engineering costs; an unsupported direct crossing does not block the overland alternative. Do not require the player to add intermediate stations merely to make the line bend. Missing catalog coverage is **no authored route yet**, not proof that no land route exists.
-
-Alignment comparison first shows total commitment, opening date, distance, journey-time estimate, and major structures. Details explain direct works, regional cost assumptions, land, stations, depot provision, overheads, contingency, future installments, and upkeep. No cheap headline excludes mandatory structures and then reveals them at purchase.
-
-Station additions needed by the selected project appear in the package. Show current unrestricted cash, protected reservations, any secured grants, payment timing, and the funding gap. Loans and grants are explicit separate decisions with published terms. The final action says, for example, **Commit project · $X total**, with **$Y reserved now; schedule below** adjacent. If a stale quote changes, highlight the differences and require renewed review before accepting the updated commitment.
-
-An acknowledged online request displays **Awaiting construction decision** and the amount reserved. An accepted project ends the draft and displays a receipt with opening target, payment schedule, and **View project**. A request that loses a conflict restores the draft with a link to the accepted rival project. Fleet and service creation remain separate actions. A project completion report links to **Create service**, with remaining fleet and station requirements visible.
+Station additions needed by the project appear in its package. Show unrestricted
+cash, protected reservations, secured grants, payment timing and the funding gap.
+Loans and grants are explicit decisions. A stale quote requires refreshed review;
+picking a prospect cannot borrow money, lease trains or place a construction order.
 
 ### Create or improve a service
 
+Click or tap an open railway's actual track path to enter **Services → Plan**.
+Use an 18-pixel screen-space target and retain overlapping sections within four
+pixels of the nearest hit for disambiguation. The existing named route selector
+is scoped to open direct and through-running patterns using the clicked section(s);
+show an explicit scope label and **Show all service routes** to clear it. Prefer a
+direct pattern when entering from unrelated track; retain the current pattern and
+its uncommitted fare/frequency when it already uses the clicked track. Selecting a
+through pattern highlights its complete route, beyond the clicked section.
+
+A drag cannot select a route. City/station marker centers retain inspection, and
+representative train markers retain their replay inspector. Under-construction
+track cannot create an operating service. Selecting from a full-map view restores
+service controls; on phones keep a compact map visible beside the scoped chooser.
+Changing the service selector through another shortcut clears an incompatible map
+filter. Persist this local scope with UI preferences, and clear it on New game.
+Map inspection cannot lease trains, apply a plan, spend money or advance time.
+
 **Stops/path → fleet → return trips/day and fare → preview → apply.** Start from a city, selected track, completed project, or Services. A service needs a continuous operational usable path; that constraint is distinct from the freedom to build independent infrastructure.
+
+For the implemented expanded-world planner, an unconfigured route opens with distance-based fare and demand-based frequency suggestions rather than a universal fare/frequency. Retain accepted plans and existing drafts; selecting the Tokyo–Osaka extension retains the starter's frequency and shows the additional leases before Apply. Construction previews use the same suggestions and state their fare/frequency assumptions.
+
+The primary three-value forecast is **Revenue / Contribution / Break-even per month**. Keep company-wide cash change, projected passengers, feeder revenue, capacity and expense detail in **Analysis**. Analysis separates running, public access, station handling, leases and maintenance, and explains that break-even assumes the current fare, scheduled plan and passenger mix. Through services use short-trip fares in that mix. Show an em dash and explanation when a suspended service, absent through-route mix or nonpositive net fare makes a target unavailable. Invalid drafts clear old figures. The target is monthly service boardings, not unique company journeys or a claim that sufficient demand exists. The same information and contextual help are available in English and Simplified Chinese in native and browser clients.
 
 An owned private line's inspector has **Offer paid access** with a rate per train-kilometre. Rivals see the posted rate, coverage, and notice terms on the map inspector and in service planning. **Accept access** shows the effective month and estimated cost at the proposed frequency. The forecast separates access charges from the operator's own running costs, shows available station access, and identifies any section where rights are missing or scheduled to end.
 
@@ -213,7 +287,9 @@ At most one unsolicited learning cue appears in the active task. It is a short, 
 
 Track concepts encountered, explanations dismissed, and actions completed in local presentation state. Progress follows actual behavior rather than an expected route sequence. A player starting with an independent line, an acquisition, or an existing-track service receives relevant explanations. A returning player can hide suggestions immediately; help and **Why this number?** remain available. A dismissed cue does not return on every reload, month, or device rotation. Cross-device hint synchronization is optional and never a prerequisite for offline play.
 
-Help is layered: concise label → visible contextual reason → **Explain** disclosure → searchable railway/business reference with a link back to the current task. Adapt Africa2ice's Field Notes into this contextual reference, rather than opening a permanent textbook drawer on a small screen. Critical numbers and reasons remain in the primary interface.
+Help is layered: concise label → visible contextual reason → **Explain** disclosure → searchable railway/business reference with a link back to the current task. The playable clients implement this as inline disclosures and a **Field Notes** inspector with **Back to my task**, search and an explicit link to the topic’s controls. The reference preserves endpoint, alignment, company-name, loan and service drafts; returning restores expanded-map mode and the task scroll position. Expanded-map help occupies a reserved strip outside the map canvas. Adapt Africa2ice's Field Notes into this contextual reference, rather than opening a permanent textbook drawer on a small screen. Critical numbers and reasons remain in the primary interface.
+
+The local concept record separates encountered, dismissed, explained and action-completed flags. New campaigns retain explicit dismissals and the separate global mute preference, clearing action completion. **Reset concept suggestions** explicitly clears learning flags without changing the mute setting. Legacy globally dismissed preferences migrate to muted suggestions. Successful accepted commands update action completion; rejected writes do not. See [implementation verification](validation/ONBOARDING.md).
 
 Guidance never changes prices, passenger allocation, time, finances, RNG, or world hashes. In multiplayer there is no special frozen tutorial month. Explain the running clock before joining and show it throughout the first task.
 
@@ -298,8 +374,8 @@ These are proposed research targets, not measured results. Test with first-time 
 9. Close an online month during editing, lose a response after a financial commitment, and background/resume a phone. Preserve the draft, refresh the world, and show correct acknowledgment without duplicate purchases or false success.
 10. Keyboard-only and assistive-technology users can navigate and perform core management tasks through semantic controls and lists. Validate this on the chosen browser/native implementations; a visually correct canvas is insufficient evidence.
 11. A stable online company can be left operating without repetitive acknowledgments. On return, one concise summary explains elapsed months, important changes, and the next deadline.
-12. Select two unserved metros, replace either endpoint by map and named search, reject duplicate endpoints, and clear/reselect one. Select the same pair in the opposite order and confirm the same construction options and estimates. Dragging and background taps preserve the draft. Dense markers require named disambiguation. Test the missing catalog coverage message for an unauthored pair.
-13. Expand/restore the map repeatedly, change alignment while expanded, pan away from the pair, review funding, and return. Preserve the draft and camera; keep cost, revenue, operating contribution and restore available at 320/390px. Test allowed and denied platform full-screen, system exit, Escape/Back, safe areas, rotation, and portrait camera limits. A delayed estimate from an older pair must never overwrite the current pair, and no interaction in this sequence submits a financial commitment.
+12. Show every eligible reviewed corridor as a dotted prospect. Select each by its actual path and its named list entry; verify the same project opens. Public, started and completed lines are absent from the prospect set. Dragging and unrelated city inspection preserve the construction draft. Commit one project and verify its prospect disappears before and after reload.
+13. Expand/restore the map repeatedly, change prospects while expanded, restore and change alignment, pan away from the selected corridor, review funding, and return. Preserve the draft and camera; keep cost, revenue, operating contribution and restore available at 320/390px. Test allowed and denied platform full-screen, system exit, Escape/Back, safe areas, rotation, and portrait camera limits. A delayed estimate from an older pair must never overwrite the current pair, and no interaction in this sequence submits a financial commitment.
 
 The first usability pass should settle whether the phone summary sheet leaves enough map visible, how much forecast detail belongs before commitment, and whether players distinguish infrastructure from services. Refine these from observed confusion before adding more permanent navigation or instructional text.
 
@@ -311,7 +387,7 @@ The proposed service editor and report use one continuous decision loop. An illu
 
 The title identifies the service and the business month being planned. The selected route states its stops, travel time, track access, and local train availability. Frequency and fare have numeric fields and large plus/minus controls; the frequency helper spells out departures in each direction. A fleet line includes the maintenance spare so the player does not have to discover an unexplained extra train later.
 
-On a phone, settings and detailed forecasts are sequential. A compact action area retains the forecast operating cash contribution and **Apply plan** while the player scrolls. The detailed forecast shows passenger journeys, seat occupancy, trainsets, and the change versus the accepted plan using the same forecast month. Expanding costs separates ticket income, train running, track access, and fixed overhead. It states that no purchase or loan is included.
+On a phone, Plan, Fleet and Analysis are separate tabs retaining the same route and draft. A compact action area retains the forecast operating cash contribution and **Apply plan** while the player scrolls. The detailed forecast shows passenger journeys, seat occupancy, trainsets, and the change versus the accepted plan using the same forecast month. Expanding costs separates ticket income, train running, track access, and fixed overhead. It states that no purchase or loan is included.
 
 The first frequency interaction can show: “One return trip means one departure each way. More trips can attract passengers and need more trains.” The fare interaction can instead show: “A lower fare can fill more seats, but each passenger pays less. Compare the cash forecast before applying.” Only one cue appears at a time. Each has **Got it**; dismissing one concept does not dismiss necessary validation or require opening another explanation.
 
@@ -331,6 +407,97 @@ Reports include an investment milestone and useful progress alongside financial 
 
 ### Phone behavior to qualify
 
-Retain the approved scrolling header: the app name scrolls away, while date/cash and bottom navigation stay available. Contextual explanations are in the content flow and never cover a field or action. The action area must not overlap bottom navigation, errors, or the software keyboard. Text editing keeps focus and cursor position while forecasts refresh. Increasing frequency, dismissing a cue, switching reports, and returning to the editor must not lose a draft or unexpectedly scroll to the top.
+Keep the app name out of the phone header; date/cash, the command dock and time controls stay available while the inspector scrolls. Contextual explanations are in the content flow and never cover a field or action. The action area must not overlap bottom navigation, errors, or the software keyboard. Text editing keeps focus and cursor position while forecasts refresh. Increasing frequency, dismissing a cue, switching reports, and returning to the editor must not lose a draft or unexpectedly scroll to the top.
 
 The mockup exercises these layouts and transitions with a small deterministic UI model. Production forecasts and reports must come from the shared game port/domain algorithms specified in DESIGN.md, including server acknowledgment and capacity uncertainty online.
+
+### Reviewing idle infrastructure and trains
+
+**Review idle lines** opens Services, frames all current warnings together on the map and lists each affected line or fleet by name. Selecting a named row focuses that route. Services shows the map on phones when reviewing idle warnings, and expands the named warning list. Thick warning-colour strokes and endpoint rings mark the committed alignment of idle infrastructure. Idle leased fleets use dashed route strokes and an **Idle trains** label: shared infrastructure may still carry other services. Through fleets highlight every section in their actual route. The map legend explains the two styles; neither an unrelated selected route nor an unbuilt alternative is used as the idle highlight. Membership follows the authoritative current warnings, so operating a line removes its warning/highlight while leasing alone does not. Reviewing is presentation-only and changes neither accepted services nor finances.
+
+### Explaining capacity conflicts
+
+Place live capacity usage beside the service frequency controls. Name the affected physical section or station, distinguish daily return paths from station calls, show requested versus available capacity and identify each contributing service, including the current draft and express/through patterns. For an overload, show the excess, requests from other services, and the maximum frequency for this draft at that resource while other services remain unchanged. Explain that each return trip uses one path per section and two calls per served station; leasing more trains does not add paths. Counts use the hypothetical accepted plan, so an edited service replaces its previous frequency and an extension removes the source service before counting. Rejected previews clear old financial forecasts, disable Apply and suppress unsolicited learning cues. Valid previews retain their capacity totals so a full section is visible before another service is added. Public allocation remains provisional.
+
+## Implemented public-network expansion
+
+The playable map includes the prototype's public HSR geometry and visible station layer, including China. The region selector lives in Map controls (the phone map menu at compact sizes); it is available during full-map review as well as ordinary inspection. Orientation-aware presets retain the named regional bounds. East Asia remains the chosen initial region. Source station markers can be tapped for a name/status explanation. City hubs remain the service/demand endpoints; a mapped station alone cannot create a service over a missing connection.
+
+Services has an optional **Find a service** disclosure so the expanded route dropdown does not require scrolling through thousands of patterns. Match endpoint names in English or Simplified Chinese. Long patterns show endpoints and stop count; called stops remain under route details. Selecting a route uses the existing lease/frequency/fare/forecast/Apply flow and highlights its actual source path. Map selection, region, search and inspection preserve the company checkpoint. Monthly reports expose Chinese services, passengers, public access charges and capacity through the same reporting controls. Sparse reports still allow inspecting outside-mode demand for a city pair without company rail.
+
+When Build's endpoint selectors identify an existing public corridor, state that
+HSR already connects the cities and no construction is needed. Offer **Plan trains
+on this existing line** to open the matching service draft. Show no construction
+quote/alternatives and keep the construction commit unavailable. Existing public
+lines and committed projects stay out of Construction opportunities. A future
+parallel-capacity project must be a separately authored, explicitly justified
+alignment; the presence of an operating service template is not a build proposal.
+
+The default public-rail map draws admitted, usable corridor geometry. Hide raw
+source fragments and station markers that are unrelated to those corridors;
+retain the complete input in the data audit. A through route remains visible
+without an intermediate city and when its end cities are outside the current
+viewport. Projected public geometry must match the paths used by service highlights
+and trains; newly committed construction continues to draw from game state.
+
+Coastline detail replaces the corresponding coarse basemap geometry. Use the same
+refined shoreline with relief on or off and in both palettes; avoid duplicate
+outlines or coarse land extending offshore beneath a finer layer. Japan and
+China/Taiwan currently share the detailed source. Shading and shoreline remain
+cartographic context, independent of construction prices and feasibility rules.
+
+The repaired public-network planner shows slower connecting-track kilometres in
+Analysis, with English and Simplified Chinese explanations. The ordinary Plan
+stays compact. Existing rail remains one map colour; its source-based connecting
+paths and associated station markers are now visible. Corridor selection,
+through-running, route highlighting and new operating plans use the restored
+network. Existing service settings remain intact after a save upgrade.
+
+
+The public-network planner includes complete NEC and Uzbekistan all-stop services,
+with their intermediate stations visible on the map. City labels retain familiar
+metro names; station details identify the actual selected terminal. The NEC uses
+New York Penn and Boston South rather than Metropark/Route 128 as metro anchors;
+Metropark and Route 128 remain distinct service stops. Uzbekistan includes
+Urgench/Khiva and Qarshi/Kitob (Shahrisabz). Conventional connecting approaches
+remain visible in the same existing-rail colour, with their slower kilometres
+explained in Analysis. These are game service templates, not an operator timetable.
+
+
+The worldwide construction plan exposes the complete 70-project catalog in one
+labeled picker with bounded native popup height (240 px), plus at most two nearby
+quick choices. The dotted map still exposes every unstarted prospect. Selecting
+any entry keeps the project identity, alignment, quote and expanded-map behavior
+consistent; existing conventional service cannot intercept selection of a new
+parallel HSR project. Started projects disappear from all selection affordances.
+Native controls use their initial-selection API and ignore stale events across
+rebuilds. The compact plan shows the scope; Costs discloses the terrain barrier,
+regional country rates and engineering totals. Browser and native labels are
+available in English and Simplified Chinese.
+
+Lisbon–Porto service names distinguish upgraded conventional rail from the new HSR
+project. Morocco's existing blue HSR ends at Kenitra; the southern projects remain
+dotted until construction begins. Retired historical services keep their accounts
+but are not offered as new services or animated on the current HSR map.
+
+### Campaign endpoint in the playable clients
+
+At the current 360-month limit, replace the footer's advance controls with a
+persistent “Campaign complete” notice and “30 years · Time stopped.” explanation.
+Offer “New game” beside it, opening the existing reset confirmation. Keep reports
+and inspection available. Derive this state from the saved campaign frame on
+load, independently of onboarding dismissal and transient “Saved” messages; clear
+it after a new game starts. Use the same affordance in native/browser clients,
+English/Simplified Chinese and compact/desktop layouts. Continuing beyond the
+campaign remains a separate planned feature.
+
+
+### Regional catalog update
+
+Houston–Austin appears as a dotted prospect and in the same complete project
+picker as the other 70 projects; it uses the ordinary selection, costs, funding,
+construction and service flow. The shorter Houston–Austin–San Antonio service is
+an additional route option, retaining older service paths via Dallas. Taipei is
+inspectable/selectable as a city and HSR station, with Taiwan's ordered through
+service available in Services. English and Simplified Chinese include Taipei,
+Houston and Austin labels. Regional camera presets retain their existing bounds.

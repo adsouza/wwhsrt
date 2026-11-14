@@ -1,0 +1,17 @@
+{
+  "format": "wwhsrt-bridge-approach-regions-v1",
+  "regions": [
+    {
+      "id": "turin-milan-approaches",
+      "bounds": [7.58, 45.02, 9.28, 45.65],
+      "gauges": ["1435"],
+      "source": "https://www.fsitaliane.it/content/dam/fsitaliane/Documents/old-media-ed-eventi/comunicati-stampa-e-news/anno-2019/giugno/2019_06_03_NS_10_anni_AV.pdf"
+    },
+    {
+      "id": "perpignan-approach",
+      "bounds": [2.80, 42.60, 2.96, 42.73],
+      "gauges": ["1435"],
+      "source": "https://www.ecologie.gouv.fr/sites/default/files/documents/CP_-_LVG_Perpignan-Figueras_-_21-12-2016.pdf"
+    }
+  ]
+}

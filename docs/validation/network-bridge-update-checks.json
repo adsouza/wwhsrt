@@ -1,0 +1,300 @@
+{
+  "recorded_at": "2026-11-13T17:43:52.903130+00:00",
+  "passed": true,
+  "scope": [
+    "Three construction prospects with usable feeders/through services",
+    "Existing Turin–Milan and Perpignan–Figueres–Barcelona repairs",
+    "Called Maibara/Camp de Tarragona/Figueres markets and shared station/track resources",
+    "v10 catalog epoch with v2–v9 restore and stable accepted service/project identities"
+  ],
+  "catalog": {
+    "cities": 291,
+    "existing_corridors": 300,
+    "prospects": 74,
+    "service_templates": 3937,
+    "mapped_stations": 2548,
+    "station_inventory": 4333
+  },
+  "data_gates": [
+    {
+      "command": [
+        "python3",
+        "tools/prepare-network-repairs.py",
+        "--check"
+      ],
+      "exit_code": 0,
+      "seconds": 20.04,
+      "log": "build/connector-update/data-00.log"
+    },
+    {
+      "command": [
+        "python3",
+        "tools/prepare-launch-prospects.py",
+        "--check"
+      ],
+      "exit_code": 0,
+      "seconds": 12.46,
+      "log": "build/connector-update/data-01.log"
+    },
+    {
+      "command": [
+        "python3",
+        "tools/import-public-network.py",
+        "--check"
+      ],
+      "exit_code": 0,
+      "seconds": 2.45,
+      "log": "build/connector-update/data-02.log"
+    },
+    {
+      "command": [
+        "python3",
+        "tools/check-launch-prospects.py"
+      ],
+      "exit_code": 0,
+      "seconds": 37.07,
+      "log": "build/connector-update/data-03.log"
+    },
+    {
+      "command": [
+        "python3",
+        "tools/check-network-bridges.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.47,
+      "log": "build/connector-update/data-04.log"
+    },
+    {
+      "command": [
+        "python3",
+        "tools/check-regional-network.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.24,
+      "log": "build/connector-update/data-05.log"
+    },
+    {
+      "command": [
+        "python3",
+        "tools/test-network-coverage.py"
+      ],
+      "exit_code": 0,
+      "seconds": 1.2,
+      "log": "build/connector-update/data-06.log"
+    },
+    {
+      "command": [
+        "python3",
+        "tools/audit-public-network.py",
+        "--strict"
+      ],
+      "exit_code": 0,
+      "seconds": 1.27,
+      "log": "build/connector-update/data-07.log"
+    },
+    {
+      "command": [
+        "python3",
+        "tools/audit-public-network.py",
+        "--check",
+        "--strict"
+      ],
+      "exit_code": 0,
+      "seconds": 1.26,
+      "log": "build/connector-update/data-08.log"
+    },
+    {
+      "command": [
+        "python3",
+        "tools/check-route-geography.py"
+      ],
+      "exit_code": 0,
+      "seconds": 0.17,
+      "log": "build/connector-update/data-09.log"
+    }
+  ],
+  "focused_go_packages": [
+    "ok  \twwhsrt/internal/domain\t0.333s",
+    "ok  \twwhsrt/internal/application\t50.067s",
+    "ok  \twwhsrt/pkg/ui\t0.171s",
+    "ok  \twwhsrt/pkg/mapview\t0.102s",
+    "ok  \twwhsrt/pkg/app\t63.770s",
+    "ok  \twwhsrt/pkg/render\t1.229s"
+  ],
+  "final_commands": [
+    {
+      "command": [
+        "python3",
+        "-u",
+        "build/connector-update/check-data.py"
+      ],
+      "exit_code": 0,
+      "seconds": 76.67,
+      "log": "build/connector-update/final-00.log"
+    },
+    {
+      "command": [
+        "go",
+        "test",
+        "-p",
+        "1",
+        "./internal/domain",
+        "./internal/application",
+        "./pkg/ui",
+        "./pkg/mapview",
+        "./pkg/app",
+        "./pkg/render",
+        "-count=1"
+      ],
+      "exit_code": 0,
+      "seconds": 121.57,
+      "log": "build/connector-update/final-01.log"
+    },
+    {
+      "command": [
+        "go",
+        "run",
+        "-p",
+        "1",
+        "./cmd/bridgecheck",
+        "-out",
+        "docs/validation/network-bridge-economics.json"
+      ],
+      "exit_code": 0,
+      "seconds": 7.78,
+      "log": "build/connector-update/final-02.log"
+    },
+    {
+      "command": [
+        "go",
+        "run",
+        "-p",
+        "1",
+        "./build/connector-update/capture.go"
+      ],
+      "exit_code": 0,
+      "seconds": 1.72,
+      "log": "build/connector-update/final-03.log"
+    },
+    {
+      "command": [
+        "sh",
+        "tools/build-native.sh"
+      ],
+      "exit_code": 0,
+      "seconds": 3.22,
+      "log": "build/connector-update/final-04.log"
+    },
+    {
+      "command": [
+        "sh",
+        "tools/build-web.sh"
+      ],
+      "exit_code": 0,
+      "seconds": 1.99,
+      "log": "build/connector-update/final-05.log"
+    },
+    {
+      "command": [
+        "go",
+        "build",
+        "-p",
+        "1",
+        "-trimpath",
+        "-o",
+        "build/wwhsrt-headless",
+        "./cmd/headless"
+      ],
+      "exit_code": 0,
+      "seconds": 0.34,
+      "log": "build/connector-update/final-06.log"
+    }
+  ],
+  "additional_verification": [
+    "Post-review provenance/accepted-price metadata regenerated; compiler --check and importer --check passed without changing any runtime catalog bytes",
+    "Final native maps recaptured with the correct Japan/Frangistan region labels and inspected",
+    "Rebuilt headless CLI opened an isolated genuine v9 save, advanced a month and preserved historical reports/active Kyoto–Nagoya plans/fleet while writing v10"
+  ],
+  "financial_receipt": "network-bridge-economics.json",
+  "financial_summary": [
+    {
+      "project": "launch_72_tsuruga__maibara",
+      "km": 55,
+      "construction_months": 48,
+      "cost_cents": 362940000000,
+      "mean_increment_cents": 78971893,
+      "worst_increment_cents": 63496830
+    },
+    {
+      "project": "launch_73_valencia__camp_de_tarragona",
+      "km": 271,
+      "construction_months": 54,
+      "cost_cents": 684756000000,
+      "mean_increment_cents": 431717605,
+      "worst_increment_cents": 380631516
+    },
+    {
+      "project": "launch_74_porto__vigo",
+      "km": 139,
+      "construction_months": 54,
+      "cost_cents": 438840000000,
+      "mean_increment_cents": 62527227,
+      "worst_increment_cents": 47231584
+    }
+  ],
+  "source_sha256": {
+    "assets/scenario/public-network.json": "df6df65b2f9a9be5f26cb416d174025652b3bd76c5655f3b49e44a2b4e302a1a",
+    "assets/scenario/public-network-v5.json.gz": "aac6fb652094a32483845aceda5f6ff4893ac8c82d3517d3c6aca4e46f4c9913",
+    "assets/scenario/playable-rail-map.json": "a259eed97f36b7bbdf5f6480b2ae3f9971280763d3f39c494eb458a56cb3d94a",
+    "assets/scenario/rail-display-paths.json": "d836fa894534a167f1e1c3b008c75237a3383fb0ffe982a6e0536eb4903750c1",
+    "data/imports/rail-bridge-approaches.v1.jsonl.gz": "17f7a111853c1554aff1371577ab9c95707d939272a1a227297ab9b445a07f4b",
+    "data/imports/bridge-approach-regions.v1.json": "f5f8d6e25ed084ef3e8b6c7294cfd1761b188634bf63a3c53e977dafe668264d",
+    "data/imports/operating-networks.v2.json": "bcd3b76094642d0149a8bd3b9cabb7c0cc66d706389d51c03f536460e8b326a5",
+    "data/imports/network-repairs.v2.json": "432ddbaf036da6a10bb218bb90c2171eb0de7ec7bf9909050996586d75e7f5b0",
+    "data/construction/launch-prospects.v1.json": "0706f4e75169dc365a4fbd0464cef4aa11a28732f3272512b7c381893c3b6544",
+    "data/construction/compiled-prospects.v1.json": "72cc59125cfc9a2b9b8427c7337102d99307fb742e4236b8b60f24af6e864c45",
+    "tools/prepare-launch-prospects.py": "bb8b3113d5e38313986973d9877a05bb3cfb0245591bff2baae0d3f8e6ed2863",
+    "tools/import-public-network.py": "370d0056584e1a0413738490ebd664110e25c8398ce63ac9d89cb857876ce756",
+    "cmd/bridgecheck/main.go": "c532fce68eca1a0387135e3f126378f0b80fc52ce6e59b7c8abc91a5208e9a43",
+    "internal/application/testdata/connectors-v9.json": "d2c33d177af3bdccd5a7e0921b975cf472672a4f1852ec7cd94b940eafe7ce27",
+    "internal/application/testdata/connectors-cutover-v9.json": "06bd673da17af759cd9560e2ea7c3ed90f5cd4a0e7c2e24fcd7873f89e00825c"
+  },
+  "builds": {
+    "build/wwhsrt": {
+      "sha256": "d2426b6cd4d0c213ca98cfc439ce4171f79d76cdb28d95028ed4b4e424b1e52c",
+      "bytes": 39201906
+    },
+    "build/World-wide High-speed Rail Tycoon.app/Contents/MacOS/wwhsrt": {
+      "sha256": "d2426b6cd4d0c213ca98cfc439ce4171f79d76cdb28d95028ed4b4e424b1e52c",
+      "bytes": 39201906
+    },
+    "build/wwhsrt-headless": {
+      "sha256": "a7b38f6e77cecb7d36c0b0503131caf0ed9737831f8d0f1c3e7a338a05807337",
+      "bytes": 17843826
+    },
+    "web/main.wasm": {
+      "sha256": "11b8ecaa4cc33a19af0b4ee5f377dd66ce44da96ca7f75949c4caf1d392b10c1",
+      "bytes": 40660724
+    },
+    "web/sw.js": {
+      "sha256": "b4602713a886ef11456d92a4cb7abc82d783f212bf72ddef21b09d22866842e3",
+      "bytes": 682
+    }
+  },
+  "native_map_captures": {
+    "docs/validation/bridge-maibara.png": "c9e50d14f64b858dea6fe8d45e673c0890346e1b22a64a3540b298dba8e8e359",
+    "docs/validation/bridge-mediterranean.png": "41c5cb36f76b1a447c69dd32b30945b5aaf10b3aa76c0d037f7b29a19d3df9bb",
+    "docs/validation/bridge-portugal.png": "d839110542258832b934e7a03a05c9c150a8c545c260e17247b9ec2a1fb18e7b",
+    "docs/validation/bridge-turin.png": "156dd34f2f8efd848d32e1e896af6aa0bd6ad8a942c2c884b2e1ce9af5a3cc00"
+  },
+  "toolchain": "go version go1.27.1 darwin/arm64",
+  "platform": "macOS-27.0.1-arm64-arm-64bit",
+  "player_save_access": false,
+  "limits": [
+    "No full root suite, race/fuzz campaign, remote CI or TypeScript compilation.",
+    "Browser/WASM startup not retried under the existing unresolved 2 GiB memory cap; a successful browser build is not an interaction check.",
+    "Native widget/map captures and isolated headless storage do not qualify native OS input, IME, physical phones or accessibility.",
+    "Operating cash screen is a bounded fixed-plan example with 90% grants, not a standalone shuttle guarantee, full campaign NPV or capital payback.",
+    "New construction quantities, durations and interoperability remain strategic game assumptions, not surveyed railway engineering."
+  ]
+}

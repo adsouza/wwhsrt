@@ -22,7 +22,7 @@ func (s *memoryStore) Commit(b []byte) error {
 }
 func openTest(t *testing.T, s Store) *Game {
 	t.Helper()
-	g, e := Open(s, nil)
+	g, e := openMode(s, nil, false)
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -139,7 +139,7 @@ func TestRestoreRejectsMalformedAndIncompatibleSnapshots(t *testing.T) {
 		check(name, raw)
 	}
 	future := base
-	future.Version = 3
+	future.Version = 4
 	raw, _ := json.Marshal(future)
 	check("future", raw)
 }

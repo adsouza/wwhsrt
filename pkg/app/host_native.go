@@ -19,7 +19,6 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/exp/textinput"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
-	"github.com/hajimehoshi/ebiten/v2/vector"
 	"wwhsrt/internal/adapters/filestore"
 	"wwhsrt/internal/application"
 	"wwhsrt/pkg/gameapi"
@@ -57,27 +56,52 @@ func StartupError(e error) {
 }
 
 type host struct {
-	ui               *ebitenui.UI
-	message          string
-	busy             bool
-	result           chan commandResult
-	field            textinput.Field
-	nameInput        *nameInput
-	statusLabel      *widget.Text
-	scroll           *widget.ScrollContainer
-	scrollbar        *widget.Slider
-	lastView         string
-	loanInput        *widget.TextInput
-	confirmNewGame   bool
-	window           *windowPlacement
-	windowConfigured bool
-	windowClosing    bool
-	windowDirty      bool
-	windowPoll       time.Time
-	windowChanged    time.Time
-	windowAttempt    time.Time
-	appearanceMode   string
-	appearancePoll   time.Time
+	nameCache     *nameInput
+	mapControls   []image.Rectangle
+	combos        []*widget.ListComboButton
+	menuInput     bool
+	actions       map[string]*widget.Button
+	primaryAction *widget.Button
+	workspace     ui.WorkspaceLayout
+	content       *widget.Container
+	contentWidth  int
+	mapImage      *ebiten.Image
+	resizing      bool
+	idleAction    *widget.Button
+
+	helpFocus              string
+	helpFocusScroll        bool
+	helpOpen               bool
+	routeSearchField       textinput.Field
+	routeSearch            *nameInput
+	helpSearchField        textinput.Field
+	helpSearch             *nameInput
+	helpAnchors            map[string]*widget.Button
+	helpCue, helpCueAnchor string
+	helpRestore            bool
+	ui                     *ebitenui.UI
+	message                string
+	busy                   bool
+	result                 chan commandResult
+	field                  textinput.Field
+	nameInput              *nameInput
+	statusLabel            *widget.Text
+	trainDescription       *widget.Text
+	replaySlider           *widget.Slider
+	scroll                 *widget.ScrollContainer
+	scrollbar              *widget.Slider
+	lastView               string
+	loanInput              *widget.TextInput
+	confirmNewGame         bool
+	window                 *windowPlacement
+	windowConfigured       bool
+	windowClosing          bool
+	windowDirty            bool
+	windowPoll             time.Time
+	windowChanged          time.Time
+	windowAttempt          time.Time
+	appearanceMode         string
+	appearancePoll         time.Time
 }
 type commandResult struct {
 	frame gameapi.Frame
@@ -101,7 +125,9 @@ func (h *host) init(g *Game) {
 			h.window = s.Window
 		}
 	}
+	ui.NormalizeHelp(&g.State)
 	g.State.Locale = ui.Locale(g.State.Locale)
+	g.State.ReplayMinute = max(0, min(1439, g.State.ReplayMinute))
 	if g.State.FromCity == "" {
 		g.State.FromCity = "tsuruga"
 		g.State.ToCity = "osaka"
@@ -123,6 +149,9 @@ func (h *host) init(g *Game) {
 		}
 	}
 	h.field.SetTextAndSelection(g.State.DraftName, len(g.State.DraftName), len(g.State.DraftName))
+	if g.Map != nil {
+		g.Camera = g.regionCamera(g.State.Portrait)
+	}
 }
 func (h *host) persist(g *Game) {
 	b, _ := json.Marshal(nativePreferences{State: g.State, Window: h.window})
@@ -135,23 +164,17 @@ func (h *host) persist(g *Game) {
 }
 func (h *host) changed(g *Game) { h.persist(g) }
 func (h *host) layout(g *Game) {
-	w, hgt := g.width-360, g.height
-	if g.width < 800 {
-		w = g.width
-		hgt = max(180, g.height/3)
-	}
-	if g.State.Expanded {
-		w = g.width
-		hgt = g.height
-	}
-	g.Camera.Width = float64(max(1, w))
-	g.Camera.Height = float64(max(1, hgt))
+	h.workspace = ui.Workspace(g.width, g.height, g.State)
+	r := h.workspace.Map
+	g.mapOrigin = mapview.Point{X: float64(r.Min.X), Y: float64(r.Min.Y)}
+	g.Camera.Resize(float64(max(1, r.Dx())), float64(max(1, r.Dy())))
 	portrait := g.height > g.width
 	if g.Camera.Zoom == 0 || g.State.Portrait != portrait {
-		g.Camera = g.Map.Camera(g.Camera.Width, g.Camera.Height, portrait)
+		g.Camera = g.regionCamera(portrait)
 	}
 	g.State.Portrait = portrait
 }
+
 func (h *host) send(g *Game, kind string) {
 	if h.busy || h.windowClosing || h.confirmNewGame && kind != gameapi.NewGame {
 		return
@@ -164,6 +187,16 @@ func (h *host) send(g *Game, kind string) {
 	h.busy = true
 	g.dirty = true
 	c := gameapi.Command{Kind: kind, Revision: g.Frame.Revision, Name: g.State.DraftName, CorridorID: g.State.ServiceCorridor, Frequency: g.State.Frequency, Fare: g.State.Fare}
+	if kind == gameapi.ExtendService {
+		forecast, err := g.Port.Forecast(gameapi.ForecastRequest{CorridorID: g.State.ServiceCorridor, Frequency: g.State.Frequency, Fare: g.State.Fare, ReplaceServiceID: g.State.ReplaceServiceID})
+		if err != nil {
+			h.busy = false
+			h.message = err.Error()
+			return
+		}
+		c.ReplaceServiceID = g.State.ReplaceServiceID
+		c.LeaseCount = forecast.AdditionalLeases
+	}
 	if kind == gameapi.TakeLoan {
 		amount, ok := ui.ParseDollars(g.State.LoanAmount)
 		if !ok || amount <= 0 {
@@ -189,12 +222,40 @@ func (h *host) send(g *Game, kind string) {
 	go func() { f, e := g.Port.Apply(c); h.result <- commandResult{f, e, kind} }()
 }
 func (h *host) update(g *Game) {
+	if h.trainDescription != nil && g.State.Watching {
+		h.updateTrainDescription(g)
+	}
+	h.menuInput = false
+	for _, combo := range h.combos {
+		if combo.ContentVisible() {
+			h.menuInput = true
+		}
+	}
 	h.refreshAppearance(g)
+	if h.resizeWorkspace(g) {
+		if g.dirty && g.width > 0 {
+			h.build(g)
+			g.dirty = false
+		}
+		return
+	}
 	loanBefore := g.State.LoanAmount
 	select {
 	case r := <-h.result:
 		h.busy = false
 		g.Frame = r.frame
+		if g.State.ReviewMap && len(g.Frame.IdleLines) == 0 && len(g.State.ServiceMapSections) == 0 {
+			g.State.ReviewMap = false
+			h.layout(g)
+		}
+		if r.err == nil && r.kind != gameapi.NewGame {
+			ui.RecordHelpAction(&g.State, g.Frame, r.kind)
+			h.persist(g)
+		}
+		if r.err == nil && r.kind == gameapi.ExtendService {
+			g.State.ReplaceServiceID = ""
+			h.persist(g)
+		}
 		if r.err == nil && r.kind == gameapi.BuildLine {
 			h.scroll = nil
 		}
@@ -203,13 +264,17 @@ func (h *host) update(g *Game) {
 			h.blurName()
 			h.nameInput = nil
 			g.newGamePresentation()
+			h.nameCache = nil
 			h.field.SetTextAndSelection(g.State.DraftName, len(g.State.DraftName), len(g.State.DraftName))
+			g.Camera = g.regionCamera(g.State.Portrait)
 			h.scroll = nil
 			h.layout(g)
 			h.persist(g)
 		}
 		if r.err == nil && r.kind == gameapi.AdvanceMonth {
 			g.State.View = "report"
+			g.State.ReviewMap = false
+			h.layout(g)
 		}
 		h.message = r.kind
 		if r.err != nil {
@@ -234,6 +299,10 @@ func (h *host) update(g *Game) {
 		}
 		return
 	}
+	if inpututil.IsKeyJustPressed(ebiten.KeyEscape) && g.State.Help.Open && h.helpSearchField.UncommittedTextLengthInBytes() == 0 {
+		h.helpEvent(g, ui.HelpEvent{Kind: "close"})
+		return
+	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyEscape) && g.State.Expanded {
 		g.State.Expanded = false
 		h.layout(g)
@@ -252,7 +321,25 @@ func (h *host) update(g *Game) {
 		h.loanInput.SetText(loanBefore)
 		h.loanInput.SelectAll()
 	}
-	if g.State.View == "company" && h.nameInput != nil {
+	if !g.State.Help.Open && g.State.View == "services" && h.routeSearch != nil {
+		_ = h.routeSearch.updateInput()
+		if value := h.routeSearchField.Text(); value != g.State.ServiceQuery {
+			g.State.ServiceQuery = value
+			g.dirty = true
+			h.persist(g)
+		}
+	}
+	if g.State.Help.Open && h.helpSearch != nil {
+		before := g.State.Help.Query
+		_ = h.helpSearch.updateInput()
+		value := h.helpSearchField.Text()
+		if value != before {
+			ui.ApplyHelpEvent(&g.State, ui.HelpEvent{Kind: "query", Value: value})
+			h.persist(g)
+			g.dirty = true
+		}
+	}
+	if g.State.View == "company" && !g.State.Help.Open && h.nameInput != nil {
 		if err := h.nameInput.updateInput(); err != nil {
 			h.message = "text_edit_failed"
 			if h.statusLabel != nil {
@@ -265,23 +352,78 @@ func (h *host) update(g *Game) {
 func (h *host) draw(g *Game, screen *ebiten.Image) {
 	p := ui.PaletteFor(g.State)
 	screen.Fill(p.Background)
-	viewport := screen.SubImage(image.Rect(0, 0, int(g.Camera.Width), int(g.Camera.Height))).(*ebiten.Image)
-	g.Map.Draw(viewport, g.Camera, g.Frame, g.State, g.tick)
-	caption := ui.Text(g.State.Locale, "illustration")
-	vector.DrawFilledRect(viewport, 12, float32(g.Camera.Height-36), float32(g.Camera.Width-24), 25, p.Surface, true)
-	g.Map.Label(viewport, caption, 20, g.Camera.Height-32, 11, p.Text)
+	r := h.workspace.Map
+	if !r.Empty() {
+		if h.mapImage == nil || h.mapImage.Bounds().Dx() != r.Dx() || h.mapImage.Bounds().Dy() != r.Dy() {
+			if h.mapImage != nil {
+				h.mapImage.Dispose()
+			}
+			h.mapImage = ebiten.NewImage(r.Dx(), r.Dy())
+		}
+		g.Map.Draw(h.mapImage, g.Camera, g.Frame, g.State, g.replayTime())
+		op := &ebiten.DrawImageOptions{}
+		op.GeoM.Translate(float64(r.Min.X), float64(r.Min.Y))
+		screen.DrawImage(h.mapImage, op)
+	}
+
 	if h.ui != nil {
 		h.ui.Draw(screen)
+		if h.helpFocus != "" {
+			if w := h.helpAnchors[h.helpFocus]; w != nil {
+				if h.helpFocusScroll && h.scroll != nil {
+					h.scrollSidebar(float64(w.GetWidget().Rect.Min.Y - h.scroll.ViewRect().Min.Y))
+				}
+				h.ui.SetFocusedWidget(w)
+			}
+			h.helpFocus = ""
+			h.helpFocusScroll = false
+		}
+
+		h.observeHelp(g)
 	}
 }
 func (h *host) build(g *Game) {
+	previousRoute := h.routeSearch
+	refocusRoute := previousRoute != nil && previousRoute.IsFocused() && !g.State.Help.Open
+	if previousRoute != nil {
+		previousRoute.Focus(false)
+	}
+	h.routeSearch = nil
+
+	previousSearch := h.helpSearch
+	refocusSearch := previousSearch != nil && previousSearch.IsFocused() && g.State.Help.Open
+	if previousSearch != nil {
+		previousSearch.Focus(false)
+	}
+	h.helpSearch = nil
+	h.helpOpen = g.State.Help.Open
+	h.helpAnchors = map[string]*widget.Button{}
+	h.helpCue = ""
+	h.helpCueAnchor = ""
 	previousName := h.nameInput
-	refocusName := previousName != nil && previousName.IsFocused() && g.State.View == "company" && !g.State.Expanded && !h.confirmNewGame
+	if previousName == nil {
+		previousName = h.nameCache
+	}
+	previousLoan := h.loanInput
+	refocusLoan := previousLoan != nil && previousLoan.IsFocused() && g.State.View == "company" && ui.CompanyPane(g.State) == "finance" && !g.State.Help.Open
+	loanAllSelected := refocusLoan && previousLoan.SelectedText() == previousLoan.GetText()
+	if previousLoan != nil {
+		previousLoan.Focus(false)
+	}
+	h.loanInput = nil
+	refocusName := h.nameInput != nil && h.nameInput.IsFocused() && g.State.View == "company" && !g.State.Expanded && !h.confirmNewGame && !g.State.Help.Open
 	h.blurName()
-	if previousName != nil {
+	if h.nameInput != nil {
 		h.syncName(g)
+		h.nameCache = h.nameInput
 	}
 	h.nameInput = nil
+	h.actions = map[string]*widget.Button{}
+	h.mapControls = nil
+	h.combos = nil
+	h.primaryAction = nil
+	h.trainDescription = nil
+	h.replaySlider = nil
 	p := ui.PaletteFor(g.State)
 	if h.confirmNewGame {
 		h.buildNewGame(g)
@@ -290,205 +432,227 @@ func (h *host) build(g *Game) {
 	t := func(k string) string { return ui.Text(g.State.Locale, k) }
 	face := func(n float64) *text.Face { var f text.Face = &text.GoTextFace{Source: g.Map.Font, Size: n}; return &f }
 	root := widget.NewContainer(widget.ContainerOpts.Layout(placed{}))
-	x, y, w, height := int(g.Camera.Width), 0, 360, g.height
-	if g.width < 800 {
+	h.workspace = ui.Workspace(g.width, g.height, g.State)
+	r := h.workspace.Inspector
+	x, y, w, height := r.Min.X, r.Min.Y, r.Dx(), r.Dy()
+	if g.State.Expanded {
 		x = 0
-		y = int(g.Camera.Height)
+		y = 0
 		w = g.width
-		height = g.height - y
+		height = g.height
 	}
-	contentWidth := w - 20 // Reserve a separate gutter for the scrollbar.
-	footerHeight := 120
-	if len(g.Frame.IdleLines) > 0 {
-		footerHeight = 184
+	contentWidth := max(60, w-20)
+	spacing := 8
+	if g.State.View == "services" && ui.ServicePane(g.State) == "plan" {
+		spacing = 6
 	}
-	content := widget.NewContainer(widget.ContainerOpts.Layout(widget.NewRowLayout(widget.RowLayoutOpts.Direction(widget.DirectionVertical), widget.RowLayoutOpts.Padding(widget.NewInsetsSimple(20)), widget.RowLayoutOpts.Spacing(12))))
+	content := widget.NewContainer(widget.ContainerOpts.Layout(widget.NewRowLayout(widget.RowLayoutOpts.Direction(widget.DirectionVertical), widget.RowLayoutOpts.Padding(&widget.Insets{Left: 16, Right: 16, Top: 12, Bottom: 12}), widget.RowLayoutOpts.Spacing(spacing))))
+	h.content = content
+	h.contentWidth = contentWidth
 	wrap := func(value string, size float64, width int) string {
 		return ui.WrapText(value, float64(width), func(s string) float64 { return text.Advance(s, *face(size)) })
 	}
 	label := func(value string, size float64) {
-		content.AddChild(widget.NewText(widget.TextOpts.Text(wrap(value, size, contentWidth-40), face(size), p.Text), widget.TextOpts.MaxWidth(float64(contentWidth-40))))
+		h.content.AddChild(widget.NewText(widget.TextOpts.Text(wrap(value, size, h.contentWidth-32), face(size), p.Text), widget.TextOpts.MaxWidth(float64(h.contentWidth-32))))
 	}
 	button := func(title string, fn func()) *widget.Button {
-		b := widget.NewButton(widget.ButtonOpts.WidgetOpts(widget.WidgetOpts.MinSize(44, 44), widget.WidgetOpts.LayoutData(widget.RowLayoutData{Stretch: true, MaxWidth: contentWidth - 40})), widget.ButtonOpts.Image(&widget.ButtonImage{Idle: uimage.NewNineSliceColor(p.Control), Hover: uimage.NewNineSliceColor(p.Selected), Pressed: uimage.NewNineSliceColor(p.Pressed), Disabled: uimage.NewNineSliceColor(p.Disabled)}), widget.ButtonOpts.Text(wrap(title, 15, contentWidth-60), face(15), &widget.ButtonTextColor{Idle: p.Text, Disabled: p.Muted}), widget.ButtonOpts.TextPadding(widget.NewInsetsSimple(10)), widget.ButtonOpts.ClickedHandler(func(*widget.ButtonClickedEventArgs) { fn() }))
-		content.AddChild(b)
+		b := widget.NewButton(widget.ButtonOpts.WidgetOpts(widget.WidgetOpts.MinSize(44, 44), widget.WidgetOpts.LayoutData(widget.RowLayoutData{Stretch: true, MaxWidth: h.contentWidth - 32})), widget.ButtonOpts.Image(&widget.ButtonImage{Idle: uimage.NewNineSliceColor(p.Control), Hover: uimage.NewNineSliceColor(p.Selected), Pressed: uimage.NewNineSliceColor(p.Pressed), Disabled: uimage.NewNineSliceColor(p.Disabled)}), widget.ButtonOpts.Text(wrap(title, 14, h.contentWidth-56), face(14), &widget.ButtonTextColor{Idle: p.Text, Disabled: p.Muted}), widget.ButtonOpts.TextPadding(widget.NewInsetsSimple(10)), widget.ButtonOpts.ClickedHandler(func(*widget.ButtonClickedEventArgs) { fn() }))
+		h.content.AddChild(b)
 		return b
 	}
-	label(fmt.Sprintf("%04d-%02d  ·  %s", g.Frame.Month.Year, g.Frame.Month.Month, t("offline")), 14)
-	label(g.Frame.Player.Name, 24)
-	label(t("cash")+"\n"+ui.Cash(g.Frame.Player.Cash), 16)
-	if len(g.Frame.IdleLines) > 0 {
-		content.AddChild(h.idleNotice(g, contentWidth-40))
-	}
-	nav := widget.NewContainer(widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{Stretch: true})), widget.ContainerOpts.Layout(widget.NewGridLayout(widget.GridLayoutOpts.Columns(3), widget.GridLayoutOpts.Stretch([]bool{true, true, true}, nil), widget.GridLayoutOpts.Spacing(6, 6))))
-	for _, view := range []string{"map", "build", "services", "report", "company"} {
-		v := view
-		tabImage := &widget.ButtonImage{Idle: uimage.NewNineSliceColor(p.Control), Hover: uimage.NewNineSliceColor(p.Selected), Pressed: uimage.NewNineSliceColor(p.Control)}
-		tabInk := p.Text
-		if v == g.State.View {
-			tabImage = &widget.ButtonImage{
-				Idle:    uimage.NewBorderedNineSliceColor(p.Selected, p.Accent, 1),
-				Hover:   uimage.NewBorderedNineSliceColor(p.Hover, p.Accent, 1),
-				Pressed: uimage.NewBorderedNineSliceColor(p.Pressed, p.Accent, 1),
-			}
-			tabInk = p.Accent
-		}
-		b := widget.NewButton(widget.ButtonOpts.WidgetOpts(widget.WidgetOpts.MinSize(44, 44)), widget.ButtonOpts.Image(tabImage), widget.ButtonOpts.Text(t(v), face(12), &widget.ButtonTextColor{Idle: tabInk}), widget.ButtonOpts.ClickedHandler(func(*widget.ButtonClickedEventArgs) { h.blurName(); g.State.View = v; g.dirty = true; h.persist(g) }))
-		nav.AddChild(b)
-	}
-	content.AddChild(nav)
-	h.guide(g, label, button)
 
-	if g.State.View == "map" {
-		label(t("cities"), 18)
-		for _, city := range g.Frame.Cities {
-			city := city
-			name := t(string(city.ID))
-			if city.ID == g.State.Selected {
-				name = "● " + name
+	if g.State.Help.Open {
+		h.buildReference(g, label, button, content)
+	} else if g.State.View == "map" {
+		h.helpSlot(g, "start", label, button)
+		h.helpSlot(g, "idle", label, button)
+		label(t("region"), 13)
+		regions := []choice{}
+		for _, r := range mapview.VisibleRegions(g.State.Portrait) {
+			if r.ID == "world" && g.State.Portrait {
+				continue
 			}
-			button(name, func() { g.State.Selected = city.ID; g.dirty = true; h.persist(g) })
+			name := r.Name
+			if g.State.Locale == "zh-Hans" {
+				name = r.Chinese
+			}
+			regions = append(regions, choice{r.ID, name})
 		}
+		region := g.State.Region
+		if region == "" {
+			region = "east-asia"
+		}
+		h.selectChoice(g, region, regions, func(id string) {
+			g.State.Region = id
+			if id == "east-asia" {
+				g.Camera = g.Map.Camera(g.Camera.Width, g.Camera.Height, g.State.Portrait)
+			} else {
+				g.Camera = mapview.RegionCamera(g.Camera.Width, g.Camera.Height, id, g.State.Portrait)
+			}
+			g.dirty = true
+			h.persist(g)
+		})
+		if stop := g.Map.PublicStop(g.State.SourceStation); stop != nil {
+			label(stop.Name, 18)
+			label(t("sourceStationInfo"), 13)
+			if stop.MapGap {
+				label(t("sourceStationGap"), 13)
+			}
+		}
+		label(t("cities"), 20)
+		choices := []choice{}
 		for _, city := range g.Frame.Cities {
-			if city.ID == g.State.Selected {
-				label(fmt.Sprintf("%s · %.4f°, %.4f°", t(string(city.ID)), city.Lat, city.Lon), 14)
-				for _, row := range ui.StationDetails(g.Frame, g.State.Locale, city.ID) {
+			choices = append(choices, choice{string(city.ID), t(string(city.ID))})
+		}
+		h.selectChoice(g, string(g.State.Selected), choices, func(id string) {
+			g.State.SourceStation = ""
+			g.State.SourceStation = ""
+			g.State.Selected = gameapi.CityID(id)
+			g.dirty = true
+			h.persist(g)
+		})
+		if g.State.Selected != "" {
+			for _, row := range ui.StationDetails(g.Frame, g.State.Locale, g.State.Selected) {
+				if row.Label == t("station") {
+					label(row.Value, 15)
+				}
+			}
+			if h.disclosure(g, "station", t("moreDetails"), button) {
+				for _, row := range ui.StationDetails(g.Frame, g.State.Locale, g.State.Selected) {
 					label(row.Label+"\n"+row.Value, 14)
 				}
 			}
 		}
+		h.helpSlot(g, "city", label, button)
+		if h.disclosure(g, "build-details", t("representativeDay"), button) || g.State.Watching {
+			h.replayControls(g, label, button, content)
+			h.helpSlot(g, "replay", label, button)
+		}
+
 	} else if g.State.View == "build" {
 		h.buildPlanner(g, t, label, button)
 	} else if g.State.View == "services" {
 		h.buildServices(g, t, label, button)
 	} else if g.State.View == "report" {
-		label(t("report"), 22)
-		if len(g.Frame.Reports) == 0 {
-			label(t("noReport"), 16)
-		} else {
-			r := g.Frame.Reports[len(g.Frame.Reports)-1]
-			label(fmt.Sprintf("%04d-%02d", r.Month.Year, r.Month.Month), 18)
-			for _, row := range []struct {
-				k string
-				v gameapi.Money
-			}{{"opening", r.OpeningCash}, {"revenue", r.Revenue}, {"runningCosts", r.RunningCosts}, {"accessCosts", r.AccessCosts}, {"stationCosts", r.StationCosts}, {"leaseCosts", r.LeaseCosts}, {"maintenance", r.Maintenance}, {"interest", r.Interest}, {"construction", r.Construction}, {"grants", r.Grants}, {"borrowed", r.Borrowed}, {"repaid", r.Repaid}, {"closing", r.ClosingCash}} {
-				label(t(row.k)+"\n"+ui.Cash(row.v), 16)
-			}
-		}
-		if len(g.Frame.Reports) > 0 {
-			label(fmt.Sprintf("%s: %d", t("passengers"), g.Frame.Reports[len(g.Frame.Reports)-1].Passengers), 16)
-		}
-		label(t("reportHint"), 15)
+		h.buildReport(g, t, label, button)
 	} else {
-		button(t("reset"), func() { h.openNewGame(g) }).GetWidget().Disabled = h.busy
-		button(t("appearance")+" · "+t("appearance_"+ui.AppearanceMode(g.State.Appearance)), func() {
-			g.State.Appearance = ui.NextAppearance(g.State.Appearance)
-			h.refreshAppearance(g)
-			g.dirty = true
-			h.persist(g)
-		})
-		button(t("guidanceSettings")+" · "+t(map[bool]string{true: "motionOff", false: "motionOn"}[g.State.HintDismissed]), func() { g.State.HintDismissed = !g.State.HintDismissed; g.dirty = true; h.persist(g) })
-		label(t("finance"), 22)
-		label(t("debt")+"\n"+ui.Cash(g.Frame.Debt), 16)
-		h.financeForm(g, t, label, button, content, contentWidth-40)
-		button(t("repay"), func() { h.send(g, gameapi.RepayLoan) })
-		label(t("loanTerms"), 14)
-		label(t("terrainCredits"), 12)
-		label(t("companyName"), 18)
-		h.nameInput = newNameInput(&h.field, g.State.DraftName, *face(16), p)
-		h.nameInput.onFocus = func() {
-			if h.loanInput != nil {
-				h.loanInput.Focus(false)
-			}
-		}
-		if previousName != nil && previousName.observed.value == h.field.Text() {
-			h.nameInput.undo, h.nameInput.redo = previousName.undo, previousName.redo
-			h.nameInput.anchor, h.nameInput.caret = previousName.anchor, previousName.caret
-			h.nameInput.offset = previousName.offset
-			h.nameInput.observed = h.nameInput.snapshot()
-		}
-		content.AddChild(h.nameInput)
-		label(t("nameHint"), 14)
-		button(t("applyName"), func() {
-			if h.field.UncommittedTextLengthInBytes() > 0 {
-				return
-			}
-			h.blurName()
-			h.syncName(g)
-			h.send(g, gameapi.RenameCompany)
-		})
+		h.buildCompany(g, t, label, button, content, contentWidth-32, previousName, refocusName)
 	}
-	button(t("showMap"), func() { g.State.Expanded = true; h.layout(g); g.dirty = true })
-	button(t("advanceYear"), func() { h.send(g, gameapi.AdvanceYear) })
-	button(t("fit"), func() { g.Camera = g.Map.Camera(g.Camera.Width, g.Camera.Height, g.State.Portrait) })
-	button(t("focusRoute"), func() { g.focusSelected() })
-	button(t("zoomIn"), func() { g.Camera.ZoomAt(1.3, mapview.Point{X: g.Camera.Width / 2, Y: g.Camera.Height / 2}) })
-	button(t("zoomOut"), func() { g.Camera.ZoomAt(1/1.3, mapview.Point{X: g.Camera.Width / 2, Y: g.Camera.Height / 2}) })
-	terrainTitle := t("terrain")
-	if !g.State.HideTerrain {
-		terrainTitle = "● " + terrainTitle
-	}
-	button(terrainTitle, func() { g.State.HideTerrain = !g.State.HideTerrain; g.dirty = true; h.persist(g) })
-	motionState := t("motionOff")
-	if g.State.Motion {
-		motionState = t("motionOn")
-	}
-	motion := button(t("motion")+" · "+motionState, func() { g.State.Motion = !g.State.Motion; g.dirty = true; h.persist(g) })
-	if g.State.Motion {
-		motion.SetImage(&widget.ButtonImage{
-			Idle:    uimage.NewBorderedNineSliceColor(p.Selected, p.Accent, 1),
-			Hover:   uimage.NewBorderedNineSliceColor(p.Hover, p.Accent, 1),
-			Pressed: uimage.NewBorderedNineSliceColor(p.Pressed, p.Accent, 1),
-		})
-	}
-	button("English / 简体中文", func() {
-		if g.State.Locale == "en" {
-			g.State.Locale = "zh-Hans"
-		} else {
-			g.State.Locale = "en"
-		}
-		g.dirty = true
-		h.persist(g)
-	})
-	label(t("illustration"), 14)
-	label(t("scope"), 13)
 	oldScroll := 0.0
 	if h.scroll != nil && h.lastView == g.State.View {
 		oldScroll = h.scroll.ScrollTop
 	}
-	scrollRect := image.Rect(x, y, x+contentWidth, y+max(1, height-footerHeight))
+	scrollRect := image.Rect(x, y, x+contentWidth, y+max(1, height))
 	scroll := widget.NewScrollContainer(widget.ScrollContainerOpts.Content(content), widget.ScrollContainerOpts.StretchContentWidth(), widget.ScrollContainerOpts.Image(&widget.ScrollContainerImage{Idle: uimage.NewNineSliceColor(p.Background), Mask: uimage.NewNineSliceColor(color.White)}), widget.ScrollContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(scrollRect)))
 	scroll.SetLocation(scrollRect)
 	scroll.ScrollTop = oldScroll
 	h.scroll = scroll
 	h.lastView = g.State.View
 	root.AddChild(scroll)
-	footer := widget.NewContainer(widget.ContainerOpts.Layout(widget.NewRowLayout(widget.RowLayoutOpts.Direction(widget.DirectionVertical), widget.RowLayoutOpts.Padding(widget.NewInsetsSimple(12)), widget.RowLayoutOpts.Spacing(6))), widget.ContainerOpts.BackgroundImage(uimage.NewNineSliceColor(p.Surface)), widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(image.Rect(x, y+height-footerHeight, x+w, y+height))))
-	if len(g.Frame.IdleLines) > 0 {
-		footer.AddChild(h.idleReviewButton(g, fmt.Sprintf("%s · %d · %s%s", t("idleShort"), len(g.Frame.IdleLines), ui.Cash(ui.IdleCosts(g.Frame)), t("monthlyUnit")), w-24))
-	}
-	labelText := t("saved")
+	footer := widget.NewContainer(widget.ContainerOpts.Layout(placed{}), widget.ContainerOpts.BackgroundImage(uimage.NewNineSliceColor(p.Surface)), widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(h.workspace.Footer)))
+	status := t("saved")
 	if h.message != "" {
-		labelText = t(h.message)
+		status = t(h.message)
 	}
-	h.statusLabel = widget.NewText(widget.TextOpts.Text(labelText, face(13), p.Text), widget.TextOpts.MaxWidth(float64(w-24)))
+	fw, fh := h.workspace.Footer.Dx(), h.workspace.Footer.Dy()
+	statusWidth := max(40, fw-290)
+	if ui.CampaignFinished(g.Frame) && !h.workspace.Compact {
+		statusWidth = fw - 354
+	}
+	statusRect := image.Rect(12, 12, statusWidth, fh-4)
+	if h.workspace.Compact {
+		statusWidth = fw - 24
+		statusRect = image.Rect(12, 0, fw-12, 32)
+	}
+	h.statusLabel = widget.NewText(widget.TextOpts.Text(wrap(status, 12, statusWidth-12), face(12), p.Text), widget.TextOpts.MaxWidth(float64(statusWidth-12)), widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(statusRect)))
 	footer.AddChild(h.statusLabel)
-	b := widget.NewButton(widget.ButtonOpts.WidgetOpts(widget.WidgetOpts.MinSize(44, 48), widget.WidgetOpts.LayoutData(widget.RowLayoutData{Stretch: true})), widget.ButtonOpts.Image(&widget.ButtonImage{Idle: uimage.NewNineSliceColor(p.Action), Hover: uimage.NewNineSliceColor(p.ActionHover), Pressed: uimage.NewNineSliceColor(p.ActionHover), Disabled: uimage.NewNineSliceColor(p.Disabled)}), widget.ButtonOpts.Text(t("advance"), face(16), &widget.ButtonTextColor{Idle: p.OnAction, Disabled: p.OnAction}), widget.ButtonOpts.ClickedHandler(func(*widget.ButtonClickedEventArgs) { h.send(g, gameapi.AdvanceMonth) }))
-	b.GetWidget().Disabled = h.busy || g.Frame.MonthsResolved >= g.Frame.CampaignMonths || g.State.View == "services" && ui.ServiceDirty(g.State, g.Frame)
-	timeButtons := widget.NewContainer(widget.ContainerOpts.Layout(widget.NewGridLayout(widget.GridLayoutOpts.Columns(2), widget.GridLayoutOpts.Stretch([]bool{true, true}, nil), widget.GridLayoutOpts.Spacing(6, 0))), widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{Stretch: true})))
-	timeButtons.AddChild(b)
-	year := widget.NewButton(widget.ButtonOpts.WidgetOpts(widget.WidgetOpts.MinSize(44, 48)), widget.ButtonOpts.Image(&widget.ButtonImage{Idle: uimage.NewNineSliceColor(p.ActionHover), Hover: uimage.NewNineSliceColor(p.Action), Pressed: uimage.NewNineSliceColor(p.ActionHover), Disabled: uimage.NewNineSliceColor(p.Disabled)}), widget.ButtonOpts.Text(t("advanceYear"), face(13), &widget.ButtonTextColor{Idle: p.OnAction, Disabled: p.OnAction}), widget.ButtonOpts.ClickedHandler(func(*widget.ButtonClickedEventArgs) { h.send(g, gameapi.AdvanceYear) }))
-	year.GetWidget().Disabled = b.GetWidget().Disabled
-	timeButtons.AddChild(year)
-	footer.AddChild(timeButtons)
+	start, bw, by := fw-276, 132, 8
+	if h.workspace.Compact {
+		start = 8
+		bw = (fw - 24) / 2
+		by = 36
+	}
+	if ui.CampaignFinished(g.Frame) {
+		if !h.workspace.Compact {
+			start = fw - 340
+		}
+		endWidth := fw - 132 - start
+		notice := t("campaignEndTitle") + "\n" + ui.CampaignEndDetail(g.State.Locale, g.Frame)
+		footer.AddChild(widget.NewText(widget.TextOpts.Text(wrap(notice, 12, endWidth), face(12), p.Text), widget.TextOpts.MaxWidth(float64(endWidth)), widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(image.Rect(start, by, start+endWidth, by+44)))))
+		b := h.fixedButton(g, t("campaignRestart"), image.Rect(fw-124, by, fw-8, by+44), func() { h.openNewGame(g) })
+		b.GetWidget().Disabled = h.busy
+		h.actions["campaign-new-game"] = b
+		footer.AddChild(b)
+	} else {
+		for i, key := range []string{"advance", "advanceYear"} {
+			key := key
+			b := h.fixedButton(g, t(key), image.Rect(start+i*(bw+8), by, start+i*(bw+8)+bw, by+44), func() {
+				kind := gameapi.AdvanceMonth
+				if key == "advanceYear" {
+					kind = gameapi.AdvanceYear
+				}
+				h.send(g, kind)
+			})
+			b.GetWidget().Disabled = h.busy || g.State.View == "services" && ui.ServiceDirty(g.State, g.Frame)
+			h.actions[key] = b
+			footer.AddChild(b)
+		}
+	}
 	root.AddChild(footer)
+
 	h.configureSidebarScroll(g, root)
+	if !g.State.Expanded {
+		h.addCommandDock(g, root)
+	}
 	if g.State.Expanded {
 		root = widget.NewContainer(widget.ContainerOpts.Layout(placed{}))
 		b := widget.NewButton(widget.ButtonOpts.WidgetOpts(widget.WidgetOpts.LayoutData(image.Rect(max(0, g.width-280), 12, g.width-12, 60))), widget.ButtonOpts.Image(&widget.ButtonImage{Idle: uimage.NewNineSliceColor(p.Control), Hover: uimage.NewNineSliceColor(p.Control), Pressed: uimage.NewNineSliceColor(p.Control)}), widget.ButtonOpts.Text(t("backPlanner"), face(15), &widget.ButtonTextColor{Idle: p.Text, Disabled: p.Muted}), widget.ButtonOpts.ClickedHandler(func(*widget.ButtonClickedEventArgs) { g.State.Expanded = false; h.layout(g); g.dirty = true }))
 		root.AddChild(b)
+		h.mapControls = append(h.mapControls, image.Rect(max(0, g.width-280), 12, g.width-12, 60))
+		if g.State.View == "build" {
+			contentWidth = g.width - 20
+			content = widget.NewContainer(widget.ContainerOpts.Layout(widget.NewRowLayout(widget.RowLayoutOpts.Direction(widget.DirectionVertical), widget.RowLayoutOpts.Padding(widget.NewInsetsSimple(10)), widget.RowLayoutOpts.Spacing(4))), widget.ContainerOpts.BackgroundImage(uimage.NewNineSliceColor(p.Surface)), widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(image.Rect(0, int(g.Camera.Height), g.width, g.height))))
+			h.content = content
+			h.contentWidth = contentWidth
+			label(t("prospectHint"), 14)
+			if co, ok := ui.Pair(g.Frame, g.State.FromCity, g.State.ToCity); ok {
+				label(t(string(co.FromCity))+" – "+t(string(co.ToCity)), 14)
+			}
+			h.helpSlot(g, "expanded-endpoint", label, button)
+			root.AddChild(content)
+		}
+		h.addMapTools(g, root)
+
 	}
 	h.ui = &ebitenui.UI{Container: root}
+	if h.helpRestore && h.scroll != nil {
+		h.setSidebarScroll(g.State.Help.ReturnScroll)
+		h.helpRestore = false
+	}
+	if previousSearch != nil && h.helpSearch != nil && previousSearch.observed.value == h.helpSearchField.Text() {
+		h.helpSearch.undo, h.helpSearch.redo = previousSearch.undo, previousSearch.redo
+		h.helpSearch.anchor, h.helpSearch.caret = previousSearch.anchor, previousSearch.caret
+		h.helpSearch.offset = previousSearch.offset
+		h.helpSearch.observed = h.helpSearch.snapshot()
+	}
+	if previousRoute != nil && h.routeSearch != nil && previousRoute.observed.value == h.routeSearchField.Text() {
+		h.routeSearch.undo, h.routeSearch.redo = previousRoute.undo, previousRoute.redo
+		h.routeSearch.anchor, h.routeSearch.caret = previousRoute.anchor, previousRoute.caret
+		h.routeSearch.offset = previousRoute.offset
+		h.routeSearch.observed = h.routeSearch.snapshot()
+	}
+	if refocusRoute && h.routeSearch != nil {
+		h.ui.SetFocusedWidget(h.routeSearch)
+	}
+	if refocusSearch && h.helpSearch != nil {
+		h.ui.SetFocusedWidget(h.helpSearch)
+	}
+	if refocusLoan && h.loanInput != nil {
+		h.ui.SetFocusedWidget(h.loanInput)
+		if loanAllSelected {
+			h.loanInput.SelectAll()
+		}
+	}
 	if refocusName && h.nameInput != nil {
 		h.ui.SetFocusedWidget(h.nameInput)
 	}

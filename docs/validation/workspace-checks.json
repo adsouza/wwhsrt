@@ -1,0 +1,45 @@
+{
+  "date": "2026-11-12T23:53:02.561Z",
+  "browser": "153.0.8010.12",
+  "wasm_sha256": "4e31ba9167920f561bb33a084614fe8d1253720513d671b202431f51ba970d72",
+  "ui_sha256": "0100c7ce169ef8233aff7c03bd88516d1a65116a70a210f2762ad15844ea991f",
+  "checks": [
+    "Focused service plan fits at 1280x850; fleet and analysis tabs plus collapsed capacity remove secondary detail; pointer and keyboard tabs preserve fare/frequency; finance, identity and settings separate; UI-only actions leave exact save bytes unchanged",
+    "320–1920px English/Chinese panes avoid horizontal overflow; 390x844 service plan fits without scrolling; phone fallback preserves left-dock/600px desktop preferences; full map retains focus and zoom controls; Field Notes task link opens the relevant Fleet tab",
+    "Applied fare plan earns revenue; Overview, Accounts, Network and Markets expose the intended report detail; reload and offline continuation retain campaign/drafts/layout; New game retains workspace preferences while clearing business drafts"
+  ],
+  "layouts": [
+    {
+      "name": "desktop-top-plan",
+      "width": 440,
+      "height": 682,
+      "scroll": 682,
+      "top": 0
+    },
+    {
+      "name": "desktop-left-plan",
+      "width": 600,
+      "height": 738,
+      "scroll": 738,
+      "top": 0
+    },
+    {
+      "name": "phone-plan-en",
+      "width": 390,
+      "height": 652,
+      "scroll": 652,
+      "top": 0
+    },
+    {
+      "name": "phone-plan-zh-Hans",
+      "width": 390,
+      "height": 652,
+      "scroll": 652,
+      "top": 0
+    }
+  ],
+  "limitations": [
+    "Browser touch, keyboard and phone layouts are emulated; physical devices, screen readers and native OS input require separate qualification."
+  ],
+  "passed": true
+}

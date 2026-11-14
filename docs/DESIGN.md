@@ -98,6 +98,25 @@ Include the existing HSR network, passenger rail, construction projects, station
 
 Defer freight, signaling, platform-by-platform control, exact timetables, individual passengers, AI companies building track, real-estate development, detailed tax/FX systems, stock trading, and speculative transoceanic megastructures. Multiplayer is part of the product scope; an official large public service is a separate hosting decision.
 
+### Map selection for service planning
+
+Open railway sections are selectable directly on the map. A click opens service
+planning with named open direct/through patterns using that track, retaining an
+already selected matching pattern and its draft values. An explicit control
+returns to all patterns. Closed construction is not selectable for operation;
+selection never commits a timetable or purchase. See
+[service interaction](UX.md#create-or-improve-a-service).
+
+### Construction prospect selection
+
+The playable construction UI presents every supported, unstarted corridor as a
+selectable dotted line on the map and as a named list entry. Selecting a prospect
+opens its reviewed alignments, engineering costs, funding and operating estimate.
+It does not offer arbitrary endpoint selection. A committed project leaves the
+prospect layer and retains its actual construction/operating style. Existing
+public lines are service opportunities, not construction prospects. See the
+[interaction contract](UX.md#plan-a-connection); earlier A/B mockups are historical.
+
 ## 3. Player loop and the two clocks
 
 ### Monthly business turn
@@ -201,9 +220,15 @@ Select an origin and destination city. The planner offers up to three materially
 
 #### Independent city-to-city lines
 
-**Neither endpoint must already have a station, track, or a connection to an existing railway.** The planner accepts two distinct eligible cities whether both are unserved, one is served, or both already have rail. Building A–B may create the company's first rail component, a separate component alongside an existing C–D network, an extension, or a link joining components. All are ordinary uses of the same construction command and quote path.
+**Neither endpoint must already have a station, track, or a connection to an existing railway.** A reviewed prospect can join two distinct eligible cities whether both are unserved, one is served, or both already have rail. Building A–B may create the company's first rail component, a separate component alongside an existing C–D network, an extension, or a link joining components. All are ordinary uses of the same construction command and quote path.
 
-The [two-endpoint planning interaction](UX.md#two-endpoints-and-a-persistent-connection-draft) keeps editable A/B slots and a persistent draft. [Expanded-map planning](UX.md#expanded-map-and-full-screen-behavior) retains endpoint/alignments controls and build-cost, monthly-revenue, and operating-contribution estimates while the large inspector is hidden. Full-screen/restore, panning, zooming, and estimate refreshes preserve the draft; only a separate funding review can lead to a financial commitment.
+The [prospect selection interaction](UX.md#pick-a-prospect-and-retain-its-draft)
+shows reviewed, unstarted corridors as dotted lines and named list entries. Selecting
+one establishes both endpoints and a persistent alignment draft. [Expanded-map
+planning](UX.md#expanded-map-and-full-screen-behavior) retains the prospect identity
+and restore control while browsing; restoring opens the selected project's cost,
+funding and operating estimate. Panning, zooming and estimate refreshes preserve the
+draft; only a separate explicit commitment can spend money.
 
 Eligibility depends on a qualified alignment, terrain/crossing feasibility, construction and operating rights, concessions, and funding. It does not depend on graph reachability from the company's home city, another owned station, or the public HSR network. A city being visible in the catalog does not certify that every other city has a feasible alignment to it; the curated corridor model still applies. Catalog selection must include independent pairs and new regional starting opportunities, rather than offering only extensions of legacy HSR.
 
@@ -457,6 +482,21 @@ Monthly seats per directed leg are derived from delivered departures × seats pe
 One journey produces one total fare, equal to the sum of the fares for its ridden service legs. Allocate revenue to those services by that same sum; a transfer does not create a second full-journey fare. Passenger-kilometres sum actual ridden distance. Load factor is passenger-kilometres divided by seat-kilometres, not an unweighted average of segment percentages.
 
 A line's own profit is not the only test of its value. The planner's incremental forecast compares the whole company with and without the proposed change over the same inputs. Show a branch's direct result separately from its estimated feeder effect.
+
+### Playable economy calibration (implemented)
+
+The expanded development world uses the versioned [gameplay policy](../assets/scenario/economy.json), described in [its notes](../assets/scenario/ECONOMY.md). These are balance assumptions, not measured passenger forecasts or regional operating-cost research. Construction costs, loan terms, grants and line upkeep are unchanged.
+
+- Each city's authored daily budget becomes `min(400000, 3 * base + min(6000, 3 * base))`. The catchment uplift supports smaller hubs without giving every new service a fresh passenger pool. Calendar-month length and the 30% business/70% leisure split still apply to the finite city budget.
+- Destination weight is `max(1, attraction * 1000000 / (120 + distance_km)^2)`, multiplied by 4 for the same authored country market. Honshu and Hokkaido share this demand weighting; that does not make the road alternative eligible across water. Distant and cross-border markets remain possible.
+- Strategic waiting inconvenience is `240 / (return_trips_per_day + 1)` minutes, rounded down. Every positive frequency step from 1–16 improves the offer; the earlier four-trip plateau is removed. Track allocation, fleet, seat limits and outside-mode choice still constrain it.
+- A 400-seat train costs **USD 120,000/month** to lease, **USD 6.50/train-km** to run, and **USD 2.50/train-km** on public track. Station handling remains USD 0.50/boarding. These are global rates for the single development train family; regional construction tables are separate.
+
+An unconfigured route starts at `clamp(USD 4 + USD 0.14 * route_km, USD 10, USD 300)`. Suggested daily return trips use all called-stop OD pairs: estimate 40% rail capture, compute the busiest two-way leg, divide by 520 seats/day (65% of 800 two-way seats per return), round up, and clamp to 1–8. This is a conservative starting point for the live forecast, not an optimizer. Existing accepted settings are retained; extending the starter retains its accepted frequency and explicitly previews any additional leases.
+
+The forecast's monthly break-even target is `ceil(fixed_cost / (average_fare_per_boarding - handling_per_boarding))`. Fixed cost includes scheduled running, access, assigned/needed leases and attributed owned-line maintenance. For a through service, average fare comes from its actual projected boarding mix, including short intermediate rides. A direct route with no forecast riders can use its known fare; a through route without a mix, a suspended service or a nonpositive net fare shows an unavailable target. Changing demand can change the mix; this target neither guarantees seats/demand nor includes company loans/construction. Company-wide incremental cash remains a separate forecast.
+
+The original pre-topology-repair January comparison independently tests its 146 existing direct corridors alongside the same starter service: 14 are contribution-positive under legacy rules at four returns/USD 90, 85 with the new rules at those same settings, and 107 using the suggested plans. The remaining routes are not guaranteed profitable. This is a first balance pass, not a complete campaign or multiplayer equilibrium test. See [calibration and interaction evidence](validation/ECONOMY.md). Prior-save historical accounts keep the original rules; the new policy begins with the next unresolved month.
 
 ## 7. Company finance and management
 
@@ -748,6 +788,8 @@ The offline corridor pipeline combines terrain profiles with water/shoreline geo
 
 Existing HSR requires an additional source-backed inventory. The [UIC High-Speed Data and Atlas](https://uic.org/activities/high-speed-data-and-atlas) distinguishes infrastructure in operation, under construction, and planned, and is a candidate verification reference. Public download availability does not establish permission to redistribute its database or maps; establish dataset-specific reuse terms before bundling material. [OpenStreetMap](https://www.openstreetmap.org/copyright) is a candidate topology source with ODbL attribution and database-sharing requirements. Qualify a source and its redistribution path before importing; a map screenshot is not the game graph. Preserve the source cutoff and document deliberate strategic simplifications of junctions, intermediate stations, and connectivity.
 
+**Implemented development import:** the [pinned prototype network](../data/imports/README.md) is now playable in native, browser and headless clients, including China. It preserves the reviewed source map, contracts connected geometry to city-level public corridors and offers connected service templates. The import uses approximate strategic timings and demand; it has not completed the production admission/evidence gates below. Intermediate source markers remain map features unless selected as strategic service stops. All 70 shortlisted projects are now authored as strategic construction prospects; the separate construction admission checks cover their game geometry and regional costs. Source gaps remain visible and do not imply arbitrary missing intercity links. Save v4 preserves historical v2/v3 accounts.
+
 Admit a starting HSR corridor only with a named line, section geometry, and dated evidence of qualifying commercial passenger service at the scenario cutoff.
 
 **A starting corridor must join two cities in the game catalog.**
@@ -878,7 +920,7 @@ CI verifies native builds, optimized browser builds, focused and full automated 
 | 5. Regional campaign | Several starting offers, legacy-line auctions, grants, upgraded assets, campaign objectives, restructuring, extended contextual guidance | Independent regional strategies can finish; acquisition preserves access and its ledger reconciles; guidance covers different starting paths |
 | 6. Worldwide release | Qualified existing HSR inventory and six-region city/corridor catalog, concessions, disconnected regional networks, complete platform delivery, and Simplified Chinese localization | Region viability, multiplayer stress workload, compatible saves, cross-target checkpoints, and Simplified Chinese localization checks pass |
 
-The [milestone 2 implementation and evidence](validation/MILESTONE_2.md) cover the limited first-business feature scope: the East Asia starter service, standalone construction and station delivery, a named train family, explainable quotes, financing, direct-service revenue, contextual guidance and continuation. The actual Go/WASM business workflows and focused Go/native-widget checks pass. The rebuilt macOS app was visually inspected in isolation; native automated input did not reliably activate controls, so native interaction, physical-device and native-accessibility qualification remain open. The [first-business notes](validation/FIRST_BUSINESS.md) document controls and scenario assumptions; [milestone 1 notes](validation/MILESTONE_1.md) retain historical evidence. Through-running, transfers and the network game remain milestone 3.
+The [milestone 2 implementation and evidence](validation/MILESTONE_2.md) cover the limited first-business feature scope: the East Asia starter service, standalone construction and station delivery, a named train family, explainable quotes, financing, direct-service revenue, contextual guidance and continuation. The actual Go/WASM business workflows and focused Go/native-widget checks pass. The rebuilt macOS app was visually inspected in isolation; native automated input did not reliably activate controls, so native interaction, physical-device and native-accessibility qualification remain open. The [first-business notes](validation/FIRST_BUSINESS.md) document controls and scenario assumptions; [milestone 1 notes](validation/MILESTONE_1.md) retain historical evidence. Milestone 3 now implements the bounded East Asia network game: through-running (including Tokyo–Nagoya–Osaka), shared track/station capacity, finite OD markets, transfers, competing modes, company-wide forecasts and the full representative operating day. [Implementation and exit evidence](validation/MILESTONE_3.md) record the balance assumptions, version-2 save upgrade and remaining platform qualification. Shared-world competition remains milestone 4.
 
 Deliver breadth at working depth before expanding data or adding crises. Model company identity, ownership, and shared markets from milestone 1, even while there is only one player. Milestone 2 may be a deliberately limited development slice; milestone 6 is the scope promised by the product's worldwide title. Multiplayer is implemented after the core loop is playable, while its domain boundaries are established from the beginning. Detailed implementation plans follow review of this specification.
 
@@ -916,3 +958,97 @@ Africa2ice was inspected at local clean `main` commit `a96a84572e4f86e8c0f410936
 - Canonical checkpoints (`internal/verification/checkpoint.go`) and measured performance record (`docs/PERFORMANCE.md`).
 
 The reference supports the architecture choices described here. Its performance measurements, game balance, and historical-geography model do not establish corresponding results for a rail game.
+
+### Implemented public-network repair
+
+The playable source graph now uses ordered OSM node IDs before simplifying map
+geometry. Conventional connectors in the reviewed Japan/France/Britain/Italy/
+Germany/US regions restore continuous railway paths, with slower strategic timing
+and connector kilometres disclosed under service Analysis. The seven audited
+connections can carry passengers; 57 source proximity sites have connected source components and 35
+remain unverified. There are 300 existing corridors, 74 construction prospects,
+291 cities and 3,937 service patterns (including closed future through-services). Existing plans, published gameplay
+lengths/times and fleets stay compatible through the v8 construction cutover, except the deliberately withdrawn conventional Moroccan services.
+Detailed provenance, exact station-anchor limits and reproduction commands are in
+[NETWORK_TOPOLOGY.md](validation/NETWORK_TOPOLOGY.md). This does not add teleport
+interchanges or claim that generated patterns are current operator timetables.
+
+
+The operating-network manifest now requires the full 14-stop Washington–Boston
+NEC chain, Tashkent–Samarkand–Bukhara–Urgench–Khiva and the
+Samarkand–Qarshi–Shahrisabz branch. German ICE hubs, Vienna, Istanbul, Moscow,
+Lisbon–Porto, Al Boraq and corrected Kunming/Kaifeng/Xuchang HSR anchors are also
+required. Compiler gates check entire networks and explicit ordered services,
+not just neighboring endpoints. New catchment hubs have authored demand budgets;
+they are not new population estimates. Tests operate trains, settle passengers,
+reconcile money, reload saves and deliberately remove links to prove the gates.
+No metropolitan teleportation or island-to-mainland rail shortcut is introduced.
+
+
+### Implemented worldwide construction catalog
+
+All 74 [launch pairs](LAUNCH_CORRIDORS.md) are selectable as dotted prospects and
+through the bounded complete-catalog picker. Retain only two nearby quick choices
+in the ordinary plan; do not create a 74-button sidebar. New routes use authored
+terrain quantities, named crossing envelopes and the regional cost ledger.
+Cross-border quantities are assigned by the route's geographic country
+intersections, rather than choosing the cheaper endpoint's rate. New game timings
+use a 250 km/h strategic moving average plus terminal allowance; Lisbon–Porto uses
+the project's 75-minute target. Opening durations remain authored game months.
+
+New construction has independent city endpoints and may form a standalone
+component. The future service catalog connects constructed chains and inherited
+railway where all sections are available. Construction history and reports remain
+separate: a preview or future pattern does not open track, collect revenue or add
+stations before the project is completed. Started projects leave both the picker
+and dotted selectable layer.
+
+Starting dedicated HSR in Morocco is Tangier–Kenitra only. The conventional
+Rabat/Casablanca continuation is excluded as a playable public HSR asset, while
+new Kenitra–Casablanca and Casablanca–Marrakech are construction prospects.
+Existing Lisbon–Porto is retained as upgraded conventional railway; its distinct
+new dedicated-HSR project has independent capacity and a faster game journey.
+The version-8 development save archives the exact v7 catalog for past reports,
+retires plans/fleet for withdrawn Moroccan services, and keeps unrelated company
+state. [Construction validation](validation/LAUNCH_PROSPECTS.md) records the limits.
+
+
+### Implemented regional additions and repair
+
+Houston–Austin is prospect 71: a 257 km authored alignment, 36-month construction
+period, North America cost profile and river/floodplain work allowances. It enables
+a separate Houston–Austin–San Antonio through-service after both sections open.
+Existing accepted service IDs retain their exact section/stop paths, including
+Texas services via Dallas, so a new prospect cannot redirect an operating company
+over unbuilt track.
+
+Taipei is restored as a 7M seed metro, anchored at Taipei HSR station, with a
+required Taipei–Taichung–Tainan–Kaohsiung through-service and visible station marker.
+Four reviewed station complexes aggregate nine explicitly named existing HSR
+platform ways through at most 100 m station adapters. General rail crossings
+remain unjoined unless they share source node IDs.
+
+The Daegu–Ulsan route uses eight pinned Gyeongju triangular-connector/crossover
+ways instead of the 49 km Yeongcheon out-and-back. The Ulsan terminal is corrected from Bugulsan to KTX/Tongdosa with reviewed local
+platform aggregation. Source drawings and the three Ulsan operating distances/
+timings are corrected prospectively; unrelated inputs and past accounts remain
+compatible. The
+v9 regional demand cutover preserves earlier accounts under the exact v8 catalog.
+See [regional verification](validation/REGIONAL_NETWORK.md) for scope and limits.
+
+
+### Network bridge additions
+
+Projects 72–74 add Tsuruga–Maibara, Valencia–Camp de Tarragona and Porto–Vigo.
+The Mediterranean service continues over existing Tarragona–Barcelona HSR;
+construction charges only the missing/new dedicated works south of that junction.
+Maibara, Camp de Tarragona and Figueres are usable called markets. Existing
+Turin–Milan and Perpignan–Figueres–Barcelona are starting public infrastructure,
+with ordered services and station markers, never duplicate construction offers.
+Through-service templates reuse public feeders and remain closed until every
+required construction section opens. The Maibara route is a historical alternative,
+not the approved Hokuriku extension. Common game rolling stock abstracts
+interoperability; regional terrain costs and durations remain game estimates.
+See [project scopes](LAUNCH_CORRIDORS.md#additional-network-connectors) and
+[validation](validation/NETWORK_BRIDGES.md). The v10 connector cutover archives the
+exact v9 catalog and preserves existing plans, asset contracts and past accounts.

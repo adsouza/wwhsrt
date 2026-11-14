@@ -4,8 +4,11 @@ package ui
 import (
 	_ "embed"
 	"encoding/json"
+	"math"
+	"sort"
 	"strconv"
 	"strings"
+	"wwhsrt/assets"
 	"wwhsrt/pkg/gameapi"
 )
 
@@ -22,6 +25,18 @@ var catalogs = func() map[string]map[string]string {
 			panic(err)
 		}
 		result[locale] = c
+	}
+	var source struct{ Cities []gameapi.City }
+	if json.Unmarshal(assets.PublicNetwork, &source) == nil {
+		for _, city := range source.Cities {
+			for _, locale := range []string{"en", "zh-Hans"} {
+				if result[locale][string(city.ID)] == "" {
+					name := city.Name
+					name = strings.NewReplacer("Ł", "L", "ł", "l", "š", "s", "ą", "a", "ł", "l", "ś", "s", "ę", "e", "ź", "z", "ż", "z", "ğ", "g", "ş", "s", "İ", "I", "ı", "i", "қ", "к", "ө", "о").Replace(name)
+					result[locale][string(city.ID)] = name
+				}
+			}
+		}
 	}
 	return result
 }()
@@ -55,60 +70,99 @@ func Matches(c gameapi.City, query string) bool {
 }
 
 type State struct {
-	Portrait        bool           `json:"portrait"`
-	Locale          string         `json:"locale"`
-	Selected        gameapi.CityID `json:"selected"`
-	View            string         `json:"view"`
-	Query           string         `json:"query"`
-	DraftName       string         `json:"draft_name"`
-	HintDismissed   bool           `json:"hint_dismissed"`
-	Motion          bool           `json:"motion"`
-	FromCity        gameapi.CityID `json:"from_city"`
-	ToCity          gameapi.CityID `json:"to_city"`
-	Choosing        string         `json:"choosing"`
-	AlignmentID     string         `json:"alignment_id"`
-	ServiceCorridor string         `json:"service_corridor"`
-	Frequency       int            `json:"frequency"`
-	Fare            gameapi.Money  `json:"fare"`
-	Expanded        bool           `json:"expanded"`
-	LoanAmount      string         `json:"loan_amount"`
-	HideTerrain     bool           `json:"hide_terrain"`
-	Appearance      string         `json:"appearance"`
-	Dark            bool           `json:"dark"`
-	FleetDetails    bool           `json:"fleet_details"`
+	SourceStation string          `json:"source_station"`
+	ServiceQuery  string          `json:"service_query"`
+	Region        string          `json:"region"`
+	PanelWidth    int             `json:"panel_width"`
+	CommandDock   string          `json:"command_dock"`
+	ServicePane   string          `json:"service_pane"`
+	CompanyPane   string          `json:"company_pane"`
+	BuildPane     string          `json:"build_pane"`
+	ReportPane    string          `json:"report_pane"`
+	Disclosures   map[string]bool `json:"disclosures"`
+	ReviewMap     bool            `json:"review_map"`
+
+	Portrait           bool           `json:"portrait"`
+	Locale             string         `json:"locale"`
+	Selected           gameapi.CityID `json:"selected"`
+	View               string         `json:"view"`
+	Query              string         `json:"query"`
+	DraftName          string         `json:"draft_name"`
+	HintDismissed      bool           `json:"hint_dismissed"`
+	Help               HelpState      `json:"help"`
+	Motion             bool           `json:"motion"`
+	FromCity           gameapi.CityID `json:"from_city"`
+	ToCity             gameapi.CityID `json:"to_city"`
+	Choosing           string         `json:"choosing"`
+	AlignmentID        string         `json:"alignment_id"`
+	ServiceMapSections []string       `json:"service_map_sections,omitempty"`
+	ServiceCorridor    string         `json:"service_corridor"`
+	Frequency          int            `json:"frequency"`
+	Fare               gameapi.Money  `json:"fare"`
+	Expanded           bool           `json:"expanded"`
+	LoanAmount         string         `json:"loan_amount"`
+	HideTerrain        bool           `json:"hide_terrain"`
+	Appearance         string         `json:"appearance"`
+	Dark               bool           `json:"dark"`
+	FleetDetails       bool           `json:"fleet_details"`
+	ReplaceServiceID   string         `json:"replace_service_id"`
+	NetworkDetails     bool           `json:"network_details"`
+	Watching           bool           `json:"watching"`
+	ReplayPlaying      bool           `json:"replay_playing"`
+	ReplayMinute       int            `json:"replay_minute"`
+	SelectedTrain      string         `json:"selected_train"`
+	MarketFrom         gameapi.CityID `json:"market_from"`
+	MarketTo           gameapi.CityID `json:"market_to"`
+	MarketClass        string         `json:"market_class"`
 }
 
-// NewGameState clears company-specific drafts and onboarding while retaining
-// device presentation preferences. It runs only after the new save commits.
+// NewGameState clears company-specific drafts and completed actions, retaining
+// device preferences and explicitly dismissed learning concepts. It runs only after the new save commits.
 func NewGameState(s State, f gameapi.Frame) State {
-	next := State{Locale: s.Locale, Portrait: s.Portrait, Motion: s.Motion, HideTerrain: s.HideTerrain, Appearance: s.Appearance, Dark: s.Dark,
+	next := State{Region: s.Region, PanelWidth: s.PanelWidth, CommandDock: s.CommandDock, Locale: s.Locale, Portrait: s.Portrait, Motion: s.Motion, HideTerrain: s.HideTerrain, Appearance: s.Appearance, Dark: s.Dark,
 		View: "map", DraftName: f.Player.Name, FromCity: "tsuruga", ToCity: "osaka", Choosing: "from", LoanAmount: "1000000.00"}
 	DraftService(&next, f, "tokyo-nagoya")
+	if s.Help.Version > 0 {
+		next.Help = cloneHelp(s.Help)
+		next.Help.Open = false
+		next.Help.Expanded = ""
+		next.Help.Topic = ""
+		next.Help.Query = ""
+		next.Help.ReturnAnchor = ""
+		next.Help.ReturnExpanded = false
+		next.Help.ReturnScroll = 0
+		next.Help.Revision++
+		for id, p := range next.Help.Concepts {
+			p.Completed = false
+			next.Help.Concepts[id] = p
+		}
+	}
 	return next
 }
 
 func Select(s *State, id gameapi.CityID) {
 	s.Selected = id
-	if s.View == "build" {
-		if s.Choosing == "from" {
-			s.FromCity = id
-			s.Choosing = "to"
-		} else {
-			s.ToCity = id
-			s.Choosing = "from"
-		}
-		s.AlignmentID = ""
-	}
+	s.SourceStation = ""
+
 }
 func Pair(f gameapi.Frame, a, b gameapi.CityID) (gameapi.Corridor, bool) {
+	var public gameapi.Corridor
 	for _, c := range f.Corridors {
 		if c.FromCity == a && c.ToCity == b || c.FromCity == b && c.ToCity == a {
-			return c, true
+			if !c.Existing {
+				return c, true
+			}
+			public = c
 		}
 	}
-	return gameapi.Corridor{}, false
+	return public, public.ID != ""
 }
 func Open(f gameapi.Frame, id string) bool {
+	for _, r := range f.Routes {
+		if r.ID == id {
+			return r.Open
+		}
+	}
 	for _, c := range f.Corridors {
 		if c.ID == id && c.Existing {
 			return true
@@ -137,18 +191,59 @@ func ConstructionOpportunities(f gameapi.Frame) []gameapi.Corridor {
 	}
 	return result
 }
+
+// SelectProspect changes only the local construction draft. Availability is
+// checked against the current frame, so stale list/map choices cannot resurrect
+// public or already committed lines.
+func SelectProspect(s *State, f gameapi.Frame, id string) bool {
+	for _, co := range ConstructionOpportunities(f) {
+		if co.ID != id || len(co.Alignments) == 0 {
+			continue
+		}
+		s.FromCity, s.ToCity = co.FromCity, co.ToCity
+		s.AlignmentID = co.Alignments[0].ID
+		s.Selected, s.SourceStation = "", ""
+		s.View, s.BuildPane = "build", "plan"
+		return true
+	}
+	return false
+}
+
 func DraftService(s *State, f gameapi.Frame, id string) {
+	if r, ok := ServiceRoute(f, id); !ok || !routeUsesSections(r, s.ServiceMapSections) {
+		s.ServiceMapSections = nil
+	}
 	s.ServiceCorridor = id
+	s.ReplaceServiceID = ""
 	s.Frequency = 4
 	s.Fare = 9000
+	if route, ok := ServiceRoute(f, id); ok && len(route.Sections) > 1 {
+		s.Fare = gameapi.Money(min(30000, max(1000, route.KM*25)))
+	}
+	if route, ok := ServiceRoute(f, id); ok && route.SuggestedFrequency > 0 {
+		s.Frequency = route.SuggestedFrequency
+		s.Fare = route.SuggestedFare
+	}
+	if id == "tokyo-osaka" {
+		for _, p := range f.Services {
+			if p.CorridorID == "tokyo-nagoya" && p.Frequency > 0 {
+				s.ReplaceServiceID = p.CorridorID
+				s.Frequency = p.Frequency
+			}
+		}
+	}
 	for _, p := range f.Services {
 		if p.CorridorID == id {
+			s.ReplaceServiceID = ""
 			s.Frequency = p.Frequency
 			s.Fare = p.Fare
 		}
 	}
 }
 func ServiceDirty(s State, f gameapi.Frame) bool {
+	if s.ReplaceServiceID != "" {
+		return true
+	}
 	for _, p := range f.Services {
 		if p.CorridorID == s.ServiceCorridor {
 			return p.Frequency != s.Frequency || p.Fare != s.Fare
@@ -269,4 +364,31 @@ func FundingBreakdown(f gameapi.Frame, s State) (ConstructionFunding, bool) {
 		}
 	}
 	return ConstructionFunding{}, false
+}
+
+// Keep the primary plan compact while the bounded dropdown and dotted map
+// expose the complete catalog. Sort quick choices near the selected project.
+func QuickProspects(f gameapi.Frame, s State) []gameapi.Corridor {
+	rows := ConstructionOpportunities(f)
+	var origin gameapi.City
+	found := false
+	for _, c := range f.Cities {
+		if c.ID == s.FromCity {
+			origin = c
+			found = true
+			break
+		}
+	}
+	if found {
+		city := map[gameapi.CityID]gameapi.City{}
+		for _, c := range f.Cities {
+			city[c.ID] = c
+		}
+		score := func(co gameapi.Corridor) float64 {
+			c := city[co.FromCity]
+			return math.Abs(c.Lat-origin.Lat) + math.Abs(c.Lon-origin.Lon)*math.Cos(origin.Lat*math.Pi/180)
+		}
+		sort.SliceStable(rows, func(i, j int) bool { return score(rows[i]) < score(rows[j]) })
+	}
+	return rows[:min(2, len(rows))]
 }

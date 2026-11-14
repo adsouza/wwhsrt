@@ -87,8 +87,8 @@ func TestM2StationDeliveryAndIndependentOperation(t *testing.T) {
 	}
 	raw, _ := g.Export()
 	var envelope map[string]any
-	if json.Unmarshal(raw, &envelope) != nil || envelope["version"] != float64(2) {
-		t.Fatal("read-only projections changed save format")
+	if json.Unmarshal(raw, &envelope) != nil || envelope["version"] != float64(3) {
+		t.Fatal("network development save version is wrong")
 	}
 }
 
@@ -116,8 +116,8 @@ func TestM2EstimatesReconcileAndProjectionsAreIsolated(t *testing.T) {
 		t.Fatal("facilities/family/estimate projection aliases world")
 	}
 	forecast, err := g.Forecast(gameapi.ForecastRequest{CorridorID: "tokyo-nagoya", Frequency: 6, Fare: 9000})
-	if err != nil || forecast.Capacity != 148800 || forecast.Passengers != 127844 || forecast.FleetNeeded != 2 {
-		t.Fatal("train-family metadata changed starter economics", forecast, err)
+	if err != nil || forecast.Capacity != 148800 || forecast.Passengers != 79348 || forecast.FleetNeeded != 2 {
+		t.Fatal("network starter regression", forecast, err)
 	}
 }
 

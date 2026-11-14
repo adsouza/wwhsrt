@@ -6,10 +6,13 @@ type CompanyID string
 type Money int64 // Game USD cents.
 
 type City struct {
-	ID   CityID  `json:"id"`
-	Name string  `json:"name"`
-	Lat  float64 `json:"lat"`
-	Lon  float64 `json:"lon"`
+	ID          CityID  `json:"id"`
+	Name        string  `json:"name"`
+	Lat         float64 `json:"lat"`
+	Lon         float64 `json:"lon"`
+	StationLat  float64 `json:"station_lat,omitempty"`
+	StationLon  float64 `json:"station_lon,omitempty"`
+	StationName string  `json:"station_name,omitempty"`
 }
 type Company struct {
 	ID   CompanyID `json:"id"`
@@ -41,30 +44,47 @@ type Report struct {
 	Services     []ServiceRun `json:"services"`
 }
 type ServiceRun struct {
-	CorridorID  string `json:"corridor_id"`
-	AlignmentID string `json:"alignment_id"`
-	Frequency   int    `json:"frequency"`
-	Passengers  int    `json:"passengers"`
-	Revenue     Money  `json:"revenue"`
-	Fare        Money  `json:"fare"`
+	RequestedFrequency int    `json:"requested_frequency,omitempty"`
+	CorridorID         string `json:"corridor_id"`
+	AlignmentID        string `json:"alignment_id"`
+	Frequency          int    `json:"frequency"`
+	Passengers         int    `json:"passengers"`
+	Revenue            Money  `json:"revenue"`
+	Fare               Money  `json:"fare"`
 }
 type GeoPoint struct {
 	Lat float64 `json:"lat"`
 	Lon float64 `json:"lon"`
 }
 type Alignment struct {
-	ID        string               `json:"id"`
-	KM        int                  `json:"km"`
-	Minutes   int                  `json:"minutes"`
-	Months    int                  `json:"months"`
-	SurfaceKM int                  `json:"surface_km"`
-	HillKM    int                  `json:"hill_km"`
-	ViaductKM int                  `json:"viaduct_km"`
-	TunnelKM  int                  `json:"tunnel_km"`
-	Path      []GeoPoint           `json:"path"`
-	Cost      Money                `json:"cost"`
-	Grant     Money                `json:"grant"`
-	Estimate  ConstructionEstimate `json:"estimate"`
+	CostIntervals []ConstructionInterval `json:"cost_intervals,omitempty"`
+	ConnectorKM   int                    `json:"connector_km,omitempty"`
+	ID            string                 `json:"id"`
+	KM            int                    `json:"km"`
+	Minutes       int                    `json:"minutes"`
+	Months        int                    `json:"months"`
+	SurfaceKM     int                    `json:"surface_km"`
+	HillKM        int                    `json:"hill_km"`
+	ViaductKM     int                    `json:"viaduct_km"`
+	TunnelKM      int                    `json:"tunnel_km"`
+	Path          []GeoPoint             `json:"path"`
+	Cost          Money                  `json:"cost"`
+	Grant         Money                  `json:"grant"`
+	Estimate      ConstructionEstimate   `json:"estimate"`
+}
+
+// ConstructionInterval assigns physical engineering quantities to one regional
+// cost profile. All amounts use game USD cents; no endpoint-wide cost shortcut.
+type ConstructionInterval struct {
+	Country           string `json:"country"`
+	ProfileID         string `json:"profile_id"`
+	BasePerKM         Money  `json:"base_per_km"`
+	SurfaceKM         int    `json:"surface_km"`
+	HillKM            int    `json:"hill_km"`
+	ViaductKM         int    `json:"viaduct_km"`
+	TunnelKM          int    `json:"tunnel_km"`
+	HillFactorPercent int    `json:"hill_factor_percent"`
+	TunnelFactor      int    `json:"tunnel_factor"`
 }
 type ConstructionEstimate struct {
 	Surface     Money `json:"surface"`
@@ -96,13 +116,18 @@ type TrainFamily struct {
 	RoundTripTurnaround int    `json:"round_trip_turnaround"`
 }
 type Corridor struct {
-	ID          string      `json:"id"`
-	FromCity    CityID      `json:"from_city"`
-	ToCity      CityID      `json:"to_city"`
-	Existing    bool        `json:"existing"`
-	DailyMarket int         `json:"daily_market"`
-	OutsideCost Money       `json:"outside_cost"`
-	Alignments  []Alignment `json:"alignments"`
+	ParallelTo         []string    `json:"parallel_to,omitempty"`
+	ConstructionKind   string      `json:"construction_kind,omitempty"`
+	ConstructionNote   string      `json:"construction_note,omitempty"`
+	InfrastructureKind string      `json:"infrastructure_kind,omitempty"`
+	SharedSections     []string    `json:"shared_sections,omitempty"`
+	ID                 string      `json:"id"`
+	FromCity           CityID      `json:"from_city"`
+	ToCity             CityID      `json:"to_city"`
+	Existing           bool        `json:"existing"`
+	DailyMarket        int         `json:"daily_market"`
+	OutsideCost        Money       `json:"outside_cost"`
+	Alignments         []Alignment `json:"alignments"`
 }
 type Project struct {
 	CorridorID  string    `json:"corridor_id"`
@@ -135,51 +160,76 @@ type CashFlows struct {
 	Repaid       Money `json:"repaid"`
 }
 type ForecastRequest struct {
-	CorridorID  string `json:"corridor_id"`
-	AlignmentID string `json:"alignment_id"`
-	Frequency   int    `json:"frequency"`
-	Fare        Money  `json:"fare"`
+	ReplaceServiceID string `json:"replace_service_id"`
+	CorridorID       string `json:"corridor_id"`
+	AlignmentID      string `json:"alignment_id"`
+	Frequency        int    `json:"frequency"`
+	Fare             Money  `json:"fare"`
 }
 type Forecast struct {
-	Passengers     int   `json:"passengers"`
-	Capacity       int   `json:"capacity"`
-	FleetNeeded    int   `json:"fleet_needed"`
-	FleetAvailable int   `json:"fleet_available"`
-	Revenue        Money `json:"revenue"`
-	Costs          Money `json:"costs"`
-	Contribution   Money `json:"contribution"`
-	Open           bool  `json:"open"`
+	RunningCosts             Money `json:"running_costs"`
+	AccessCosts              Money `json:"access_costs"`
+	HandlingCosts            Money `json:"handling_costs"`
+	LeaseCosts               Money `json:"lease_costs"`
+	MaintenanceCosts         Money `json:"maintenance_costs"`
+	BreakEvenAvailable       bool  `json:"break_even_available"`
+	BreakEvenUsesObservedMix bool  `json:"break_even_uses_observed_mix"`
+	BreakEvenPassengers      int   `json:"break_even_passengers"`
+
+	CapacityUsage      []CapacityUsage `json:"capacity_usage"`
+	AdditionalLeases   int             `json:"additional_leases"`
+	Passengers         int             `json:"passengers"`
+	Capacity           int             `json:"capacity"`
+	FleetNeeded        int             `json:"fleet_needed"`
+	FleetAvailable     int             `json:"fleet_available"`
+	Revenue            Money           `json:"revenue"`
+	Costs              Money           `json:"costs"`
+	Contribution       Money           `json:"contribution"`
+	Open               bool            `json:"open"`
+	DeliveredFrequency int             `json:"delivered_frequency"`
+	CompanyPassengers  int             `json:"company_passengers"`
+	CompanyRevenue     Money           `json:"company_revenue"`
+	CompanyChange      Money           `json:"company_change"`
+	FeederRevenue      Money           `json:"feeder_revenue"`
+	KM                 int             `json:"km"`
+	Minutes            int             `json:"minutes"`
 }
 type Frame struct {
-	WorldID        string       `json:"world_id"`
-	Revision       uint64       `json:"revision"`
-	Month          Month        `json:"month"`
-	MonthsResolved int          `json:"months_resolved"`
-	CampaignMonths int          `json:"campaign_months"`
-	Player         Company      `json:"player"`
-	Cities         []City       `json:"cities"`
-	Stations       []Station    `json:"stations"`
-	TrainFamily    TrainFamily  `json:"train_family"`
-	Reports        []Report     `json:"reports"`
-	Checkpoint     string       `json:"checkpoint"`
-	Corridors      []Corridor   `json:"corridors"`
-	Projects       []Project    `json:"projects"`
-	Services       []Service    `json:"services"`
-	Fleet          []FleetLease `json:"fleet"`
-	IdleLines      []IdleLine   `json:"idle_lines"`
-	Debt           Money        `json:"debt"`
-	DebtLimit      Money        `json:"debt_limit"`
-	Pending        CashFlows    `json:"pending"`
+	PublicNetwork  bool          `json:"public_network,omitempty"`
+	Routes         []Route       `json:"routes"`
+	Network        NetworkReport `json:"network"`
+	Day            []DayTrip     `json:"day"`
+	WorldID        string        `json:"world_id"`
+	Revision       uint64        `json:"revision"`
+	Month          Month         `json:"month"`
+	MonthsResolved int           `json:"months_resolved"`
+	CampaignMonths int           `json:"campaign_months"`
+	Player         Company       `json:"player"`
+	Cities         []City        `json:"cities"`
+	Stations       []Station     `json:"stations"`
+	TrainFamily    TrainFamily   `json:"train_family"`
+	Reports        []Report      `json:"reports"`
+	Checkpoint     string        `json:"checkpoint"`
+	Corridors      []Corridor    `json:"corridors"`
+	Projects       []Project     `json:"projects"`
+	Services       []Service     `json:"services"`
+	Fleet          []FleetLease  `json:"fleet"`
+	IdleLines      []IdleLine    `json:"idle_lines"`
+	Debt           Money         `json:"debt"`
+	DebtLimit      Money         `json:"debt_limit"`
+	Pending        CashFlows     `json:"pending"`
 }
 type Command struct {
-	Kind        string `json:"kind"`
-	Revision    uint64 `json:"revision"`
-	Name        string `json:"name"`
-	CorridorID  string `json:"corridor_id"`
-	AlignmentID string `json:"alignment_id"`
-	Frequency   int    `json:"frequency"`
-	Fare        Money  `json:"fare"`
-	Amount      Money  `json:"amount"`
+	ReplaceServiceID string `json:"replace_service_id"`
+	LeaseCount       int    `json:"lease_count"`
+	Kind             string `json:"kind"`
+	Revision         uint64 `json:"revision"`
+	Name             string `json:"name"`
+	CorridorID       string `json:"corridor_id"`
+	AlignmentID      string `json:"alignment_id"`
+	Frequency        int    `json:"frequency"`
+	Fare             Money  `json:"fare"`
+	Amount           Money  `json:"amount"`
 }
 
 const (
@@ -193,9 +243,13 @@ const (
 	TakeLoan      = "take_loan"
 	RepayLoan     = "repay_loan"
 	AdvanceYear   = "advance_year"
+	ExtendService = "extend_service"
 )
 
-type Error struct{ Code string }
+type Error struct {
+	Code          string
+	CapacityUsage []CapacityUsage
+}
 
 func (e *Error) Error() string { return e.Code }
 

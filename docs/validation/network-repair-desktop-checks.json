@@ -1,0 +1,19 @@
+{
+  "date": "2026-11-13T03:39:17.991Z",
+  "browser": "153.0.8010.12",
+  "wasm_sha256": "7ae9646de6ed3dc89604a2d779e689258e84db470341198da560642cb9690acb",
+  "catalog_sha256": "9fcd93c3356bd5545896684e98e102cf7d22144884bf984abd80998cffe942f5",
+  "checks": [
+    "All seven expected city pairs have an operational direct/through service pattern in the actual browser frame",
+    "The repaired Sendai–Shin-Hakodate-Hokuto path is visibly highlighted, can lease/apply a service and earns real monthly passenger revenue; native/WASM checkpoints and detailed reports agree"
+  ],
+  "limitations": [
+    "Synthetic browser input and emulated phone; native OS interaction and physical devices not qualified.",
+    "38 remaining proximity sites are unverified; selected metropolitan station anchors and published legacy game timings remain unchanged."
+  ],
+  "japan_highlight_samples": 154,
+  "checkpoint": "3e0d7f39eb1b65679954a509fbf4619dd53d56301192c8f8307551502a52d0c9",
+  "passed": true,
+  "phase": "desktop",
+  "peak_rss_mib": 1999
+}

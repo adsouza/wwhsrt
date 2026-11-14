@@ -1,8 +1,9 @@
 {
   "result": "passed",
+  "display_sha256": "d836fa894534a167f1e1c3b008c75237a3383fb0ffe982a6e0536eb4903750c1",
   "business_sha256": "4c08dd6376df93279f6d63be517f09d0c0d3bee21d025c9f8223ec855032780b",
   "mask_sha256": "d6cd55fc2601950b042222108e9c25d778fc251cd898f9d3b7ed6d6af741360b",
-  "drawn_coast_sha256": "f87605f4b75118aa6174bda395acebe1934eb260079755f329801736974d0e38",
+  "drawn_coast_sha256": "9778e134693ce21685068597135f93cd1870016d09eed59c904c9bbdb3cb92be",
   "routes": [
     {
       "corridor": "tokyo-nagoya",
@@ -55,6 +56,60 @@
       "existing": false,
       "vertices": 31,
       "drawn_geodesic_km": 272.97,
+      "scenario_rail_km": 300,
+      "errors": []
+    },
+    {
+      "corridor": "tokyo-nagoya",
+      "alignment": "tokaido-east",
+      "display": true,
+      "vertices": 92,
+      "drawn_geodesic_km": 341.06,
+      "scenario_rail_km": 366,
+      "errors": []
+    },
+    {
+      "corridor": "nagoya-osaka",
+      "alignment": "tokaido-west",
+      "display": true,
+      "vertices": 89,
+      "drawn_geodesic_km": 173.29,
+      "scenario_rail_km": 186,
+      "errors": []
+    },
+    {
+      "corridor": "tsuruga-osaka",
+      "alignment": "mountain",
+      "display": true,
+      "vertices": 29,
+      "drawn_geodesic_km": 134.32,
+      "scenario_rail_km": 205,
+      "errors": []
+    },
+    {
+      "corridor": "tsuruga-osaka",
+      "alignment": "valley",
+      "display": true,
+      "vertices": 37,
+      "drawn_geodesic_km": 148.75,
+      "scenario_rail_km": 260,
+      "errors": []
+    },
+    {
+      "corridor": "hokkaido-extension",
+      "alignment": "mountain",
+      "display": true,
+      "vertices": 15,
+      "drawn_geodesic_km": 208.63,
+      "scenario_rail_km": 212,
+      "errors": []
+    },
+    {
+      "corridor": "hokkaido-extension",
+      "alignment": "valley",
+      "display": true,
+      "vertices": 31,
+      "drawn_geodesic_km": 272.87,
       "scenario_rail_km": 300,
       "errors": []
     }

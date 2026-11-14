@@ -41,7 +41,7 @@ func TestNativeReportScrollEventsReachBothEnds(t *testing.T) {
 					mapW, mapH = size[0], max(180, size[1]/3)
 				}
 				g := &Game{Port: port, Frame: port.Snapshot(), Map: &render.Map{Font: font}, width: size[0], height: size[1],
-					Camera: mapview.Camera{Width: float64(mapW), Height: float64(mapH)}, State: ui.State{Locale: locale, View: "report"}}
+					Camera: mapview.Camera{Width: float64(mapW), Height: float64(mapH)}, State: ui.State{Locale: locale, View: "report", ReportPane: "accounts"}}
 				g.host.build(g)
 				h := &g.host
 				event.ExecuteDeferred()

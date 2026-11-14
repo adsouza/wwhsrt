@@ -1,0 +1,570 @@
+{
+  "id": "east-asia-network-v1",
+  "cities": [
+    {
+      "id": "shenyang",
+      "name": "Shenyang",
+      "lat": 41.8057,
+      "lon": 123.4315,
+      "daily_trips": 10000,
+      "attraction": 10000,
+      "road_region": "china"
+    },
+    {
+      "id": "beijing",
+      "name": "Beijing",
+      "lat": 39.9042,
+      "lon": 116.4074,
+      "daily_trips": 27000,
+      "attraction": 27000,
+      "road_region": "china"
+    },
+    {
+      "id": "shanghai",
+      "name": "Shanghai",
+      "lat": 31.2304,
+      "lon": 121.4737,
+      "daily_trips": 30000,
+      "attraction": 30000,
+      "road_region": "china"
+    },
+    {
+      "id": "chengdu",
+      "name": "Chengdu",
+      "lat": 30.5728,
+      "lon": 104.0668,
+      "daily_trips": 18000,
+      "attraction": 18000,
+      "road_region": "china"
+    },
+    {
+      "id": "hong_kong",
+      "name": "Hong Kong",
+      "lat": 22.3193,
+      "lon": 114.1694,
+      "daily_trips": 16000,
+      "attraction": 16000,
+      "road_region": "hong_kong"
+    },
+    {
+      "id": "seoul",
+      "name": "Seoul",
+      "lat": 37.5665,
+      "lon": 126.978,
+      "daily_trips": 25000,
+      "attraction": 25000,
+      "road_region": "korea"
+    },
+    {
+      "id": "tokyo",
+      "name": "Tokyo",
+      "lat": 35.685,
+      "lon": 139.7514,
+      "daily_trips": 42000,
+      "attraction": 42000,
+      "road_region": "honshu"
+    },
+    {
+      "id": "nagoya",
+      "name": "Nagoya",
+      "lat": 35.1815,
+      "lon": 136.9066,
+      "daily_trips": 15000,
+      "attraction": 15000,
+      "road_region": "honshu"
+    },
+    {
+      "id": "osaka",
+      "name": "Osaka",
+      "lat": 34.6937,
+      "lon": 135.5023,
+      "daily_trips": 27000,
+      "attraction": 27000,
+      "road_region": "honshu"
+    },
+    {
+      "id": "tsuruga",
+      "name": "Tsuruga",
+      "lat": 35.645,
+      "lon": 136.076,
+      "daily_trips": 6000,
+      "attraction": 6000,
+      "road_region": "honshu"
+    },
+    {
+      "id": "shin_hakodate_hokuto",
+      "name": "Shin-Hakodate-Hokuto",
+      "lat": 41.904,
+      "lon": 140.648,
+      "daily_trips": 5000,
+      "attraction": 5000,
+      "road_region": "hokkaido"
+    },
+    {
+      "id": "sapporo",
+      "name": "Sapporo",
+      "lat": 43.0687,
+      "lon": 141.3507,
+      "daily_trips": 14000,
+      "attraction": 14000,
+      "road_region": "hokkaido"
+    }
+  ],
+  "routes": [
+    {
+      "id": "tokyo-osaka",
+      "sections": [
+        "tokyo-nagoya",
+        "nagoya-osaka"
+      ],
+      "cities": [
+        "tokyo",
+        "nagoya",
+        "osaka"
+      ],
+      "stops": [
+        "tokyo",
+        "nagoya",
+        "osaka"
+      ]
+    },
+    {
+      "id": "tokyo-osaka-express",
+      "sections": [
+        "tokyo-nagoya",
+        "nagoya-osaka"
+      ],
+      "cities": [
+        "tokyo",
+        "nagoya",
+        "osaka"
+      ],
+      "stops": [
+        "tokyo",
+        "osaka"
+      ]
+    },
+    {
+      "id": "nagoya-tsuruga",
+      "sections": [
+        "nagoya-osaka",
+        "tsuruga-osaka"
+      ],
+      "cities": [
+        "nagoya",
+        "osaka",
+        "tsuruga"
+      ],
+      "stops": [
+        "nagoya",
+        "osaka",
+        "tsuruga"
+      ]
+    },
+    {
+      "id": "nagoya-tsuruga-express",
+      "sections": [
+        "nagoya-osaka",
+        "tsuruga-osaka"
+      ],
+      "cities": [
+        "nagoya",
+        "osaka",
+        "tsuruga"
+      ],
+      "stops": [
+        "nagoya",
+        "tsuruga"
+      ]
+    },
+    {
+      "id": "tokyo-tsuruga",
+      "sections": [
+        "tokyo-nagoya",
+        "nagoya-osaka",
+        "tsuruga-osaka"
+      ],
+      "cities": [
+        "tokyo",
+        "nagoya",
+        "osaka",
+        "tsuruga"
+      ],
+      "stops": [
+        "tokyo",
+        "nagoya",
+        "osaka",
+        "tsuruga"
+      ]
+    },
+    {
+      "id": "tokyo-tsuruga-express",
+      "sections": [
+        "tokyo-nagoya",
+        "nagoya-osaka",
+        "tsuruga-osaka"
+      ],
+      "cities": [
+        "tokyo",
+        "nagoya",
+        "osaka",
+        "tsuruga"
+      ],
+      "stops": [
+        "tokyo",
+        "tsuruga"
+      ]
+    }
+  ],
+  "conventional_pairs": [
+    [
+      "tokyo",
+      "nagoya"
+    ],
+    [
+      "nagoya",
+      "osaka"
+    ],
+    [
+      "tsuruga",
+      "osaka"
+    ]
+  ],
+  "public_paths": 16,
+  "private_paths": 12,
+  "station_calls": 64,
+  "dwell_minutes": 4,
+  "transfer_minutes": 20,
+  "distances": [
+    {
+      "from": "shenyang",
+      "to": "beijing",
+      "km": 627
+    },
+    {
+      "from": "shenyang",
+      "to": "shanghai",
+      "km": 1189
+    },
+    {
+      "from": "shenyang",
+      "to": "chengdu",
+      "km": 2132
+    },
+    {
+      "from": "shenyang",
+      "to": "hong_kong",
+      "km": 2332
+    },
+    {
+      "from": "shenyang",
+      "to": "seoul",
+      "km": 560
+    },
+    {
+      "from": "shenyang",
+      "to": "tokyo",
+      "km": 1567
+    },
+    {
+      "from": "shenyang",
+      "to": "nagoya",
+      "km": 1382
+    },
+    {
+      "from": "shenyang",
+      "to": "osaka",
+      "km": 1316
+    },
+    {
+      "from": "shenyang",
+      "to": "tsuruga",
+      "km": 1291
+    },
+    {
+      "from": "shenyang",
+      "to": "shin_hakodate_hokuto",
+      "km": 1424
+    },
+    {
+      "from": "shenyang",
+      "to": "sapporo",
+      "km": 1474
+    },
+    {
+      "from": "beijing",
+      "to": "shanghai",
+      "km": 1067
+    },
+    {
+      "from": "beijing",
+      "to": "chengdu",
+      "km": 1525
+    },
+    {
+      "from": "beijing",
+      "to": "hong_kong",
+      "km": 1967
+    },
+    {
+      "from": "beijing",
+      "to": "seoul",
+      "km": 952
+    },
+    {
+      "from": "beijing",
+      "to": "tokyo",
+      "km": 2098
+    },
+    {
+      "from": "beijing",
+      "to": "nagoya",
+      "km": 1877
+    },
+    {
+      "from": "beijing",
+      "to": "osaka",
+      "km": 1781
+    },
+    {
+      "from": "beijing",
+      "to": "tsuruga",
+      "km": 1788
+    },
+    {
+      "from": "beijing",
+      "to": "shin_hakodate_hokuto",
+      "km": 2042
+    },
+    {
+      "from": "beijing",
+      "to": "sapporo",
+      "km": 2099
+    },
+    {
+      "from": "shanghai",
+      "to": "chengdu",
+      "km": 1661
+    },
+    {
+      "from": "shanghai",
+      "to": "hong_kong",
+      "km": 1227
+    },
+    {
+      "from": "shanghai",
+      "to": "seoul",
+      "km": 866
+    },
+    {
+      "from": "shanghai",
+      "to": "tokyo",
+      "km": 1763
+    },
+    {
+      "from": "shanghai",
+      "to": "nagoya",
+      "km": 1500
+    },
+    {
+      "from": "shanghai",
+      "to": "osaka",
+      "km": 1363
+    },
+    {
+      "from": "shanghai",
+      "to": "tsuruga",
+      "km": 1439
+    },
+    {
+      "from": "shanghai",
+      "to": "shin_hakodate_hokuto",
+      "km": 2076
+    },
+    {
+      "from": "shanghai",
+      "to": "sapporo",
+      "km": 2190
+    },
+    {
+      "from": "chengdu",
+      "to": "hong_kong",
+      "km": 1360
+    },
+    {
+      "from": "chengdu",
+      "to": "seoul",
+      "km": 2242
+    },
+    {
+      "from": "chengdu",
+      "to": "tokyo",
+      "km": 3352
+    },
+    {
+      "from": "chengdu",
+      "to": "nagoya",
+      "km": 3095
+    },
+    {
+      "from": "chengdu",
+      "to": "osaka",
+      "km": 2967
+    },
+    {
+      "from": "chengdu",
+      "to": "tsuruga",
+      "km": 3020
+    },
+    {
+      "from": "chengdu",
+      "to": "shin_hakodate_hokuto",
+      "km": 3483
+    },
+    {
+      "from": "chengdu",
+      "to": "sapporo",
+      "km": 3562
+    },
+    {
+      "from": "hong_kong",
+      "to": "seoul",
+      "km": 2092
+    },
+    {
+      "from": "hong_kong",
+      "to": "tokyo",
+      "km": 2884
+    },
+    {
+      "from": "hong_kong",
+      "to": "nagoya",
+      "km": 2628
+    },
+    {
+      "from": "hong_kong",
+      "to": "osaka",
+      "km": 2489
+    },
+    {
+      "from": "hong_kong",
+      "to": "tsuruga",
+      "km": 2585
+    },
+    {
+      "from": "hong_kong",
+      "to": "shin_hakodate_hokuto",
+      "km": 3286
+    },
+    {
+      "from": "hong_kong",
+      "to": "sapporo",
+      "km": 3406
+    },
+    {
+      "from": "seoul",
+      "to": "tokyo",
+      "km": 1158
+    },
+    {
+      "from": "seoul",
+      "to": "nagoya",
+      "km": 927
+    },
+    {
+      "from": "seoul",
+      "to": "osaka",
+      "km": 829
+    },
+    {
+      "from": "seoul",
+      "to": "tsuruga",
+      "km": 839
+    },
+    {
+      "from": "seoul",
+      "to": "shin_hakodate_hokuto",
+      "km": 1263
+    },
+    {
+      "from": "seoul",
+      "to": "sapporo",
+      "km": 1361
+    },
+    {
+      "from": "tokyo",
+      "to": "nagoya",
+      "km": 264
+    },
+    {
+      "from": "tokyo",
+      "to": "osaka",
+      "km": 402
+    },
+    {
+      "from": "tokyo",
+      "to": "tsuruga",
+      "km": 332
+    },
+    {
+      "from": "tokyo",
+      "to": "shin_hakodate_hokuto",
+      "km": 696
+    },
+    {
+      "from": "tokyo",
+      "to": "sapporo",
+      "km": 832
+    },
+    {
+      "from": "nagoya",
+      "to": "osaka",
+      "km": 139
+    },
+    {
+      "from": "nagoya",
+      "to": "tsuruga",
+      "km": 91
+    },
+    {
+      "from": "nagoya",
+      "to": "shin_hakodate_hokuto",
+      "km": 815
+    },
+    {
+      "from": "nagoya",
+      "to": "sapporo",
+      "km": 957
+    },
+    {
+      "from": "osaka",
+      "to": "tsuruga",
+      "km": 118
+    },
+    {
+      "from": "osaka",
+      "to": "shin_hakodate_hokuto",
+      "km": 918
+    },
+    {
+      "from": "osaka",
+      "to": "sapporo",
+      "km": 1059
+    },
+    {
+      "from": "tsuruga",
+      "to": "shin_hakodate_hokuto",
+      "km": 801
+    },
+    {
+      "from": "tsuruga",
+      "to": "sapporo",
+      "km": 941
+    },
+    {
+      "from": "shin_hakodate_hokuto",
+      "to": "sapporo",
+      "km": 142
+    }
+  ]
+}

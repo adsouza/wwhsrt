@@ -1,0 +1,70 @@
+{
+  "date": "2026-11-12T16:22:44.700Z",
+  "browser": "153.0.8010.12",
+  "wasm_sha256": "9fa2148ae46ddba11aed552d0a2035bf7d9d5c4816648a02ab09383843e4d75d",
+  "ui_sha256": "7ce71462c1c8eedb04819133c3e7016c975e3be882fcde623e747b2ff16b8287",
+  "checks": [
+    "Review frames both idle built alignments, paints their actual map pixels in the warning colour and lists both names; the operating Tokyo–Nagoya line is not marked idle; review leaves checkpoint and durable bytes unchanged",
+    "Each named idle row selects and focuses its line; Chinese 320px review reveals the map and highlights both lines without horizontal overflow",
+    "Leasing alone retains both idle highlights; applying a running service removes exactly its row and highlight while the other idle line remains marked",
+    "Idle leased trains are named separately and use a dashed route highlight even while another service runs on the same public track; an idle through-service fleet highlights both sections"
+  ],
+  "limitations": [
+    "Phone layouts are emulated; native OS input and physical devices are not qualified."
+  ],
+  "initial_pixels": {
+    "tsuruga-osaka": {
+      "hits": 63,
+      "inside": 81
+    },
+    "hokkaido-extension": {
+      "hits": 116,
+      "inside": 126
+    },
+    "tokyo-nagoya": {
+      "hits": 0,
+      "inside": 18
+    }
+  },
+  "phone_pixels": {
+    "tsuruga-osaka": {
+      "hits": 1,
+      "inside": 81
+    },
+    "hokkaido-extension": {
+      "hits": 11,
+      "inside": 126
+    }
+  },
+  "resolved_pixels": {
+    "tsuruga-osaka": {
+      "hits": 0,
+      "inside": 81
+    },
+    "hokkaido-extension": {
+      "hits": 89,
+      "inside": 110
+    }
+  },
+  "shared_track_pixels": {
+    "tokyo-nagoya": {
+      "hits": 9,
+      "inside": 18
+    },
+    "hokkaido-extension": {
+      "hits": 116,
+      "inside": 126
+    }
+  },
+  "through_fleet_pixels": {
+    "tokyo-nagoya": {
+      "hits": 9,
+      "inside": 18
+    },
+    "nagoya-osaka": {
+      "hits": 133,
+      "inside": 144
+    }
+  },
+  "passed": true
+}

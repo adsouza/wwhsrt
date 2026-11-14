@@ -1,0 +1,145 @@
+{
+  "recorded_at": "2026-11-13T15:55:41.125660+00:00",
+  "passed": true,
+  "scope": [
+    "Correct Ulsan KTX/Tongdosa gateway and Yeongcheon/Gyeongju junction geometry",
+    "Houston\u2013Austin prospect and separate San Antonio through-service",
+    "Taipei HSR market/station and ordered Taiwan service",
+    "v9 archive/epoch preserving older accounts and accepted service plans"
+  ],
+  "catalog": {
+    "cities": 288,
+    "existing_corridors": 293,
+    "prospects": 71,
+    "prospect_alignments": 73,
+    "service_templates": 3327,
+    "map_station_markers": 2533
+  },
+  "data_gates": [
+    "source preparation --check passed",
+    "construction authoring --check passed",
+    "catalog import --check passed",
+    "all 71 construction pairs and 69 new alignments passed detailed geographic/projected/drawn-land and crossing/cost admission",
+    "regional admission passed; all 3323 old service templates exact; only three reanchored Ulsan distances/timings corrected",
+    "seven coverage mutation tests passed; all eleven operating-network contracts passed",
+    "strict source audit and audit reproducibility passed; seven earlier pair checks passed",
+    "legacy Japanese geography and negative fixtures passed"
+  ],
+  "focused_go_package_results": {
+    "internal/domain": "passed 0.310s",
+    "internal/application": "passed full package rerun 26.406s after updating pre-v9 timing assertions to allow only shortening of Ulsan services",
+    "pkg/ui": "passed 0.171s",
+    "pkg/mapview": "passed cached",
+    "pkg/app": "passed 52.794s",
+    "pkg/render": "passed 1.044s"
+  },
+  "migration_fixtures": {
+    "regional-assets-v8.json": "7d7cac4eee80dbdfd849374480feb9d4f5531a390480b166df608271df254b6f",
+    "regional-cutover-v8.json": "42af7211cb63cd9e19e171e9eff60235faa3907992f76f027a762e70dc62f652",
+    "regional-korea-v8.json": "ec7cb4c2bc2ecd2349a2f421ac7ef70227ff09a75c76924520b1fc9b572f0258",
+    "regional-texas-v8.json": "0ea8fe66c16160e5fa7331b1e0e3bdb03e260fa8f14e7dc931c330319191d69b",
+    "regional-v8.json": "6dc801c110f345cc5604b488d4b8a82e03a237b8634f370b2aee2fa011145ecf"
+  },
+  "migration_verified": [
+    "Opening preserves input bytes, reports, cash, assets, plans, fleet, debt and pending flows",
+    "Failed commits preserve memory/checkpoint/save bytes",
+    "v8 normal, prior-v7 cutover, ongoing build/debt, active 51-month Texas and pre-fix Korean service histories load and advance",
+    "Unknown prior identity and malformed epoch bounds rejected",
+    "New regional demand and corrected Ulsan service distances settle/reload under v9"
+  ],
+  "rebuilt_headless_verification": "Fresh one-month run has 288 cities/71 prospects and positive starter revenue; genuine 51-month v8 Texas fixture advances to v9, preserves all old reports/assets/plans and keeps its Dallas route open while the new Austin route remains closed",
+  "native_map_captures": {
+    "scope": "Actual Ebitengine renderer using a map-only shipped-data frame; no user campaign loaded",
+    "peak_rss_mib": 132.1,
+    "verified": [
+      "Daegu approach has no remaining Yeongcheon or Moryang out-and-back spur",
+      "Taipei is labeled and connected through Taiwan HSR",
+      "Houston\u2013Austin is dotted alongside the three previous Texas prospects"
+    ]
+  },
+  "builds": {
+    "native": "passed; bundle executable and icon match build/source",
+    "web": "Built offline web bundle a781568cc9d05620",
+    "headless": "passed"
+  },
+  "other_checks": [
+    "Architecture import boundaries passed",
+    "Python AST/JSON parsing and relevant JavaScript syntax passed",
+    "git diff --check passed",
+    "native Info.plist lint passed"
+  ],
+  "memory_receipts_mib": {
+    "audit-check": {
+      "peak_rss_mib": 115.9,
+      "stopped": false,
+      "exit_code": 0
+    },
+    "audit": {
+      "peak_rss_mib": 116.2,
+      "stopped": false,
+      "exit_code": 0
+    },
+    "authoring": {
+      "peak_rss_mib": 882.4,
+      "stopped": false,
+      "exit_code": 0
+    },
+    "catalog": {
+      "peak_rss_mib": 462.2,
+      "stopped": false,
+      "exit_code": 0
+    },
+    "construction-geography": {
+      "peak_rss_mib": 746.2,
+      "stopped": false,
+      "exit_code": 0
+    },
+    "coverage": {
+      "peak_rss_mib": 130.9,
+      "stopped": false,
+      "exit_code": 0
+    },
+    "japan": {
+      "peak_rss_mib": 1.4,
+      "stopped": false,
+      "exit_code": 0
+    },
+    "regional": {
+      "peak_rss_mib": 1.1,
+      "stopped": false,
+      "exit_code": 0
+    },
+    "source": {
+      "peak_rss_mib": 1742.0,
+      "stopped": false,
+      "exit_code": 0
+    }
+  },
+  "sha256": {
+    "assets/scenario/public-network.json": "f4d94ee8afa0239270975e78033cad2458de90fa012f3037e5adc39b07acdad1",
+    "assets/scenario/public-network-v4.json.gz": "26367c992dc3840bc32f6240feed1626bc8754f0aa0b6819eb65b284c94400da",
+    "assets/scenario/playable-rail-map.json": "49c201b76a013b0fef942f121a71cac35df9cb50fc0ef319d548138225246ce3",
+    "data/imports/network-repairs.v2.json": "b99b87fbd0b78f6a8230b0f29d7ac3daaf1a1cd322878eb5d9d27a819b073a96",
+    "data/imports/rail-regional-links.v1.jsonl.gz": "a7c4d6ffc114ef9ccd5ddb9b7589d33e0702ac6c84ea6395547b9934460f6742",
+    "data/imports/operating-networks.v2.json": "35ef2333783c425c8824011a4977512654f1558d649d6b427061547029ed12f5",
+    "data/construction/launch-prospects.v1.json": "9f1ab5c6c6d830205a69a045239a89b3eb806815f404781014a8433b2e376555",
+    "data/construction/compiled-prospects.v1.json": "bac21a18bf293fe91447be423b2d9931541fc0d82264e32a72fca595fbdcd9b1",
+    "build/wwhsrt": "1cce505b735a24c02274e1c6e30580fd17f7a1970379d8a4b60a00a1d0fb4b1b",
+    "build/headless": "ebed3fd21e8c1f904a3508c1ef4ef6d6bad80f54ff485268c6de5ee409928294",
+    "web/main.wasm": "f7091d2b9f788abed1ad16dd2c99fda26d5e8c54295a6920bf59705cd2b725e5",
+    "web/app.js": "d9503174184e33223dec9eae0c146e5b46ca2444e9e977589f2c08ed55e008be",
+    "web/index.html": "ccc4bb7bb3360b52b22779947f6d0f4699b4ed55568cdbc7b9afa8236976c454",
+    "web/style.css": "771af1f99e4aa023ef2de6da700d6d3c040dde15a48b5862a5e52400dee63ac3",
+    "docs/validation/regional-daegu-before.png": "a1f7002a7739c4166836810318d7fa0e58ad10142b16c6b182e8bdbab371acd6",
+    "docs/validation/regional-daegu-after.png": "a0eb5b29c67785c512cd2f3e03b58c558ee66c5e4c5785a1340ab8020a7971ca",
+    "docs/validation/regional-taiwan.png": "57c6a70c262924ed32ef7b8c8c108a339bcdf3eaf0ad6e745178fa1cdf49ddbd",
+    "docs/validation/regional-texas.png": "66bc2445470ee2812e8e6114d900a429b38f1fe086968dd9b17418e79bb7ac2c"
+  },
+  "limits": [
+    "Full browser/WASM startup not retried: previous check exceeded the 2 GiB combined RSS cap and this task does not fix that limitation.",
+    "Native OS input and physical phones not requalified; captures and widget tests are the native evidence.",
+    "Full root suite, race/fuzz campaigns and remote CI not run or claimed.",
+    "Reviewed platform adapters aggregate strategic station resources; they do not claim new physical crossovers. Houston\u2013Austin is an authored game concept, not approved engineering.",
+    "Existing user campaign/running native app not modified; restart rebuilt app to load the update."
+  ]
+}

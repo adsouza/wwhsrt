@@ -1,6 +1,14 @@
 # Proposed launch corridor shortlist
 
-Precompute **70 unordered city pairs** for the worldwide release: **60 regional projects** and **10 strategic projects**. Each pair gets one qualified alignment first. Add a second only if it changes the construction or operating decision. These are candidates for alignment authoring and qualification. Only reviewed routes enter the playable catalog.
+Precompute **74 unordered city pairs** for the worldwide release: the original **60 regional projects** and **10 strategic projects**, plus Houston–Austin and three network connectors. Each pair gets one qualified alignment first. Add a second only if it changes the construction or operating decision. Only reviewed routes enter the playable catalog.
+
+
+The development game now includes all 74 pairs as authored strategic projects.
+The 72 new alignments and the two retained Japanese projects have cartographic
+water screening, explicit major crossing allowances, regional engineering prices,
+construction durations and usable service plans. This is game admission, not a
+claim of surveyed gradients, railway approvals or construction-ready designs.
+See [qualification and limits](validation/LAUNCH_PROSPECTS.md).
 
 Start with routes that form short chains or branches, plus standalone projects for regions without public HSR. Use the planned production city catalog for endpoints such as Fresno, Ottawa, and Newcastle. The 94 major metros remain the prototype roster. Intermediate geometry does not require a station unless that station makes a useful construction boundary or passenger market.
 
@@ -130,3 +138,45 @@ These round out the launch catalog. Build them after the regional chains in the 
 Start in southwest Frangistan. The Bordeaux branches and Mediterranean gap give multiple projects near existing HSR and test shared access, standalone construction, staged openings, and connections through inherited track. Include a construction-led case such as Lagos–Ibadan or Buenos Aires–Rosario in the same early pass. For the prototype's long corridor examples, keep Lagos–Kinshasa as a terrain acceptance case and replace the illustrative direct Delhi–Mumbai project with a through service over the shorter packages in the launch catalog.
 
 For every qualified pair, show the opening date, cost, likely demand, and plausible onward network value. Reject or replace candidates whose terrain, rights, demand, or shared works cannot be qualified within launch scope. Reconcile shared approaches in the physical section catalog so two projects cannot sell or manufacture the same track twice.
+
+
+## Implemented starting-network distinctions
+
+- Morocco's starting HSR ends at Kenitra. Existing conventional service through
+  Rabat to Casablanca is not starting public HSR. Project 33 builds new dedicated
+  HSR to Casablanca; project 34 continues toward Marrakech. The game's project
+  endpoints are its called service markets, rather than every real intermediate
+  station. The raw station inventory remains available for source review.
+- Existing Lisbon–Porto is upgraded conventional rail, explicitly labeled in the
+  service picker. Project 26 is a distinct dedicated-HSR investment, with a
+  75-minute strategic journey estimate and its own track capacity. Current source
+  infrastructure is not purchased twice. The existing public corridor remains
+  available for service while the new physical line is built.
+- New regional chains also have future through-service templates, including
+  connections onto inherited track. A template stays closed until all its
+  sections open. These templates do not create extra construction projects.
+
+## Additional regional prospect
+
+Keep the original project numbers stable. Houston–Austin adds a westward Texas
+connection and a Houston–Austin–San Antonio through-service opportunity.
+
+| # | City pair | Basis and scope |
+| ---: | --- | --- |
+| 71 | Houston–Austin | Concept. Westward Texas connection, enabling Houston–Austin–San Antonio through-running and an alternative to Dallas. |
+
+## Additional network connectors
+
+| # | City pair | Basis and scope |
+| ---: | --- | --- |
+| 72 | Tsuruga–Maibara | Historical route alternative, not the selected Hokuriku extension. New HSR via the east side of Lake Biwa, including mountain approaches and a junction at Maibara. Reuse the existing Tokaido line to Kyoto/Osaka or Nagoya. [Maibara route study](https://www.city.maibara.lg.jp/material/files/group/5/97252097.pdf) |
+| 73 | Valencia–Camp de Tarragona | Dedicated-HSR completion/upgrade game package inspired by the Mediterranean corridor program. Price only Valencia–Camp de Tarragona; reuse the existing HSR to Barcelona. Conventional track is not sold as new HSR. [Spanish transport ministry](https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/transportes-movilidad-sostenible/Paginas/2025/070225-puente-alta-velocidad-valencia.aspx) |
+| 74 | Porto–Vigo | Planned Portugal–Galicia connector with a 50-minute strategic service target. Includes the Minho crossing, mountain/urban approaches and cross-border interface works. Through services reuse the existing Lisbon–Porto line and continue to Pontevedra. [Infraestruturas de Portugal](https://www.infraestruturasdeportugal.pt/pt-pt/rede-de-alta-velocidade) |
+
+Maibara, Camp de Tarragona and Figueres are called station markets. Existing
+Turin–Milan and Perpignan–Figueres–Barcelona are public railway repairs, not
+construction opportunities. All new cost quantities and durations are authored
+strategic game estimates; interoperability uses the common game train family.
+The Mediterranean package does not charge for the existing Tarragona–Barcelona
+HSR. Regional network value depends on feeder/through services; positive monthly
+cash is not a guarantee of construction payback within a campaign.

@@ -6,7 +6,10 @@ import (
 	"wwhsrt/pkg/gameapi"
 )
 
-type Detail struct{ Label, Value string }
+type Detail struct {
+	Label string `json:"label"`
+	Value string `json:"value"`
+}
 
 func StationAt(f gameapi.Frame, id gameapi.CityID) (gameapi.Station, bool) {
 	for _, station := range f.Stations {
@@ -31,6 +34,12 @@ func StationDetails(f gameapi.Frame, locale string, id gameapi.CityID) []Detail 
 		owner = t("stationPublic")
 	}
 	rows := []Detail{{t("station"), status}, {t("stationOwner"), owner}}
+	for _, city := range f.Cities {
+		if city.ID == id && city.StationName != "" {
+			rows = append(rows, Detail{t("mappedStation"), city.StationName})
+			break
+		}
+	}
 	if !station.Open {
 		rows = append(rows, Detail{t("opens"), fmt.Sprintf("%04d-%02d", 2029+station.Ready/12, 1+station.Ready%12)})
 	}
@@ -45,6 +54,9 @@ func EstimateDetails(a gameapi.Alignment, locale string) []Detail {
 	t := func(k string) string { return Text(locale, k) }
 	e := a.Estimate
 	rows := []Detail{}
+	for _, p := range a.CostIntervals {
+		rows = append(rows, Detail{t("regionalCostBasis") + " · " + p.Country, Cash(p.BasePerKM) + " / km"})
+	}
 	for _, r := range []struct {
 		key   string
 		money gameapi.Money

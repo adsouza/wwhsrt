@@ -1,0 +1,692 @@
+{
+  "format": "wwhsrt-operating-networks-v2",
+  "checked_on": "2026-11-13",
+  "hubs": [
+    {
+      "city_id": "washington",
+      "station_id": "node/6097540128",
+      "name": "Washington Union Station",
+      "station_name": "Washington Union Station",
+      "lon": -77.00586,
+      "lat": 38.89837,
+      "road_region": "united_states",
+      "evidence": "https://media.amtrak.com/wp-content/uploads/2025/08/NextGen-Acela_NEC-Map.pdf"
+    },
+    {
+      "city_id": "stop_node_6097540129",
+      "station_id": "node/6097540129",
+      "name": "BWI Airport",
+      "station_name": "BWI Airport Rail Station",
+      "lon": -76.69455,
+      "lat": 39.19217,
+      "road_region": "united_states",
+      "evidence": "https://media.amtrak.com/wp-content/uploads/2025/08/NextGen-Acela_NEC-Map.pdf"
+    },
+    {
+      "city_id": "baltimore",
+      "station_id": "node/6097540130",
+      "name": "Baltimore Penn Station",
+      "station_name": "Baltimore Penn Station",
+      "lon": -76.6154,
+      "lat": 39.3077,
+      "road_region": "united_states",
+      "evidence": "https://media.amtrak.com/wp-content/uploads/2025/08/NextGen-Acela_NEC-Map.pdf"
+    },
+    {
+      "city_id": "wilmington",
+      "station_id": "node/366753362",
+      "name": "Wilmington",
+      "station_name": "Wilmington",
+      "lon": -75.5511,
+      "lat": 39.73675,
+      "road_region": "united_states",
+      "evidence": "https://media.amtrak.com/wp-content/uploads/2025/08/NextGen-Acela_NEC-Map.pdf"
+    },
+    {
+      "city_id": "philadelphia",
+      "station_id": "node/6097540131",
+      "name": "Philadelphia 30th Street",
+      "station_name": "Philadelphia 30th Street",
+      "lon": -75.18191,
+      "lat": 39.95593,
+      "road_region": "united_states",
+      "evidence": "https://media.amtrak.com/wp-content/uploads/2025/08/NextGen-Acela_NEC-Map.pdf"
+    },
+    {
+      "city_id": "metropark",
+      "station_id": "node/6615000263",
+      "name": "Metropark",
+      "station_name": "Metropark",
+      "lon": -74.32987,
+      "lat": 40.5683,
+      "road_region": "united_states",
+      "evidence": "https://media.amtrak.com/wp-content/uploads/2025/08/NextGen-Acela_NEC-Map.pdf"
+    },
+    {
+      "city_id": "newark",
+      "station_id": "node/2051677435",
+      "name": "Newark Penn Station",
+      "station_name": "Newark Penn Station",
+      "lon": -74.16396,
+      "lat": 40.7346,
+      "road_region": "united_states",
+      "evidence": "https://media.amtrak.com/wp-content/uploads/2025/08/NextGen-Acela_NEC-Map.pdf"
+    },
+    {
+      "city_id": "new_york",
+      "station_id": "node/895371274",
+      "name": "New York Penn Station",
+      "station_name": "New York Penn Station",
+      "lon": -73.99281,
+      "lat": 40.75024,
+      "road_region": "united_states",
+      "evidence": "https://media.amtrak.com/wp-content/uploads/2025/08/NextGen-Acela_NEC-Map.pdf"
+    },
+    {
+      "city_id": "stamford",
+      "station_id": "node/3256112986",
+      "name": "Stamford",
+      "station_name": "Stamford",
+      "lon": -73.54202,
+      "lat": 41.0469,
+      "road_region": "united_states",
+      "evidence": "https://media.amtrak.com/wp-content/uploads/2025/08/NextGen-Acela_NEC-Map.pdf"
+    },
+    {
+      "city_id": "new_haven",
+      "station_id": "node/6097540133",
+      "name": "New Haven Union Station",
+      "station_name": "New Haven Union Station",
+      "lon": -72.92662,
+      "lat": 41.29752,
+      "road_region": "united_states",
+      "evidence": "https://media.amtrak.com/wp-content/uploads/2025/08/NextGen-Acela_NEC-Map.pdf"
+    },
+    {
+      "city_id": "providence",
+      "station_id": "node/3280065972",
+      "name": "Providence",
+      "station_name": "Providence",
+      "lon": -71.41325,
+      "lat": 41.82923,
+      "road_region": "united_states",
+      "evidence": "https://media.amtrak.com/wp-content/uploads/2025/08/NextGen-Acela_NEC-Map.pdf"
+    },
+    {
+      "city_id": "route_128",
+      "station_id": "way/212904812",
+      "name": "Route 128",
+      "station_name": "Route 128",
+      "lon": -71.14756,
+      "lat": 42.21038,
+      "road_region": "united_states",
+      "evidence": "https://media.amtrak.com/wp-content/uploads/2025/08/NextGen-Acela_NEC-Map.pdf"
+    },
+    {
+      "city_id": "boston_back_bay",
+      "station_id": "relation/20313627",
+      "name": "Boston Back Bay",
+      "station_name": "Boston Back Bay",
+      "lon": -71.07528,
+      "lat": 42.34744,
+      "road_region": "united_states",
+      "evidence": "https://media.amtrak.com/wp-content/uploads/2025/08/NextGen-Acela_NEC-Map.pdf"
+    },
+    {
+      "city_id": "boston",
+      "station_id": "way/29742438",
+      "name": "Boston South Station",
+      "station_name": "Boston South Station",
+      "lon": -71.05556,
+      "lat": 42.3507,
+      "road_region": "united_states",
+      "evidence": "https://media.amtrak.com/wp-content/uploads/2025/08/NextGen-Acela_NEC-Map.pdf"
+    },
+    {
+      "city_id": "tashkent",
+      "station_id": "node/2204812766",
+      "name": "Tashkent Central",
+      "station_name": "Tashkent Central",
+      "lon": 69.2874,
+      "lat": 41.29098,
+      "road_region": "uzbekistan",
+      "evidence": "https://uzrailpass.uz/en/pages/poezd-jadvali"
+    },
+    {
+      "city_id": "stop_node_2279305298",
+      "station_id": "node/2279305298",
+      "name": "Samarkand",
+      "station_name": "Samarkand",
+      "lon": 66.929,
+      "lat": 39.68596,
+      "road_region": "uzbekistan",
+      "evidence": "https://uzrailpass.uz/en/pages/poezd-jadvali"
+    },
+    {
+      "city_id": "stop_node_8328285677",
+      "station_id": "node/8328285677",
+      "name": "Bukhara (Kogon)",
+      "station_name": "Bukhara (Kogon)",
+      "lon": 64.54841,
+      "lat": 39.72249,
+      "road_region": "uzbekistan",
+      "evidence": "https://uzrailpass.uz/en/pages/poezd-jadvali"
+    },
+    {
+      "city_id": "urgench",
+      "station_id": "node/1585865853",
+      "name": "Urgench",
+      "station_name": "Urgench",
+      "lon": 60.63215,
+      "lat": 41.5365,
+      "road_region": "uzbekistan",
+      "evidence": "https://uzrailpass.uz/en/pages/poezd-jadvali"
+    },
+    {
+      "city_id": "khiva",
+      "station_id": "node/5793725055",
+      "name": "Khiva",
+      "station_name": "Khiva",
+      "lon": 60.3766,
+      "lat": 41.37716,
+      "road_region": "uzbekistan",
+      "evidence": "https://uzrailpass.uz/en/pages/poezd-jadvali"
+    },
+    {
+      "city_id": "qarshi",
+      "station_id": "node/1555410151",
+      "name": "Qarshi",
+      "station_name": "Qarshi",
+      "lon": 65.777017,
+      "lat": 38.8214,
+      "road_region": "uzbekistan",
+      "evidence": "https://uzrailpass.uz/en/pages/poezd-jadvali"
+    },
+    {
+      "city_id": "shahrisabz",
+      "station_id": "node/245607879",
+      "name": "Kitob / Shahrisabz",
+      "station_name": "Kitob / Shahrisabz",
+      "lon": 66.837454,
+      "lat": 39.090278,
+      "road_region": "uzbekistan",
+      "evidence": "https://uzrailpass.uz/en/pages/poezd-jadvali"
+    },
+    {
+      "city_id": "istanbul",
+      "station_id": "node/6321654790",
+      "name": "Söğütlüçeşme",
+      "station_name": "Söğütlüçeşme",
+      "lon": 29.037909,
+      "lat": 40.990646,
+      "road_region": "turkey",
+      "evidence": "https://www.tcddtasimacilik.gov.tr/seferler/yuksek-hizli-tren"
+    },
+    {
+      "city_id": "moscow",
+      "station_id": "node/26999673",
+      "name": "Moscow Leningradsky",
+      "station_name": "Moscow Leningradsky",
+      "lon": 37.653721,
+      "lat": 55.778834,
+      "road_region": "russia",
+      "evidence": "https://rzdtour.com/assets/pdf/rzd-mag/RZD_Mag_07_2025.pdf"
+    },
+    {
+      "city_id": "lisbon",
+      "station_id": "node/5289090764",
+      "name": "Lisboa Oriente",
+      "station_name": "Lisboa - Oriente",
+      "lon": -9.09905,
+      "lat": 38.76782,
+      "road_region": "portugal",
+      "evidence": "https://www.cp.pt/info/documents/d/cp/precos-alfa-pendular-lisboa-porto-braga-1"
+    },
+    {
+      "city_id": "porto",
+      "station_id": "node/5391639445",
+      "name": "Porto Campanhã",
+      "station_name": "Porto - Campanhã",
+      "lon": -8.58483,
+      "lat": 41.14875,
+      "road_region": "portugal",
+      "evidence": "https://www.cp.pt/info/documents/d/cp/precos-alfa-pendular-lisboa-porto-braga-1"
+    },
+    {
+      "city_id": "tangier",
+      "station_id": "node/9418232000",
+      "name": "Tanger Ville",
+      "station_name": "Tanger Ville",
+      "lon": -5.78534,
+      "lat": 35.77039,
+      "road_region": "morocco",
+      "evidence": "https://www.oncf.ma/content/download/120129/2802244/file/Plan%20de%20transport%20Al%20Boraq%20CAN.pdf"
+    },
+    {
+      "city_id": "kenitra",
+      "station_id": "node/9450518206",
+      "name": "Kénitra",
+      "station_name": "Kénitra",
+      "lon": -6.58191,
+      "lat": 34.25154,
+      "road_region": "morocco",
+      "evidence": "https://www.oncf.ma/content/download/120129/2802244/file/Plan%20de%20transport%20Al%20Boraq%20CAN.pdf"
+    },
+    {
+      "city_id": "kunming",
+      "station_id": "node/2865839196",
+      "name": "Kunming South",
+      "station_name": "Kunmingnan",
+      "lon": 102.86038,
+      "lat": 24.87336,
+      "road_region": "china",
+      "evidence": "https://source.nra.gov.cn/tlfc/tpsy/202204/t20220405_293015.shtml"
+    },
+    {
+      "city_id": "kaifeng",
+      "station_id": "node/6736774928",
+      "name": "Kaifeng North",
+      "station_name": "Kaifengbei",
+      "lon": 114.25605,
+      "lat": 34.84064,
+      "road_region": "china",
+      "evidence": "https://www.kaifeng.gov.cn/kfsrmzfwz/szfbx/1742071489435447296/yO7R5VTV.pdf"
+    },
+    {
+      "city_id": "xuchang",
+      "station_id": "node/8093975737",
+      "name": "Xuchang East",
+      "station_name": "许昌东",
+      "lon": 113.88202,
+      "lat": 34.05,
+      "road_region": "china",
+      "evidence": "https://sfj.pds.gov.cn/contents/33790/21232.html"
+    },
+    {
+      "city_id": "taipei",
+      "station_id": "node/3799089099",
+      "name": "Taipei",
+      "lon": 121.517,
+      "lat": 25.04793,
+      "road_region": "taiwan",
+      "evidence": "https://en.thsrc.com.tw/corp/c33f8d02-7c8a-44f0-8866-b3f8c9707ff9"
+    },
+    {
+      "city_id": "ulsan",
+      "station_id": "node/1657629122",
+      "name": "Ulsan (KTX / Tongdosa)",
+      "lon": 129.13793,
+      "lat": 35.55131,
+      "road_region": "korea",
+      "evidence": "https://www.kric.go.kr/jsp/board/portal/sub05/est/estation_BasicDetail.jsp?q_station=A030280485"
+    },
+    {
+      "city_id": "turin",
+      "station_id": "node/11592793752",
+      "name": "Torino Porta Susa",
+      "lon": 7.665855,
+      "lat": 45.071577,
+      "road_region": "italy",
+      "evidence": "https://www.fsitaliane.it/content/dam/fsitaliane/Documents/old-media-ed-eventi/comunicati-stampa-e-news/anno-2019/giugno/2019_06_03_NS_10_anni_AV.pdf"
+    },
+    {
+      "city_id": "perpignan",
+      "station_id": "node/448465221",
+      "name": "Perpignan",
+      "lon": 2.879693,
+      "lat": 42.696244,
+      "road_region": "france",
+      "evidence": "https://www.ecologie.gouv.fr/sites/default/files/documents/CP_-_LVG_Perpignan-Figueras_-_21-12-2016.pdf"
+    },
+    {
+      "city_id": "maibara",
+      "station_id": "node/3999594682",
+      "name": "Maibara",
+      "lon": 136.29012,
+      "lat": 35.31491,
+      "road_region": "honshu",
+      "evidence": "https://global.jr-central.co.jp/en/info/route-map/"
+    },
+    {
+      "city_id": "camp_de_tarragona",
+      "station_id": "node/2713026494",
+      "name": "Camp de Tarragona",
+      "lon": 1.27357,
+      "lat": 41.19217,
+      "road_region": "spain",
+      "evidence": "https://www.adifaltavelocidad.es/w/lav-madrid-barcelona-frontera-francesa-tramo"
+    },
+    {
+      "city_id": "figueres",
+      "station_id": "node/1914054304",
+      "name": "Figueres Vilafant",
+      "lon": 2.94268,
+      "lat": 42.2647,
+      "road_region": "spain",
+      "evidence": "https://www.adifaltavelocidad.es/w/lav-madrid-barcelona-frontera-francesa-tramo"
+    }
+  ],
+  "networks": [
+    {
+      "id": "nec",
+      "cities": [
+        "washington",
+        "stop_node_6097540129",
+        "baltimore",
+        "wilmington",
+        "philadelphia",
+        "metropark",
+        "newark",
+        "new_york",
+        "stamford",
+        "new_haven",
+        "providence",
+        "route_128",
+        "boston_back_bay",
+        "boston"
+      ],
+      "source": "https://media.amtrak.com/wp-content/uploads/2025/08/NextGen-Acela_NEC-Map.pdf",
+      "ordered": true
+    },
+    {
+      "id": "uzbek-main",
+      "cities": [
+        "tashkent",
+        "stop_node_2279305298",
+        "stop_node_8328285677",
+        "urgench",
+        "khiva"
+      ],
+      "source": "https://uzrailpass.uz/en/pages/poezd-jadvali",
+      "ordered": true
+    },
+    {
+      "id": "uzbek-branch",
+      "cities": [
+        "stop_node_2279305298",
+        "qarshi",
+        "shahrisabz"
+      ],
+      "source": "https://uzrailpass.uz/en/pages/poezd-jadvali",
+      "ordered": true
+    },
+    {
+      "id": "german-ice",
+      "cities": [
+        "rhine_ruhr",
+        "koln",
+        "frankfurt_am_main",
+        "berlin",
+        "munich",
+        "hamburg"
+      ],
+      "source": "https://www.bahn.de/service/ueber-uns/zugtypen/ice",
+      "ordered": false
+    },
+    {
+      "id": "austrian-railjet",
+      "cities": [
+        "vienna",
+        "munich"
+      ],
+      "source": "https://www.oebb.at/en/reiseplanung-services/oebb-zugverbindungen",
+      "ordered": false
+    },
+    {
+      "id": "turkey-yht",
+      "cities": [
+        "istanbul",
+        "ankara",
+        "konya"
+      ],
+      "source": "https://www.tcddtasimacilik.gov.tr/seferler/yuksek-hizli-tren",
+      "ordered": false
+    },
+    {
+      "id": "sapsan",
+      "cities": [
+        "moscow",
+        "saint_petersburg"
+      ],
+      "source": "https://rzdtour.com/assets/pdf/rzd-mag/RZD_Mag_07_2025.pdf",
+      "ordered": false
+    },
+    {
+      "id": "alfa-pendular",
+      "cities": [
+        "lisbon",
+        "porto"
+      ],
+      "source": "https://www.cp.pt/info/documents/d/cp/precos-alfa-pendular-lisboa-porto-braga-1",
+      "ordered": false
+    },
+    {
+      "id": "al-boraq",
+      "cities": [
+        "tangier",
+        "kenitra"
+      ],
+      "source": "https://www.oncf.ma/content/download/120129/2802244/file/Plan%20de%20transport%20Al%20Boraq%20CAN.pdf",
+      "ordered": true,
+      "scope": "Starting dedicated HSR only. Rabat–Casablanca is conventional connecting track, not a starting HSR asset."
+    },
+    {
+      "id": "china-hubs",
+      "cities": [
+        "kunming",
+        "kaifeng",
+        "xuchang",
+        "beijing",
+        "shanghai",
+        "hong_kong"
+      ],
+      "source": "https://www.nra.gov.cn/",
+      "ordered": false
+    },
+    {
+      "id": "taiwan-hsr",
+      "cities": [
+        "taipei",
+        "taichung",
+        "tainan",
+        "kaohsiung"
+      ],
+      "ordered": true,
+      "source": "https://en.thsrc.com.tw/corp/c33f8d02-7c8a-44f0-8866-b3f8c9707ff9"
+    },
+    {
+      "id": "tokaido-junction",
+      "cities": [
+        "osaka",
+        "kyoto",
+        "maibara",
+        "nagoya"
+      ],
+      "ordered": true,
+      "source": "https://global.jr-central.co.jp/en/info/route-map/"
+    },
+    {
+      "id": "italian-hsr",
+      "cities": [
+        "turin",
+        "milan",
+        "bologna",
+        "florence",
+        "rome",
+        "naples"
+      ],
+      "ordered": true,
+      "source": "https://www.fsitaliane.it/content/dam/fsitaliane/Documents/old-media-ed-eventi/comunicati-stampa-e-news/anno-2019/giugno/2019_06_03_NS_10_anni_AV.pdf"
+    },
+    {
+      "id": "catalan-hsr",
+      "cities": [
+        "camp_de_tarragona",
+        "barcelona",
+        "figueres",
+        "perpignan"
+      ],
+      "ordered": true,
+      "source": "https://www.ecologie.gouv.fr/sites/default/files/documents/CP_-_LVG_Perpignan-Figueras_-_21-12-2016.pdf"
+    }
+  ],
+  "non_hsr_connectors": [
+    "public_casablanca__rabat",
+    "public_kenitra__rabat"
+  ],
+  "conventional_station_context": [
+    {
+      "city_id": "rabat",
+      "station_id": "way/449071760",
+      "name": "Rabat Agdal",
+      "station_name": "Rabat Agdal",
+      "lon": -6.85763,
+      "lat": 34.00104,
+      "road_region": "morocco",
+      "evidence": "https://www.oncf.ma/content/download/120129/2802244/file/Plan%20de%20transport%20Al%20Boraq%20CAN.pdf"
+    },
+    {
+      "city_id": "casablanca",
+      "station_id": "node/7055155496",
+      "name": "Casa Voyageurs",
+      "station_name": "Casa Voyageurs",
+      "lon": -7.58967,
+      "lat": 33.59036,
+      "road_region": "morocco",
+      "evidence": "https://www.oncf.ma/content/download/120129/2802244/file/Plan%20de%20transport%20Al%20Boraq%20CAN.pdf"
+    }
+  ],
+  "platform_hubs": [
+    {
+      "city_id": "kaohsiung",
+      "max_adapter_m": 100,
+      "way_ids": [
+        197666421,
+        501135661
+      ],
+      "role": "Reviewed station-platform aggregation of existing HSR tracks; a strategic station resource, not a claim of a new physical crossover.",
+      "source": "https://en.thsrc.com.tw/corp/c33f8d02-7c8a-44f0-8866-b3f8c9707ff9"
+    },
+    {
+      "city_id": "taichung",
+      "max_adapter_m": 100,
+      "way_ids": [
+        23638395,
+        199770402
+      ],
+      "role": "Reviewed station-platform aggregation of existing HSR tracks; a strategic station resource, not a claim of a new physical crossover.",
+      "source": "https://en.thsrc.com.tw/corp/c33f8d02-7c8a-44f0-8866-b3f8c9707ff9"
+    },
+    {
+      "city_id": "tainan",
+      "max_adapter_m": 100,
+      "way_ids": [
+        197614576,
+        197665127
+      ],
+      "role": "Reviewed station-platform aggregation of existing HSR tracks; a strategic station resource, not a claim of a new physical crossover.",
+      "source": "https://en.thsrc.com.tw/corp/c33f8d02-7c8a-44f0-8866-b3f8c9707ff9"
+    },
+    {
+      "city_id": "taipei",
+      "max_adapter_m": 100,
+      "way_ids": [
+        593871149,
+        615600478,
+        615600481
+      ],
+      "role": "Reviewed station-platform aggregation of existing HSR tracks; a strategic station resource, not a claim of a new physical crossover.",
+      "source": "https://en.thsrc.com.tw/corp/c33f8d02-7c8a-44f0-8866-b3f8c9707ff9"
+    },
+    {
+      "city_id": "ulsan",
+      "max_adapter_m": 100,
+      "way_ids": [
+        128255583,
+        407204571
+      ],
+      "role": "Reviewed aggregation of both existing Ulsan KTX platforms; strategic station resource, not a physical crossover.",
+      "source": "https://www.kric.go.kr/jsp/board/portal/sub05/est/estation_BasicDetail.jsp?q_station=A030280485"
+    },
+    {
+      "city_id": "nagoya",
+      "max_adapter_m": 100,
+      "way_ids": [
+        705211190,
+        705211191,
+        859360753,
+        859360756
+      ],
+      "role": "Reviewed aggregation of parallel Shinkansen station tracks as one strategic station; not a physical track crossover or a free intercity connection.",
+      "source": "https://global.jr-central.co.jp/en/info/route-map/"
+    },
+    {
+      "city_id": "maibara",
+      "max_adapter_m": 100,
+      "way_ids": [
+        265176832,
+        608693622
+      ],
+      "role": "Reviewed aggregation of parallel Shinkansen station tracks as one strategic station; not a physical track crossover or a free intercity connection.",
+      "source": "https://global.jr-central.co.jp/en/info/route-map/"
+    },
+    {
+      "city_id": "kyoto",
+      "max_adapter_m": 100,
+      "way_ids": [
+        41750762,
+        357704833
+      ],
+      "role": "Reviewed aggregation of parallel Shinkansen station tracks as one strategic station; not a physical track crossover or a free intercity connection.",
+      "source": "https://global.jr-central.co.jp/en/info/route-map/"
+    },
+    {
+      "city_id": "osaka",
+      "max_adapter_m": 100,
+      "way_ids": [
+        111069163,
+        200889426,
+        1461496262,
+        1461496263
+      ],
+      "role": "Reviewed aggregation of parallel Shinkansen station tracks as one strategic station; not a physical track crossover or a free intercity connection.",
+      "source": "https://global.jr-central.co.jp/en/info/route-map/"
+    },
+    {
+      "city_id": "barcelona",
+      "max_adapter_m": 100,
+      "way_ids": [
+        395889346,
+        772266514,
+        772266520,
+        774727419
+      ],
+      "role": "Reviewed aggregation of existing HSR station tracks as one strategic station; not a new physical crossover.",
+      "source": "https://www.adifaltavelocidad.es/w/lav-madrid-barcelona-frontera-francesa-tramo"
+    },
+    {
+      "city_id": "camp_de_tarragona",
+      "max_adapter_m": 100,
+      "way_ids": [
+        192152757,
+        192152758,
+        541914223,
+        541914250
+      ],
+      "role": "Reviewed aggregation of existing HSR station tracks as one strategic station; not a new physical crossover.",
+      "source": "https://www.adifaltavelocidad.es/w/lav-madrid-barcelona-frontera-francesa-tramo"
+    },
+    {
+      "city_id": "figueres",
+      "max_adapter_m": 100,
+      "way_ids": [
+        223533769,
+        223533776,
+        333986488,
+        333986489
+      ],
+      "role": "Reviewed aggregation of existing HSR station tracks as one strategic station; not a new physical crossover.",
+      "source": "https://www.adifaltavelocidad.es/w/lav-madrid-barcelona-frontera-francesa-tramo"
+    }
+  ]
+}

@@ -8,7 +8,7 @@ if [ "$(go env GOOS)" = darwin ]; then
   mkdir -p "$bundle/Contents/MacOS" "$bundle/Contents/Resources"
   cp build/wwhsrt "$bundle/Contents/MacOS/wwhsrt.next"
   mv "$bundle/Contents/MacOS/wwhsrt.next" "$bundle/Contents/MacOS/wwhsrt"
-  cp assets/terrain/ATTRIBUTION.md "$bundle/Contents/Resources/TerrainAttribution.txt"
+  cat assets/terrain/ATTRIBUTION.md assets/scenario/NETWORK_ATTRIBUTION.md > "$bundle/Contents/Resources/TerrainAttribution.txt"
   cp assets/branding/app-icon.icns "$bundle/Contents/Resources/AppIcon.icns.next"
   mv "$bundle/Contents/Resources/AppIcon.icns.next" "$bundle/Contents/Resources/AppIcon.icns"
   cat > "$bundle/Contents/Info.plist" <<'PLIST'

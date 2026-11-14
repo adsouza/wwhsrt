@@ -1,0 +1,676 @@
+{
+  "passed": true,
+  "prospects": 74,
+  "new_alignments_checked": 72,
+  "catalog_sha256": "df6df65b2f9a9be5f26cb416d174025652b3bd76c5655f3b49e44a2b4e302a1a",
+  "checks": [
+    {
+      "number": 1,
+      "id": "launch_01_san_francisco__fresno",
+      "priced_km": 310,
+      "water_km": 0,
+      "countries": [
+        "United States"
+      ]
+    },
+    {
+      "number": 2,
+      "id": "launch_02_fresno__bakersfield",
+      "priced_km": 184,
+      "water_km": 0,
+      "countries": [
+        "United States"
+      ]
+    },
+    {
+      "number": 3,
+      "id": "launch_03_bakersfield__los_angeles",
+      "priced_km": 199,
+      "water_km": 0,
+      "countries": [
+        "United States"
+      ]
+    },
+    {
+      "number": 4,
+      "id": "launch_04_los_angeles__las_vegas",
+      "priced_km": 416,
+      "water_km": 0,
+      "countries": [
+        "United States"
+      ]
+    },
+    {
+      "number": 5,
+      "id": "launch_05_dallas__houston",
+      "priced_km": 392,
+      "water_km": 0,
+      "countries": [
+        "United States"
+      ]
+    },
+    {
+      "number": 6,
+      "id": "launch_06_dallas__austin",
+      "priced_km": 318,
+      "water_km": 0,
+      "countries": [
+        "United States"
+      ]
+    },
+    {
+      "number": 7,
+      "id": "launch_07_austin__san_antonio",
+      "priced_km": 129,
+      "water_km": 0,
+      "countries": [
+        "United States"
+      ]
+    },
+    {
+      "number": 8,
+      "id": "launch_08_toronto__ottawa",
+      "priced_km": 391,
+      "water_km": 0,
+      "countries": [
+        "Canada"
+      ]
+    },
+    {
+      "number": 9,
+      "id": "launch_09_ottawa__montreal",
+      "priced_km": 185,
+      "water_km": 4.225,
+      "countries": [
+        "Canada"
+      ]
+    },
+    {
+      "number": 10,
+      "id": "launch_10_montreal__quebec",
+      "priced_km": 274,
+      "water_km": 4.477,
+      "countries": [
+        "Canada"
+      ]
+    },
+    {
+      "number": 11,
+      "id": "launch_11_mexico_city__santiago_de_queretaro",
+      "priced_km": 209,
+      "water_km": 0,
+      "countries": [
+        "Mexico"
+      ]
+    },
+    {
+      "number": 12,
+      "id": "launch_12_santiago_de_queretaro__guadalajara",
+      "priced_km": 369,
+      "water_km": 0,
+      "countries": [
+        "Mexico"
+      ]
+    },
+    {
+      "number": 13,
+      "id": "launch_13_sao_paulo__campinas",
+      "priced_km": 91,
+      "water_km": 0,
+      "countries": [
+        "Brazil"
+      ]
+    },
+    {
+      "number": 14,
+      "id": "launch_14_sao_paulo__rio_de_janeiro",
+      "priced_km": 419,
+      "water_km": 0,
+      "countries": [
+        "Brazil"
+      ]
+    },
+    {
+      "number": 15,
+      "id": "launch_15_rio_de_janeiro__belo_horizonte",
+      "priced_km": 376,
+      "water_km": 0,
+      "countries": [
+        "Brazil"
+      ]
+    },
+    {
+      "number": 16,
+      "id": "launch_16_sao_paulo__curitiba",
+      "priced_km": 396,
+      "water_km": 0,
+      "countries": [
+        "Brazil"
+      ]
+    },
+    {
+      "number": 17,
+      "id": "launch_17_buenos_aires__rosario",
+      "priced_km": 304,
+      "water_km": 0,
+      "countries": [
+        "Argentina"
+      ]
+    },
+    {
+      "number": 18,
+      "id": "launch_18_rosario__cordoba",
+      "priced_km": 426,
+      "water_km": 0,
+      "countries": [
+        "Argentina"
+      ]
+    },
+    {
+      "number": 19,
+      "id": "launch_19_santiago__valparaiso",
+      "priced_km": 114,
+      "water_km": 0,
+      "countries": [
+        "Chile"
+      ]
+    },
+    {
+      "number": 20,
+      "id": "launch_20_santiago__chillan",
+      "priced_km": 415,
+      "water_km": 0,
+      "countries": [
+        "Chile"
+      ]
+    },
+    {
+      "number": 21,
+      "id": "launch_21_london__birmingham",
+      "priced_km": 186,
+      "water_km": 0,
+      "countries": [
+        "United Kingdom"
+      ]
+    },
+    {
+      "number": 22,
+      "id": "launch_22_bordeaux__toulouse",
+      "priced_km": 247,
+      "water_km": 0,
+      "countries": [
+        "France"
+      ]
+    },
+    {
+      "number": 23,
+      "id": "launch_23_bordeaux__dax",
+      "priced_km": 155,
+      "water_km": 0,
+      "countries": [
+        "France"
+      ]
+    },
+    {
+      "number": 24,
+      "id": "launch_24_montpellier__beziers",
+      "priced_km": 70,
+      "water_km": 0,
+      "countries": [
+        "France"
+      ]
+    },
+    {
+      "number": 25,
+      "id": "launch_25_beziers__perpignan",
+      "priced_km": 86,
+      "water_km": 0,
+      "countries": [
+        "France"
+      ]
+    },
+    {
+      "number": 26,
+      "id": "launch_26_lisbon__porto",
+      "priced_km": 306,
+      "water_km": 0.31,
+      "countries": [
+        "Portugal"
+      ]
+    },
+    {
+      "number": 27,
+      "id": "launch_27_madrid__plasencia",
+      "priced_km": 260,
+      "water_km": 0,
+      "countries": [
+        "Spain"
+      ]
+    },
+    {
+      "number": 28,
+      "id": "launch_28_warsaw__lodz",
+      "priced_km": 90,
+      "water_km": 0,
+      "countries": [
+        "Poland"
+      ]
+    },
+    {
+      "number": 29,
+      "id": "launch_29_dresden__prague",
+      "priced_km": 163,
+      "water_km": 0,
+      "countries": [
+        "Czechia",
+        "Germany"
+      ]
+    },
+    {
+      "number": 30,
+      "id": "launch_30_belgrade__nis",
+      "priced_km": 253,
+      "water_km": 0,
+      "countries": [
+        "Republic of Serbia"
+      ]
+    },
+    {
+      "number": 31,
+      "id": "launch_31_cairo__alexandria",
+      "priced_km": 202,
+      "water_km": 0,
+      "countries": [
+        "Egypt"
+      ]
+    },
+    {
+      "number": 32,
+      "id": "launch_32_cairo__al_ayn_as_sukhnah",
+      "priced_km": 136,
+      "water_km": 0,
+      "countries": [
+        "Egypt"
+      ]
+    },
+    {
+      "number": 33,
+      "id": "launch_33_kenitra__casablanca",
+      "priced_km": 133,
+      "water_km": 0,
+      "countries": [
+        "Morocco"
+      ]
+    },
+    {
+      "number": 34,
+      "id": "launch_34_casablanca__marrakesh",
+      "priced_km": 240,
+      "water_km": 0,
+      "countries": [
+        "Morocco"
+      ]
+    },
+    {
+      "number": 35,
+      "id": "launch_35_lagos__ibadan",
+      "priced_km": 133,
+      "water_km": 0,
+      "countries": [
+        "Nigeria"
+      ]
+    },
+    {
+      "number": 36,
+      "id": "launch_36_nairobi__mombasa",
+      "priced_km": 476,
+      "water_km": 0,
+      "countries": [
+        "Kenya"
+      ]
+    },
+    {
+      "number": 37,
+      "id": "launch_37_dar_es_salaam__morogoro",
+      "priced_km": 188,
+      "water_km": 0,
+      "countries": [
+        "United Republic of Tanzania"
+      ]
+    },
+    {
+      "number": 38,
+      "id": "launch_38_johannesburg__durban",
+      "priced_km": 561,
+      "water_km": 0,
+      "countries": [
+        "South Africa"
+      ]
+    },
+    {
+      "number": 39,
+      "id": "launch_39_mumbai__surat",
+      "priced_km": 260,
+      "water_km": 1.682,
+      "countries": [
+        "India"
+      ]
+    },
+    {
+      "number": 40,
+      "id": "launch_40_surat__ahmedabad",
+      "priced_km": 253,
+      "water_km": 5.043,
+      "countries": [
+        "India"
+      ]
+    },
+    {
+      "number": 41,
+      "id": "launch_41_mumbai__pune",
+      "priced_km": 135,
+      "water_km": 5.167,
+      "countries": [
+        "India"
+      ]
+    },
+    {
+      "number": 42,
+      "id": "launch_42_bengaluru__chennai",
+      "priced_km": 315,
+      "water_km": 0,
+      "countries": [
+        "India"
+      ]
+    },
+    {
+      "number": 43,
+      "id": "launch_43_delhi__jaipur",
+      "priced_km": 270,
+      "water_km": 0,
+      "countries": [
+        "India"
+      ]
+    },
+    {
+      "number": 44,
+      "id": "launch_44_dhaka__chattogram",
+      "priced_km": 258,
+      "water_km": 2.196,
+      "countries": [
+        "India",
+        "Bangladesh"
+      ]
+    },
+    {
+      "number": 45,
+      "id": "launch_45_lahore__multan",
+      "priced_km": 377,
+      "water_km": 0,
+      "countries": [
+        "Pakistan"
+      ]
+    },
+    {
+      "number": 46,
+      "id": "launch_46_bandung__cirebon",
+      "priced_km": 116,
+      "water_km": 0,
+      "countries": [
+        "Indonesia"
+      ]
+    },
+    {
+      "number": 47,
+      "id": "launch_47_cirebon__semarang",
+      "priced_km": 233,
+      "water_km": 0,
+      "countries": [
+        "Indonesia"
+      ]
+    },
+    {
+      "number": 48,
+      "id": "launch_48_semarang__surabaya",
+      "priced_km": 282,
+      "water_km": 0,
+      "countries": [
+        "Indonesia"
+      ]
+    },
+    {
+      "number": 49,
+      "id": "launch_49_bangkok__nakhon_ratchasima",
+      "priced_km": 262,
+      "water_km": 0,
+      "countries": [
+        "Thailand"
+      ]
+    },
+    {
+      "number": 50,
+      "id": "launch_50_riyadh__dammam",
+      "priced_km": 444,
+      "water_km": 0,
+      "countries": [
+        "Saudi Arabia"
+      ]
+    },
+    {
+      "number": 51,
+      "id": "launch_51_abu_dhabi__dubai",
+      "priced_km": 144,
+      "water_km": 1.353,
+      "countries": [
+        "United Arab Emirates"
+      ]
+    },
+    {
+      "number": 54,
+      "id": "launch_54_brisbane__gold_coast",
+      "priced_km": 78,
+      "water_km": 0.913,
+      "countries": [
+        "Australia"
+      ]
+    },
+    {
+      "number": 55,
+      "id": "launch_55_gold_coast__coffs_harbour",
+      "priced_km": 283,
+      "water_km": 0,
+      "countries": [
+        "Australia"
+      ]
+    },
+    {
+      "number": 56,
+      "id": "launch_56_coffs_harbour__newcastle",
+      "priced_km": 350,
+      "water_km": 0.876,
+      "countries": [
+        "Australia"
+      ]
+    },
+    {
+      "number": 57,
+      "id": "launch_57_newcastle__sydney",
+      "priced_km": 141,
+      "water_km": 2.558,
+      "countries": [
+        "Australia"
+      ]
+    },
+    {
+      "number": 58,
+      "id": "launch_58_sydney__canberra",
+      "priced_km": 273,
+      "water_km": 0,
+      "countries": [
+        "Australia"
+      ]
+    },
+    {
+      "number": 59,
+      "id": "launch_59_canberra__albury_wodonga",
+      "priced_km": 324,
+      "water_km": 0,
+      "countries": [
+        "Australia"
+      ]
+    },
+    {
+      "number": 60,
+      "id": "launch_60_albury_wodonga__melbourne",
+      "priced_km": 290,
+      "water_km": 0,
+      "countries": [
+        "Australia"
+      ]
+    },
+    {
+      "number": 61,
+      "id": "launch_61_montreal__boston",
+      "priced_km": 453,
+      "water_km": 3.905,
+      "countries": [
+        "United States",
+        "Canada"
+      ]
+    },
+    {
+      "number": 62,
+      "id": "launch_62_santiago_de_queretaro__monterrey",
+      "priced_km": 672,
+      "water_km": 0,
+      "countries": [
+        "Mexico"
+      ]
+    },
+    {
+      "number": 63,
+      "id": "launch_63_lima__ica",
+      "priced_km": 290,
+      "water_km": 0,
+      "countries": [
+        "Peru"
+      ]
+    },
+    {
+      "number": 64,
+      "id": "launch_64_bogota__medellin",
+      "priced_km": 421,
+      "water_km": 0,
+      "countries": [
+        "Colombia"
+      ]
+    },
+    {
+      "number": 65,
+      "id": "launch_65_dax__donostia_san_sebastian",
+      "priced_km": 99,
+      "water_km": 0,
+      "countries": [
+        "France",
+        "Spain"
+      ]
+    },
+    {
+      "number": 66,
+      "id": "launch_66_lyon__turin",
+      "priced_km": 240,
+      "water_km": 0,
+      "countries": [
+        "France",
+        "Italy"
+      ]
+    },
+    {
+      "number": 67,
+      "id": "launch_67_nairobi__kampala",
+      "priced_km": 625,
+      "water_km": 0,
+      "countries": [
+        "Kenya",
+        "Uganda"
+      ]
+    },
+    {
+      "number": 68,
+      "id": "launch_68_lagos__kinshasa",
+      "priced_km": 2349,
+      "water_km": 0,
+      "countries": [
+        "Republic of the Congo",
+        "Democratic Republic of the Congo",
+        "Nigeria",
+        "Cameroon",
+        "Gabon"
+      ]
+    },
+    {
+      "number": 69,
+      "id": "launch_69_jaipur__ahmedabad",
+      "priced_km": 617,
+      "water_km": 0,
+      "countries": [
+        "India"
+      ]
+    },
+    {
+      "number": 70,
+      "id": "launch_70_kuala_lumpur__singapore",
+      "priced_km": 349,
+      "water_km": 4.303,
+      "countries": [
+        "Malaysia",
+        "Singapore"
+      ]
+    },
+    {
+      "number": 71,
+      "id": "launch_71_houston__austin",
+      "priced_km": 257,
+      "water_km": 0,
+      "countries": [
+        "United States"
+      ]
+    },
+    {
+      "number": 72,
+      "id": "launch_72_tsuruga__maibara",
+      "priced_km": 55,
+      "water_km": 0,
+      "countries": [
+        "Japan"
+      ]
+    },
+    {
+      "number": 73,
+      "id": "launch_73_valencia__camp_de_tarragona",
+      "priced_km": 271,
+      "water_km": 0,
+      "countries": [
+        "Spain"
+      ]
+    },
+    {
+      "number": 74,
+      "id": "launch_74_porto__vigo",
+      "priced_km": 139,
+      "water_km": 0,
+      "countries": [
+        "Spain",
+        "Portugal"
+      ]
+    }
+  ],
+  "negative_regressions": [
+    "Gulf of Guinea shortcut rejected",
+    "Unpriced Johor Strait crossing rejected"
+  ],
+  "limits": [
+    "Natural Earth cartographic screening and authored engineering quantities, not surveyed gradients, curvature, rights or procurement estimates.",
+    "Legacy Japanese paths use their separate pinned detailed mask and unchanged costs."
+  ]
+}

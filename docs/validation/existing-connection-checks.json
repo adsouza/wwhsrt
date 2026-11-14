@@ -1,0 +1,30 @@
+{
+  "date": "2026-11-13T01:25:19.086Z",
+  "passed": true,
+  "wasm_sha256": "177328351dce3f933a0dcba6e71674f0ac400911800c9c8d9cc6d6e02423430d",
+  "pairs": [
+    [
+      "beijing",
+      "tianjin",
+      "public_beijing__tianjin"
+    ],
+    [
+      "chengdu",
+      "chongqing",
+      "public_chengdu__chongqing"
+    ],
+    [
+      "chengdu",
+      "xi_an",
+      "public_chengdu__xi_an"
+    ]
+  ],
+  "checks": [
+    "All three Chinese pairs are existing public assets, excluded from prospects; arbitrary endpoint controls are absent",
+    "Service selector opens each existing route without changing checkpoint, money, projects or exact durable save bytes",
+    "English desktop and Simplified Chinese phone layouts remain within the viewport"
+  ],
+  "limitations": [
+    "Synthetic browser input; native shortcut is covered by real-widget unit tests and a native build, not OS interaction."
+  ]
+}

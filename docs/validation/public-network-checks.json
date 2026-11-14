@@ -1,0 +1,31 @@
+{
+  "date": "2026-11-13T03:01:47.353Z",
+  "browser": "153.0.8010.12",
+  "wasm_sha256": "dd749f6ea07471c606f5eba87c279b990d5a5d477fb1e2cb513310eee40a24fd",
+  "catalog_sha256": "2a8d0522b5a678579d17d5f257d0f6c1fc1c4f4d79879414d720ee6249486e59",
+  "checks": [
+    "Chinese public-rail geometry is painted in the actual Go-rendered map, with stations and city hubs; tapping a non-hub source station shows its name/status; region selection and inspection preserve the campaign checkpoint",
+    "Searchable Beijing–Shanghai all-stop service leases trains, carries through passengers and intermediate markets, pays access fees and reconciles finite global demand/shared track capacity",
+    "Sparse outside-mode inspector remains available; Chinese route search and phone layouts reflow; region/campaign reload and offline continuation work; native-headless and WASM checkpoints and detailed reports match"
+  ],
+  "timings_ms": {
+    "cold_start": 729,
+    "month_with_china_service": 1212
+  },
+  "limitations": [
+    "Synthetic browser phone/touch input; native OS interaction, physical devices and full production topology are not qualified.",
+    "Prototype source gaps and approximate strategic timings remain; route templates are not operator timetables."
+  ],
+  "catalog_counts": {
+    "cities": 274,
+    "corridors": 148,
+    "stations": 4323,
+    "through_patterns": 1990
+  },
+  "rail_pixels": {
+    "inside": 2600,
+    "hits": 2316
+  },
+  "passed": true,
+  "final_checkpoint": "6d34fa545fe8de3c0c9d6ddbbbf1962b9b009f2fcf4e1fa3443fc5224e07340d"
+}

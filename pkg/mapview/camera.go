@@ -51,6 +51,27 @@ func (c Camera) World(p Point) Point {
 	s := c.scale()
 	return Point{center.X + (p.X-c.Width/2-c.PanX)/s, center.Y - (p.Y-c.Height/2-c.PanY)/s}
 }
+
+// Resize keeps the same geographical center and scale when an inspector or
+// compact task changes the map's available rectangle. Reusing pixel pan offsets
+// with a different fit scale can otherwise move a closely inspected route away.
+func (c *Camera) Resize(w, h float64) {
+	if w == c.Width && h == c.Height {
+		return
+	}
+	// Hidden/initial one-pixel surfaces have no useful fit scale to preserve.
+	if c.Zoom == 0 || c.Width <= 72 || c.Height <= 80 || w <= 72 || h <= 80 {
+		c.Width, c.Height = w, h
+		return
+	}
+	center, scale := c.World(Point{X: c.Width / 2, Y: c.Height / 2}), c.scale()
+	c.Width, c.Height = w, h
+	c.Zoom, c.PanX, c.PanY = 1, 0, 0
+	c.Zoom = math.Max(1, math.Min(maxZoom, scale/c.scale()))
+	at := c.Screen(center)
+	c.PanX, c.PanY = w/2-at.X, h/2-at.Y
+	c.Clamp()
+}
 func (c *Camera) ZoomAt(factor float64, at Point) {
 	before := c.World(at)
 	c.Zoom = math.Max(1, math.Min(maxZoom, c.Zoom*factor))

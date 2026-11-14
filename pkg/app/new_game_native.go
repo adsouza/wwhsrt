@@ -10,13 +10,40 @@ import (
 	"github.com/ebitenui/ebitenui"
 	uimage "github.com/ebitenui/ebitenui/image"
 	"github.com/ebitenui/ebitenui/widget"
+	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"wwhsrt/pkg/gameapi"
 
 	"wwhsrt/pkg/ui"
 )
 
-func (h *host) blocksMap() bool { return h.confirmNewGame }
+func (h *host) blocksMap() bool {
+	x, y := ebiten.CursorPosition()
+	if h.mapControlAt(x, y) {
+		return true
+	}
+	for _, id := range ebiten.AppendTouchIDs(nil) {
+		x, y := ebiten.TouchPosition(id)
+		if h.mapControlAt(x, y) {
+			return true
+		}
+	}
+	for _, combo := range h.combos {
+		if combo.ContentVisible() {
+			return true
+		}
+	}
+	return h.menuInput || h.confirmNewGame || h.helpOpen || h.resizing || h.workspace.Map.Empty()
+}
+
+func (h *host) mapControlAt(x, y int) bool {
+	for _, r := range h.mapControls {
+		if image.Pt(x, y).In(r) {
+			return true
+		}
+	}
+	return false
+}
 
 func (h *host) openNewGame(g *Game) {
 	if h.busy {

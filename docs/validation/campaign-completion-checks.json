@@ -1,0 +1,247 @@
+{
+  "recorded_at": "2026-11-13T14:12:11.409206+00:00",
+  "passed": true,
+  "change": "Persistent campaign completion notice and confirmed New game action replace time controls at month 360. Both locales; completed-save frame reopening; tab changes; muted onboarding.",
+  "native_widget_checks": {
+    "passed": true,
+    "package_seconds": 9.285,
+    "widths": [
+      320,
+      390,
+      800,
+      1440
+    ],
+    "locales": [
+      "en",
+      "zh-Hans"
+    ],
+    "includes": [
+      "final-month boundary",
+      "notice text fits actual widget geometry",
+      "completed frame reconstruction and tab switches",
+      "restart confirmation/cancel preserves exported campaign bytes",
+      "existing panel wrapping/reset confirmation regressions"
+    ]
+  },
+  "browser_footer": {
+    "passed": true,
+    "peak_rss_mib": 575,
+    "results": [
+      {
+        "locale": "en",
+        "width": 320,
+        "boxes": [
+          {
+            "x": 10,
+            "y": 794,
+            "right": 186,
+            "bottom": 838,
+            "width": 176,
+            "height": 44
+          },
+          {
+            "x": 194,
+            "y": 794,
+            "right": 310,
+            "bottom": 838,
+            "width": 116,
+            "height": 44
+          }
+        ],
+        "clipped": false,
+        "overflow": false
+      },
+      {
+        "locale": "en",
+        "width": 390,
+        "boxes": [
+          {
+            "x": 10,
+            "y": 794,
+            "right": 226,
+            "bottom": 838,
+            "width": 216,
+            "height": 44
+          },
+          {
+            "x": 234,
+            "y": 794,
+            "right": 350,
+            "bottom": 838,
+            "width": 116,
+            "height": 44
+          }
+        ],
+        "clipped": false,
+        "overflow": false
+      },
+      {
+        "locale": "en",
+        "width": 800,
+        "boxes": [
+          {
+            "x": 444,
+            "y": 790.5,
+            "right": 660,
+            "bottom": 834.5,
+            "width": 216,
+            "height": 44
+          },
+          {
+            "x": 668,
+            "y": 790.5,
+            "right": 784,
+            "bottom": 834.5,
+            "width": 116,
+            "height": 44
+          }
+        ],
+        "clipped": false,
+        "overflow": false
+      },
+      {
+        "locale": "en",
+        "width": 1440,
+        "boxes": [
+          {
+            "x": 1084,
+            "y": 790.5,
+            "right": 1300,
+            "bottom": 834.5,
+            "width": 216,
+            "height": 44
+          },
+          {
+            "x": 1308,
+            "y": 790.5,
+            "right": 1424,
+            "bottom": 834.5,
+            "width": 116,
+            "height": 44
+          }
+        ],
+        "clipped": false,
+        "overflow": false
+      },
+      {
+        "locale": "zh-Hans",
+        "width": 320,
+        "boxes": [
+          {
+            "x": 10,
+            "y": 794,
+            "right": 186,
+            "bottom": 838,
+            "width": 176,
+            "height": 44
+          },
+          {
+            "x": 194,
+            "y": 794,
+            "right": 310,
+            "bottom": 838,
+            "width": 116,
+            "height": 44
+          }
+        ],
+        "clipped": false,
+        "overflow": false
+      },
+      {
+        "locale": "zh-Hans",
+        "width": 390,
+        "boxes": [
+          {
+            "x": 10,
+            "y": 794,
+            "right": 226,
+            "bottom": 838,
+            "width": 216,
+            "height": 44
+          },
+          {
+            "x": 234,
+            "y": 794,
+            "right": 350,
+            "bottom": 838,
+            "width": 116,
+            "height": 44
+          }
+        ],
+        "clipped": false,
+        "overflow": false
+      },
+      {
+        "locale": "zh-Hans",
+        "width": 800,
+        "boxes": [
+          {
+            "x": 444,
+            "y": 790.5,
+            "right": 660,
+            "bottom": 834.5,
+            "width": 216,
+            "height": 44
+          },
+          {
+            "x": 668,
+            "y": 790.5,
+            "right": 784,
+            "bottom": 834.5,
+            "width": 116,
+            "height": 44
+          }
+        ],
+        "clipped": false,
+        "overflow": false
+      },
+      {
+        "locale": "zh-Hans",
+        "width": 1440,
+        "boxes": [
+          {
+            "x": 1084,
+            "y": 790.5,
+            "right": 1300,
+            "bottom": 834.5,
+            "width": 216,
+            "height": 44
+          },
+          {
+            "x": 1308,
+            "y": 790.5,
+            "right": 1424,
+            "bottom": 834.5,
+            "width": 116,
+            "height": 44
+          }
+        ],
+        "clipped": false,
+        "overflow": false
+      }
+    ],
+    "scope": "Isolated production footer HTML/CSS/font and renderer; no full application/WASM startup or save interaction"
+  },
+  "locale_catalog_check": "passed; 0.210 seconds",
+  "other_checks": [
+    "JS syntax passed",
+    "domain/application import boundaries passed",
+    "git diff --check passed"
+  ],
+  "builds": {
+    "native": "passed",
+    "web": "Built offline web bundle ab425447869340a8",
+    "sha256": {
+      "build/wwhsrt": "6b1cb0981f39b17f8ffe99ca66f047ea47dc1e2ffce8fef54c6cbad6d8aedd2e",
+      "web/main.wasm": "05ea20d1afb2ac01209999771ee2c464234217b351d84eb31342895b9eb781da",
+      "web/app.js": "d9503174184e33223dec9eae0c146e5b46ca2444e9e977589f2c08ed55e008be",
+      "web/index.html": "ccc4bb7bb3360b52b22779947f6d0f4699b4ed55568cdbc7b9afa8236976c454",
+      "web/style.css": "771af1f99e4aa023ef2de6da700d6d3c040dde15a48b5862a5e52400dee63ac3"
+    }
+  },
+  "limits": [
+    "Isolated browser footer HTML/CSS/font/production renderer only; complete WASM application not started or qualified.",
+    "Native OS input and physical phone interaction not requalified.",
+    "Existing campaign/running game not modified; restart rebuilt client to show new UI."
+  ]
+}

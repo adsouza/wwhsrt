@@ -1,0 +1,51 @@
+{
+  "recorded_at": "2026-11-13T14:19:05.569206+00:00",
+  "passed": true,
+  "cause": "Shared public corridor edges submitted repeatedly in opposite directions caused winding cancellation and pale gaps in the vector stroke.",
+  "fix": "Draw exact undirected source segment union once; preserve all original corridor paths and distinct nearby parallel tracks.",
+  "source_segment_instances": 46317,
+  "unique_drawn_segments": 34880,
+  "duplicate_strokes_removed": 11437,
+  "native_pixel_samples": {
+    "before": {
+      "samples": 21,
+      "solid_track_hits": 6
+    },
+    "after": {
+      "samples": 21,
+      "solid_track_hits": 21
+    }
+  },
+  "native_capture_peak_rss_mib": {
+    "before": 219.3,
+    "after": 132.7
+  },
+  "regressions": [
+    "Duplicate and reversed strokes removed; zero-length edges omitted; distinct close parallel tracks retained.",
+    "All original public edges conserved exactly once.",
+    "All six overlapping services remain pickable at the reported Jinan approach.",
+    "Existing rendering/picking/cache tests pass."
+  ],
+  "checks": {
+    "focused": "GOMEMLIMIT=768MiB GOMAXPROCS=2 go test -p 1 ./pkg/render -count=1; passed in 1.096 seconds",
+    "boundaries": "passed",
+    "diff_check": "passed",
+    "native_build": "passed; bundle executable equals build/wwhsrt",
+    "web_build": "Built offline web bundle 4a357a36457027be"
+  },
+  "sha256": {
+    "assets/scenario/public-network.json": "0d74a64753d4ec70d353decfd80584cc17c6fc49adfb7c4bd640864d331ba5e9",
+    "assets/scenario/playable-rail-map.json": "da9c3e1ae9da3f1c0b233fffc4f2209980a0e3b7927c35579ffd6b4e5888dd2e",
+    "pkg/render/track_geometry.go": "fe7e83374d342e280f255f323aa9456c45cdaca48aaeade92da2f2c00d51cde8",
+    "pkg/render/public_network.go": "c9919fadc5cb9460175a285fae49dc66eb268bd778ca505cb08e5f4e619c5a50",
+    "docs/validation/shared-track-before.png": "9ef485060501eb40ee01519a8310b521a7cb269afe62a178075a57db008932b7",
+    "docs/validation/shared-track-after.png": "35ae08a85da2eafe33df4a125d179949cee82f1beeaf774c057fed260dde2041",
+    "build/wwhsrt": "0b07a7dfa431793d0a79c8f6c0895917cad1145719d6cb7639b995408946357c",
+    "web/main.wasm": "9c0592804b638c276bad10938100150e74a7bb275bf3df59dee6da79505f5fe1"
+  },
+  "limits": [
+    "Native captures use the real Ebitengine renderer with shipped map data and an isolated map-only frame; no user save loaded.",
+    "No complete browser/WASM startup retry or physical-device/native-input qualification.",
+    "No network topology, cost, demand, capacity or save schema changes."
+  ]
+}

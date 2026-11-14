@@ -1,0 +1,19 @@
+# Contextual onboarding
+
+The native and browser clients share fourteen learning concepts and the same context/quote model in `pkg/ui/help.go`, `guidance.go` and `help_facts.go`. Both provide inline Explain disclosures and searchable Field Notes in English and Simplified Chinese.
+
+Learning remains local presentation state: each concept records encountered, dismissed, explained and action-completed flags. At most one unsolicited cue is selected for the active view. A dismissed concept stays dismissed across reloads, rotation, settlement and new campaigns. New campaigns clear action completion; the explicit **Reset concept suggestions** action resets learning flags. Global suggestion visibility is independent of those flags. Old globally dismissed preferences migrate to muted suggestions, with all on-demand help available.
+
+The inline help covers endpoints/independent networks, terrain/engineering, financing and cash deficits, construction, fleet requirements, service drafts, fares/company effects, through-running, shared capacity, monthly accounts, idle assets and operating-day replay. Facts come from existing frame/quote/forecast outputs. Dismissed or completed priority cues yield to other relevant concepts rather than suppressing them. Required-train guidance also covers partially assigned fleets. Successful business commands record completion after acceptance; failed commands do not. Opening, searching, dismissing and navigating help cannot dispatch a business command.
+
+Field Notes replaces the inspector contents while retaining the active view and draft. Back restores the task, expanded-map state and normalized scroll position. An explicit topic-to-control link changes views and targets the relevant disclosure. Reference search uses a regular browser search input and the native Unicode/IME/selection/clipboard editor. Expanded-map endpoint help reserves space outside the map canvas. Native and browser map input is disabled while the reference is open.
+
+## Verification
+
+- `GOMEMLIMIT=768MiB GOMAXPROCS=2 go test -p 1 ./pkg/ui ./pkg/app -count=1`: shared concept transitions/migration/search, new-campaign semantics, native real-widget disclosure, focus/draft/scroll retention and inline/reference width/expanded-strip checks in both languages, both palettes and 320–1920px windows. Existing name, report scroll, window and network widget checks also pass.
+- `python3 tools/check-boundaries.py`: UI help does not enter domain/application/headless dependencies.
+- `NODE_OPTIONS=--max-old-space-size=1536 node tools/check-onboarding.cjs http://127.0.0.1:8767/`: actual DOM controls and WASM help state, per-concept/global controls, current financial facts, draft preservation, Chinese composition, 320px reflow, expanded-map separation, rejection/acceptance, reload and offline reference. [Machine-readable results](onboarding-checks.json) pin the tested WASM hash.
+- The existing `check-milestone2.cjs` business workflow also passed after adapting its guidance checks to the ordinary time controls and per-concept dismissal. It covers independent construction, financing, opening, leasing, service revenue and native-headless/WASM replay parity. Its result pins its own tested WASM hash.
+- Native and WASM builds compile. The isolated macOS validation app rendered dark Field Notes with a real current service forecast; its campaign was unchanged. Automated native content clicks/text did not take effect, so native OS interaction is not claimed. Native real-widget tests exercise disclosures and editor/focus behavior independently. [Native observation details](onboarding-native-checks.json) distinguish the observed artifact from subsequent cue-fallback/return-focus adjustments covered by the final build and focused tests.
+
+No full repository suite was run locally. Physical phones, native OS IME/clipboard/accessibility, other native platforms and usability with first-time players remain unqualified.

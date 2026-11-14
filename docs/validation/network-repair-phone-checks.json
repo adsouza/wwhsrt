@@ -1,0 +1,20 @@
+{
+  "date": "2026-11-13T03:50:30.610389+00:00",
+  "status": "memory_limit_stopped",
+  "passed": false,
+  "wasm_sha256": "2bd7613cc3daec24032cea82dbc760dfe945e0832570b9f5e1b76c512d892ed7",
+  "catalog_sha256": "9fcd93c3356bd5545896684e98e102cf7d22144884bf984abd80998cffe942f5",
+  "limit_rss_mib": 2048,
+  "last_observed_rss_mib": 2235,
+  "checks_completed": [
+    "Rules/native-headless tests verify historical v5 accounts and v6 continuation independently."
+  ],
+  "incomplete": [
+    "Browser phone old-save opening, Chinese route interaction and offline continuation were not qualified within the local memory cap."
+  ],
+  "notes": [
+    "Stopped when the cap was exceeded. No player save was used.",
+    "Phone and cold-offline modes remain separate optional workflows; they are not part of the qualified desktop CI step.",
+    "Do not repeat the phone workflow without a material memory fix or a changed authorized resource budget."
+  ]
+}

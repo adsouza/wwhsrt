@@ -1,0 +1,1836 @@
+{
+  "catalog_sha256": "df6df65b2f9a9be5f26cb416d174025652b3bd76c5655f3b49e44a2b4e302a1a",
+  "economy_sha256": "137c545cf1abb4ef3d673693413942f1c0de17ab06a9eb14362c619f95e6f563",
+  "method": "Actual shipped costs, durations, grant, financing and service patterns. Default starter operated during real construction months. Baseline existing public services optimized first among all service-stop pairs, mirrored into project world; add or extend one connector through service. Fixed first-post-opening fare/frequency chosen from bounded grid, then settle 12 months. Monthly cash deltas include maintenance and actual loan interest, exclude upfront capital/principal repayment and competition. A greedy portfolio screen, not an optimum or campaign NPV.",
+  "projects": [
+    {
+      "best": {
+        "BaselinePlans": [
+          {
+            "corridor_id": "tokyo-nagoya",
+            "frequency": 0,
+            "fare": 9000
+          },
+          {
+            "corridor_id": "validation_base_1_0_2",
+            "frequency": 6,
+            "fare": 30000
+          },
+          {
+            "corridor_id": "validation_base_1_0_3",
+            "frequency": 0,
+            "fare": 9492
+          },
+          {
+            "corridor_id": "validation_base_1_1_2",
+            "frequency": 6,
+            "fare": 30000
+          }
+        ],
+        "BaselineFleet": [
+          {
+            "id": 1,
+            "corridor_id": "validation_base_1_1_2"
+          },
+          {
+            "id": 2,
+            "corridor_id": "validation_base_1_1_2"
+          },
+          {
+            "id": 3,
+            "corridor_id": "validation_base_1_0_2"
+          },
+          {
+            "id": 4,
+            "corridor_id": "validation_base_1_0_2"
+          },
+          {
+            "id": 5,
+            "corridor_id": "validation_base_1_0_2"
+          },
+          {
+            "id": 6,
+            "corridor_id": "validation_base_1_0_2"
+          },
+          {
+            "id": 7,
+            "corridor_id": "validation_base_1_1_2"
+          },
+          {
+            "id": 8,
+            "corridor_id": "validation_base_1_1_2"
+          }
+        ],
+        "NewPlans": [
+          {
+            "corridor_id": "tokyo-nagoya",
+            "frequency": 0,
+            "fare": 9000
+          },
+          {
+            "corridor_id": "validation_base_1_0_2",
+            "frequency": 6,
+            "fare": 30000
+          },
+          {
+            "corridor_id": "validation_base_1_0_3",
+            "frequency": 0,
+            "fare": 9492
+          },
+          {
+            "corridor_id": "validation_base_1_1_2",
+            "frequency": 6,
+            "fare": 30000
+          },
+          {
+            "corridor_id": "connector_kanazawa__nagoya_via_maibara",
+            "frequency": 4,
+            "fare": 16000
+          }
+        ],
+        "NewFleet": [
+          {
+            "id": 3,
+            "corridor_id": "validation_base_1_0_2"
+          },
+          {
+            "id": 4,
+            "corridor_id": "validation_base_1_0_2"
+          },
+          {
+            "id": 5,
+            "corridor_id": "validation_base_1_0_2"
+          },
+          {
+            "id": 6,
+            "corridor_id": "validation_base_1_0_2"
+          },
+          {
+            "id": 7,
+            "corridor_id": "validation_base_1_1_2"
+          },
+          {
+            "id": 8,
+            "corridor_id": "validation_base_1_1_2"
+          },
+          {
+            "id": 9,
+            "corridor_id": "validation_base_1_1_2"
+          },
+          {
+            "id": 10,
+            "corridor_id": "validation_base_1_1_2"
+          },
+          {
+            "id": 11,
+            "corridor_id": "connector_kanazawa__nagoya_via_maibara"
+          }
+        ],
+        "route": "connector_kanazawa__nagoya_via_maibara",
+        "frequency": 4,
+        "fare": 16000,
+        "Cost": 362940000000,
+        "Grant": 326646000000,
+        "Debt": 26294000000,
+        "MonthlyIncrement": [
+          82701791,
+          63496830,
+          82701791,
+          76313338,
+          82701791,
+          76313338,
+          82701791,
+          82701791,
+          76313338,
+          82701791,
+          76313338,
+          82701791
+        ],
+        "MonthlyNewServicePortfolio": [
+          2849716592,
+          2553361140,
+          2849716592,
+          2750908409,
+          2849716592,
+          2750908409,
+          2849716592,
+          2849716592,
+          2750908409,
+          2849716592,
+          2750908409,
+          2849716592
+        ],
+        "MonthlyFeederPortfolio": [
+          2767014801,
+          2489864310,
+          2767014801,
+          2674595071,
+          2767014801,
+          2674595071,
+          2767014801,
+          2767014801,
+          2674595071,
+          2767014801,
+          2674595071,
+          2767014801
+        ],
+        "AverageIncrement": 78971893,
+        "MinimumIncrement": 63496830,
+        "Forecast": {
+          "running_costs": 39655200,
+          "access_costs": 11842000,
+          "handling_costs": 2965400,
+          "lease_costs": 12000000,
+          "maintenance_costs": 60490000,
+          "break_even_available": true,
+          "break_even_uses_observed_mix": true,
+          "break_even_passengers": 25064,
+          "capacity_usage": [
+            {
+              "kind": "track",
+              "corridor_id": "launch_72_tsuruga__maibara",
+              "requested": 4,
+              "capacity": 12,
+              "excess": 0,
+              "draft": true,
+              "draft_use": 4,
+              "other_requested": 0,
+              "max_frequency": 12,
+              "services": [
+                {
+                  "service_id": "connector_kanazawa__nagoya_via_maibara",
+                  "frequency": 4,
+                  "usage": 4,
+                  "draft": true
+                }
+              ]
+            }
+          ],
+          "additional_leases": 1,
+          "passengers": 59308,
+          "capacity": 297600,
+          "fleet_needed": 1,
+          "fleet_available": 0,
+          "revenue": 296356204,
+          "costs": 126952600,
+          "contribution": 169403604,
+          "open": true,
+          "delivered_frequency": 4,
+          "company_passengers": 343801,
+          "company_revenue": 3767162376,
+          "company_change": 187015125,
+          "feeder_revenue": -41087179,
+          "km": 246,
+          "minutes": 76
+        }
+      },
+      "km": 55,
+      "months": 48,
+      "project": "launch_72_tsuruga__maibara",
+      "trials": [
+        {
+          "replaces": "validation_base_0_2_4",
+          "BaselinePlans": [
+            {
+              "corridor_id": "tokyo-nagoya",
+              "frequency": 0,
+              "fare": 9000
+            },
+            {
+              "corridor_id": "validation_base_0_0_2",
+              "frequency": 0,
+              "fare": 30000
+            },
+            {
+              "corridor_id": "validation_base_0_0_3",
+              "frequency": 6,
+              "fare": 30000
+            },
+            {
+              "corridor_id": "validation_base_0_0_4",
+              "frequency": 4,
+              "fare": 30000
+            },
+            {
+              "corridor_id": "validation_base_0_1_2",
+              "frequency": 6,
+              "fare": 21810
+            },
+            {
+              "corridor_id": "validation_base_0_2_4",
+              "frequency": 6,
+              "fare": 30000
+            },
+            {
+              "corridor_id": "public_kyoto__osaka",
+              "frequency": 6,
+              "fare": 1040
+            }
+          ],
+          "BaselineFleet": [
+            {
+              "id": 1,
+              "corridor_id": "validation_base_0_0_3"
+            },
+            {
+              "id": 2,
+              "corridor_id": "validation_base_0_0_3"
+            },
+            {
+              "id": 3,
+              "corridor_id": "validation_base_0_1_2"
+            },
+            {
+              "id": 4,
+              "corridor_id": "validation_base_0_1_2"
+            },
+            {
+              "id": 5,
+              "corridor_id": "validation_base_0_1_2"
+            },
+            {
+              "id": 6,
+              "corridor_id": "validation_base_0_1_2"
+            },
+            {
+              "id": 7,
+              "corridor_id": "validation_base_0_0_3"
+            },
+            {
+              "id": 8,
+              "corridor_id": "validation_base_0_0_3"
+            },
+            {
+              "id": 9,
+              "corridor_id": "validation_base_0_0_4"
+            },
+            {
+              "id": 10,
+              "corridor_id": "validation_base_0_0_4"
+            },
+            {
+              "id": 11,
+              "corridor_id": "validation_base_0_0_4"
+            },
+            {
+              "id": 12,
+              "corridor_id": "validation_base_0_2_4"
+            },
+            {
+              "id": 13,
+              "corridor_id": "public_kyoto__osaka"
+            }
+          ],
+          "NewPlans": [
+            {
+              "corridor_id": "tokyo-nagoya",
+              "frequency": 0,
+              "fare": 9000
+            },
+            {
+              "corridor_id": "validation_base_0_0_2",
+              "frequency": 0,
+              "fare": 30000
+            },
+            {
+              "corridor_id": "validation_base_0_0_3",
+              "frequency": 6,
+              "fare": 30000
+            },
+            {
+              "corridor_id": "validation_base_0_0_4",
+              "frequency": 4,
+              "fare": 30000
+            },
+            {
+              "corridor_id": "validation_base_0_1_2",
+              "frequency": 6,
+              "fare": 21810
+            },
+            {
+              "corridor_id": "validation_base_0_2_4",
+              "frequency": 0,
+              "fare": 30000
+            },
+            {
+              "corridor_id": "public_kyoto__osaka",
+              "frequency": 6,
+              "fare": 1040
+            },
+            {
+              "corridor_id": "connector_kanazawa__osaka_via_maibara",
+              "frequency": 6,
+              "fare": 30000
+            }
+          ],
+          "NewFleet": [
+            {
+              "id": 3,
+              "corridor_id": "validation_base_0_0_3"
+            },
+            {
+              "id": 4,
+              "corridor_id": "validation_base_0_0_3"
+            },
+            {
+              "id": 5,
+              "corridor_id": "validation_base_0_0_3"
+            },
+            {
+              "id": 6,
+              "corridor_id": "validation_base_0_0_3"
+            },
+            {
+              "id": 7,
+              "corridor_id": "validation_base_0_0_4"
+            },
+            {
+              "id": 8,
+              "corridor_id": "validation_base_0_0_4"
+            },
+            {
+              "id": 9,
+              "corridor_id": "validation_base_0_0_4"
+            },
+            {
+              "id": 10,
+              "corridor_id": "validation_base_0_1_2"
+            },
+            {
+              "id": 11,
+              "corridor_id": "validation_base_0_1_2"
+            },
+            {
+              "id": 12,
+              "corridor_id": "validation_base_0_1_2"
+            },
+            {
+              "id": 13,
+              "corridor_id": "validation_base_0_1_2"
+            },
+            {
+              "id": 14,
+              "corridor_id": "connector_kanazawa__osaka_via_maibara"
+            },
+            {
+              "id": 15,
+              "corridor_id": "public_kyoto__osaka"
+            },
+            {
+              "id": 16,
+              "corridor_id": "connector_kanazawa__osaka_via_maibara"
+            }
+          ],
+          "route": "connector_kanazawa__osaka_via_maibara",
+          "frequency": 6,
+          "fare": 30000,
+          "Cost": 362940000000,
+          "Grant": 326646000000,
+          "Debt": 26294000000,
+          "MonthlyIncrement": [
+            -1413006098,
+            -1287492667,
+            -1413006098,
+            -1371128298,
+            -1413006098,
+            -1371128298,
+            -1413006098,
+            -1413006098,
+            -1371128298,
+            -1413006098,
+            -1371128298,
+            -1413006098
+          ],
+          "MonthlyNewServicePortfolio": [
+            5731923280,
+            5150824875,
+            5731923280,
+            5538233248,
+            5731923280,
+            5538233248,
+            5731923280,
+            5731923280,
+            5538233248,
+            5731923280,
+            5538233248,
+            5731923280
+          ],
+          "MonthlyFeederPortfolio": [
+            7144929378,
+            6438317542,
+            7144929378,
+            6909361546,
+            7144929378,
+            6909361546,
+            7144929378,
+            7144929378,
+            6909361546,
+            7144929378,
+            6909361546,
+            7144929378
+          ],
+          "AverageIncrement": -1388587378,
+          "MinimumIncrement": -1413006098,
+          "Forecast": {
+            "running_costs": 69396600,
+            "access_costs": 21576000,
+            "handling_costs": 13237150,
+            "lease_costs": 24000000,
+            "maintenance_costs": 60490000,
+            "break_even_available": true,
+            "break_even_uses_observed_mix": true,
+            "break_even_passengers": 30324,
+            "capacity_usage": [
+              {
+                "kind": "track",
+                "corridor_id": "launch_72_tsuruga__maibara",
+                "requested": 6,
+                "capacity": 12,
+                "excess": 0,
+                "draft": true,
+                "draft_use": 6,
+                "other_requested": 0,
+                "max_frequency": 12,
+                "services": [
+                  {
+                    "service_id": "connector_kanazawa__osaka_via_maibara",
+                    "frequency": 6,
+                    "usage": 6,
+                    "draft": true
+                  }
+                ]
+              }
+            ],
+            "additional_leases": 1,
+            "passengers": 264743,
+            "capacity": 595200,
+            "fleet_needed": 2,
+            "fleet_available": 1,
+            "revenue": 1545144835,
+            "costs": 188699750,
+            "contribution": 1356445085,
+            "open": true,
+            "delivered_frequency": 6,
+            "company_passengers": 1001822,
+            "company_revenue": 7045878664,
+            "company_change": -1308692764,
+            "feeder_revenue": -2782185199,
+            "km": 287,
+            "minutes": 91
+          }
+        },
+        {
+          "BaselinePlans": [
+            {
+              "corridor_id": "tokyo-nagoya",
+              "frequency": 0,
+              "fare": 9000
+            },
+            {
+              "corridor_id": "validation_base_1_0_2",
+              "frequency": 6,
+              "fare": 30000
+            },
+            {
+              "corridor_id": "validation_base_1_0_3",
+              "frequency": 0,
+              "fare": 9492
+            },
+            {
+              "corridor_id": "validation_base_1_1_2",
+              "frequency": 6,
+              "fare": 30000
+            }
+          ],
+          "BaselineFleet": [
+            {
+              "id": 1,
+              "corridor_id": "validation_base_1_1_2"
+            },
+            {
+              "id": 2,
+              "corridor_id": "validation_base_1_1_2"
+            },
+            {
+              "id": 3,
+              "corridor_id": "validation_base_1_0_2"
+            },
+            {
+              "id": 4,
+              "corridor_id": "validation_base_1_0_2"
+            },
+            {
+              "id": 5,
+              "corridor_id": "validation_base_1_0_2"
+            },
+            {
+              "id": 6,
+              "corridor_id": "validation_base_1_0_2"
+            },
+            {
+              "id": 7,
+              "corridor_id": "validation_base_1_1_2"
+            },
+            {
+              "id": 8,
+              "corridor_id": "validation_base_1_1_2"
+            }
+          ],
+          "NewPlans": [
+            {
+              "corridor_id": "tokyo-nagoya",
+              "frequency": 0,
+              "fare": 9000
+            },
+            {
+              "corridor_id": "validation_base_1_0_2",
+              "frequency": 6,
+              "fare": 30000
+            },
+            {
+              "corridor_id": "validation_base_1_0_3",
+              "frequency": 0,
+              "fare": 9492
+            },
+            {
+              "corridor_id": "validation_base_1_1_2",
+              "frequency": 6,
+              "fare": 30000
+            },
+            {
+              "corridor_id": "connector_kanazawa__nagoya_via_maibara",
+              "frequency": 4,
+              "fare": 16000
+            }
+          ],
+          "NewFleet": [
+            {
+              "id": 3,
+              "corridor_id": "validation_base_1_0_2"
+            },
+            {
+              "id": 4,
+              "corridor_id": "validation_base_1_0_2"
+            },
+            {
+              "id": 5,
+              "corridor_id": "validation_base_1_0_2"
+            },
+            {
+              "id": 6,
+              "corridor_id": "validation_base_1_0_2"
+            },
+            {
+              "id": 7,
+              "corridor_id": "validation_base_1_1_2"
+            },
+            {
+              "id": 8,
+              "corridor_id": "validation_base_1_1_2"
+            },
+            {
+              "id": 9,
+              "corridor_id": "validation_base_1_1_2"
+            },
+            {
+              "id": 10,
+              "corridor_id": "validation_base_1_1_2"
+            },
+            {
+              "id": 11,
+              "corridor_id": "connector_kanazawa__nagoya_via_maibara"
+            }
+          ],
+          "route": "connector_kanazawa__nagoya_via_maibara",
+          "frequency": 4,
+          "fare": 16000,
+          "Cost": 362940000000,
+          "Grant": 326646000000,
+          "Debt": 26294000000,
+          "MonthlyIncrement": [
+            82701791,
+            63496830,
+            82701791,
+            76313338,
+            82701791,
+            76313338,
+            82701791,
+            82701791,
+            76313338,
+            82701791,
+            76313338,
+            82701791
+          ],
+          "MonthlyNewServicePortfolio": [
+            2849716592,
+            2553361140,
+            2849716592,
+            2750908409,
+            2849716592,
+            2750908409,
+            2849716592,
+            2849716592,
+            2750908409,
+            2849716592,
+            2750908409,
+            2849716592
+          ],
+          "MonthlyFeederPortfolio": [
+            2767014801,
+            2489864310,
+            2767014801,
+            2674595071,
+            2767014801,
+            2674595071,
+            2767014801,
+            2767014801,
+            2674595071,
+            2767014801,
+            2674595071,
+            2767014801
+          ],
+          "AverageIncrement": 78971893,
+          "MinimumIncrement": 63496830,
+          "Forecast": {
+            "running_costs": 39655200,
+            "access_costs": 11842000,
+            "handling_costs": 2965400,
+            "lease_costs": 12000000,
+            "maintenance_costs": 60490000,
+            "break_even_available": true,
+            "break_even_uses_observed_mix": true,
+            "break_even_passengers": 25064,
+            "capacity_usage": [
+              {
+                "kind": "track",
+                "corridor_id": "launch_72_tsuruga__maibara",
+                "requested": 4,
+                "capacity": 12,
+                "excess": 0,
+                "draft": true,
+                "draft_use": 4,
+                "other_requested": 0,
+                "max_frequency": 12,
+                "services": [
+                  {
+                    "service_id": "connector_kanazawa__nagoya_via_maibara",
+                    "frequency": 4,
+                    "usage": 4,
+                    "draft": true
+                  }
+                ]
+              }
+            ],
+            "additional_leases": 1,
+            "passengers": 59308,
+            "capacity": 297600,
+            "fleet_needed": 1,
+            "fleet_available": 0,
+            "revenue": 296356204,
+            "costs": 126952600,
+            "contribution": 169403604,
+            "open": true,
+            "delivered_frequency": 4,
+            "company_passengers": 343801,
+            "company_revenue": 3767162376,
+            "company_change": 187015125,
+            "feeder_revenue": -41087179,
+            "km": 246,
+            "minutes": 76
+          }
+        }
+      ]
+    },
+    {
+      "best": {
+        "replaces": "public_barcelona__camp_de_tarragona",
+        "BaselinePlans": [
+          {
+            "corridor_id": "tokyo-nagoya",
+            "frequency": 6,
+            "fare": 9000
+          },
+          {
+            "corridor_id": "validation_base_0_0_1",
+            "frequency": 2,
+            "fare": 22000
+          },
+          {
+            "corridor_id": "validation_base_0_0_2",
+            "frequency": 6,
+            "fare": 22000
+          },
+          {
+            "corridor_id": "public_barcelona__camp_de_tarragona",
+            "frequency": 1,
+            "fare": 1000
+          }
+        ],
+        "BaselineFleet": [
+          {
+            "id": 1,
+            "corridor_id": "tokyo-nagoya"
+          },
+          {
+            "id": 2,
+            "corridor_id": "tokyo-nagoya"
+          },
+          {
+            "id": 3,
+            "corridor_id": "validation_base_0_0_1"
+          },
+          {
+            "id": 4,
+            "corridor_id": "validation_base_0_0_1"
+          },
+          {
+            "id": 5,
+            "corridor_id": "validation_base_0_0_2"
+          },
+          {
+            "id": 6,
+            "corridor_id": "validation_base_0_0_2"
+          },
+          {
+            "id": 7,
+            "corridor_id": "validation_base_0_0_2"
+          },
+          {
+            "id": 8,
+            "corridor_id": "validation_base_0_0_2"
+          },
+          {
+            "id": 9,
+            "corridor_id": "public_barcelona__camp_de_tarragona"
+          }
+        ],
+        "NewPlans": [
+          {
+            "corridor_id": "tokyo-nagoya",
+            "frequency": 6,
+            "fare": 9000
+          },
+          {
+            "corridor_id": "validation_base_0_0_1",
+            "frequency": 2,
+            "fare": 22000
+          },
+          {
+            "corridor_id": "validation_base_0_0_2",
+            "frequency": 6,
+            "fare": 22000
+          },
+          {
+            "corridor_id": "public_barcelona__camp_de_tarragona",
+            "frequency": 0,
+            "fare": 1000
+          },
+          {
+            "corridor_id": "connector_valencia__barcelona",
+            "frequency": 1,
+            "fare": 2000
+          }
+        ],
+        "NewFleet": [
+          {
+            "id": 3,
+            "corridor_id": "tokyo-nagoya"
+          },
+          {
+            "id": 4,
+            "corridor_id": "tokyo-nagoya"
+          },
+          {
+            "id": 5,
+            "corridor_id": "validation_base_0_0_1"
+          },
+          {
+            "id": 6,
+            "corridor_id": "validation_base_0_0_1"
+          },
+          {
+            "id": 7,
+            "corridor_id": "validation_base_0_0_2"
+          },
+          {
+            "id": 8,
+            "corridor_id": "validation_base_0_0_2"
+          },
+          {
+            "id": 9,
+            "corridor_id": "validation_base_0_0_2"
+          },
+          {
+            "id": 10,
+            "corridor_id": "validation_base_0_0_2"
+          },
+          {
+            "id": 11,
+            "corridor_id": "connector_valencia__barcelona"
+          }
+        ],
+        "route": "connector_valencia__barcelona",
+        "frequency": 1,
+        "fare": 2000,
+        "Cost": 684756000000,
+        "Grant": 616280400000,
+        "Debt": 58475600000,
+        "MonthlyIncrement": [
+          444020992,
+          444020992,
+          422958200,
+          444020992,
+          422958200,
+          444020992,
+          444020992,
+          380631516,
+          444020992,
+          422958200,
+          444020992,
+          422958200
+        ],
+        "MonthlyNewServicePortfolio": [
+          3395025791,
+          3395025791,
+          3275250088,
+          3395025791,
+          3275250088,
+          3395025791,
+          3395025791,
+          3035593489,
+          3395025791,
+          3275250088,
+          3395025791,
+          3275250088
+        ],
+        "MonthlyFeederPortfolio": [
+          2951004799,
+          2951004799,
+          2852291888,
+          2951004799,
+          2852291888,
+          2951004799,
+          2951004799,
+          2654961973,
+          2951004799,
+          2852291888,
+          2951004799,
+          2852291888
+        ],
+        "AverageIncrement": 431717605,
+        "MinimumIncrement": 380631516,
+        "Forecast": {
+          "running_costs": 14951300,
+          "access_costs": 1550000,
+          "handling_costs": 1680600,
+          "lease_costs": 12000000,
+          "maintenance_costs": 114126000,
+          "break_even_available": true,
+          "break_even_uses_observed_mix": true,
+          "break_even_passengers": 100043,
+          "capacity_usage": [
+            {
+              "kind": "track",
+              "corridor_id": "launch_73_valencia__camp_de_tarragona",
+              "requested": 1,
+              "capacity": 12,
+              "excess": 0,
+              "draft": true,
+              "draft_use": 1,
+              "other_requested": 0,
+              "max_frequency": 12,
+              "services": [
+                {
+                  "service_id": "connector_valencia__barcelona",
+                  "frequency": 1,
+                  "usage": 1,
+                  "draft": true
+                }
+              ]
+            }
+          ],
+          "additional_leases": 0,
+          "passengers": 33612,
+          "capacity": 49600,
+          "fleet_needed": 1,
+          "fleet_available": 1,
+          "revenue": 49600000,
+          "costs": 144307900,
+          "contribution": -94707900,
+          "open": true,
+          "delivered_frequency": 1,
+          "company_passengers": 411314,
+          "company_revenue": 4323785625,
+          "company_change": 655606326,
+          "feeder_revenue": 619169726,
+          "km": 371,
+          "minutes": 103
+        }
+      },
+      "km": 271,
+      "months": 54,
+      "project": "launch_73_valencia__camp_de_tarragona",
+      "trials": [
+        {
+          "replaces": "public_barcelona__camp_de_tarragona",
+          "BaselinePlans": [
+            {
+              "corridor_id": "tokyo-nagoya",
+              "frequency": 6,
+              "fare": 9000
+            },
+            {
+              "corridor_id": "validation_base_0_0_1",
+              "frequency": 2,
+              "fare": 22000
+            },
+            {
+              "corridor_id": "validation_base_0_0_2",
+              "frequency": 6,
+              "fare": 22000
+            },
+            {
+              "corridor_id": "public_barcelona__camp_de_tarragona",
+              "frequency": 1,
+              "fare": 1000
+            }
+          ],
+          "BaselineFleet": [
+            {
+              "id": 1,
+              "corridor_id": "tokyo-nagoya"
+            },
+            {
+              "id": 2,
+              "corridor_id": "tokyo-nagoya"
+            },
+            {
+              "id": 3,
+              "corridor_id": "validation_base_0_0_1"
+            },
+            {
+              "id": 4,
+              "corridor_id": "validation_base_0_0_1"
+            },
+            {
+              "id": 5,
+              "corridor_id": "validation_base_0_0_2"
+            },
+            {
+              "id": 6,
+              "corridor_id": "validation_base_0_0_2"
+            },
+            {
+              "id": 7,
+              "corridor_id": "validation_base_0_0_2"
+            },
+            {
+              "id": 8,
+              "corridor_id": "validation_base_0_0_2"
+            },
+            {
+              "id": 9,
+              "corridor_id": "public_barcelona__camp_de_tarragona"
+            }
+          ],
+          "NewPlans": [
+            {
+              "corridor_id": "tokyo-nagoya",
+              "frequency": 6,
+              "fare": 9000
+            },
+            {
+              "corridor_id": "validation_base_0_0_1",
+              "frequency": 2,
+              "fare": 22000
+            },
+            {
+              "corridor_id": "validation_base_0_0_2",
+              "frequency": 6,
+              "fare": 22000
+            },
+            {
+              "corridor_id": "public_barcelona__camp_de_tarragona",
+              "frequency": 0,
+              "fare": 1000
+            },
+            {
+              "corridor_id": "connector_valencia__barcelona",
+              "frequency": 1,
+              "fare": 2000
+            }
+          ],
+          "NewFleet": [
+            {
+              "id": 3,
+              "corridor_id": "tokyo-nagoya"
+            },
+            {
+              "id": 4,
+              "corridor_id": "tokyo-nagoya"
+            },
+            {
+              "id": 5,
+              "corridor_id": "validation_base_0_0_1"
+            },
+            {
+              "id": 6,
+              "corridor_id": "validation_base_0_0_1"
+            },
+            {
+              "id": 7,
+              "corridor_id": "validation_base_0_0_2"
+            },
+            {
+              "id": 8,
+              "corridor_id": "validation_base_0_0_2"
+            },
+            {
+              "id": 9,
+              "corridor_id": "validation_base_0_0_2"
+            },
+            {
+              "id": 10,
+              "corridor_id": "validation_base_0_0_2"
+            },
+            {
+              "id": 11,
+              "corridor_id": "connector_valencia__barcelona"
+            }
+          ],
+          "route": "connector_valencia__barcelona",
+          "frequency": 1,
+          "fare": 2000,
+          "Cost": 684756000000,
+          "Grant": 616280400000,
+          "Debt": 58475600000,
+          "MonthlyIncrement": [
+            444020992,
+            444020992,
+            422958200,
+            444020992,
+            422958200,
+            444020992,
+            444020992,
+            380631516,
+            444020992,
+            422958200,
+            444020992,
+            422958200
+          ],
+          "MonthlyNewServicePortfolio": [
+            3395025791,
+            3395025791,
+            3275250088,
+            3395025791,
+            3275250088,
+            3395025791,
+            3395025791,
+            3035593489,
+            3395025791,
+            3275250088,
+            3395025791,
+            3275250088
+          ],
+          "MonthlyFeederPortfolio": [
+            2951004799,
+            2951004799,
+            2852291888,
+            2951004799,
+            2852291888,
+            2951004799,
+            2951004799,
+            2654961973,
+            2951004799,
+            2852291888,
+            2951004799,
+            2852291888
+          ],
+          "AverageIncrement": 431717605,
+          "MinimumIncrement": 380631516,
+          "Forecast": {
+            "running_costs": 14951300,
+            "access_costs": 1550000,
+            "handling_costs": 1680600,
+            "lease_costs": 12000000,
+            "maintenance_costs": 114126000,
+            "break_even_available": true,
+            "break_even_uses_observed_mix": true,
+            "break_even_passengers": 100043,
+            "capacity_usage": [
+              {
+                "kind": "track",
+                "corridor_id": "launch_73_valencia__camp_de_tarragona",
+                "requested": 1,
+                "capacity": 12,
+                "excess": 0,
+                "draft": true,
+                "draft_use": 1,
+                "other_requested": 0,
+                "max_frequency": 12,
+                "services": [
+                  {
+                    "service_id": "connector_valencia__barcelona",
+                    "frequency": 1,
+                    "usage": 1,
+                    "draft": true
+                  }
+                ]
+              }
+            ],
+            "additional_leases": 0,
+            "passengers": 33612,
+            "capacity": 49600,
+            "fleet_needed": 1,
+            "fleet_available": 1,
+            "revenue": 49600000,
+            "costs": 144307900,
+            "contribution": -94707900,
+            "open": true,
+            "delivered_frequency": 1,
+            "company_passengers": 411314,
+            "company_revenue": 4323785625,
+            "company_change": 655606326,
+            "feeder_revenue": 619169726,
+            "km": 371,
+            "minutes": 103
+          }
+        },
+        {
+          "replaces": "validation_base_1_1_4",
+          "BaselinePlans": [
+            {
+              "corridor_id": "tokyo-nagoya",
+              "frequency": 6,
+              "fare": 9000
+            },
+            {
+              "corridor_id": "validation_base_1_0_1",
+              "frequency": 2,
+              "fare": 22000
+            },
+            {
+              "corridor_id": "validation_base_1_0_2",
+              "frequency": 0,
+              "fare": 22000
+            },
+            {
+              "corridor_id": "validation_base_1_0_3",
+              "frequency": 0,
+              "fare": 22000
+            },
+            {
+              "corridor_id": "validation_base_1_0_4",
+              "frequency": 4,
+              "fare": 30000
+            },
+            {
+              "corridor_id": "public_barcelona__camp_de_tarragona",
+              "frequency": 0,
+              "fare": 1000
+            },
+            {
+              "corridor_id": "validation_base_1_1_3",
+              "frequency": 4,
+              "fare": 30000
+            },
+            {
+              "corridor_id": "validation_base_1_1_4",
+              "frequency": 2,
+              "fare": 1000
+            }
+          ],
+          "BaselineFleet": [
+            {
+              "id": 1,
+              "corridor_id": "tokyo-nagoya"
+            },
+            {
+              "id": 2,
+              "corridor_id": "tokyo-nagoya"
+            },
+            {
+              "id": 3,
+              "corridor_id": "validation_base_1_0_1"
+            },
+            {
+              "id": 4,
+              "corridor_id": "validation_base_1_0_1"
+            },
+            {
+              "id": 5,
+              "corridor_id": "validation_base_1_0_4"
+            },
+            {
+              "id": 6,
+              "corridor_id": "validation_base_1_0_4"
+            },
+            {
+              "id": 7,
+              "corridor_id": "validation_base_1_0_4"
+            },
+            {
+              "id": 8,
+              "corridor_id": "validation_base_1_0_4"
+            },
+            {
+              "id": 9,
+              "corridor_id": "validation_base_1_1_4"
+            },
+            {
+              "id": 10,
+              "corridor_id": "validation_base_1_1_3"
+            }
+          ],
+          "NewPlans": [
+            {
+              "corridor_id": "tokyo-nagoya",
+              "frequency": 6,
+              "fare": 9000
+            },
+            {
+              "corridor_id": "validation_base_1_0_1",
+              "frequency": 2,
+              "fare": 22000
+            },
+            {
+              "corridor_id": "validation_base_1_0_2",
+              "frequency": 0,
+              "fare": 22000
+            },
+            {
+              "corridor_id": "validation_base_1_0_3",
+              "frequency": 0,
+              "fare": 22000
+            },
+            {
+              "corridor_id": "validation_base_1_0_4",
+              "frequency": 4,
+              "fare": 30000
+            },
+            {
+              "corridor_id": "public_barcelona__camp_de_tarragona",
+              "frequency": 0,
+              "fare": 1000
+            },
+            {
+              "corridor_id": "validation_base_1_1_3",
+              "frequency": 4,
+              "fare": 30000
+            },
+            {
+              "corridor_id": "validation_base_1_1_4",
+              "frequency": 0,
+              "fare": 1000
+            },
+            {
+              "corridor_id": "connector_valencia__perpignan",
+              "frequency": 4,
+              "fare": 6500
+            }
+          ],
+          "NewFleet": [
+            {
+              "id": 3,
+              "corridor_id": "tokyo-nagoya"
+            },
+            {
+              "id": 4,
+              "corridor_id": "tokyo-nagoya"
+            },
+            {
+              "id": 5,
+              "corridor_id": "validation_base_1_0_1"
+            },
+            {
+              "id": 6,
+              "corridor_id": "validation_base_1_0_1"
+            },
+            {
+              "id": 7,
+              "corridor_id": "validation_base_1_0_4"
+            },
+            {
+              "id": 8,
+              "corridor_id": "validation_base_1_0_4"
+            },
+            {
+              "id": 9,
+              "corridor_id": "validation_base_1_0_4"
+            },
+            {
+              "id": 10,
+              "corridor_id": "validation_base_1_0_4"
+            },
+            {
+              "id": 11,
+              "corridor_id": "validation_base_1_1_3"
+            },
+            {
+              "id": 12,
+              "corridor_id": "connector_valencia__perpignan"
+            },
+            {
+              "id": 13,
+              "corridor_id": "connector_valencia__perpignan"
+            }
+          ],
+          "route": "connector_valencia__perpignan",
+          "frequency": 4,
+          "fare": 6500,
+          "Cost": 684756000000,
+          "Grant": 616280400000,
+          "Debt": 58475600000,
+          "MonthlyIncrement": [
+            -61700735,
+            -61700735,
+            -66986091,
+            -61700735,
+            -66986091,
+            -61700735,
+            -61700735,
+            -77322812,
+            -61700735,
+            -66986091,
+            -61700735,
+            -66986091
+          ],
+          "MonthlyNewServicePortfolio": [
+            3467387003,
+            3467387003,
+            3344525404,
+            3467387003,
+            3344525404,
+            3467387003,
+            3467387003,
+            3098679704,
+            3467387003,
+            3344525404,
+            3467387003,
+            3344525404
+          ],
+          "MonthlyFeederPortfolio": [
+            3529087738,
+            3529087738,
+            3411511495,
+            3529087738,
+            3411511495,
+            3529087738,
+            3529087738,
+            3176002516,
+            3529087738,
+            3411511495,
+            3529087738,
+            3411511495
+          ],
+          "AverageIncrement": -64764360,
+          "MinimumIncrement": -77322812,
+          "Forecast": {
+            "running_costs": 89304800,
+            "access_costs": 17546000,
+            "handling_costs": 11873700,
+            "lease_costs": 24000000,
+            "maintenance_costs": 114126000,
+            "break_even_available": true,
+            "break_even_uses_observed_mix": true,
+            "break_even_passengers": 114977,
+            "capacity_usage": [
+              {
+                "kind": "track",
+                "corridor_id": "launch_73_valencia__camp_de_tarragona",
+                "requested": 4,
+                "capacity": 12,
+                "excess": 0,
+                "draft": true,
+                "draft_use": 4,
+                "other_requested": 0,
+                "max_frequency": 12,
+                "services": [
+                  {
+                    "service_id": "connector_valencia__perpignan",
+                    "frequency": 4,
+                    "usage": 4,
+                    "draft": true
+                  }
+                ]
+              }
+            ],
+            "additional_leases": 1,
+            "passengers": 237474,
+            "capacity": 396800,
+            "fleet_needed": 2,
+            "fleet_available": 1,
+            "revenue": 517850921,
+            "costs": 256850500,
+            "contribution": 261000421,
+            "open": true,
+            "delivered_frequency": 4,
+            "company_passengers": 551455,
+            "company_revenue": 4495865687,
+            "company_change": 149884599,
+            "feeder_revenue": -275933572,
+            "km": 554,
+            "minutes": 157
+          }
+        }
+      ]
+    },
+    {
+      "best": {
+        "replaces": "public_lisbon__porto",
+        "BaselinePlans": [
+          {
+            "corridor_id": "tokyo-nagoya",
+            "frequency": 6,
+            "fare": 9000
+          },
+          {
+            "corridor_id": "public_lisbon__porto",
+            "frequency": 2,
+            "fare": 9000
+          },
+          {
+            "corridor_id": "public_stop_node_12819737430__stop_node_453651815",
+            "frequency": 6,
+            "fare": 3000
+          }
+        ],
+        "BaselineFleet": [
+          {
+            "id": 1,
+            "corridor_id": "tokyo-nagoya"
+          },
+          {
+            "id": 2,
+            "corridor_id": "tokyo-nagoya"
+          },
+          {
+            "id": 3,
+            "corridor_id": "public_lisbon__porto"
+          },
+          {
+            "id": 4,
+            "corridor_id": "public_stop_node_12819737430__stop_node_453651815"
+          }
+        ],
+        "NewPlans": [
+          {
+            "corridor_id": "tokyo-nagoya",
+            "frequency": 6,
+            "fare": 9000
+          },
+          {
+            "corridor_id": "public_lisbon__porto",
+            "frequency": 0,
+            "fare": 9000
+          },
+          {
+            "corridor_id": "public_stop_node_12819737430__stop_node_453651815",
+            "frequency": 6,
+            "fare": 3000
+          },
+          {
+            "corridor_id": "connector_lisbon__pontevedra",
+            "frequency": 2,
+            "fare": 30000
+          }
+        ],
+        "NewFleet": [
+          {
+            "id": 3,
+            "corridor_id": "tokyo-nagoya"
+          },
+          {
+            "id": 4,
+            "corridor_id": "tokyo-nagoya"
+          },
+          {
+            "id": 5,
+            "corridor_id": "connector_lisbon__pontevedra"
+          },
+          {
+            "id": 6,
+            "corridor_id": "public_stop_node_12819737430__stop_node_453651815"
+          }
+        ],
+        "route": "connector_lisbon__pontevedra",
+        "frequency": 2,
+        "fare": 30000,
+        "Cost": 438840000000,
+        "Grant": 394956000000,
+        "Debt": 33884000000,
+        "MonthlyIncrement": [
+          66221398,
+          66221398,
+          59886339,
+          66221398,
+          59886339,
+          66221398,
+          66221398,
+          47231584,
+          66221398,
+          59886339,
+          66221398,
+          59886339
+        ],
+        "MonthlyNewServicePortfolio": [
+          1357787998,
+          1357787998,
+          1308234539,
+          1357787998,
+          1308234539,
+          1357787998,
+          1357787998,
+          1209152034,
+          1357787998,
+          1308234539,
+          1357787998,
+          1308234539
+        ],
+        "MonthlyFeederPortfolio": [
+          1291566600,
+          1291566600,
+          1248348200,
+          1291566600,
+          1248348200,
+          1291566600,
+          1291566600,
+          1161920450,
+          1291566600,
+          1248348200,
+          1291566600,
+          1248348200
+        ],
+        "AverageIncrement": 62527227,
+        "MinimumIncrement": 47231584,
+        "Forecast": {
+          "running_costs": 39977600,
+          "access_costs": 11067000,
+          "handling_costs": 2240200,
+          "lease_costs": 12000000,
+          "maintenance_costs": 73140000,
+          "break_even_available": true,
+          "break_even_uses_observed_mix": true,
+          "break_even_passengers": 13050,
+          "capacity_usage": [
+            {
+              "kind": "track",
+              "corridor_id": "launch_74_porto__vigo",
+              "requested": 2,
+              "capacity": 12,
+              "excess": 0,
+              "draft": true,
+              "draft_use": 2,
+              "other_requested": 0,
+              "max_frequency": 12,
+              "services": [
+                {
+                  "service_id": "connector_lisbon__pontevedra",
+                  "frequency": 2,
+                  "usage": 2,
+                  "draft": true
+                }
+              ]
+            }
+          ],
+          "additional_leases": 0,
+          "passengers": 44804,
+          "capacity": 148800,
+          "fleet_needed": 1,
+          "fleet_available": 1,
+          "revenue": 469810232,
+          "costs": 138424800,
+          "contribution": 331385432,
+          "open": true,
+          "delivered_frequency": 2,
+          "company_passengers": 187398,
+          "company_revenue": 1727392232,
+          "company_change": 195834732,
+          "feeder_revenue": -259230000,
+          "km": 496,
+          "minutes": 183
+        }
+      },
+      "km": 139,
+      "months": 54,
+      "project": "launch_74_porto__vigo",
+      "trials": [
+        {
+          "replaces": "public_lisbon__porto",
+          "BaselinePlans": [
+            {
+              "corridor_id": "tokyo-nagoya",
+              "frequency": 6,
+              "fare": 9000
+            },
+            {
+              "corridor_id": "public_lisbon__porto",
+              "frequency": 2,
+              "fare": 9000
+            },
+            {
+              "corridor_id": "public_stop_node_12819737430__stop_node_453651815",
+              "frequency": 6,
+              "fare": 3000
+            }
+          ],
+          "BaselineFleet": [
+            {
+              "id": 1,
+              "corridor_id": "tokyo-nagoya"
+            },
+            {
+              "id": 2,
+              "corridor_id": "tokyo-nagoya"
+            },
+            {
+              "id": 3,
+              "corridor_id": "public_lisbon__porto"
+            },
+            {
+              "id": 4,
+              "corridor_id": "public_stop_node_12819737430__stop_node_453651815"
+            }
+          ],
+          "NewPlans": [
+            {
+              "corridor_id": "tokyo-nagoya",
+              "frequency": 6,
+              "fare": 9000
+            },
+            {
+              "corridor_id": "public_lisbon__porto",
+              "frequency": 0,
+              "fare": 9000
+            },
+            {
+              "corridor_id": "public_stop_node_12819737430__stop_node_453651815",
+              "frequency": 6,
+              "fare": 3000
+            },
+            {
+              "corridor_id": "connector_lisbon__pontevedra",
+              "frequency": 2,
+              "fare": 30000
+            }
+          ],
+          "NewFleet": [
+            {
+              "id": 3,
+              "corridor_id": "tokyo-nagoya"
+            },
+            {
+              "id": 4,
+              "corridor_id": "tokyo-nagoya"
+            },
+            {
+              "id": 5,
+              "corridor_id": "connector_lisbon__pontevedra"
+            },
+            {
+              "id": 6,
+              "corridor_id": "public_stop_node_12819737430__stop_node_453651815"
+            }
+          ],
+          "route": "connector_lisbon__pontevedra",
+          "frequency": 2,
+          "fare": 30000,
+          "Cost": 438840000000,
+          "Grant": 394956000000,
+          "Debt": 33884000000,
+          "MonthlyIncrement": [
+            66221398,
+            66221398,
+            59886339,
+            66221398,
+            59886339,
+            66221398,
+            66221398,
+            47231584,
+            66221398,
+            59886339,
+            66221398,
+            59886339
+          ],
+          "MonthlyNewServicePortfolio": [
+            1357787998,
+            1357787998,
+            1308234539,
+            1357787998,
+            1308234539,
+            1357787998,
+            1357787998,
+            1209152034,
+            1357787998,
+            1308234539,
+            1357787998,
+            1308234539
+          ],
+          "MonthlyFeederPortfolio": [
+            1291566600,
+            1291566600,
+            1248348200,
+            1291566600,
+            1248348200,
+            1291566600,
+            1291566600,
+            1161920450,
+            1291566600,
+            1248348200,
+            1291566600,
+            1248348200
+          ],
+          "AverageIncrement": 62527227,
+          "MinimumIncrement": 47231584,
+          "Forecast": {
+            "running_costs": 39977600,
+            "access_costs": 11067000,
+            "handling_costs": 2240200,
+            "lease_costs": 12000000,
+            "maintenance_costs": 73140000,
+            "break_even_available": true,
+            "break_even_uses_observed_mix": true,
+            "break_even_passengers": 13050,
+            "capacity_usage": [
+              {
+                "kind": "track",
+                "corridor_id": "launch_74_porto__vigo",
+                "requested": 2,
+                "capacity": 12,
+                "excess": 0,
+                "draft": true,
+                "draft_use": 2,
+                "other_requested": 0,
+                "max_frequency": 12,
+                "services": [
+                  {
+                    "service_id": "connector_lisbon__pontevedra",
+                    "frequency": 2,
+                    "usage": 2,
+                    "draft": true
+                  }
+                ]
+              }
+            ],
+            "additional_leases": 0,
+            "passengers": 44804,
+            "capacity": 148800,
+            "fleet_needed": 1,
+            "fleet_available": 1,
+            "revenue": 469810232,
+            "costs": 138424800,
+            "contribution": 331385432,
+            "open": true,
+            "delivered_frequency": 2,
+            "company_passengers": 187398,
+            "company_revenue": 1727392232,
+            "company_change": 195834732,
+            "feeder_revenue": -259230000,
+            "km": 496,
+            "minutes": 183
+          }
+        }
+      ]
+    }
+  ]
+}

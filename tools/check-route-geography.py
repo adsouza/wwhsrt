@@ -102,10 +102,24 @@ def main():
             rows.append(row)
             if errors:
                 failures.append(row)
+    display_file=ROOT/'assets/scenario/rail-display-paths.json'
+    if display_file.exists():
+        display=json.loads(display_file.read_text())
+        live_cities={c['id']:(c.get('station_lon',c['lon']),c.get('station_lat',c['lat'])) for c in json.loads((ROOT/'assets/scenario/public-network.json').read_text())['cities']}
+        for corridor in json.loads(business.read_text()):
+            for alignment in corridor['alignments']:
+                points=[(p['lon'],p['lat']) for p in display[corridor['id']][alignment['id']]]
+                assert points[0]==live_cities[corridor['from_city']] and points[-1]==live_cities[corridor['to_city']], 'Detached display endpoints'
+                errors=check_path(points)
+                length=kilometres(points)
+                if length>alignment['km']:errors.append('drawn route exceeds priced rail kilometres')
+                row={'corridor':corridor['id'],'alignment':alignment['id'],'display':True,'vertices':len(points),'drawn_geodesic_km':round(length,2),'scenario_rail_km':alignment['km'],'errors':errors}
+                rows.append(row)
+                if errors:failures.append(row)
     assert rows, 'Empty route catalog'
     if failures:
         raise AssertionError(json.dumps(failures,indent=2))
-    result = {'result':'passed','business_sha256':sha(business),'mask_sha256':sha(source),'drawn_coast_sha256':sha(coastline),
+    result = {'result':'passed','display_sha256':sha(display_file),'business_sha256':sha(business),'mask_sha256':sha(source),'drawn_coast_sha256':sha(coastline),
               'routes':rows,'checks':['All shipped paths, including existing lines and both alternatives, connect their endpoints',
               'No mapped sea/lake or conservative lake-envelope crossings in geographic and Equal Earth space',
               'Both source shoreline and actually rendered coast checked; unknown coverage rejected',

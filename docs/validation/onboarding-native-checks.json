@@ -1,0 +1,23 @@
+{
+  "date": "2026-11-12T13:39:02.895346+00:00",
+  "platform": "macOS arm64",
+  "observed_binary_sha256": "8a4dde4c76299294aa656b2f4c76e9f9b679d7975b845dab841c16f886cf9be4",
+  "isolated_bundle_identifier": "io.github.adsouza.wwhsrt.onboarding-validation",
+  "isolated_data_directory": "build/onboarding-native-validation-data",
+  "rendering_observed": [
+    "Dark Field Notes in the native sidebar with readable wrapped English text and selected Help tab",
+    "Search input, Back to my task, topic article and authoritative current-service fare/forecast facts",
+    "Scrollable native reference alongside the existing map"
+  ],
+  "fixture_campaign_unchanged": true,
+  "player_campaign_reset": false,
+  "isolated_app_closed": true,
+  "result": "native_rendering_observed",
+  "limitations": [
+    "Native content clicks and text input did not take effect through CUA; only native rendering was observed. Widget-level tests cover help disclosure and search/focus behavior.",
+    "Native physical keyboard, IME, clipboard and assistive technology remain unqualified.",
+    "Rendering was observed before the final cue-fallback and return-focus adjustments; the final native build and focused widget tests include those changes."
+  ],
+  "final_built_binary_sha256": "a05276d45c0f6c060386b79a219cad47054446422cf9472eee3292dfcda94cee",
+  "final_bundle_matches_built_binary": true
+}

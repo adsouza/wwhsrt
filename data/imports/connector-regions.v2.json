@@ -1,0 +1,111 @@
+{
+  "format": "wwhsrt-connector-regions-v2",
+  "regions": [
+    {
+      "id": "full-nec",
+      "bounds": [
+        -77.3,
+        38.7,
+        -70.8,
+        42.6
+      ],
+      "gauges": [
+        "1435"
+      ],
+      "source": "https://media.amtrak.com/wp-content/uploads/2025/08/NextGen-Acela_NEC-Map.pdf"
+    },
+    {
+      "id": "uzbekistan",
+      "bounds": [
+        60.0,
+        38.6,
+        70.0,
+        42.0
+      ],
+      "gauges": [
+        "1520"
+      ],
+      "source": "https://uzrailpass.uz/en/pages/poezd-jadvali"
+    },
+    {
+      "id": "germany",
+      "bounds": [
+        5.7,
+        47.2,
+        15.2,
+        55.2
+      ],
+      "gauges": [
+        "1435"
+      ],
+      "source": "https://www.bahn.de/service/ueber-uns/zugtypen/ice"
+    },
+    {
+      "id": "austria",
+      "bounds": [
+        9.5,
+        46.4,
+        17.1,
+        49.1
+      ],
+      "gauges": [
+        "1435"
+      ],
+      "source": "https://www.oebb.at/en/reiseplanung-services/oebb-zugverbindungen"
+    },
+    {
+      "id": "turkey-yht",
+      "bounds": [
+        28.5,
+        37.5,
+        33.5,
+        41.3
+      ],
+      "gauges": [
+        "1435"
+      ],
+      "source": "https://www.tcddtasimacilik.gov.tr/seferler/yuksek-hizli-tren"
+    },
+    {
+      "id": "moscow-petersburg",
+      "bounds": [
+        29.5,
+        55.3,
+        38.0,
+        60.2
+      ],
+      "gauges": [
+        "1520"
+      ],
+      "source": "https://eng.rzd.ru/en/9878"
+    },
+    {
+      "id": "portugal",
+      "bounds": [
+        -9.6,
+        37.0,
+        -7.0,
+        42.2
+      ],
+      "gauges": [
+        "1668"
+      ],
+      "source": "https://www.cp.pt/passageiros/en/train-times/Prices/alfa-pendular"
+    },
+    {
+      "id": "morocco-al-boraq",
+      "bounds": [
+        -8.2,
+        33.3,
+        -5.3,
+        35.9
+      ],
+      "gauges": [
+        "1435"
+      ],
+      "source": "https://www.oncf.ma/en/Al-boraq",
+      "allow_untagged_active_rail": true,
+      "gauge_inference": "ONCF national mainline network is standard gauge. In this operator-backed corridor only, infer 1435 mm for missing-gauge active railway=rail ways after excluding yard/siding/spur, freight, industrial, military, test, disused and construction tracks. Explicit incompatible gauges remain rejected; junctions still require shared source node IDs."
+    }
+  ]
+}

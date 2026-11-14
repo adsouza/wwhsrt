@@ -200,7 +200,7 @@ func TestNativeNameDraftFocusAndCampaignIsolation(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	g := &Game{Port: port, Frame: port.Snapshot(), Map: &render.Map{Font: e.face.(*text.GoTextFace).Source}, width: 1200, height: 800, Camera: mapview.Camera{Width: 840, Height: 800}, State: ui.State{Locale: "en", View: "company", DraftName: "晨曦 Rail", LoanAmount: "1000000"}}
+	g := &Game{Port: port, Frame: port.Snapshot(), Map: &render.Map{Font: e.face.(*text.GoTextFace).Source}, width: 1200, height: 800, Camera: mapview.Camera{Width: 840, Height: 800}, State: ui.State{Locale: "en", View: "company", CompanyPane: "identity", DraftName: "晨曦 Rail", LoanAmount: "1000000"}}
 	old := preferencesPath
 	preferencesPath = filepath.Join(t.TempDir(), "ui.json")
 	t.Cleanup(func() { preferencesPath = old })
@@ -233,16 +233,22 @@ func TestNativeNameDraftFocusAndCampaignIsolation(t *testing.T) {
 	if err != nil || !strings.Contains(string(saved), "新公司") {
 		t.Fatal("draft not saved", err)
 	}
+	g.State.CompanyPane = "finance"
+	g.host.build(g)
+	event.ExecuteDeferred()
 	g.host.ui.SetFocusedWidget(g.host.loanInput)
 	event.ExecuteDeferred()
 	if input.field.IsFocused() || input.IsFocused() {
-		t.Fatal("loan field did not release name input")
+		t.Fatal("hidden identity editor retained focus")
 	}
-	// A pointer press must also transfer focus away from the loan widget.
+	g.State.CompanyPane = "identity"
+	g.host.build(g)
+	event.ExecuteDeferred()
+	input = g.host.nameInput
 	input.GetWidget().MouseButtonPressedEvent.Fire(&widget.WidgetMouseButtonPressedEventArgs{Widget: input.GetWidget(), Button: ebiten.MouseButtonLeft, OffsetX: 10})
 	event.ExecuteDeferred()
-	if !input.IsFocused() || g.host.loanInput.IsFocused() {
-		t.Fatal("click did not transfer focus from loan to name")
+	if !input.IsFocused() || g.host.loanInput != nil {
+		t.Fatal("identity pane did not restore its editor")
 	}
 	nameCommand(t, input, "all", false)
 	g.host.build(g)

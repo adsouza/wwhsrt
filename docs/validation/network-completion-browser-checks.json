@@ -1,0 +1,14 @@
+{
+  "date": "2026-11-13T11:56:25.846Z",
+  "catalog_sha256": "b5940f7c0c130ec255f0783da9c09e12355b6c61131396a1b5f590c4c72ce2f8",
+  "wasm_sha256": "c7faab5e41b67908a3a5b31a10d1044598db1468dbd86228c8de3fc915503674",
+  "passed": false,
+  "checks": [],
+  "limitations": [
+    "Synthetic desktop browser interaction; physical phones and native OS input are not qualified.",
+    "Source/operator completeness outside the declared network manifest remains unqualified."
+  ],
+  "error": "Error: page.waitForFunction: Target page, context or browser has been closed",
+  "peak_rss_mib": 2068,
+  "status": "memory_limit_stopped"
+}

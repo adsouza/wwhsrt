@@ -1,0 +1,19 @@
+{
+  "date": "2026-11-12T16:30:16.184Z",
+  "browser": "153.0.8010.12",
+  "wasm_sha256": "9fa2148ae46ddba11aed552d0a2035bf7d9d5c4816648a02ab09383843e4d75d",
+  "ui_sha256": "7ce71462c1c8eedb04819133c3e7016c975e3be882fcde623e747b2ff16b8287",
+  "checks": [
+    "Single anchored cue; dismissing terrain exposes funding without global mute; Explain remains available with quote facts; reference search/back preserves draft and exact durable game bytes",
+    "Reload retains per-concept dismissals; global mute hides only unsolicited cues; on-demand forecast explanations and service fare/frequency drafts survive help navigation",
+    "320px Simplified Chinese reference/search and composition Enter do not submit business commands; expanded endpoint help reserves space outside map; Back restores expanded draft",
+    "Rejected storage write does not complete a learning action; blocking error suppresses the unsolicited cue",
+    "Choosing operating-day replay teaches replay beside its controls; dismissing it allows city guidance and leaves the settlement unchanged",
+    "Accepted month advances learning without reviving dismissed concepts; report explains settlement; Field Notes and persisted progression work after offline cold reload",
+    "Legacy global dismissal imports as mute while all fourteen reference topics remain available"
+  ],
+  "limitations": [
+    "Phone and IME inputs are emulated. Native OS input and novice usability remain unqualified."
+  ],
+  "passed": true
+}

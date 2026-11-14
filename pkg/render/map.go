@@ -18,10 +18,13 @@ import (
 )
 
 type Map struct {
-	Font    *text.GoTextFaceSource
-	rings   [][][2]float64
-	anchors map[string][][2]float64
-	terrain *relief
+	Font     *text.GoTextFaceSource
+	rings    [][][2]float64
+	anchors  map[string][][2]float64
+	terrain  *relief
+	public   *publicLayer
+	scene    *ebiten.Image
+	sceneKey sceneKey
 }
 type labelRect struct{ x, y, w, h float64 }
 
@@ -40,6 +43,10 @@ func New() (*Map, error) {
 		return nil, e
 	}
 	e = json.Unmarshal(assets.Camera, &m.anchors)
+	if e != nil {
+		return nil, e
+	}
+	m.public, e = newPublicLayer()
 	if e != nil {
 		return nil, e
 	}
@@ -64,7 +71,11 @@ func (m *Map) Label(dst *ebiten.Image, s string, x, y, size float64, c color.Col
 	text.Draw(dst, s, &text.GoTextFace{Source: m.Font, Size: size}, op)
 }
 func CityPoint(c mapview.Camera, city gameapi.City) mapview.Point {
-	return c.Screen(mapview.Project(city.Lat, city.Lon))
+	lat, lon := city.Lat, city.Lon
+	if city.StationName != "" {
+		lat, lon = city.StationLat, city.StationLon
+	}
+	return c.Screen(mapview.Project(lat, lon))
 }
 func Pick(c mapview.Camera, cities []gameapi.City, at mapview.Point) gameapi.CityID {
 	best := 24.0
@@ -79,32 +90,55 @@ func Pick(c mapview.Camera, cities []gameapi.City, at mapview.Point) gameapi.Cit
 	}
 	return id
 }
-func (m *Map) Draw(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s ui.State, tick float64) {
+func (m *Map) drawScene(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s ui.State) {
 	pal := ui.PaletteFor(s)
 	dst.Fill(pal.Water)
-	for _, ring := range m.rings {
-		var path vector.Path
-		for i, p := range ring {
-			q := c.Screen(mapview.Project(p[1], p[0]))
-			if i == 0 {
-				path.MoveTo(float32(q.X), float32(q.Y))
-			} else {
-				path.LineTo(float32(q.X), float32(q.Y))
+	if f.PublicNetwork {
+		m.public.drawLand(dst, c, s)
+	} else {
+		for _, ring := range m.rings {
+			var path vector.Path
+			points := screenRing(c, ring)
+			if len(points) < 3 {
+				continue
 			}
+			for i, q := range points {
+				if i == 0 {
+					path.MoveTo(float32(q.X), float32(q.Y))
+				} else {
+					path.LineTo(float32(q.X), float32(q.Y))
+				}
+			}
+			path.Close()
+			op := &vector.DrawPathOptions{AntiAlias: true}
+			op.ColorScale.ScaleWithColor(pal.Land)
+			vector.FillPath(dst, &path, nil, op)
+			op = &vector.DrawPathOptions{AntiAlias: true}
+			op.ColorScale.ScaleWithColor(pal.Coast)
+			vector.StrokePath(dst, &path, &vector.StrokeOptions{Width: 1}, op)
 		}
-		path.Close()
-		op := &vector.DrawPathOptions{AntiAlias: true}
-		op.ColorScale.ScaleWithColor(pal.Land)
-		vector.FillPath(dst, &path, nil, op)
-		op = &vector.DrawPathOptions{AntiAlias: true}
-		op.ColorScale.ScaleWithColor(pal.Coast)
-		vector.StrokePath(dst, &path, &vector.StrokeOptions{Width: 1}, op)
 	}
 	if !s.HideTerrain {
 		m.terrain.draw(dst, c, s)
 	}
+	if f.PublicNetwork {
+		m.public.draw(dst, c, s)
+	}
+	// The static source network is cached; only active selections need a second
+	// stroke. Resolve the route once, rather than searching it for every section.
+	draftSections := map[string]bool{}
+	if s.View == "services" {
+		if route, ok := ui.ServiceRoute(f, s.ServiceCorridor); ok {
+			for _, id := range route.Sections {
+				draftSections[id] = true
+			}
+		}
+	}
 	// Track styles reflect authoritative infrastructure and construction state.
 	for _, co := range f.Corridors {
+		if f.PublicNetwork && co.Existing && !draftSections[co.ID] && !(s.View == "build" && (co.FromCity == s.FromCity && co.ToCity == s.ToCity || co.FromCity == s.ToCity && co.ToCity == s.FromCity)) {
+			continue
+		}
 		var chosen *gameapi.Alignment
 		stroke := pal.Existing
 		dashed := false
@@ -128,50 +162,72 @@ func (m *Map) Draw(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s ui.St
 				}
 			}
 		}
+		if draftSections[co.ID] && chosen != nil {
+			stroke = pal.Draft
+		}
 		if chosen != nil {
 			m.route(dst, c, chosen.Path, stroke, pal.Outline, dashed)
 		}
-		if s.View == "build" && (co.FromCity == s.FromCity && co.ToCity == s.ToCity || co.FromCity == s.ToCity && co.ToCity == s.FromCity) {
-			for _, a := range co.Alignments {
-				if a.ID == s.AlignmentID {
-					m.route(dst, c, a.Path, pal.Draft, pal.Outline, true)
-				}
-			}
-		}
+
 	}
-	if len(f.Reports) > 0 {
-		for index, run := range f.Reports[len(f.Reports)-1].Services {
-			if run.Passengers == 0 {
+	m.drawProspects(dst, c, f, s)
+	idle := []ui.IdleHighlight{}
+	if s.View == "services" {
+		idle = ui.IdleHighlights(f)
+	}
+	idleCities := map[gameapi.CityID]bool{}
+	hasIdleLine, hasIdleFleet := false, false
+	// Fleet overlays go first so a physical idle-line warning remains solid if
+	// its geometry is also covered by an idle through-service fleet.
+	for _, fleetOnly := range []bool{true, false} {
+		for _, line := range idle {
+			if line.FleetOnly != fleetOnly {
 				continue
 			}
-			for _, co := range f.Corridors {
-				if co.ID != run.CorridorID {
-					continue
-				}
-				for _, a := range co.Alignments {
-					if a.ID != run.AlignmentID {
-						continue
-					}
-					u := .5
-					if s.Motion {
-						u = (1 - math.Cos(tick/180+float64(index))) / 2
-					}
-					p := routePoint(c, a.Path, u)
-					vector.DrawFilledRect(dst, float32(p.X-13), float32(p.Y-7), 26, 14, pal.Accent, true)
-					vector.DrawFilledRect(dst, float32(p.X-8), float32(p.Y-4), 9, 5, pal.Surface, true)
-					vector.DrawFilledCircle(dst, float32(p.X+7), float32(p.Y), 2, color.NRGBA{255, 194, 71, 255}, true)
-				}
+			m.routeWidth(dst, c, line.Path, pal.WarningText, pal.Warning, line.FleetOnly, 11, 5)
+			idleCities[line.FromCity] = true
+			idleCities[line.ToCity] = true
+			if fleetOnly {
+				hasIdleFleet = true
+			} else {
+				hasIdleLine = true
 			}
 		}
 	}
 	// Selected labels take precedence; remaining labels avoid collisions.
 	cities := append([]gameapi.City{}, f.Cities...)
-	sort.SliceStable(cities, func(i, j int) bool { return cities[i].ID == s.Selected && cities[j].ID != s.Selected })
+	rank := func(id gameapi.CityID) int {
+		if id == s.Selected {
+			return 0
+		}
+		if idleCities[id] {
+			return 1
+		}
+		return 2
+	}
+	sort.SliceStable(cities, func(i, j int) bool { return rank(cities[i].ID) < rank(cities[j].ID) })
 	occupied := []labelRect{}
+	if s.View == "map" || s.View == "build" {
+		width := text.Advance(ui.Text(s.Locale, "prospectLegend"), &text.GoTextFace{Source: m.Font, Size: 11}) + 48
+		occupied = append(occupied, labelRect{12, 56, math.Min(width, c.Width-24), 22})
+	}
+	if len(idle) > 0 {
+		rows := 0
+		if hasIdleLine {
+			rows++
+		}
+		if hasIdleFleet {
+			rows++
+		}
+		occupied = append(occupied, labelRect{12, 56, math.Min(285, c.Width-24), float64(rows * 24)})
+	}
 	for _, city := range cities {
 		p := CityPoint(c, city)
 		if p.X < 0 || p.Y < 0 || p.X > c.Width || p.Y > c.Height {
 			continue
+		}
+		if idleCities[city.ID] {
+			vector.StrokeCircle(dst, float32(p.X), float32(p.Y), 10, 3, pal.WarningText, true)
 		}
 		if city.ID == s.Selected {
 			vector.DrawFilledCircle(dst, float32(p.X), float32(p.Y), 13, pal.Surface, true)
@@ -230,8 +286,49 @@ func (m *Map) Draw(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s ui.St
 	if !s.HideTerrain {
 		m.terrain.labels(m, dst, c, s, occupied)
 	}
-	m.Label(dst, ui.Text(s.Locale, "east_asia"), 20, 18, 20, pal.Text)
+	title := ui.Text(s.Locale, "east_asia")
+	for _, r := range mapview.VisibleRegions(s.Portrait) {
+		if r.ID == s.Region {
+			title = r.Name
+			if s.Locale == "zh-Hans" {
+				title = r.Chinese
+			}
+		}
+	}
+	m.Label(dst, title, 20, 18, 20, pal.Text)
+	if stop := m.PublicStop(s.SourceStation); stop != nil {
+		p := c.Screen(mapview.Project(stop.Lat, stop.Lon))
+		vector.StrokeCircle(dst, float32(p.X), float32(p.Y), 9, 2, pal.Accent, true)
+		m.Label(dst, stop.Name, 12, c.Height-28, 14, pal.Text)
+	}
 	m.Label(dst, ui.Text(s.Locale, "stationLegend"), 20, 40, 11, pal.Muted)
+	y := float32(56)
+	if s.View == "map" || s.View == "build" {
+		vector.DrawFilledCircle(dst, 24, y+9, 2.5, pal.Action, true)
+		vector.DrawFilledCircle(dst, 34, y+9, 2.5, pal.Action, true)
+		vector.DrawFilledCircle(dst, 44, y+9, 2.5, pal.Action, true)
+		m.Label(dst, ui.Text(s.Locale, "prospectLegend"), 54, float64(y), 11, pal.Text)
+		y += 22
+	}
+	for _, legend := range []struct {
+		show, fleet bool
+		key         string
+	}{{hasIdleLine, false, "idleHighlightLegend"}, {hasIdleFleet, true, "idleFleetHighlightLegend"}} {
+		if !legend.show {
+			continue
+		}
+		vector.DrawFilledRect(dst, 12, y, float32(math.Min(285, c.Width-24)), 24, pal.Warning, true)
+		if legend.fleet {
+			for x := float32(20); x < 43; x += 10 {
+				vector.StrokeLine(dst, x, y+12, x+5, y+12, 5, pal.WarningText, true)
+			}
+		} else {
+			vector.StrokeLine(dst, 20, y+12, 43, y+12, 5, pal.WarningText, true)
+		}
+		m.Label(dst, ui.Text(s.Locale, legend.key), 52, float64(y+4), 12, pal.WarningText)
+		y += 24
+	}
+
 }
 
 func routePoint(c mapview.Camera, path []gameapi.GeoPoint, u float64) mapview.Point {
@@ -243,17 +340,34 @@ func routePoint(c mapview.Camera, path []gameapi.GeoPoint, u float64) mapview.Po
 	return mapview.Point{X: a.X + (b.X-a.X)*v, Y: a.Y + (b.Y-a.Y)*v}
 }
 func (m *Map) route(dst *ebiten.Image, c mapview.Camera, path []gameapi.GeoPoint, stroke, outline color.Color, dashed bool) {
-	for i := 0; i < len(path)-1; i++ {
-		a, b := c.Screen(mapview.Project(path[i].Lat, path[i].Lon)), c.Screen(mapview.Project(path[i+1].Lat, path[i+1].Lon))
-		n := max(1, int(math.Hypot(b.X-a.X, b.Y-a.Y)/6))
+	m.routeWidth(dst, c, path, stroke, outline, dashed, 5, 3)
+}
+func (m *Map) routeWidth(dst *ebiten.Image, c mapview.Camera, points []gameapi.GeoPoint, stroke, outline color.Color, dashed bool, outerWidth, innerWidth float32) {
+	var path vector.Path
+	for i := 0; i < len(points)-1; i++ {
+		a, b, ok := screenSegment(c, c.Screen(mapview.Project(points[i].Lat, points[i].Lon)), c.Screen(mapview.Project(points[i+1].Lat, points[i+1].Lon)))
+		if !ok {
+			continue
+		}
+		n := 1
+		if dashed {
+			n = max(1, int(math.Hypot(b.X-a.X, b.Y-a.Y)/6))
+		}
 		for j := 0; j < n; j++ {
 			if dashed && j%2 == 1 {
 				continue
 			}
 			u, v := float64(j)/float64(n), float64(j+1)/float64(n)
-			x1, y1, x2, y2 := float32(a.X+(b.X-a.X)*u), float32(a.Y+(b.Y-a.Y)*u), float32(a.X+(b.X-a.X)*v), float32(a.Y+(b.Y-a.Y)*v)
-			vector.StrokeLine(dst, x1, y1, x2, y2, 5, outline, true)
-			vector.StrokeLine(dst, x1, y1, x2, y2, 3, stroke, true)
+			path.MoveTo(float32(a.X+(b.X-a.X)*u), float32(a.Y+(b.Y-a.Y)*u))
+			path.LineTo(float32(a.X+(b.X-a.X)*v), float32(a.Y+(b.Y-a.Y)*v))
 		}
+	}
+	for _, style := range []struct {
+		width float32
+		ink   color.Color
+	}{{outerWidth, outline}, {innerWidth, stroke}} {
+		op := &vector.DrawPathOptions{AntiAlias: true}
+		op.ColorScale.ScaleWithColor(style.ink)
+		vector.StrokePath(dst, &path, &vector.StrokeOptions{Width: style.width}, op)
 	}
 }

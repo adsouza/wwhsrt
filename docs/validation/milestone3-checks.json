@@ -1,0 +1,18 @@
+{
+  "date": "2026-11-12T23:53:57.820Z",
+  "browser": "153.0.8010.12",
+  "wasm_sha256": "4e31ba9167920f561bb33a084614fe8d1253720513d671b202431f51ba970d72",
+  "checks": [
+    "Through service calls at Nagoya, carries both end-to-end and intermediate markets, and derives twelve daily departures with a real intermediate dwell; explicit extension transfers two starter trains and leases exactly one, with failed-save atomicity",
+    "Representative day supports departure selection, station calls, play/pause and time scrubbing on actual paths; replay controls leave the campaign checkpoint unchanged",
+    "Overlapping local/through services share the same sixteen return paths; transfers at Nagoya consume directed seats on both services and one company journey; outside road/air/conventional/no-trip shares conserve finite OD/class demand; report and inspector reflow at 320–1920px including Simplified Chinese",
+    "A completed branch feeds the existing network through up to two transfers; every monthly ledger reconciles; reload/export restore the same detailed results; accepted UI commands replay to an identical native-headless/WASM checkpoint and network report",
+    "A real version-2 fixture opens without rewriting historical revenue, commits version-4 network months, then reloads and advances offline"
+  ],
+  "limitations": [
+    "Browser phone/touch inputs are emulated; physical devices, native OS interaction/IME and assistive technology remain separate qualification.",
+    "Representative departures and aggregate loads are a strategic replay, not a validated dispatch timetable."
+  ],
+  "checkpoint": "e79b77d65590fa87117da8d9c2fd9844aa4168d88e9b420494666ffc1aeb9fc2",
+  "result": "passed"
+}

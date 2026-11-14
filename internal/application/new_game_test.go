@@ -53,7 +53,7 @@ func TestNewGameReplacesCampaignAtomicallyAndResumes(t *testing.T) {
 		t.Fatal("new game did not survive reload")
 	}
 	firstMonth := act(t, reloaded, gameapi.Command{Kind: gameapi.AdvanceMonth})
-	if firstMonth.Reports[0].Revenue != 1_150_596_000 || firstMonth.Player.Cash != 10_832_745_400 {
+	if firstMonth.Reports[0].Revenue != 714_132_000 || firstMonth.Player.Cash != 10_398_706_200 {
 		t.Fatal("starter business failed after reset")
 	}
 	// Compare the whole persisted state, including future fleet identity.

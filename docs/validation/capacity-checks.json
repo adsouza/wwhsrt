@@ -1,0 +1,17 @@
+{
+  "date": "2026-11-12T16:32:57.169Z",
+  "browser": "153.0.8010.12",
+  "wasm_sha256": "9fa2148ae46ddba11aed552d0a2035bf7d9d5c4816648a02ab09383843e4d75d",
+  "ui_sha256": "7ce71462c1c8eedb04819133c3e7016c975e3be882fcde623e747b2ff16b8287",
+  "checks": [
+    "A real 4+4+4+1 draft reports Tsuruga–Osaka 13/12, names every contributing service and the draft, shows the 12 other requests and a zero-frequency remaining allowance; stale revenue is cleared, Apply is disabled and no tutorial cue competes with the error; checkpoint/durable bytes stay unchanged",
+    "The rejected draft and named explanation survive reload and reflow at 320px in Simplified Chinese",
+    "Lowering an existing contributor from four to three frees exactly one daily return path; the formerly blocked draft becomes 12/12 and can be leased/applied, without double-counting the edited service",
+    "The accepted UI command trace replays to the identical native-headless/WASM checkpoint"
+  ],
+  "limitations": [
+    "Phone/keyboard are emulated; native OS input and physical devices are not qualified."
+  ],
+  "checkpoint": "1d1d52defa767ac3ab7b57e73e33dedd7fa99e9c4b22ddafdea3aed7c4fe9538",
+  "passed": true
+}

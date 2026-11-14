@@ -1,8 +1,8 @@
 # Architecture
 
-This document describes the architecture of World-wide High-speed Rail Tycoon. The [first-business slice](docs/validation/FIRST_BUSINESS.md) implements domain/application/API boundaries, direct-service demand and finance, construction and funding, dedicated train leases, native ebitenui controls, an Ebitengine map, a semantic browser HUD, a headless CLI and development saves. Transfer markets, the worldwide data pipeline, production save contract and multiplayer server remain planned. Earlier map and widget prototypes remain separate reference artifacts.
+This document describes the architecture of World-wide High-speed Rail Tycoon. The [first-business slice](docs/validation/FIRST_BUSINESS.md) implements domain/application/API boundaries, network demand, transfers, capacity and finance, construction and funding, dedicated train leases, native ebitenui controls, an Ebitengine map, a semantic browser HUD, a headless CLI and development saves. The prototype public-network import now feeds the playable catalog; production data qualification, the production save contract and multiplayer server remain planned. Earlier widget prototypes remain reference artifacts.
 
-Milestone 2 derives station ownership/readiness from the pinned starting network and committed projects; stations open with their project. A single named train-family projection publishes the constants used by fleet validation and settlement. Construction component projections use the same existing cost calculation and cent rounding. These projections and pure UI guidance are excluded from canonical saves/checkpoints, so this milestone needs no version-2 save migration or financial reset. Detailed station capex/capacity and multiple train families remain outside this introductory model.
+Milestone 2 derives station ownership/readiness from the pinned starting network and committed projects; stations open with their project. A single named train-family projection publishes the constants used by fleet validation and settlement. Construction component projections use the same existing cost calculation and cent rounding. These projections and pure UI guidance are excluded from canonical saves/checkpoints, so this milestone needs no version-2 save migration or financial reset. Detailed station capex/upgrades and multiple train families remain outside this introductory model. Milestone 3 adds shared track/station call limits and a network solver, as described below.
 
 The [game design](docs/DESIGN.md) owns gameplay rules and domain invariants; [UX](docs/UX.md) owns interaction behavior; [testing](TESTING.md) records verification commands and release gates. The [state/storage contract](docs/STATE_AND_STORAGE.md) defines Go type shapes, portable save v1, the SQLite server backend and migration policy. Numeric camera settings and cost assumptions live in their linked manifests. This document explains the system boundaries that realize those requirements. Proposed balance and recovery policies retain their status from the design; listing them here does not make them calibrated or implemented.
 
@@ -111,7 +111,7 @@ Preserve raw inputs and derive game catalogs with explicit transformations. Reco
 
 Ebitengine is the proposed desktop/browser renderer, with ebitenui a demonstrated visual-widget candidate. The HTML/D3 map prototype is a feasibility/reference artifact, not an existing Go map implementation. Both product hosts must share the game port and rules regardless of their eventual control-rendering technology.
 
-Use one forward/inverse camera transform for map drawing and picking. Layout uses logical space; framebuffer scale improves raster quality without shrinking controls. Phone task views reflow instead of scaling down a fixed desktop canvas. Contextual guidance reads frames and presentation preferences; enabling it cannot change simulation results.
+Use one forward/inverse camera transform for map drawing and picking. Layout uses logical space; framebuffer scale improves raster quality without shrinking controls. Phone task views reflow instead of scaling down a fixed desktop canvas. Contextual guidance reads frames and presentation preferences; enabling it cannot change simulation results. The shared `pkg/ui` concept model supplies inline disclosures and searchable Field Notes to both hosts. Seen/dismissed/explained/completed flags, global mute and reference return context live in local UI preferences, outside campaign exports and hashes. Browser help events are serialized and versioned independently of game revisions so asynchronous rendering cannot restore dismissed suggestions. Successful accepted commands record learning progress; help navigation itself cannot dispatch a business command.
 
 Camera, selection, dismissed hints, replay position, and drafts are local UI state, separate from authoritative campaign state. Timezone-selected portrait defaults are calculated locally and give way to saved views. Region framing and the cushioned zoom floor follow the [UX camera contract](docs/UX.md#regional-camera-presets); retain those details in the manifest rather than duplicating regional tables here.
 
@@ -148,3 +148,132 @@ Use [TESTING.md](TESTING.md) to distinguish existing prototype evidence from the
 ### Native text editing
 
 The Company name editor participates in Ebiten UI layout, input layers and focus traversal, with Ebitengine `textinput.Field` retaining IME composition. The pinned Ebiten UI 0.7.3 `TextInput` has no native clipboard/IME integration and uses rune positions as byte slices in selection extraction/deletion; using it unchanged would corrupt non-ASCII selections. `pkg/app/name_input_native.go` supplies grapheme-safe editing/selection rendering and bounded undo history; `github.com/atotto/clipboard` supplies explicit clipboard reads/writes only on editing shortcuts, with failures preserving the draft. Clipboard contents are not logged. The browser keeps its semantic HTML input. This adapter can be replaced when the upstream widget meets the same Unicode/IME/clipboard contract.
+
+### Network game and development save v9
+
+`internal/domain/routes.go` resolves immutable service patterns onto physical corridor sections. `journeys.go` builds called-station rides and bounded transfer itineraries; `allocation.go` conserves finite markets and rations complete requests across shared resources with stable rounding. `network.go` uses the same solver for forecasts, settlement and read models. Track paths are allocated before directed-leg seats. `day.go` derives a repeating representative day from the last committed plan and aggregate loads; `pkg/render/day.go` draws/picks it without changing the business world.
+
+The network catalog is pinned separately in `assets/scenario/network.json`. It declares game trip budgets, attraction/road regions, rounded outside-mode distances, stopping patterns and resource limits. It is not a surveyed railway/demographic dataset. Forecasts replace one plan on a copied world and compare whole-company outcomes. `extend_service` atomically suspends a source pattern, transfers its fleet, orders only explicitly approved additional leases and applies the longer service, subject to the same revision, capacity and persist-before-acknowledgment rules.
+
+The bounded development save is version 10, rules `network-v10`, with `public_sha256`, `catalog_since`, `network_sha256`, `network_since`, `economy_sha256` and `economy_since`. Version-2/3 restores retain their original reports and company state; the next resolved month uses the expanded public catalog. The frozen original catalog validates earlier reports. Opening a legacy save does not write it; the next successful command commits the upgrade atomically. Restore recomputes network-era monthly service results from requested plans and pinned data. Ephemeral detailed markets, route frames and replay positions stay out of economic saves/checkpoints. Existing `corridor_id` service/fleet fields retain their wire names as stable service-pattern IDs; construction corridors remain physical assets.
+
+The embedded `assets/scenario/economy.json` pins the expanded-world gameplay calibration. `Catalog.WithEconomy` validates bounds and caches destination-weight totals; `World` selects legacy or calibrated rules at the saved monthly cutover. Version-4 worlds open with `economy_since = months`: old reports replay using the old demand and cost rules, future months use the calibrated policy. The v5 reader requires the exact policy hash and a valid cutover. Opening and failed commands preserve the original bytes; the next successful command persists the upgrade. Frozen v2/v3 catalogs keep their legacy economics while validating earlier history. Policy changes need an explicit new identity/compatibility path, never silent substitution.
+
+Read-only route suggestions are computed for the frame, not inside every simulation lookup. Accepted fare/frequency plans remain authoritative. Forecast cost components and fixed-mix break-even are domain projections shared by both clients; they are excluded from canonical saves/checkpoints. See [economic calibration and verification](docs/validation/ECONOMY.md).
+
+Public topology repairs are a second independent historical boundary. The immutable `public-network-v1.json` validates pre-repair expanded reports; the repaired catalog carries `WithPrevious` as well as the original 12-city `WithPrior`. `World.atMonth` selects topology first and the original-catalog epoch second, then the economy cutover controls demand and costs. Save v6 adds `topology_since` and `prior_public_sha256`; v4/v5 opens validate with the frozen expanded catalog before upgrading in memory. Published route IDs and timings remain stable so active fleets retain valid requirements. That original v6 transition is retained for historical validation; current successful commands persist v9 atomically. The [source-node pipeline and connectivity gates](docs/validation/NETWORK_TOPOLOGY.md) document provenance and limitations.
+
+Capacity validation and its explanation share one domain projection (`ownedCapacityUsage`). Forecasts publish requested track paths/station calls, each contributing service, the current draft contribution and the maximum frequency for that resource with other services unchanged. Typed capacity errors carry the violated-resource projection while retaining stable error codes. Both clients format those values through `pkg/ui/CapacityDetails`; neither recreates the validation rule. These diagnostic projections are excluded from saves/checkpoints and do not alter public-capacity allocation or private-capacity limits.
+
+The task workspace uses `pkg/ui/workspace.go` for the unobscured map/inspector rectangles, width clamps and responsive dock choice in both clients. Local `ui.State` stores preferred panel width, dock placement, task tabs and bounded disclosure flags. Temporary compact fallback never rewrites desktop preferences. Native drawing translates an offscreen map into that rectangle; picking, dragging and pinch centers subtract the same origin. Map widgets and open combo popups consume their own pointer input. Native selection lists use ebitenui comboboxes; browser tablists and an accessible separator use semantic HTML. Task links choose the relevant subtab, and ordinary tab changes retain unapplied drafts. These preferences and projections require no campaign schema migration and cannot dispatch business commands.
+
+## Prototype public network
+
+`tools/import-public-network.py` compiles a pinned source snapshot into an immutable catalog and map layer. See [the import contract](data/imports/README.md). Real station locations are separate from metro coordinates. Strategic hub contraction limits service/demand graph size while retaining every visible source station and polyline for cartography. Source station inspection never changes company state. Operating patterns use graph paths, not geographic endpoint chords; small endpoint/platform joins and remaining source gaps are explicit.
+
+The catalog has indexed city/corridor/distance lookups and source-pinned integer distances for native/WASM determinism. Journey enumeration finds itineraries for all reachable destinations in one traversal per origin/class. Sparse reports retain all company-reachable markets; `unserved_demand` accounts for the entire remaining world budget, and the read-only market inspector projects outside-mode detail on demand. An origin with no company departure bypasses OD allocation while preserving its full demand budget. Disconnected source components cannot produce through services. Service templates are game plans, not imported operator timetables. Original service/fleet identities stay stable; the legacy Nagoya–Osaka express explicitly shares the new Kyoto sections' physical capacity.
+
+The map caches global land and the static public-rail layer by camera/theme, then overlays the selected service, active projects, city stations and representative trains. Both clients expose the same orientation-aware region manifest and optional route search. Native search uses the existing Unicode selection/paste/IME adapter. Camera, search, station inspection and language are presentation preferences, excluded from canonical saves.
+
+The legacy Japan route IDs use `rail-display-paths.json` for frame geometry. This
+presentation-only projection follows the imported railway/station hubs; the frozen
+catalog still owns costs, lengths, timings and save validation. Correcting a map
+endpoint therefore does not invalidate v4 saves. All map/highlight/train consumers
+use the same projected frame paths. See [Osaka correction](docs/validation/OSAKA_STATION.md).
+
+`playable-rail-map.json` compiles the admitted public corridor paths and associated
+source station IDs into the cached background layer. The renderer validates its
+catalog fingerprint, and rendering tests compare every line with the application
+frame. Source-only geometry remains in the pinned input for audits; neither it nor
+unrelated station dots are painted as playable infrastructure. This projection is
+excluded from economic saves, so map decluttering requires no campaign migration.
+
+Shoreline refinements replace coarse rings before rendering. The generated
+`world-land.json` combines the worldwide base and refined regional geometry once;
+public frames draw that layer alone, and legacy fixtures draw the regional layer
+alone. `prepare-shorelines.py` shares the pinned Japan/China/Taiwan derivation with
+the relief preparer, without requiring tile downloads for coastline work. Data
+checks enforce unique rings and source hashes; pixel checks verify that former
+coarse land protrusions are water across palette/terrain settings.
+### Construction prospect presentation
+
+`ui.ConstructionOpportunities` supplies the current unstarted, non-public corridor
+set. `render/prospects.go` uses one reviewed alignment per candidate for both
+drawing and screen-distance picking; selecting an alternative changes that shared
+geometry. `ui.SelectProspect` validates current availability and updates only the
+local draft. Both hosts show the same named candidates, and map selection opens
+Build → Plan. City inspection no longer rewrites construction endpoints. Accepted
+projects leave the prospect set and keep authoritative project rendering. Existing
+endpoint fields remain the save-compatible draft representation; no business
+rules, catalogue coverage or persistence schema are changed by this interaction.
+### Selecting services from track
+
+`render.PickServiceSections` follows open sections' actual displayed alignments,
+including a completed project's committed alternative. It retains nearby
+overlapping hits for named disambiguation. `ui.SelectMapService` scopes the open
+route selector to those sections and updates only local draft preferences.
+`ServiceMapSections` is optional UI state; ordinary selection of an incompatible
+route and New game clear it. The existing service command/forecast path remains
+authoritative. Marker centers retain city/station inspection, and drags never
+select track. Both hosts use `Camera.Resize` to preserve geographic center/scale
+when the visible map rectangle changes as the service inspector opens.
+
+
+Whole-network completion adds a separate `WithConnectivityPrior` catalog and
+`connectivity_since` boundary. The exact v6 catalog is shipped as frozen gzip;
+`previous_repair_sha256` pins its decompressed bytes. `World.atMonth` selects
+that history first, then the older topology and original-catalog boundaries.
+v6 restores validate their historical reports against that exact catalog before
+upgrading in memory. Archived catalogs are parsed lazily, avoiding their geometry
+allocation for fresh games. Both Python compiler gates and actual Go monthly
+service tests cover complete operator-backed networks; source component checks
+alone cannot establish a usable city/station chain. See the updated topology
+validation report for the ten-network manifest and deliberate missing-link tests.
+
+
+Worldwide construction adds 69 authored alignments to the two frozen Japanese
+projects. `ConstructionInterval` assigns work quantities and regional baseline
+rates to physical country scopes. `constructionEstimate` validates complete
+quantity coverage and calculates the shared engineering/management/contingency
+quote; legacy intervals retain the exact Japan formula. One explicitly declared
+new dedicated HSR project may parallel inherited conventional rail between the
+same cities; duplicate ordinary projects remain invalid and independent physical
+tracks receive independent capacity. No cost calculation lives in either client.
+
+Save v8 adds a `WithConstructionPrior` catalog and construction epoch, preserving
+v7 historical reports while withdrawing conventional Moroccan starter assets.
+Report validation and representative-day calculations select the historical
+catalog; current frame animation filters retired services. All 71 prospects use
+the same command, station-opening, service, demand, forecast and accounting ports
+in native, WASM and headless clients. Source preparation and independent admission
+checks run offline from pinned Natural Earth/cost/authoring inputs.
+
+
+Save v9 adds `regional_since` and `regional_prior_sha256` through `regionalPayload`.
+`WithRegionalPrior` retains the exact v8 catalog from `public-network-v4.json.gz`;
+`World.atMonth` selects that catalog before applying earlier construction,
+connectivity, topology and original-catalog boundaries. This preserves historical
+demand/accounting when Taipei returns and Houston–Austin is added. Versions 2–8
+remain readable; reads/failed commits do not write and the next accepted command
+commits v9 atomically. New games reset all boundaries to zero. Reviewed Taiwan
+station-platform aggregation is confined to named source way IDs at four HSR
+stations; general railway junctions still require shared OSM node IDs.
+
+The regional update also pins Ulsan to KTX/Tongdosa and aggregates its two mapped
+platforms. Three Ulsan distances/timings change in current rules; v8 reports still
+validate against the exact archived inputs.
+
+
+Save v10 adds `connector_since` and `connector_prior_sha256` through
+`connectorPayload`. `WithConnectorPrior` retains the exact v9 catalog in
+`public-network-v5.json.gz`. Historical selection applies this boundary before
+all earlier boundaries. Junction markets, repaired public resources and future
+through-service alternatives apply prospectively; accepted service IDs, project
+quotes/dates, fleets and resolved accounts are retained. v2–v9 saves remain
+readable. Opening is read-only and the next accepted command commits atomically.
+Named, bounded station-platform aggregations at Maibara, Kyoto, Nagoya,
+Shin-Osaka, Barcelona, Camp de Tarragona and Figueres join reviewed HSR platforms
+as strategic station resources. All intercity railway joins still require shared
+source node IDs. The pinned approach supplement covers operational Turin/Milan
+and Perpignan connections; these are existing public infrastructure, not private
+construction projects.

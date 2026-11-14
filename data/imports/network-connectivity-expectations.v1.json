@@ -1,0 +1,41 @@
+{
+  "checked_on": "2026-11-12",
+  "meaning": "Operator-published railway connectivity expectations, not evidence for a particular geometric snap or station interchange.",
+  "pairs": [
+    {
+      "from": "sendai",
+      "to": "shin_hakodate_hokuto",
+      "source": "https://timetables.jreast.co.jp/en/timetable/list0913.html"
+    },
+    {
+      "from": "london",
+      "to": "paris",
+      "source": "https://www.eurostar.com/us-en/travel-info/timetable/7015400/8727100/london-st-pancras-intl/paris-gare-du-nord"
+    },
+    {
+      "from": "paris",
+      "to": "lyon",
+      "source": "https://www.sncf-connect.com/en-en/train/route/paris/lyon"
+    },
+    {
+      "from": "milan",
+      "to": "rome",
+      "source": "https://www.trenitalia.com/it/frecciarossa/collegamenti-frecciarossa/viaggia-tra-roma-e-milano-con-frecciarossa.html"
+    },
+    {
+      "from": "berlin",
+      "to": "munich",
+      "source": "https://www.bahn.de/service/ueber-uns/zugtypen/ice-sprinter"
+    },
+    {
+      "from": "new_york",
+      "to": "boston",
+      "source": "https://www.amtrak.com/acela-train"
+    },
+    {
+      "from": "changchun",
+      "to": "shenyang",
+      "source": "https://www.nra.gov.cn/ztzl/hy/gcjs2023/xmjj/kzjj/201311/t20131127_344129.shtml"
+    }
+  ]
+}

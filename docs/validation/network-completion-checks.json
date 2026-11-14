@@ -1,0 +1,58 @@
+{
+  "date": "2026-11-13T11:59:34.701242+00:00",
+  "passed": true,
+  "scope": "Focused local source/catalog, domain, application, UI, mapview, native-widget and renderer checks plus web/native/headless builds. Browser interaction remains unqualified.",
+  "catalog_sha256": "b5940f7c0c130ec255f0783da9c09e12355b6c61131396a1b5f590c4c72ce2f8",
+  "previous_catalog_sha256": "9fcd93c3356bd5545896684e98e102cf7d22144884bf984abd80998cffe942f5",
+  "source_sha256": "ff3a1ace4f58b79879cc31c0cc3e1f610591dc011eab3304391f2074cc72ed40",
+  "connector_source_sha256": "0c78da68031c6bd03e33eb81fa7eb9a2a9d68715dca2c3092ffce2f5cd477743",
+  "manifest_sha256": "fe9859ba6d523bfd28650f794c24d14f8c3fc25697b0d0f8f0b4d8a8ea97de1e",
+  "native_sha256": "08a4dc329ee2413ddf32f1b0784e41d7ef4ba69ca3f6f321387025f1416c83ea",
+  "headless_sha256": "412b1e6c6f9e2b731b558b8afdb1a278490a71e8af28044149f46eea2adb4769",
+  "wasm_sha256": "c7faab5e41b67908a3a5b31a10d1044598db1468dbd86228c8de3fc915503674",
+  "counts": {
+    "cities": 287,
+    "existing_corridors": 294,
+    "buildable_corridors": 2,
+    "through_patterns": 2899,
+    "mapped_stations": 2527,
+    "station_inventory": 4331,
+    "source_ways": 464507,
+    "source_vertices": 3432690,
+    "whole_network_contracts": 10,
+    "source_review_sites_resolved": 57,
+    "source_review_sites_unverified": 35
+  },
+  "source_reproduction_memory": {
+    "peak_rss_mib": 1767.9,
+    "stopped": false,
+    "exit_code": 0
+  },
+  "checks": [
+    "prepare-network-repairs.py --check: exact source-node regeneration passed",
+    "import-public-network.py --check: staged catalog/map regeneration, ordered chains, all required markers and drawing endpoints passed",
+    "test-network-coverage.py: six tests passed, including severed NEC physical cut beneath retained aliases, isolated Tashkent, damaged stop/section lists, missing marker and island isolation",
+    "audit-public-network.py --check --strict: seven earlier pair expectations plus all ten whole-network contracts passed",
+    "Focused Go internal/domain, internal/application, pkg/ui, pkg/mapview, pkg/app, pkg/render packages passed; application rerun after expected inventory/demand updates passed",
+    "Complete NEC, Uzbekistan main/branch, Al Boraq and other repaired network-family services carry endpoint/intermediate passengers; capacity, ledger and reload pass",
+    "Original route IDs/stop lists/sections/alignment lengths/times and fleet requirements retained for both frozen catalogs",
+    "Genuine v4/v5/v6 fixtures: history/company/plans/fleet preservation, failed-write atomicity, bad metadata rejection and mixed v1/v2/current continuation passed",
+    "Web/native/headless builds, macOS bundle icon/Info.plist and bundled binary identity passed",
+    "Python/JavaScript syntax, import-boundary and diff-whitespace checks passed"
+  ],
+  "browser": {
+    "passed": false,
+    "status": "memory_limit_stopped",
+    "peak_rss_mib": 2068,
+    "phase": "Startup; no interaction assertions completed",
+    "evidence": "network-completion-browser-checks.json"
+  },
+  "limitations": [
+    "Browser smoke stopped at the required 2 GiB combined checker cap (2068 MiB sampled); no retry, screenshots or native/WASM browser parity claimed.",
+    "35 original proximity review sites remain unverified and unjoined; multiple-terminal modeling and source completeness outside manifest remain unqualified.",
+    "Morocco missing-gauge admission is an explicit ONCF national-gauge inference recorded in the pinned source header.",
+    "New station catchment budgets and generated service timings remain authored game assumptions.",
+    "Full root suite, hosted CI, physical phones and native OS input were not run.",
+    "Player campaign and running native process were not touched; restart the rebuilt native app to load the completed network."
+  ]
+}

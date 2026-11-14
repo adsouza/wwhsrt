@@ -73,7 +73,7 @@ func (h *host) scrollSidebar(pixels float64) {
 }
 
 func (h *host) sidebarKeyboard(g *Game) {
-	editing := g.State.View == "company" && (h.field.IsFocused() || h.loanInput != nil && h.loanInput.IsFocused())
+	editing := h.routeSearch != nil && h.routeSearch.IsFocused() || g.State.Help.Open && h.helpSearchField.IsFocused() || g.State.View == "company" && (h.field.IsFocused() || h.loanInput != nil && h.loanInput.IsFocused())
 	if h.scroll == nil || g.State.Expanded || editing {
 		return
 	}

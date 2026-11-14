@@ -1,0 +1,28 @@
+# Task workspace redesign
+
+The native and browser clients now separate global commands from the right task inspector. Choose **Company → Settings** for top/left dock placement and preferred panel width. Drag the inspector's inner edge to resize it on desktop; the browser separator also supports keyboard arrows/Home/End. Native Settings provides Wider/Narrower buttons. Width is limited to 320–800 logical px and clamped to preserve at least 320 px of map. Phone navigation uses one row at 390 px and above and two rows on narrower screens; contextual cue text itself expands in place. Compact windows temporarily use top navigation and a full-width task without overwriting desktop preferences.
+
+Services separates Plan, Fleet and Analysis. Construction separates Plan, Costs and Projects. Company separates Finance, Identity and Settings. Reports separate Overview, Accounts, Network and Markets. Optional disclosures hold funding arithmetic, engineering context, called stops, station facts and capacity contributors. A relevant named capacity total remains visible; invalid plans cannot be applied. Header idle review expands the affected-line list and map. Contextual help supplies one relevant cue or quiet explanation, with the complete searchable reference in Field Notes. Explicit reference links select the pane containing the relevant control.
+
+Phone map controls sit in a folded menu in a separate strip below the map. Opening the menu is deliberate; closing it restores the unobscured railway view. Expanded-map endpoint help reserves its own area, with controls separated from the canvas.
+
+The ordinary service plan keeps route, frequency, fare, assigned/required fleet, quick lease/return, three forecast numbers and Apply together. Native selectors use real ebitenui comboboxes. Pane and layout changes preserve drafts and do not dispatch business commands. Local UI preferences extend the existing compatible record; no campaign schema migration is needed. New game preserves dock/width and resets task-specific drafts.
+
+## Verification on 2026-11-12
+
+- `GOMEMLIMIT=768MiB GOMAXPROCS=2 go test -p 1 ./pkg/ui ./pkg/app -count=1` passed. These focused packages cover layout bounds, desktop preference recovery after compact fallback, native real-widget sizing, edited service-plan fit, tab draft retention, map drawing/picking origins, disclosure/help navigation, name/loan focus, report scrolling and existing idle/capacity behavior.
+- `python3 tools/check-boundaries.py` passed. English and Simplified Chinese catalogs have 429 matching keys; all characters are covered by the bundled font.
+- `sh tools/build-native.sh`, `sh tools/build-web.sh` and the focused headless build passed. macOS bundle metadata validates, and the bundle executable matches `build/wwhsrt` (`85fbbdadf716d4d0e1ae48bee80bf1ea1c50054746f2bf19d6acd68f30ce85ad`).
+- `NODE_OPTIONS=--max-old-space-size=1536 node tools/check-workspace.cjs http://127.0.0.1:8767/` passed against Chromium 153.0.8010.12. [Results](workspace-checks.json) pin both WASM and UI hashes. It drives actual tabs, pointer/keyboard resizing, dock placement, responsive English/Chinese panes, Field Notes task links, expanded-map zoom/focus, an applied fare plan, revenue, report detail, reload, offline continuation and New game. UI-only actions preserve the exact durable campaign bytes. Isolated browser contexts protect the player's save.
+
+- `NODE_OPTIONS=--max-old-space-size=1536 node tools/check-capacity.cjs http://127.0.0.1:8767/` passed on the same WASM. It opens the selective contributor disclosure, reproduces 13 requests against 12 paths, verifies blocked Apply and unchanged save bytes, checks Chinese phone/reload, then accepts a real remedy with native-headless replay parity. [Results](capacity-checks.json).
+
+- `NODE_OPTIONS=--max-old-space-size=1536 node tools/check-onboarding.cjs http://127.0.0.1:8767/` passed on the final assets. It covers per-concept dismissal, persistent explanations after rebuilding, Field Notes navigation/facts, Chinese composition, phone/expanded-map layouts, accepted/rejected learning actions and offline use. [Results](onboarding-checks.json).
+
+- `NODE_OPTIONS=--max-old-space-size=1536 node tools/check-idle-review.cjs http://127.0.0.1:8767/` passed on the final assets. It inspects actual warning-colour pixels for both idle lines on desktop and a Chinese 320 px map, named focus, lease versus accepted service, shared-track idle fleets, through-fleet coverage and reload. [Results](idle-review-checks.json).
+
+The default top-dock plan at 1280×850 has a 440×682 px inspector with a 682 px scroll height. The wider left-dock plan has a 600×738 px inspector with a 738 px scroll height. English and Chinese edited plans at 390×844 have a 390×652 px inspector and 652 px scroll height. Apply stays visible with no inspector scrolling in those cases. Expanded explanations, long lists, larger text and shorter windows can still require scrolling; the inspector retains a scrollbar.
+
+[Default desktop](workspace-services-desktop.png) · [Left dock and wider inspector](workspace-left-dock-desktop.png) · [Chinese phone plan](workspace-services-phone-zh.png)
+
+The native app was rebuilt, but a locked Mac prevented visual inspection of its window. Widget events and sizes are tested without claiming native OS pointer/keyboard qualification. Physical phones, software keyboards/safe areas, actual screen readers, larger text settings and first-time-player usability remain separate gates. No full root suite or TypeScript compilation ran locally. Earlier validation screenshots retain their own historical build identities.

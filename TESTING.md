@@ -1,6 +1,6 @@
 # Testing
 
-The repository has a root Go module and a playable first-business slice, alongside earlier prototypes. Focused checks exercise construction, direct-service demand/revenue, funding, fleet, cash reconciliation and continuation. The broader network economy, dedicated server and full production save format remain planned. A hosted workflow builds native/browser targets and runs the initial rules and browser checks; adding the workflow does not establish that it has run remotely.
+The repository has a root Go module and a playable first-business slice, alongside earlier prototypes. Focused checks exercise construction, network demand/revenue, funding, fleet, cash reconciliation and continuation. The dedicated server, worldwide data qualification and full production save format remain planned. A hosted workflow builds native/browser targets and runs the initial rules and browser checks; adding the workflow does not establish that it has run remotely.
 
 Use the [architecture](ARCHITECTURE.md) for system boundaries, [game design verification contract](docs/DESIGN.md#13-verification-and-performance) for domain properties and scenarios, and [UX acceptance criteria](docs/UX.md#10-acceptance-and-questions-to-test) for player workflows. Existing results and limitations are recorded in the [validation report](docs/validation/README.md).
 
@@ -14,11 +14,61 @@ Use the [architecture](ARCHITECTURE.md) for system boundaries, [game design veri
 
 ## Existing checks
 
+The Taipei/Yeongcheon/Texas update adds `python3 tools/check-regional-network.py`
+after ordinary source preparation/import. Run it sequentially with the existing
+geography, coverage and strict audit gates; the operating manifest now has eleven
+network contracts. `TestRegional*` in the application package covers genuine v8
+migration, active older Texas service retention and new Taiwan/Texas through
+passengers. See [REGIONAL_NETWORK.md](docs/validation/REGIONAL_NETWORK.md).
+
+Campaign-end feedback has a focused native widget regression and an isolated
+browser footer check: `NODE_OPTIONS=--max-old-space-size=1536 node tools/check-campaign-completion.cjs --layout`.
+See [CAMPAIGN_COMPLETION.md](docs/validation/CAMPAIGN_COMPLETION.md) for exact
+targets and qualification limits. This does not retry full WASM startup.
+
+For the economy calibration, run the focused domain/application/UI/native-app packages, then `go run -p 1 ./cmd/balancecheck -out docs/validation/economy-calibration.json` with the Go memory/process caps above. After rebuilding web/native/headless, run `NODE_OPTIONS=--max-old-space-size=1536 node tools/check-economy.cjs <test-server-url>`. It exercises suggested plans, break-even/expense reconciliation, invalid/suspended drafts, through-running, native-headless/WASM replay, a genuine v4 save cutover, Chinese phone layouts and offline continuation. See [ECONOMY.md](docs/validation/ECONOMY.md). These are focused checks, not permission to run the full local suite.
+
+
+Public-network repairs are documented in [NETWORK_TOPOLOGY.md](docs/validation/NETWORK_TOPOLOGY.md). Run `python3 tools/prepare-network-repairs.py --check`, `python3 tools/import-public-network.py --check`, `python3 tools/test-network-coverage.py` and `python3 tools/audit-public-network.py --check --strict` sequentially. All ten whole-network contracts, ordered NEC/Uzbekistan/Al Boraq services, required station markers and map endpoints must pass, alongside the earlier seven pair checks. Negative regressions sever the NEC, isolate Tashkent, damage stop/section lists and remove a marker. Focused Go application tests operate complete services, carry end-to-end/intermediate passengers, check capacity/ledger/reload and v6→v7 historical migration/atomicity. The domain/UI/mapview/app/render packages cover shared behavior and drawings.
+
+Source preparation handles about 3.43 million vertices; serialize it with all heavy checks and monitor RSS. The successful local reproducibility run peaked at 1,768 MiB. After building web/native/headless, the optional focused desktop check is `NODE_OPTIONS=--max-old-space-size=1536 node tools/check-network-completion.cjs <server-url>`. It uses a fresh isolated campaign, checks visible NEC/Uzbekistan paths and normal service controls, and closes the browser before native-headless parity. It stops above the 2 GiB combined checker RSS cap. Earlier broad browser/phone runs were stopped at that cap; do not repeat them without a material memory fix or changed authorized budget. Current historical-catalog parsing is lazy; this does not establish physical-phone or repeated-reload memory qualification.
+
+For service selection from map track, run the focused UI/mapview/app/render
+packages or `-run 'Test(MapService|ServicePicking|MapResize|NativeMapService)'`.
+After building both clients, run
+`NODE_OPTIONS=--max-old-space-size=1536 node tools/check-map-services.cjs <server-url>`.
+It covers open-track picking, direct/through choices, retained drafts, full-route
+highlight pixels, Chinese phone visibility, clearing/reloading the local scope
+and unchanged campaign saves. See [MAP_SERVICES.md](docs/validation/MAP_SERVICES.md).
+
+For prospect selection, use focused `go test -p 1 ./pkg/ui ./pkg/app ./pkg/render`
+or `-run 'Test(SelectProspect|Prospect|ProductionProspect|NativeProspects)'`.
+After rebuilding web/native, run
+`NODE_OPTIONS=--max-old-space-size=1536 node tools/check-prospects.cjs <server-url>`.
+It checks actual dotted pixels, whole-path selection, drag separation, list and
+full-map browsing, Chinese phone layout and removal after a real construction
+commit/reload. See [PROSPECTS.md](docs/validation/PROSPECTS.md) for evidence and limits.
+
+For native representative-day Play, run
+`GOMEMLIMIT=768MiB GOMAXPROCS=2 go test -p 1 ./pkg/app -run '^TestNativeReplay' -count=1`.
+It renders the real slider after Play/rebuilds, checks deferred-event isolation,
+pause/scrub/resume and unchanged campaign exports. See
+[REPLAY_PLAYBACK.md](docs/validation/REPLAY_PLAYBACK.md) for evidence and limits.
+
 ### First business slice
+
+For the expanded public network, see [PUBLIC_NETWORK.md](docs/validation/PUBLIC_NETWORK.md). Focused checks: `go test -p 1 ./internal/domain ./internal/application ./pkg/ui ./pkg/mapview ./pkg/app ./pkg/render`; `TestPublicNetwork*` covers Chinese through-running, finite demand, shared Kyoto capacity, source inventory, atomic v2–v6→v7 upgrade, historical account retention and pinned-catalog restore. `TestNativePublicNetwork*` covers route search and region rotation. Build web/native/headless, then run `NODE_OPTIONS=--max-old-space-size=1536 node tools/check-public-network.cjs <server-url>` for actual Chinese rail pixels, route search/service/revenue, Chinese phone layouts, native/WASM replay, reload and offline continuation. This is focused qualification, not permission for a full root suite. Import regeneration uses `tools/requirements-public-network.txt`; its scope/limits are in `data/imports/README.md`.
+
+
+Task workspace checks and qualification limits are in [WORKSPACE.md](docs/validation/WORKSPACE.md). Use the focused `./pkg/ui ./pkg/app` packages for shared layout, native widget sizing, draft preservation and map-origin picking. After building the web bundle, run `NODE_OPTIONS=--max-old-space-size=1536 node tools/check-workspace.cjs <test-server-url>` for real tabs, disclosures, pointer/keyboard resizing, top/left placement, compact fallback, English/Chinese reflow, business actions, help links, reload, offline continuation and New game preference retention. The ordinary plan fits at 390×844 and 1280×850; expanded detail and short screens can scroll. Legacy workflow scripts use `tools/ui-helpers.cjs` to follow normal tabs and disclosures before an action. Native OS pointer/keyboard interaction and physical devices remain separate qualification.
+
+Contextual onboarding checks and qualification limits are in [ONBOARDING.md](docs/validation/ONBOARDING.md). Run the focused `./pkg/ui ./pkg/app` packages, build the web bundle, then run `NODE_OPTIONS=--max-old-space-size=1536 node tools/check-onboarding.cjs` against a temporary local server (optional URL argument). It checks per-concept persistence, explanations/reference, drafts, Chinese search/composition, failed/accepted learning actions and offline use; it does not qualify novice usability or native OS input.
+
+Milestone 3 details and limits are in [MILESTONE_3.md](docs/validation/MILESTONE_3.md). Focused checks are `GOMEMLIMIT=768MiB GOMAXPROCS=2 go test -p 1 ./internal/domain ./internal/application ./pkg/ui ./pkg/app ./pkg/render -count=1`. These include network conservation/fuzz seeds, through/transfer/feeder and bottleneck scenarios, migration/atomic extension, Chinese native layout and representative train timing/picking. For the real browser workflow, build web/headless targets and start the server below, then run `NODE_OPTIONS=--max-old-space-size=1536 node tools/check-milestone3.cjs` (optional URL argument). It writes `milestone3-checks.json` and screenshots, and compares both the checkpoint and detailed network report with native-headless replay. The `testdata/milestone2-v2.json` application fixture was exported by the prior version-2 headless binary. Full suites, races and extended fuzzing remain hosted gates; no additional local-suite permission is implied.
 
 For native Company name editing, run `GOMEMLIMIT=768MiB GOMAXPROCS=2 go test -p 1 ./pkg/app -run '^TestNative(Name|Panels|Wrapped|ReportScroll|NewGame)' -count=1`. `TestNativeName*` covers Unicode/repeated-substring selections, grapheme deletion, pointer placement/double-click, Shift/word navigation, fake-clipboard copy/cut/paste, failed/empty clipboard preservation, undo/redo, UI focus traversal, draft-only persistence and resize retention. Clipboard tests use an in-memory adapter and never inspect or overwrite the host clipboard. Native OS shortcuts, physical drag/keyboard/IME and actual clipboard exchange still need a manual pass: automated CUA input did not reliably activate even the existing native controls during the isolated observation.
 
-Milestone 2 evidence is in [MILESTONE_2.md](docs/validation/MILESTONE_2.md). After building browser/headless targets and starting the test server, run `NODE_OPTIONS=--max-old-space-size=1536 node tools/check-milestone2.cjs` (optional URL argument). It drives the contextual starter action, guidance dismissal/restore, station/family inspection, cost/alternative comparison, independent project/station construction, opening, fleet, service, revenue, export/headless restore and offline continuation on desktop/Chinese phone layouts. It records `milestone2-checks.json`, screenshots and native-headless/WASM parity. Run the focused Go application/UI/native-widget packages below; `TestM2*` adds station lifecycle/reuse and projection/accounting coverage, and `TestContextGuidance*` covers cue transitions and dismissal without state mutation. Native macOS service rendering was visually inspected in isolation, but automated native input did not reliably activate controls. Native interaction and physical-device qualification remain open.
+Milestone 2 evidence is in [MILESTONE_2.md](docs/validation/MILESTONE_2.md). After building browser/headless targets and starting the test server, run `NODE_OPTIONS=--max-old-space-size=1536 node tools/check-milestone2.cjs` (optional URL argument). It drives the normal starter-month control, per-concept dismissal and separate global visibility, station/family inspection, cost/alternative comparison, independent project/station construction, opening, fleet, service, revenue, export/headless restore and offline continuation on desktop/Chinese phone layouts. It records `milestone2-checks.json`, screenshots and native-headless/WASM parity. Run the focused Go application/UI/native-widget packages below; `TestM2*` adds station lifecycle/reuse and projection/accounting coverage, and `TestContextGuidance*` covers cue transitions and dismissal without state mutation. Native macOS service rendering was visually inspected in isolation, but automated native input did not reliably activate controls. Native interaction and physical-device qualification remain open.
 
 Use Go 1.27.1 (module minimum 1.26.4). From the root, these are focused checks for the implemented slice, not permission to run the full repository suite locally:
 
@@ -50,7 +100,7 @@ For native sidebar sizing and scrolling, run `GOMEMLIMIT=768MiB GOMAXPROCS=2 go 
 
 Hosted [CI](.github/workflows/milestone1.yml) owns the full root suite, race checks, bounded fuzz campaigns and macOS/Linux/Windows builds. Stop a test server when finished; preserve an interactive development instance the user is using.
 
-For idle-line warnings, run `go test -p 1 ./internal/application -run '^TestIdle' -count=1` and `go test -p 1 ./pkg/app -run '^TestNativeIdle' -count=1`. They cover authoritative fees, opening boundaries, accepted versus previewed service, leasing alone, suspension, reload, public-track false alarms, frame isolation and native warning/footer sizing. The business browser checker exercises the warning, service shortcut and its lifecycle at desktop and 320px Chinese layouts and saves `business-idle-line-*.png`. Notices do not block deliberate suspension or mutate finances.
+For idle-line warnings, run `go test -p 1 ./internal/application -run '^TestIdle' -count=1` and `go test -p 1 ./pkg/app -run '^TestNativeIdle' -count=1`. They cover authoritative fees, opening boundaries, accepted versus previewed service, leasing alone, suspension, reload, public-track false alarms, frame isolation and native warning/header sizing. The business browser checker exercises the warning, service shortcut and its lifecycle at desktop and 320px Chinese layouts and saves `business-idle-line-*.png`. Notices do not block deliberate suspension or mutate finances. The focused `TestIdleHighlights*`, `TestIdleThroughFleet*` and `TestNativeIdle*` checks also verify committed geometry, through-fleet section coverage, all-line and individual review framing, and unchanged state. After rebuilding web/native targets, run `NODE_OPTIONS=--max-old-space-size=1536 node tools/check-idle-review.cjs` against the test server (optional URL argument). It checks actual Go-rendered warning-colour pixels on two idle lines, excludes operating track, exercises row focus, 320px Chinese map visibility, leasing versus accepted service, idle fleets on shared track, through-route coverage and reload. Results are `docs/validation/idle-review-*`.
 
 For New game, run `go test -p 1 ./internal/application ./pkg/ui ./pkg/app -run 'Test(NewGame|NativeNewGame)' -count=1`. This covers a populated campaign reset, atomic failed writes, restart after campaign completion, stale command rejection, durable reload, first-month income, cleared drafts, retained preferences, and native confirmation/cancel sizing down to 320×480. After building browser/headless targets and starting the test server, run `NODE_OPTIONS=--max-old-space-size=1536 node tools/check-new-game.cjs` (optional URL argument). It uses actual Company/confirmation controls for cancellation, errors/retry, English/Chinese layouts, reload, offline restart and native-headless/WASM replay; evidence is `docs/validation/new-game-*`. Its browser context is isolated from the player's real save.
 
@@ -218,3 +268,79 @@ Before release, qualify actual iOS Safari and Android Chrome, software keyboards
 First-time-player sessions must cover both starting strategies without a required tutorial, plus experienced play with hints disabled. Verify that drafts carry from the planning lobby across host start and several live month boundaries. A stable online company must survive a 30-minute absence at the proposed default and eight hours at the 15-minute host setting. Use injected clocks for correctness checks and qualify real host timing separately.
 
 For meaningful verification, record source/data identities, toolchain/browser/OS versions, executed commands, outcomes, and remaining gaps. Keep screenshots and ledgers tied to the build they describe. An unresolved required gate is reported as unresolved rather than hidden behind a prototype `passed` flag.
+
+For capacity diagnostics, run the focused domain/application/UI/app packages or `go test -p 1 ./internal/domain ./internal/application ./pkg/ui ./pkg/app -run 'Test(Capacity|NativeCapacity)' -count=1`. After building web/native/headless targets, run `NODE_OPTIONS=--max-old-space-size=1536 node tools/check-capacity.cjs <test-server-url>`. It reproduces a 4+4+4+1 private-section conflict through real controls, verifies named contributors, available draft frequency, blocked Apply, cleared stale forecast, Chinese phone layout/reload, a real remedy and headless/WASM parity. See [CAPACITY.md](docs/validation/CAPACITY.md). This is a focused workflow, not permission to run the full root suite locally.
+
+For station-connected legacy geometry, run `go test -p 1 ./internal/application ./pkg/render`
+and `python3 tools/check-route-geography.py`. The latter checks all six frozen paths
+and their six displayed replacements, including water masks in geographic/Equal
+Earth space and unchanged priced kilometre bounds. After building web, run
+`NODE_OPTIONS=--max-old-space-size=1536 node tools/check-osaka-map.cjs <server-url>`.
+It checks actual selected-track pixels at Kyoto/Shin-Osaka, absence of the old
+city-centre approach, common endpoints, reload and unchanged save bytes. See
+[OSAKA_STATION.md](docs/validation/OSAKA_STATION.md).
+
+For existing public pairs in Build, use focused `TestExistingChineseConnections`,
+`TestNativeExistingPublicConnection`, and `TestConstructionOpportunities` checks.
+After building web, run `NODE_OPTIONS=--max-old-space-size=1536 node tools/check-existing-connections.cjs <server-url>`.
+The [validation note](docs/validation/EXISTING_CONNECTIONS.md) covers the three
+reported Chinese pairs, no duplicate construction, explicit existing-line status,
+service navigation and unchanged company state in both languages.
+
+For unused-source map filtering, run `go test -p 1 ./pkg/render` and
+`python3 tools/import-public-network.py --check`, then build web/native and run
+`NODE_OPTIONS=--max-old-space-size=1536 node tools/check-playable-map.cjs <server-url>`.
+The renderer test covers all admitted paths, visible station association, retained
+Harbin–Shenyang/Changchun–Jilin and removal of the reported unused parallel fragment.
+The browser check verifies actual retained/removed rail pixels and unchanged saves.
+See [PLAYABLE_MAP.md](docs/validation/PLAYABLE_MAP.md).
+
+For coastline replacement/refinement, run focused `go test -p 1 ./pkg/render`,
+`python3 tools/prepare-shorelines.py --check`,
+`python3 tools/import-public-network.py --check` and the route geography checker.
+After building web/native, run
+`NODE_OPTIONS=--max-old-space-size=1536 node tools/check-coastlines.cjs <server-url>`.
+It checks Japan/China coastal water and fine shoreline pixels in light/dark modes
+with terrain on/off, plus unchanged save bytes/checkpoint. See
+[COASTLINES.md](docs/validation/COASTLINES.md).
+
+
+## Worldwide construction catalog
+
+See [LAUNCH_PROSPECTS.md](docs/validation/LAUNCH_PROSPECTS.md). Run sequentially:
+`python3 tools/prepare-launch-prospects.py --check`,
+`python3 tools/import-public-network.py --check`,
+`python3 tools/check-launch-prospects.py`,
+`python3 tools/test-network-coverage.py` and the strict public-network audit.
+The new mask checker covers all 68 new alignments in geographic and Equal Earth
+coordinates, explicit water structures, regional quantities, all 70 spec identities,
+Morocco's HSR boundary and deliberate Gulf/Johor errors. The unchanged Japanese
+alternatives retain their separate detailed route mask.
+
+Focused domain/application/UI/mapview/app/render packages cover all 70 funded
+build commands, opening boundaries, real regional construction/loan/revenue/reload
+campaigns, Tokyo–Sapporo through-running, v7→v8 migration including retired Moroccan
+services, and native 70-entry selection in both languages at 320/1440 px. The
+native dropdown test exercises controlled initialization and stale deferred events.
+No full local root suite or TypeScript compilation is authorized by this section.
+Rebuild native, web and headless after data changes. Existing browser interaction
+qualification remains blocked by the documented startup memory cap; do not repeat
+that workflow without a material fix or changed authorized budget.
+
+## Network bridge expansion
+
+The connector update uses focused `TestConnectors*` application checks for v9→v10
+migration, nested historical accounts, failure atomicity, ordered public services,
+new construction/opening boundaries, through passengers and reload. Native
+`TestNativeWorldwideProspectPickerFitsAndSelectsDedicatedHSR` checks all three new
+projects in English/Simplified Chinese at 320/1440 px. Shared-resource assertions
+now include the two physical Maibara sections beneath older Kyoto–Nagoya aliases.
+
+Run `python3 tools/check-network-bridges.py` with the existing offline preparation,
+import, launch geography, regional, coverage and strict audit checks. The
+operating manifest has 14 network contracts; bridge cuts must fail even when old
+express aliases remain. Focused Go packages are domain, application, UI, mapview,
+app and render, with the existing memory/process limits. Rebuild native, web and
+headless after catalog changes. This does not authorize a full root suite or
+another full browser/WASM startup under the unresolved 2 GiB cap. See
+[NETWORK_BRIDGES.md](docs/validation/NETWORK_BRIDGES.md).

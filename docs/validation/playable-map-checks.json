@@ -1,0 +1,62 @@
+{
+  "date": "2026-11-13T00:31:32.808Z",
+  "passed": true,
+  "wasm_sha256": "b9cfe9632d4ceacd294a3e24ab7db919be6c1da0f99b11efefc30dec883c7377",
+  "map_sha256": "8320e8a8ff270f6a82f5f855bb193325a594248bf0594e748dbad6a4f7966948",
+  "pixels": {
+    "keptRoute": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "unusedFragment": [
+      false,
+      false,
+      false
+    ]
+  },
+  "checks": [
+    "Actual Go map retains Harbin–Shenyang through track while unused parallel fragment samples have no rail pixels",
+    "Map focus/zoom/selection/reload preserve campaign checkpoint and exact durable save bytes"
+  ],
+  "limitations": [
+    "Browser input is synthetic; native OS interaction and production topology qualification remain separate."
+  ]
+}

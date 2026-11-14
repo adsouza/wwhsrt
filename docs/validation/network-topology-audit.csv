@@ -1,0 +1,93 @@
+kind,meters,lon_a,lat_a,lon_b,lat_b,station_a,station_b,component_a,component_b,status
+endpoint_to_interior,0.2,117.4702,31.8596,117.47019930393962,31.859601659213695,肥东,肥东,330,205,connected_in_source_node_topology
+endpoint_to_interior,0.23,103.4138,24.3315,103.41380171167089,24.33150129045434,Mile,Mile,210,205,connected_in_source_node_topology
+endpoint_to_interior,0.37,125.2038,43.8813,125.20380175685717,43.88129688399938,长春西,长春西,387,205,connected_in_source_node_topology
+endpoint_to_interior,0.59,121.3174,28.4697,121.31739412235106,28.46970119952019,Wenling,Wenling,205,369,connected_in_source_node_topology
+endpoint_to_interior,1.16,122.6502,40.909,122.6501915600786,40.90900824758044,Haichengxi,Haichengxi,373,205,connected_in_source_node_topology
+endpoint_to_interior,1.58,112.2829,32.0112,112.28289088259552,32.01121187350536,Xiangyangdong,Xiangyangdong,250,205,connected_in_source_node_topology
+endpoint_to_interior,1.85,113.3729,40.0434,113.37290004084888,40.043416605065566,Datongnan,Datongnan,262,205,connected_in_source_node_topology
+endpoint_to_interior,3.37,116.9545,33.4328,116.95453622547059,33.432801954611726,双堆集,双堆集,205,317,connected_in_source_node_topology
+endpoint_to_interior,3.92,112.2283,31.9645,112.22826921451747,31.964523692748816,Xiangyangdong,Xiangyangdong,250,205,connected_in_source_node_topology
+endpoint_to_interior,5.8,61.193,41.2644,61.19296847161572,41.264353537117906,No 343,No 343,200,199,connected_in_source_node_topology
+endpoint_to_interior,7.28,113.1583,40.9639,113.15829478606592,40.963965395105255,Wulanchabu,Wulanchabu,262,205,connected_in_source_node_topology
+endpoint_to_interior,8.17,129.1257,35.8267,129.12576361427693,35.82664764758069,Gyeongju,Gyeongju,411,395,connected_in_source_node_topology
+endpoint_to_interior,8.76,119.0637,25.3657,119.06377638411196,25.365661963196278,Putian,Putian,347,205,connected_in_source_node_topology
+endpoint_to_interior,9.36,121.8164,41.3386,121.81643165927123,41.33851920394188,Panjinbei,Panjinbei,373,205,connected_in_source_node_topology
+endpoint_to_interior,9.85,113.7551,34.7363,113.7551018791361,34.73621144571111,Zhengzhoudong,Zhengzhoudong,205,271,connected_in_source_node_topology
+endpoint_to_interior,10.12,126.4847,45.8704,126.48475314630439,45.870483118348126,万乐,万乐,392,205,connected_in_source_node_topology
+endpoint_to_interior,11.5,117.1622,36.7487,117.16219732640178,36.748596620868916,Jinandong,Jinandong,326,205,requires_junction_or_source_review
+endpoint_to_interior,12.48,39.2154,21.6235,39.215512408759125,21.623540875912408,Haramain High Speed Railway - King Abdulaziz International Airport,Haramain High Speed Railway - King Abdulaziz International Airport,195,198,connected_in_source_node_topology
+endpoint_to_interior,13.4,108.4559,22.8484,108.45586745627354,22.84851668405195,Tunli,Tunli,233,205,connected_in_source_node_topology
+endpoint_to_interior,13.5,110.749,31.3306,110.7489192476756,31.330699903073253,Xingshan,Xingshan,249,205,connected_in_source_node_topology
+endpoint_to_interior,14.1,106.1097,30.912,106.1098208831793,30.911927001882923,Nanchongbei,Nanchongbei,223,205,requires_junction_or_source_review
+endpoint_to_interior,14.92,116.8428,34.041,116.84294756797425,34.04094471773774,Huaibeibei,Huaibeibei,317,205,connected_in_source_node_topology
+endpoint_to_interior,15.46,122.5731,40.8472,122.57321813799534,40.847093544174115,Haichengxi,Haichengxi,373,205,connected_in_source_node_topology
+endpoint_to_interior,16.68,112.2514,31.9858,112.2514975865373,31.985674933440006,Xiangyangdong,Xiangyangdong,250,205,connected_in_source_node_topology
+endpoint_to_interior,16.91,115.289,40.5075,115.28910082517895,40.507631383979685,Xiahuayuanbei,Xiahuayuanbei,302,205,connected_in_source_node_topology
+endpoint_to_interior,24.54,121.8104,41.3364,121.8104829691246,41.336188258606306,Panjinbei,Panjinbei,373,205,connected_in_source_node_topology
+endpoint_to_interior,29.04,113.165,40.9645,113.16501317932018,40.964239049460616,Wulanchabu,Wulanchabu,205,262,requires_junction_or_source_review
+endpoint_to_interior,29.04,129.0983,35.8215,129.0981646153846,35.821263076923074,Gyeongju,Gyeongju,411,395,connected_in_source_node_topology
+endpoint_to_interior,29.41,0.6458,47.2467,0.6454370627638899,47.24679622428372,Monts,Monts,42,67,connected_in_source_node_topology
+endpoint_to_interior,32.58,108.5971,34.3132,108.59701767609064,34.31348500441132,Maoling,Maoling,230,205,connected_in_source_node_topology
+endpoint_to_interior,38.61,117.4332,32.9159,117.43359343592235,32.91600709356187,Bengbunan,Bengbunan,317,205,connected_in_source_node_topology
+endpoint_to_interior,39.3,117.1698,36.7484,117.16979744829473,36.748753411179024,Jinandong,Jinandong,205,326,connected_in_source_node_topology
+endpoint_to_interior,39.59,109.0632,27.3556,109.06340736980883,27.35529529334212,Dazongping,Dazongping,238,205,connected_in_source_node_topology
+endpoint_to_interior,41.26,113.7811,34.7073,113.78153219666932,34.70740705789056,Nancao,Nancao,271,205,connected_in_source_node_topology
+endpoint_to_interior,49.47,0.5864,47.0342,0.5868854009077163,47.03449750378215,Maillé,Maillé,42,67,connected_in_source_node_topology
+endpoint_to_interior,54.57,114.3327,34.7714,114.33266486387126,34.77091010197645,Kaifeng,Kaifeng,289,286,requires_junction_or_source_review
+endpoint_to_interior,57.31,111.4554,30.7464,111.45548852419074,30.74589022276366,Yichangbei,Yichangbei,249,250,connected_in_source_node_topology
+endpoint_to_interior,66.59,61.2154,41.2548,61.21534973113617,41.25539764093669,No 343,No 343,199,200,connected_in_source_node_topology
+endpoint_to_interior,78.12,112.1941,30.3738,112.19412737158196,30.374502122549078,Jingzhou,Jingzhou,250,205,connected_in_source_node_topology
+endpoint_to_interior,83.87,118.9367,25.8464,118.93706919572091,25.847077120662608,Yongtai,Yongtai,347,205,connected_in_source_node_topology
+endpoint_to_interior,95.84,112.8324,28.2613,112.83209468856121,28.260481139064172,Lugu,Lugu,205,259,requires_junction_or_source_review
+endpoint_to_interior,104.65,106.0903,30.8834,106.09096414247115,30.882651110182266,Nanchongbei,Nanchongbei,223,205,connected_in_source_node_topology
+endpoint_to_interior,128.78,-8.5511,42.8673,-8.550192347661785,42.866352007557865,Santiago de Compostela - Daniel Castelao,Santiago de Compostela - Daniel Castelao,15,17,connected_in_source_node_topology
+endpoint_to_endpoint,160.56,140.4913,41.1662,140.4928,41.1653,Tsugaru-futamata,Tsugaru-futamata,416,413,connected_in_source_node_topology
+endpoint_to_endpoint,275.17,124.7041,43.4392,124.707,43.4405,Gongzhuling South,Gongzhuling South,382,386,requires_junction_or_source_review
+endpoint_to_interior,304.84,10.8676,48.3986,10.866008741845292,48.39607030754893,Augsburg-Oberhausen,Augsburg-Oberhausen,116,114,connected_in_source_node_topology
+endpoint_to_interior,325.34,116.8363,34.0232,116.83431725204929,34.02562079691656,Huaibeibei,Huaibeibei,205,317,connected_in_source_node_topology
+endpoint_to_endpoint,368.08,127.8223,35.1092,127.8263,35.1097,Hoengcheon,Hoengcheon,399,401,requires_junction_or_source_review
+endpoint_to_interior,428.02,-0.3095,47.8659,-0.307853311763894,47.86221263063695,Sablé-sur-Sarthe,Sablé-sur-Sarthe,42,57,connected_in_source_node_topology
+endpoint_to_interior,613.21,124.9217,43.5908,124.9158974248927,43.594370815450645,Gongzhuling South,Gongzhuling South,386,205,requires_junction_or_source_review
+endpoint_to_interior,664.59,0.6509,47.2343,0.6427003525705529,47.23647394392793,Villeperdue,Villeperdue,42,67,connected_in_source_node_topology
+endpoint_to_endpoint,714.28,-8.5468,42.8696,-8.5392,42.8728,Santiago de Compostela - Daniel Castelao,Santiago de Compostela - Daniel Castelao,17,18,requires_junction_or_source_review
+endpoint_to_endpoint,793.76,13.7615,56.1546,13.7654,56.1614,Hässleholm C,Hässleholm C,139,141,requires_junction_or_source_review
+endpoint_to_interior,793.77,0.3492,46.6352,0.3583094963985411,46.631760314637894,Chasseneuil-du-Poitou,Chasseneuil-du-Poitou,42,67,connected_in_source_node_topology
+endpoint_to_interior,814.15,112.998,27.9982,112.99338616387517,28.00428393096853,Muyun,Muyun,260,205,connected_in_source_node_topology
+endpoint_to_interior,876.9,-0.4614,44.9328,-0.4673700690340358,44.93945814478711,La Grave-d'Ambarès,La Grave-d'Ambarès,58,42,requires_junction_or_source_review
+endpoint_to_interior,886.76,114.0416,32.5326,114.03406632371367,32.527777846285325,Lixindian,Lixindian,285,205,requires_junction_or_source_review
+endpoint_to_endpoint,953.61,126.7828,35.1271,126.7881,35.1345,Gwangju Songjeong,Gwangju Songjeong,393,395,requires_junction_or_source_review
+endpoint_to_interior,956.98,125.2918,43.9907,125.29733235702739,43.98306950399262,Xiaohelong,Xiaohelong,385,205,requires_junction_or_source_review
+endpoint_to_interior,965.03,115.9212,28.3601,115.91609617838125,28.35267385124332,潭岗,潭岗,304,205,requires_junction_or_source_review
+endpoint_to_interior,1089.52,107.8278,34.272,107.82940870463356,34.26229229962499,Meixiandong,Meixiandong,230,205,requires_junction_or_source_review
+endpoint_to_endpoint,1146.52,-8.5511,42.8673,-8.5392,42.8728,Santiago de Compostela - Daniel Castelao,Santiago de Compostela - Daniel Castelao,15,18,requires_junction_or_source_review
+endpoint_to_endpoint,1166.62,29.3904,60.3553,29.4013,60.3463,Kannelyarvi,Шевелёво,175,176,requires_junction_or_source_review
+endpoint_to_interior,1167.7,-8.5623,42.8579,-8.5515,42.8648,Santiago de Compostela - Daniel Castelao,Santiago de Compostela - Daniel Castelao,15,17,connected_in_source_node_topology
+endpoint_to_interior,1192.97,0.8219,47.3982,0.8146754093573625,47.407749458911724,Noizay,Noizay,68,42,connected_in_source_node_topology
+endpoint_to_interior,1211.21,124.1817,42.8736,124.17331741233319,42.88259538825075,双庙子,双庙子,382,205,requires_junction_or_source_review
+endpoint_to_interior,1220.98,118.8858,32.1001,118.881,32.1103,Zijinshan,Zijinshan,346,205,requires_junction_or_source_review
+endpoint_to_endpoint,1360.02,124.6601,45.1762,124.6712,45.1668,Tongtu,Tongtu,384,385,requires_junction_or_source_review
+endpoint_to_interior,1381.7,113.9281,30.7137,113.93866952509386,30.72217580055259,Xingou,Xingou,250,205,requires_junction_or_source_review
+endpoint_to_endpoint,1417.13,31.2447,59.3544,31.262,59.3452,Bolotnitskaya,Pomeranye,181,182,connected_in_source_node_topology
+endpoint_to_interior,1418.84,4.703,44.368,4.712901305115653,44.357383600625994,Pierrelatte,Pierrelatte,82,71,requires_junction_or_source_review
+endpoint_to_endpoint,1419.08,11.4676,48.1482,11.4807,48.1575,München-Pasing,Obermenzing,114,123,connected_in_source_node_topology
+endpoint_to_interior,1431.56,0.6017,47.0566,0.5830275658168512,47.05462067428199,Maillé,Maillé,42,67,connected_in_source_node_topology
+endpoint_to_endpoint,1450.37,115.1406,34.6424,115.1548,34.6366,Minquan,Minquan,289,205,requires_junction_or_source_review
+endpoint_to_interior,1455.28,126.3876,45.5428,126.3793807608552,45.554553937844396,Wujia,Wujia,390,205,requires_junction_or_source_review
+endpoint_to_interior,1474.36,4.7136,44.2277,4.698510892813095,44.22002647967845,Bollène - La Croisière,Bollène - La Croisière,82,71,requires_junction_or_source_review
+endpoint_to_interior,1503.24,115.9853,28.4198,115.98388045405801,28.406338788481158,梁家渡,梁家渡,205,304,requires_junction_or_source_review
+endpoint_to_interior,1548.15,111.3608,30.6764,111.35741833179092,30.66278433589506,Yichangdong,Yichangdong,250,205,connected_in_source_node_topology
+endpoint_to_interior,1603.33,113.7729,34.7505,113.7687,34.7365,Zhengzhoudong,Zhengzhoudong,205,271,connected_in_source_node_topology
+endpoint_to_interior,1686.49,0.6572,47.2072,0.6364010547716885,47.21271435181521,Villeperdue,Villeperdue,42,67,requires_junction_or_source_review
+endpoint_to_endpoint,1703.32,70.5869,52.2832,70.5981,52.2695,333 км,333 км,203,204,requires_junction_or_source_review
+endpoint_to_interior,1729.09,0.3553,46.6683,0.37765285885062827,46.66574885850075,Futuroscope,Futuroscope,42,67,connected_in_source_node_topology
+endpoint_to_endpoint,1747.87,31.7668,59.0757,31.7831,59.0624,Volkhov Most,Volkhov Most,182,183,connected_in_source_node_topology
+endpoint_to_interior,1751.82,128.3318,43.33,128.33387007029518,43.345682350721034,敦化南,敦化南,205,387,connected_in_source_node_topology
+endpoint_to_interior,1771.57,0.3493,46.6079,0.3355131727347382,46.62071200109499,Chasseneuil-du-Poitou,Chasseneuil-du-Poitou,67,42,connected_in_source_node_topology
+endpoint_to_endpoint,1814.53,34.9886,57.4257,35.0083,57.4133,Lyubinka,Lyubinka,186,187,connected_in_source_node_topology
+endpoint_to_interior,1893.2,113.7937,34.7761,113.77311398265562,34.77411042435922,Zhengzhoudong,Zhengzhoudong,277,205,requires_junction_or_source_review
+endpoint_to_interior,1896.37,108.0793,34.2709,108.07726446179721,34.25392870023422,Yangling,Yangling,230,205,requires_junction_or_source_review
+endpoint_to_interior,1912.22,106.0052,30.8045,106.0228514975996,30.79638489590875,南充西,南充西,220,205,requires_junction_or_source_review
+endpoint_to_interior,1926.97,13.1811,55.7161,13.1793,55.6988,Lund Central,Klostergården,133,135,requires_junction_or_source_review
+endpoint_to_endpoint,1929.97,70.4074,52.6446,70.4123,52.6275,Бурли-Казахский,Бурли-Казахский,202,203,requires_junction_or_source_review
+endpoint_to_interior,1931.82,124.9785,43.6397,124.96249729891063,43.65265139505317,范家屯,范家屯,386,205,requires_junction_or_source_review

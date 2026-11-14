@@ -1,0 +1,6806 @@
+{
+  "version": 1,
+  "role": "Authored strategic game alignments, not surveyed engineering or procurement estimates",
+  "pairs": [
+    {
+      "number": 1,
+      "name": "San Francisco Bay–Fresno",
+      "from_city": "san_francisco",
+      "to_city": "fresno",
+      "basis": "Project. Northern California HSR approach and Central Valley link. Account for blended track at the Bay end. [California HSR Authority](https://hsr.ca.gov/project-overview/)",
+      "source_urls": [
+        "https://hsr.ca.gov/project-overview/"
+      ],
+      "id": "launch_01_san_francisco__fresno",
+      "profile": "north_america",
+      "months": 48,
+      "hill_percent": 12,
+      "viaduct_percent": 18,
+      "tunnel_percent": 12,
+      "via": [
+        [
+          -122.05,
+          37.36
+        ],
+        [
+          -121.89,
+          37.34
+        ],
+        [
+          -121.57,
+          37.01
+        ],
+        [
+          -121.13,
+          37.06
+        ],
+        [
+          -120.85,
+          37.06
+        ]
+      ],
+      "barrier": "Pacheco Pass and the San Francisco peninsula",
+      "kind": "new_line"
+    },
+    {
+      "number": 2,
+      "name": "Fresno–Bakersfield",
+      "from_city": "fresno",
+      "to_city": "bakersfield",
+      "basis": "Project. Central Valley spine between two usable city markets. [California HSR Authority](https://hsr.ca.gov/project-overview/project-sections/central-valley/)",
+      "source_urls": [
+        "https://hsr.ca.gov/project-overview/project-sections/central-valley/"
+      ],
+      "id": "launch_02_fresno__bakersfield",
+      "profile": "north_america",
+      "months": 36,
+      "hill_percent": 0,
+      "viaduct_percent": 20,
+      "tunnel_percent": 0,
+      "via": [
+        [
+          -119.6,
+          36.1
+        ]
+      ],
+      "barrier": "Central Valley floodplain and urban approaches",
+      "kind": "new_line"
+    },
+    {
+      "number": 3,
+      "name": "Bakersfield–Los Angeles",
+      "from_city": "bakersfield",
+      "to_city": "los_angeles",
+      "basis": "Project. Tehachapi and Palmdale approach, with material tunnel and grade tradeoffs. [California HSR Authority](https://hsr.ca.gov/project-overview/project-sections/southern-california/)",
+      "source_urls": [
+        "https://hsr.ca.gov/project-overview/project-sections/southern-california/"
+      ],
+      "id": "launch_03_bakersfield__los_angeles",
+      "profile": "north_america",
+      "months": 66,
+      "hill_percent": 20,
+      "viaduct_percent": 15,
+      "tunnel_percent": 35,
+      "via": [
+        [
+          -118.83,
+          35.05
+        ],
+        [
+          -118.12,
+          34.58
+        ],
+        [
+          -118.25,
+          34.3
+        ]
+      ],
+      "barrier": "Tehachapi Mountains and Los Angeles approach",
+      "kind": "new_line"
+    },
+    {
+      "number": 4,
+      "name": "Los Angeles–Las Vegas",
+      "from_city": "los_angeles",
+      "to_city": "las_vegas",
+      "basis": "Project plus approach. Brightline West's western terminal is Rancho Cucamonga. Author and price the missing connection to the game's Los Angeles station. [Brightline West](https://www.brightlinewest.com/overview/project)",
+      "source_urls": [
+        "https://www.brightlinewest.com/overview/project"
+      ],
+      "id": "launch_04_los_angeles__las_vegas",
+      "profile": "north_america",
+      "months": 48,
+      "hill_percent": 15,
+      "viaduct_percent": 15,
+      "tunnel_percent": 8,
+      "via": [
+        [
+          -117.59,
+          34.11
+        ],
+        [
+          -117.4,
+          34.31
+        ],
+        [
+          -117.28,
+          34.54
+        ],
+        [
+          -116.08,
+          35.26
+        ]
+      ],
+      "barrier": "Cajon Pass; includes the Los Angeles–Rancho Cucamonga approach",
+      "kind": "new_line"
+    },
+    {
+      "number": 5,
+      "name": "DFW–Houston",
+      "from_city": "dallas",
+      "to_city": "houston",
+      "basis": "Project. The FRA environmental study supplies a corridor reference. [FRA environmental review](https://railroads.dot.gov/environmental-reviews/dallas-houston-high-speed-rail/dallas-houston-high-speed-rail-final)",
+      "source_urls": [
+        "https://railroads.dot.gov/environmental-reviews/dallas-houston-high-speed-rail/dallas-houston-high-speed-rail-final"
+      ],
+      "id": "launch_05_dallas__houston",
+      "profile": "north_america",
+      "months": 42,
+      "hill_percent": 0,
+      "viaduct_percent": 15,
+      "tunnel_percent": 0,
+      "via": [
+        [
+          -96.4,
+          31.65
+        ]
+      ],
+      "barrier": "Texas floodplains and city approaches",
+      "kind": "new_line"
+    },
+    {
+      "number": 6,
+      "name": "DFW–Austin",
+      "from_city": "dallas",
+      "to_city": "austin",
+      "basis": "Concept. Texas spine through the Waco area.",
+      "source_urls": [],
+      "id": "launch_06_dallas__austin",
+      "profile": "north_america",
+      "months": 42,
+      "hill_percent": 10,
+      "viaduct_percent": 10,
+      "tunnel_percent": 0,
+      "via": [
+        [
+          -97.15,
+          31.55
+        ]
+      ],
+      "barrier": "Waco corridor",
+      "kind": "new_line"
+    },
+    {
+      "number": 7,
+      "name": "Austin–San Antonio",
+      "from_city": "austin",
+      "to_city": "san_antonio",
+      "basis": "Concept. Shorter Texas spine link and a possible independent start.",
+      "source_urls": [],
+      "id": "launch_07_austin__san_antonio",
+      "profile": "north_america",
+      "months": 30,
+      "hill_percent": 10,
+      "viaduct_percent": 12,
+      "tunnel_percent": 0,
+      "via": [
+        [
+          -98.0,
+          29.88
+        ]
+      ],
+      "barrier": "Texas Hill Country fringe",
+      "kind": "new_line"
+    },
+    {
+      "number": 8,
+      "name": "Toronto–Ottawa",
+      "from_city": "toronto",
+      "to_city": "ottawa",
+      "basis": "Project. Western Alto package, potentially via Peterborough. [Transport Canada](https://tc.canada.ca/en/rail-transportation/railway-lines/high-speed-rail-initiative-toronto-quebec-city)",
+      "source_urls": [
+        "https://tc.canada.ca/en/rail-transportation/railway-lines/high-speed-rail-initiative-toronto-quebec-city"
+      ],
+      "id": "launch_08_toronto__ottawa",
+      "profile": "north_america",
+      "months": 48,
+      "hill_percent": 12,
+      "viaduct_percent": 15,
+      "tunnel_percent": 5,
+      "via": [
+        [
+          -78.32,
+          44.3
+        ],
+        [
+          -77.11,
+          44.52
+        ],
+        [
+          -76.22,
+          44.93
+        ]
+      ],
+      "barrier": "Peterborough and the Canadian Shield fringe",
+      "kind": "new_line"
+    },
+    {
+      "number": 9,
+      "name": "Ottawa–Montréal",
+      "from_city": "ottawa",
+      "to_city": "montreal",
+      "basis": "Project. Central Alto package. [Transport Canada](https://tc.canada.ca/en/rail-transportation/railway-lines/high-speed-rail-initiative-toronto-quebec-city)",
+      "source_urls": [
+        "https://tc.canada.ca/en/rail-transportation/railway-lines/high-speed-rail-initiative-toronto-quebec-city"
+      ],
+      "id": "launch_09_ottawa__montreal",
+      "profile": "north_america",
+      "months": 36,
+      "hill_percent": 0,
+      "viaduct_percent": 15,
+      "tunnel_percent": 0,
+      "via": [
+        [
+          -74.63,
+          45.5
+        ],
+        [
+          -74.1,
+          45.4
+        ],
+        [
+          -73.99,
+          45.385
+        ],
+        [
+          -73.93,
+          45.43
+        ]
+      ],
+      "barrier": "Ottawa River and Montréal approaches",
+      "kind": "new_line",
+      "crossings": [
+        {
+          "name": "Montréal western channel crossing",
+          "kind": "rail_bridge",
+          "geometry": {
+            "type": "Polygon",
+            "coordinates": [
+              [
+                [
+                  -73.93660000000001,
+                  45.4388
+                ],
+                [
+                  -73.93635609137122,
+                  45.43896487419661
+                ],
+                [
+                  -73.9360971967319,
+                  45.439105047252596
+                ],
+                [
+                  -73.93582580937893,
+                  45.43921916922481
+                ],
+                [
+                  -73.93554454292085,
+                  45.439306141056285
+                ],
+                [
+                  -73.93525610610746,
+                  45.43936512516072
+                ],
+                [
+                  -73.9349632767429,
+                  45.43939555348896
+                ],
+                [
+                  -73.93466887493408,
+                  45.43939713299957
+                ],
+                [
+                  -73.9343757359313,
+                  45.439369848480986
+                ],
+                [
+                  -73.93408668282343,
+                  45.439313962698044
+                ],
+                [
+                  -73.93380449934992,
+                  45.43923001386139
+                ],
+                [
+                  -73.93353190309186,
+                  45.439118810444214
+                ],
+                [
+                  -73.93327151930025,
+                  45.4389814233962
+                ],
+                [
+                  -73.93302585561331,
+                  45.43881917582973
+                ],
+                [
+                  -73.93279727790667,
+                  45.438633630277565
+                ],
+                [
+                  -73.9325879875086,
+                  45.438426573644804
+                ],
+                [
+                  -73.93240000000002,
+                  45.4382
+                ],
+                [
+                  -73.92280000000001,
+                  45.4254
+                ],
+                [
+                  -73.9226351258034,
+                  45.42515609137122
+                ],
+                [
+                  -73.92249495274741,
+                  45.42489719673189
+                ],
+                [
+                  -73.9223808307752,
+                  45.42462580937891
+                ],
+                [
+                  -73.92229385894372,
+                  45.42434454292085
+                ],
+                [
+                  -73.92223487483928,
+                  45.42405610610745
+                ],
+                [
+                  -73.92220444651105,
+                  45.4237632767429
+                ],
+                [
+                  -73.92220286700044,
+                  45.423468874934066
+                ],
+                [
+                  -73.92223015151902,
+                  45.423175735931295
+                ],
+                [
+                  -73.92228603730196,
+                  45.422886682823425
+                ],
+                [
+                  -73.9223699861386,
+                  45.422604499349916
+                ],
+                [
+                  -73.9224811895558,
+                  45.42233190309185
+                ],
+                [
+                  -73.92261857660381,
+                  45.42207151930023
+                ],
+                [
+                  -73.92278082417027,
+                  45.4218258556133
+                ],
+                [
+                  -73.92296636972243,
+                  45.42159727790666
+                ],
+                [
+                  -73.9231734263552,
+                  45.42138798750858
+                ],
+                [
+                  -73.9234,
+                  45.4212
+                ],
+                [
+                  -73.98339999999999,
+                  45.3762
+                ],
+                [
+                  -73.98364390862878,
+                  45.37603512580339
+                ],
+                [
+                  -73.98390280326811,
+                  45.3758949527474
+                ],
+                [
+                  -73.98417419062108,
+                  45.375780830775184
+                ],
+                [
+                  -73.98445545707915,
+                  45.37569385894371
+                ],
+                [
+                  -73.98474389389254,
+                  45.37563487483928
+                ],
+                [
+                  -73.9850367232571,
+                  45.37560444651104
+                ],
+                [
+                  -73.98533112506593,
+                  45.37560286700043
+                ],
+                [
+                  -73.9856242640687,
+                  45.37563015151901
+                ],
+                [
+                  -73.98591331717657,
+                  45.37568603730195
+                ],
+                [
+                  -73.98619550065008,
+                  45.37576998613861
+                ],
+                [
+                  -73.98646809690814,
+                  45.375881189555784
+                ],
+                [
+                  -73.98672848069975,
+                  45.3760185766038
+                ],
+                [
+                  -73.98697414438669,
+                  45.37618082417027
+                ],
+                [
+                  -73.98720272209333,
+                  45.37636636972243
+                ],
+                [
+                  -73.9874120124914,
+                  45.37657342635519
+                ],
+                [
+                  -73.98759999999999,
+                  45.376799999999996
+                ],
+                [
+                  -73.99719999999999,
+                  45.389599999999994
+                ],
+                [
+                  -73.9973648741966,
+                  45.38984390862878
+                ],
+                [
+                  -73.99750504725259,
+                  45.39010280326811
+                ],
+                [
+                  -73.9976191692248,
+                  45.39037419062109
+                ],
+                [
+                  -73.99770614105628,
+                  45.39065545707915
+                ],
+                [
+                  -73.99776512516073,
+                  45.39094389389255
+                ],
+                [
+                  -73.99779555348896,
+                  45.391236723257094
+                ],
+                [
+                  -73.99779713299957,
+                  45.39153112506593
+                ],
+                [
+                  -73.99776984848098,
+                  45.3918242640687
+                ],
+                [
+                  -73.99771396269804,
+                  45.39211331717657
+                ],
+                [
+                  -73.9976300138614,
+                  45.39239550065008
+                ],
+                [
+                  -73.9975188104442,
+                  45.392668096908146
+                ],
+                [
+                  -73.99738142339619,
+                  45.392928480699766
+                ],
+                [
+                  -73.99721917582973,
+                  45.3931741443867
+                ],
+                [
+                  -73.99703363027757,
+                  45.393402722093334
+                ],
+                [
+                  -73.9968265736448,
+                  45.39361201249142
+                ],
+                [
+                  -73.9966,
+                  45.3938
+                ],
+                [
+                  -73.93660000000001,
+                  45.4388
+                ]
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "number": 10,
+      "name": "Montréal–Québec City",
+      "from_city": "montreal",
+      "to_city": "quebec",
+      "basis": "Project. Eastern Alto package, potentially via Trois-Rivières. [Transport Canada](https://tc.canada.ca/en/rail-transportation/railway-lines/high-speed-rail-initiative-toronto-quebec-city)",
+      "source_urls": [
+        "https://tc.canada.ca/en/rail-transportation/railway-lines/high-speed-rail-initiative-toronto-quebec-city"
+      ],
+      "id": "launch_10_montreal__quebec",
+      "profile": "north_america",
+      "months": 42,
+      "hill_percent": 0,
+      "viaduct_percent": 18,
+      "tunnel_percent": 0,
+      "via": [
+        [
+          -73.52,
+          45.68
+        ],
+        [
+          -73.47,
+          45.73
+        ],
+        [
+          -73.18,
+          46.1
+        ],
+        [
+          -72.55,
+          46.35
+        ],
+        [
+          -71.89,
+          46.7
+        ]
+      ],
+      "barrier": "Saint Lawrence north-shore corridor",
+      "kind": "new_line",
+      "crossings": [
+        {
+          "name": "Montréal northeastern channel crossing",
+          "kind": "rail_bridge",
+          "geometry": {
+            "type": "Polygon",
+            "coordinates": [
+              [
+                [
+                  -73.47848528137423,
+                  45.73848528137424
+                ],
+                [
+                  -73.47826714088316,
+                  45.738682992390764
+                ],
+                [
+                  -73.47803067172973,
+                  45.738858369867586
+                ],
+                [
+                  -73.47777815124115,
+                  45.739009724823724
+                ],
+                [
+                  -73.47751201132776,
+                  45.73913559962821
+                ],
+                [
+                  -73.47723481506243,
+                  45.739234782037876
+                ],
+                [
+                  -73.47694923199671,
+                  45.73930631687189
+                ],
+                [
+                  -73.47665801245165,
+                  45.73934951521069
+                ],
+                [
+                  -73.47636396103067,
+                  45.739363961030676
+                ],
+                [
+                  -73.47606990960968,
+                  45.73934951521069
+                ],
+                [
+                  -73.47577869006462,
+                  45.73930631687188
+                ],
+                [
+                  -73.47549310699891,
+                  45.73923478203787
+                ],
+                [
+                  -73.47521591073357,
+                  45.739135599628206
+                ],
+                [
+                  -73.47494977082019,
+                  45.73900972482372
+                ],
+                [
+                  -73.4746972503316,
+                  45.73885836986758
+                ],
+                [
+                  -73.47446078117818,
+                  45.738682992390764
+                ],
+                [
+                  -73.47424264068711,
+                  45.73848528137423
+                ],
+                [
+                  -73.46151471862576,
+                  45.72575735931287
+                ],
+                [
+                  -73.46131700760924,
+                  45.72553921882181
+                ],
+                [
+                  -73.46114163013242,
+                  45.72530274966837
+                ],
+                [
+                  -73.46099027517629,
+                  45.72505022917979
+                ],
+                [
+                  -73.46086440037179,
+                  45.72478408926641
+                ],
+                [
+                  -73.46076521796213,
+                  45.72450689300108
+                ],
+                [
+                  -73.46069368312811,
+                  45.724221309935366
+                ],
+                [
+                  -73.46065048478931,
+                  45.723930090390304
+                ],
+                [
+                  -73.46063603896933,
+                  45.72363603896932
+                ],
+                [
+                  -73.46065048478931,
+                  45.723341987548324
+                ],
+                [
+                  -73.46069368312811,
+                  45.72305076800327
+                ],
+                [
+                  -73.46076521796213,
+                  45.72276518493755
+                ],
+                [
+                  -73.46086440037179,
+                  45.72248798867222
+                ],
+                [
+                  -73.46099027517629,
+                  45.72222184875884
+                ],
+                [
+                  -73.46114163013242,
+                  45.721969328270255
+                ],
+                [
+                  -73.46131700760924,
+                  45.72173285911683
+                ],
+                [
+                  -73.46151471862576,
+                  45.721514718625755
+                ],
+                [
+                  -73.51151471862576,
+                  45.67151471862576
+                ],
+                [
+                  -73.51173285911683,
+                  45.67131700760923
+                ],
+                [
+                  -73.51196932827027,
+                  45.67114163013241
+                ],
+                [
+                  -73.51222184875884,
+                  45.67099027517627
+                ],
+                [
+                  -73.51248798867223,
+                  45.670864400371784
+                ],
+                [
+                  -73.51276518493756,
+                  45.67076521796212
+                ],
+                [
+                  -73.51305076800328,
+                  45.67069368312811
+                ],
+                [
+                  -73.51334198754834,
+                  45.670650484789306
+                ],
+                [
+                  -73.51363603896932,
+                  45.67063603896932
+                ],
+                [
+                  -73.51393009039032,
+                  45.670650484789306
+                ],
+                [
+                  -73.51422130993538,
+                  45.670693683128114
+                ],
+                [
+                  -73.51450689300108,
+                  45.67076521796213
+                ],
+                [
+                  -73.51478408926643,
+                  45.67086440037179
+                ],
+                [
+                  -73.5150502291798,
+                  45.67099027517628
+                ],
+                [
+                  -73.5153027496684,
+                  45.67114163013242
+                ],
+                [
+                  -73.51553921882181,
+                  45.67131700760923
+                ],
+                [
+                  -73.51575735931289,
+                  45.671514718625765
+                ],
+                [
+                  -73.52848528137423,
+                  45.684242640687124
+                ],
+                [
+                  -73.52868299239076,
+                  45.68446078117819
+                ],
+                [
+                  -73.52885836986758,
+                  45.684697250331624
+                ],
+                [
+                  -73.52900972482371,
+                  45.684949770820204
+                ],
+                [
+                  -73.5291355996282,
+                  45.68521591073359
+                ],
+                [
+                  -73.52923478203786,
+                  45.68549310699892
+                ],
+                [
+                  -73.52930631687188,
+                  45.68577869006463
+                ],
+                [
+                  -73.52934951521068,
+                  45.68606990960969
+                ],
+                [
+                  -73.52936396103067,
+                  45.68636396103068
+                ],
+                [
+                  -73.52934951521068,
+                  45.68665801245167
+                ],
+                [
+                  -73.52930631687188,
+                  45.68694923199673
+                ],
+                [
+                  -73.52923478203786,
+                  45.687234815062446
+                ],
+                [
+                  -73.5291355996282,
+                  45.687512011327776
+                ],
+                [
+                  -73.52900972482371,
+                  45.687778151241154
+                ],
+                [
+                  -73.52885836986758,
+                  45.68803067172974
+                ],
+                [
+                  -73.52868299239076,
+                  45.68826714088317
+                ],
+                [
+                  -73.52848528137423,
+                  45.68848528137424
+                ],
+                [
+                  -73.47848528137423,
+                  45.73848528137424
+                ]
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "number": 11,
+      "name": "Mexico City–Querétaro",
+      "from_city": "mexico_city",
+      "to_city": "santiago_de_queretaro",
+      "basis": "Project. Mexico's central passenger-rail program is a baseline for a faster game alignment. [SICT](https://www.gob.mx/sict/prensa/anuncia-sict-inversion-de-144-mil-mdp-para-construir-tren-de-pasajeros-mexico-queretaro)",
+      "source_urls": [
+        "https://www.gob.mx/sict/prensa/anuncia-sict-inversion-de-144-mil-mdp-para-construir-tren-de-pasajeros-mexico-queretaro"
+      ],
+      "id": "launch_11_mexico_city__santiago_de_queretaro",
+      "profile": "other_latin_america",
+      "months": 42,
+      "hill_percent": 20,
+      "viaduct_percent": 15,
+      "tunnel_percent": 15,
+      "via": [
+        [
+          -99.25,
+          19.65
+        ],
+        [
+          -99.35,
+          19.98
+        ]
+      ],
+      "barrier": "Mexican plateau and urban gradients",
+      "kind": "new_line"
+    },
+    {
+      "number": 12,
+      "name": "Querétaro–Guadalajara",
+      "from_city": "santiago_de_queretaro",
+      "to_city": "guadalajara",
+      "basis": "Project-based concept. Extend west via the Bajío. Track the actual Querétaro–Irapuato works separately from the farther extension. [Mexican presidency](https://www.gob.mx/presidencia/es/articulos/version-estenografica-supervision-del-tren-queretaro-irapuato-apaseo-el-grande-guanajuato)",
+      "source_urls": [
+        "https://www.gob.mx/presidencia/es/articulos/version-estenografica-supervision-del-tren-queretaro-irapuato-apaseo-el-grande-guanajuato"
+      ],
+      "id": "launch_12_santiago_de_queretaro__guadalajara",
+      "profile": "other_latin_america",
+      "months": 48,
+      "hill_percent": 20,
+      "viaduct_percent": 12,
+      "tunnel_percent": 12,
+      "via": [
+        [
+          -101.35,
+          20.68
+        ],
+        [
+          -101.68,
+          21.12
+        ],
+        [
+          -102.76,
+          20.82
+        ]
+      ],
+      "barrier": "Bajío plateau",
+      "kind": "new_line"
+    },
+    {
+      "number": 13,
+      "name": "São Paulo–Campinas",
+      "from_city": "sao_paulo",
+      "to_city": "campinas",
+      "basis": "Project. Faster game variant of the intercity passenger project. [São Paulo regulator](https://www.artesp.sp.gov.br/artesp/setor-regulado/metroferroviario/tic-trens)",
+      "source_urls": [
+        "https://www.artesp.sp.gov.br/artesp/setor-regulado/metroferroviario/tic-trens"
+      ],
+      "id": "launch_13_sao_paulo__campinas",
+      "profile": "brazil",
+      "months": 30,
+      "hill_percent": 15,
+      "viaduct_percent": 15,
+      "tunnel_percent": 5,
+      "via": [
+        [
+          -46.9,
+          -23.18
+        ]
+      ],
+      "barrier": "São Paulo urban approaches",
+      "kind": "new_line"
+    },
+    {
+      "number": 14,
+      "name": "São Paulo–Rio de Janeiro",
+      "from_city": "sao_paulo",
+      "to_city": "rio_de_janeiro",
+      "basis": "Project. Strong anchor markets with expensive terrain and urban approaches. [ANTT authorization](https://www.gov.br/antt/pt-br/assuntos/ultimas-noticias/autorizacao-ferroviaria-da-tav-brasil-e-a-39a-autorizada-pela-antt)",
+      "source_urls": [
+        "https://www.gov.br/antt/pt-br/assuntos/ultimas-noticias/autorizacao-ferroviaria-da-tav-brasil-e-a-39a-autorizada-pela-antt"
+      ],
+      "id": "launch_14_sao_paulo__rio_de_janeiro",
+      "profile": "brazil",
+      "months": 60,
+      "hill_percent": 20,
+      "viaduct_percent": 20,
+      "tunnel_percent": 25,
+      "via": [
+        [
+          -45.88,
+          -23.18
+        ],
+        [
+          -45.55,
+          -23.04
+        ],
+        [
+          -44.1,
+          -22.53
+        ],
+        [
+          -43.68,
+          -22.73
+        ]
+      ],
+      "barrier": "Paraíba valley and Serra das Araras",
+      "kind": "new_line"
+    },
+    {
+      "number": 15,
+      "name": "Rio de Janeiro–Belo Horizonte",
+      "from_city": "rio_de_janeiro",
+      "to_city": "belo_horizonte",
+      "basis": "Concept. Inland branch with a substantial mountain approach. Compare a direct route with a longer valley approach.",
+      "source_urls": [],
+      "id": "launch_15_rio_de_janeiro__belo_horizonte",
+      "profile": "brazil",
+      "months": 66,
+      "hill_percent": 30,
+      "viaduct_percent": 15,
+      "tunnel_percent": 30,
+      "via": [
+        [
+          -43.25,
+          -22.85
+        ],
+        [
+          -43.35,
+          -22.52
+        ],
+        [
+          -43.35,
+          -21.76
+        ],
+        [
+          -43.78,
+          -20.66
+        ]
+      ],
+      "barrier": "Serra do Mar and Mantiqueira uplands",
+      "kind": "new_line"
+    },
+    {
+      "number": 16,
+      "name": "São Paulo–Curitiba",
+      "from_city": "sao_paulo",
+      "to_city": "curitiba",
+      "basis": "Concept. Southbound extension. Screen plateau and escarpment approaches.",
+      "source_urls": [],
+      "id": "launch_16_sao_paulo__curitiba",
+      "profile": "brazil",
+      "months": 60,
+      "hill_percent": 30,
+      "viaduct_percent": 15,
+      "tunnel_percent": 20,
+      "via": [
+        [
+          -47.47,
+          -24.11
+        ],
+        [
+          -48.53,
+          -24.34
+        ],
+        [
+          -49.02,
+          -24.66
+        ]
+      ],
+      "barrier": "Ribeira valley and Serra do Mar",
+      "kind": "new_line"
+    },
+    {
+      "number": 17,
+      "name": "Buenos Aires–Rosario",
+      "from_city": "buenos_aires",
+      "to_city": "rosario",
+      "basis": "Upgrade. An existing intercity passenger corridor provides the route baseline. [Trenes Argentinos](https://www.argentina.gob.ar/transporte/trenes-argentinos/horarios-tarifas-y-recorridos/servicios-regionales-larga-distancia)",
+      "source_urls": [
+        "https://www.argentina.gob.ar/transporte/trenes-argentinos/horarios-tarifas-y-recorridos/servicios-regionales-larga-distancia"
+      ],
+      "id": "launch_17_buenos_aires__rosario",
+      "profile": "other_latin_america",
+      "months": 36,
+      "hill_percent": 0,
+      "viaduct_percent": 12,
+      "tunnel_percent": 0,
+      "via": [
+        [
+          -59.1,
+          -33.88
+        ]
+      ],
+      "barrier": "Pampas river crossings; game upgrade priced as replacement works",
+      "kind": "upgrade"
+    },
+    {
+      "number": 18,
+      "name": "Rosario–Córdoba",
+      "from_city": "rosario",
+      "to_city": "cordoba",
+      "basis": "Upgrade. Extend the Buenos Aires spine inland. Verify the route, stops, and how much track can actually be reused. [Argentina passenger railway network](https://www.argentina.gob.ar/transporte/cnrt/lineas-de-trenes-pasajeros)",
+      "source_urls": [
+        "https://www.argentina.gob.ar/transporte/cnrt/lineas-de-trenes-pasajeros"
+      ],
+      "id": "launch_18_rosario__cordoba",
+      "profile": "other_latin_america",
+      "months": 42,
+      "hill_percent": 5,
+      "viaduct_percent": 10,
+      "tunnel_percent": 0,
+      "via": [
+        [
+          -62.25,
+          -32.62
+        ],
+        [
+          -63.24,
+          -32.41
+        ]
+      ],
+      "barrier": "Pampas corridor; game upgrade priced as replacement works",
+      "kind": "upgrade"
+    },
+    {
+      "number": 19,
+      "name": "Santiago–Valparaíso",
+      "from_city": "santiago",
+      "to_city": "valparaiso",
+      "basis": "Project. Pacific port connection with an interior crossing. [Chile Ministry of Public Works](https://concesiones.mop.gob.cl/project/tren-valparaiso-santiago/)",
+      "source_urls": [
+        "https://concesiones.mop.gob.cl/project/tren-valparaiso-santiago/"
+      ],
+      "id": "launch_19_santiago__valparaiso",
+      "profile": "other_latin_america",
+      "months": 48,
+      "hill_percent": 25,
+      "viaduct_percent": 15,
+      "tunnel_percent": 25,
+      "via": [
+        [
+          -70.85,
+          -33.4
+        ],
+        [
+          -71.15,
+          -33.35
+        ],
+        [
+          -71.42,
+          -33.08
+        ]
+      ],
+      "barrier": "Coastal Range crossing",
+      "kind": "new_line"
+    },
+    {
+      "number": 20,
+      "name": "Santiago–Chillán",
+      "from_city": "santiago",
+      "to_city": "chillan",
+      "basis": "Upgrade. Faster Central Valley line based on the existing intercity corridor. [EFE](https://www.pasajes.efe.cl/destinos/santiago-chillan)",
+      "source_urls": [
+        "https://www.pasajes.efe.cl/destinos/santiago-chillan"
+      ],
+      "id": "launch_20_santiago__chillan",
+      "profile": "other_latin_america",
+      "months": 42,
+      "hill_percent": 10,
+      "viaduct_percent": 15,
+      "tunnel_percent": 5,
+      "via": [
+        [
+          -70.74,
+          -34.17
+        ],
+        [
+          -71.23,
+          -34.59
+        ],
+        [
+          -71.67,
+          -35.43
+        ]
+      ],
+      "barrier": "Chile Central Valley rivers",
+      "kind": "upgrade"
+    },
+    {
+      "number": 21,
+      "name": "London–Birmingham",
+      "from_city": "london",
+      "to_city": "birmingham",
+      "basis": "Project. HS2 Phase One, with real approach and terminal constraints. [UK Department for Transport](https://www.gov.uk/check-hs2-route)",
+      "source_urls": [
+        "https://www.gov.uk/check-hs2-route"
+      ],
+      "id": "launch_21_london__birmingham",
+      "profile": "uk",
+      "months": 60,
+      "hill_percent": 5,
+      "viaduct_percent": 25,
+      "tunnel_percent": 25,
+      "via": [
+        [
+          -0.32,
+          51.53
+        ],
+        [
+          -0.6,
+          51.65
+        ],
+        [
+          -1.02,
+          51.88
+        ],
+        [
+          -1.51,
+          52.19
+        ]
+      ],
+      "barrier": "Chiltern tunnels and Birmingham approach",
+      "kind": "new_line"
+    },
+    {
+      "number": 22,
+      "name": "Bordeaux–Toulouse",
+      "from_city": "bordeaux",
+      "to_city": "toulouse",
+      "basis": "Project. Branch off the existing high-speed spine toward Toulouse. [SNCF Réseau](https://www.sncf-reseau.com/fr/lignes-nouvelles-en-occitanie)",
+      "source_urls": [
+        "https://www.sncf-reseau.com/fr/lignes-nouvelles-en-occitanie"
+      ],
+      "id": "launch_22_bordeaux__toulouse",
+      "profile": "france_benelux",
+      "months": 48,
+      "hill_percent": 12,
+      "viaduct_percent": 15,
+      "tunnel_percent": 8,
+      "via": [
+        [
+          0.2,
+          44.45
+        ],
+        [
+          0.61,
+          44.2
+        ],
+        [
+          1.35,
+          44.02
+        ]
+      ],
+      "barrier": "Garonne valley and Toulouse approach",
+      "kind": "new_line"
+    },
+    {
+      "number": 23,
+      "name": "Bordeaux–Dax",
+      "from_city": "bordeaux",
+      "to_city": "dax",
+      "basis": "Project. Southwestern branch and prerequisite for the proposed Basque connector. [SNCF Réseau](https://www.sncf-reseau.com/fr/lignes-nouvelles-en-occitanie)",
+      "source_urls": [
+        "https://www.sncf-reseau.com/fr/lignes-nouvelles-en-occitanie"
+      ],
+      "id": "launch_23_bordeaux__dax",
+      "profile": "france_benelux",
+      "months": 42,
+      "hill_percent": 5,
+      "viaduct_percent": 15,
+      "tunnel_percent": 0,
+      "via": [
+        [
+          -0.75,
+          44.4
+        ],
+        [
+          -0.95,
+          44.02
+        ]
+      ],
+      "barrier": "Landes forest and river crossings",
+      "kind": "new_line"
+    },
+    {
+      "number": 24,
+      "name": "Montpellier–Béziers",
+      "from_city": "montpellier",
+      "to_city": "beziers",
+      "basis": "Project. First package of the Montpellier–Perpignan gap. [SNCF Réseau](https://www.sncf-reseau.com/fr/lignes-nouvelles-en-occitanie)",
+      "source_urls": [
+        "https://www.sncf-reseau.com/fr/lignes-nouvelles-en-occitanie"
+      ],
+      "id": "launch_24_montpellier__beziers",
+      "profile": "france_benelux",
+      "months": 42,
+      "hill_percent": 10,
+      "viaduct_percent": 20,
+      "tunnel_percent": 8,
+      "via": [
+        [
+          3.38,
+          43.39
+        ]
+      ],
+      "barrier": "Languedoc lagoons and urban approaches",
+      "kind": "new_line"
+    },
+    {
+      "number": 25,
+      "name": "Béziers–Perpignan",
+      "from_city": "beziers",
+      "to_city": "perpignan",
+      "basis": "Project. Second package, joining the route toward the existing cross-border link at Perpignan. [SNCF Réseau](https://www.sncf-reseau.com/fr/lignes-nouvelles-en-occitanie)",
+      "source_urls": [
+        "https://www.sncf-reseau.com/fr/lignes-nouvelles-en-occitanie"
+      ],
+      "id": "launch_25_beziers__perpignan",
+      "profile": "france_benelux",
+      "months": 48,
+      "hill_percent": 15,
+      "viaduct_percent": 20,
+      "tunnel_percent": 12,
+      "via": [
+        [
+          3.01,
+          43.18
+        ],
+        [
+          2.97,
+          42.93
+        ]
+      ],
+      "barrier": "Corbières and coastal lagoons",
+      "kind": "new_line"
+    },
+    {
+      "number": 26,
+      "name": "Lisbon–Porto",
+      "from_city": "lisbon",
+      "to_city": "porto",
+      "basis": "Project. Domestic spine with a plausible staged opening if the catalog later splits it. [Infraestruturas de Portugal](https://www.infraestruturasdeportugal.pt/pt-pt/rede-de-alta-velocidade)",
+      "source_urls": [
+        "https://www.infraestruturasdeportugal.pt/pt-pt/rede-de-alta-velocidade"
+      ],
+      "id": "launch_26_lisbon__porto",
+      "profile": "iberia",
+      "months": 54,
+      "hill_percent": 20,
+      "viaduct_percent": 15,
+      "tunnel_percent": 15,
+      "via": [
+        [
+          -9.105,
+          38.7675
+        ],
+        [
+          -9.04,
+          38.95
+        ],
+        [
+          -8.95,
+          39.2
+        ],
+        [
+          -8.81,
+          39.75
+        ],
+        [
+          -8.43,
+          40.21
+        ],
+        [
+          -8.64,
+          40.64
+        ]
+      ],
+      "barrier": "New dedicated HSR; conventional Alfa Pendular track remains available",
+      "kind": "dedicated_hsr",
+      "parallel_to": [
+        "public_lisbon__porto"
+      ],
+      "minutes": 75,
+      "crossings": [
+        {
+          "name": "Oriente cartographic station adapter",
+          "kind": "station_adapter",
+          "geometry": {
+            "type": "Polygon",
+            "coordinates": [
+              [
+                [
+                  -9.104785184397064,
+                  38.76350577238296
+                ],
+                [
+                  -9.105079587270582,
+                  38.76350440564792
+                ],
+                [
+                  -9.105372706477256,
+                  38.763531902021846
+                ],
+                [
+                  -9.10566171911889,
+                  38.763587996699634
+                ],
+                [
+                  -9.105943841845756,
+                  38.76367214945887
+                ],
+                [
+                  -9.106216357661769,
+                  38.763783549862474
+                ],
+                [
+                  -9.106476642090648,
+                  38.76392112506367
+                ],
+                [
+                  -9.106722188451057,
+                  38.764083550138054
+                ],
+                [
+                  -9.106950631997318,
+                  38.76426926084338
+                ],
+                [
+                  -9.1071597726932,
+                  38.76447646868402
+                ],
+                [
+                  -9.107347596399473,
+                  38.76470317813522
+                ],
+                [
+                  -9.107512294271169,
+                  38.76494720586102
+                ],
+                [
+                  -9.107652280177755,
+                  38.76520620174102
+                ],
+                [
+                  -9.107766205978422,
+                  38.76547767150333
+                ],
+                [
+                  -9.107852974505432,
+                  38.76575900074571
+                ],
+                [
+                  -9.107911750130441,
+                  38.766047480113784
+                ],
+                [
+                  -9.107941966812048,
+                  38.766340331393536
+                ],
+                [
+                  -9.108049374613516,
+                  38.76833744520205
+                ],
+                [
+                  -9.108050741348558,
+                  38.76863184807557
+                ],
+                [
+                  -9.108023244974628,
+                  38.768924967282246
+                ],
+                [
+                  -9.107967150296842,
+                  38.769213979923876
+                ],
+                [
+                  -9.10788299753761,
+                  38.76949610265074
+                ],
+                [
+                  -9.107771597134006,
+                  38.769768618466756
+                ],
+                [
+                  -9.107634021932812,
+                  38.77002890289564
+                ],
+                [
+                  -9.107471596858426,
+                  38.77027444925605
+                ],
+                [
+                  -9.1072858861531,
+                  38.770502892802305
+                ],
+                [
+                  -9.107078678312451,
+                  38.77071203349819
+                ],
+                [
+                  -9.106851968861253,
+                  38.77089985720446
+                ],
+                [
+                  -9.106607941135453,
+                  38.77106455507616
+                ],
+                [
+                  -9.10634894525545,
+                  38.771204540982744
+                ],
+                [
+                  -9.106077475493151,
+                  38.77131846678341
+                ],
+                [
+                  -9.105796146250766,
+                  38.771405235310425
+                ],
+                [
+                  -9.10550766688269,
+                  38.77146401093543
+                ],
+                [
+                  -9.105214815602936,
+                  38.77149422761703
+                ],
+                [
+                  -9.099264815602936,
+                  38.771814227617035
+                ],
+                [
+                  -9.098970412729418,
+                  38.77181559435208
+                ],
+                [
+                  -9.098677293522744,
+                  38.77178809797815
+                ],
+                [
+                  -9.09838828088111,
+                  38.771732003300365
+                ],
+                [
+                  -9.098106158154245,
+                  38.77164785054113
+                ],
+                [
+                  -9.097833642338232,
+                  38.771536450137525
+                ],
+                [
+                  -9.097573357909353,
+                  38.77139887493633
+                ],
+                [
+                  -9.097327811548944,
+                  38.771236449861945
+                ],
+                [
+                  -9.097099368002683,
+                  38.77105073915662
+                ],
+                [
+                  -9.096890227306801,
+                  38.770843531315975
+                ],
+                [
+                  -9.096702403600528,
+                  38.77061682186478
+                ],
+                [
+                  -9.096537705728831,
+                  38.77037279413898
+                ],
+                [
+                  -9.096397719822246,
+                  38.770113798258976
+                ],
+                [
+                  -9.096283794021579,
+                  38.76984232849667
+                ],
+                [
+                  -9.096197025494568,
+                  38.76956099925429
+                ],
+                [
+                  -9.09613824986956,
+                  38.769272519886215
+                ],
+                [
+                  -9.096108033187953,
+                  38.76897966860646
+                ],
+                [
+                  -9.096000625386484,
+                  38.76698255479795
+                ],
+                [
+                  -9.095999258651442,
+                  38.76668815192443
+                ],
+                [
+                  -9.096026755025372,
+                  38.76639503271775
+                ],
+                [
+                  -9.096082849703159,
+                  38.76610602007612
+                ],
+                [
+                  -9.09616700246239,
+                  38.76582389734926
+                ],
+                [
+                  -9.096278402865995,
+                  38.76555138153324
+                ],
+                [
+                  -9.096415978067188,
+                  38.76529109710436
+                ],
+                [
+                  -9.096578403141574,
+                  38.76504555074395
+                ],
+                [
+                  -9.0967641138469,
+                  38.76481710719769
+                ],
+                [
+                  -9.09697132168755,
+                  38.764607966501806
+                ],
+                [
+                  -9.097198031138747,
+                  38.76442014279554
+                ],
+                [
+                  -9.097442058864548,
+                  38.76425544492384
+                ],
+                [
+                  -9.097701054744551,
+                  38.764115459017255
+                ],
+                [
+                  -9.097972524506849,
+                  38.764001533216586
+                ],
+                [
+                  -9.098253853749235,
+                  38.763914764689574
+                ],
+                [
+                  -9.09854233311731,
+                  38.76385598906457
+                ],
+                [
+                  -9.098835184397064,
+                  38.763825772382965
+                ],
+                [
+                  -9.104785184397064,
+                  38.76350577238296
+                ]
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "number": 27,
+      "name": "Madrid–Plasencia",
+      "from_city": "madrid",
+      "to_city": "plasencia",
+      "basis": "Project. Fill missing Madrid–Extremadura works and connect to the separate Plasencia–Badajoz section. [Adif AV](https://www.adifaltavelocidad.es/financiacion-europea/2021-2027/lav-extremadura)",
+      "source_urls": [
+        "https://www.adifaltavelocidad.es/financiacion-europea/2021-2027/lav-extremadura"
+      ],
+      "id": "launch_27_madrid__plasencia",
+      "profile": "iberia",
+      "months": 48,
+      "hill_percent": 18,
+      "viaduct_percent": 15,
+      "tunnel_percent": 12,
+      "via": [
+        [
+          -4.02,
+          39.96
+        ],
+        [
+          -4.83,
+          39.96
+        ],
+        [
+          -5.56,
+          39.96
+        ]
+      ],
+      "barrier": "Missing Madrid–Extremadura high-speed works",
+      "kind": "new_line"
+    },
+    {
+      "number": 28,
+      "name": "Warsaw–Łódź",
+      "from_city": "warsaw",
+      "to_city": "lodz",
+      "basis": "Project. First section of Poland's planned high-speed Y line. Review the Warsaw approach, the Port Polska airport interface, and the Łódź tunnel before qualifying the alignment. [Poland's Y line](https://zsk.gov.pl/korzysci/korytarze/linia-y/) · [Polish Ministry of Infrastructure](https://www.gov.pl/web/infrastruktura/otwarto-oferty-w-przetargu-na-drazenie-najdluzszego-tunelu-kolejowego-w-polsce)",
+      "source_urls": [
+        "https://zsk.gov.pl/korzysci/korytarze/linia-y/",
+        "https://www.gov.pl/web/infrastruktura/otwarto-oferty-w-przetargu-na-drazenie-najdluzszego-tunelu-kolejowego-w-polsce"
+      ],
+      "id": "launch_28_warsaw__lodz",
+      "profile": "central_europe",
+      "months": 48,
+      "hill_percent": 0,
+      "viaduct_percent": 20,
+      "tunnel_percent": 15,
+      "via": [
+        [
+          20.4,
+          52.08
+        ],
+        [
+          20.03,
+          51.94
+        ]
+      ],
+      "barrier": "Warsaw approach and Łódź tunnel",
+      "kind": "new_line"
+    },
+    {
+      "number": 29,
+      "name": "Dresden–Prague",
+      "from_city": "dresden",
+      "to_city": "prague",
+      "basis": "Project. Cross-border corridor with the Ore Mountains tunnel as a major engineering constraint. [Správa železnic](https://www.spravazeleznic.cz/en/web/en/-/feasibility-study-for-a-new-line-from-prague-to-dresden-is-approved)",
+      "source_urls": [
+        "https://www.spravazeleznic.cz/en/web/en/-/feasibility-study-for-a-new-line-from-prague-to-dresden-is-approved"
+      ],
+      "id": "launch_29_dresden__prague",
+      "profile": "central_europe",
+      "months": 66,
+      "hill_percent": 20,
+      "viaduct_percent": 15,
+      "tunnel_percent": 40,
+      "via": [
+        [
+          13.87,
+          50.91
+        ],
+        [
+          14.04,
+          50.7
+        ],
+        [
+          14.04,
+          50.53
+        ]
+      ],
+      "barrier": "Ore Mountains base tunnel",
+      "kind": "new_line",
+      "tunnel_factor": 8,
+      "country_profiles": {
+        "Germany": "central_europe",
+        "Czechia": "central_europe"
+      }
+    },
+    {
+      "number": 30,
+      "name": "Belgrade–Niš",
+      "from_city": "belgrade",
+      "to_city": "nis",
+      "basis": "Upgrade. Intercity modernization with a real engineering reference and a potential Balkan trunk. [EIB](https://www.eib.org/en/stories/belgrade-nis-big-eu-rail-financing)",
+      "source_urls": [
+        "https://www.eib.org/en/stories/belgrade-nis-big-eu-rail-financing"
+      ],
+      "id": "launch_30_belgrade__nis",
+      "profile": "eurasia_transfer",
+      "months": 48,
+      "hill_percent": 18,
+      "viaduct_percent": 18,
+      "tunnel_percent": 8,
+      "via": [
+        [
+          21.15,
+          44.26
+        ],
+        [
+          21.38,
+          43.98
+        ],
+        [
+          21.44,
+          43.57
+        ]
+      ],
+      "barrier": "Morava valley; game upgrade priced as replacement works",
+      "kind": "upgrade"
+    },
+    {
+      "number": 31,
+      "name": "Cairo–Alexandria",
+      "from_city": "cairo",
+      "to_city": "alexandria",
+      "basis": "Project. Western branch of Egypt's Green Line. [Siemens Mobility](https://press.siemens.com/global/en/pressrelease/siemens-unveils-velaro-high-speed-train-transmea-2025-cairo)",
+      "source_urls": [
+        "https://press.siemens.com/global/en/pressrelease/siemens-unveils-velaro-high-speed-train-transmea-2025-cairo"
+      ],
+      "id": "launch_31_cairo__alexandria",
+      "profile": "north_africa",
+      "months": 42,
+      "hill_percent": 0,
+      "viaduct_percent": 20,
+      "tunnel_percent": 0,
+      "via": [
+        [
+          30.8,
+          30.18
+        ],
+        [
+          30.48,
+          30.52
+        ],
+        [
+          30.1,
+          30.9
+        ]
+      ],
+      "barrier": "Green Line game package and Nile delta works",
+      "kind": "new_line"
+    },
+    {
+      "number": 32,
+      "name": "Cairo–Ain Sokhna",
+      "from_city": "cairo",
+      "to_city": "al_ayn_as_sukhnah",
+      "basis": "Project. Eastern Green Line branch to the Suez coast. Model the real shared Cairo approach if it overlaps the Alexandria branch. [Siemens Mobility](https://press.siemens.com/global/en/pressrelease/siemens-unveils-velaro-high-speed-train-transmea-2025-cairo)",
+      "source_urls": [
+        "https://press.siemens.com/global/en/pressrelease/siemens-unveils-velaro-high-speed-train-transmea-2025-cairo"
+      ],
+      "id": "launch_32_cairo__al_ayn_as_sukhnah",
+      "profile": "north_africa",
+      "months": 42,
+      "hill_percent": 5,
+      "viaduct_percent": 20,
+      "tunnel_percent": 8,
+      "via": [
+        [
+          31.74,
+          30.02
+        ],
+        [
+          32.13,
+          29.83
+        ]
+      ],
+      "barrier": "Green Line shared Cairo terminal, separate eastbound works",
+      "kind": "new_line"
+    },
+    {
+      "number": 33,
+      "name": "Kenitra–Casablanca",
+      "from_city": "kenitra",
+      "to_city": "casablanca",
+      "basis": "Project. New dedicated track on the Moroccan extension. Existing through service and existing physical HSR track are separate inventory questions. [ONCF investment report](https://www.oncf.ma/fr/content/download/117654/2744236/file/Rapport%20Financier%20Semestriel%202025.pdf)",
+      "source_urls": [
+        "https://www.oncf.ma/fr/content/download/117654/2744236/file/Rapport%20Financier%20Semestriel%202025.pdf"
+      ],
+      "id": "launch_33_kenitra__casablanca",
+      "profile": "north_africa",
+      "months": 42,
+      "hill_percent": 0,
+      "viaduct_percent": 20,
+      "tunnel_percent": 0,
+      "via": [
+        [
+          -6.7,
+          34.12
+        ],
+        [
+          -6.84,
+          33.92
+        ],
+        [
+          -7.32,
+          33.74
+        ]
+      ],
+      "barrier": "New dedicated HSR; current Al Boraq connecting track remains available",
+      "kind": "new_line"
+    },
+    {
+      "number": 34,
+      "name": "Casablanca–Marrakech",
+      "from_city": "casablanca",
+      "to_city": "marrakesh",
+      "basis": "Project. Extend Morocco's spine south. [ONCF investment report](https://www.oncf.ma/fr/content/download/117654/2744236/file/Rapport%20Financier%20Semestriel%202025.pdf)",
+      "source_urls": [
+        "https://www.oncf.ma/fr/content/download/117654/2744236/file/Rapport%20Financier%20Semestriel%202025.pdf"
+      ],
+      "id": "launch_34_casablanca__marrakesh",
+      "profile": "north_africa",
+      "months": 48,
+      "hill_percent": 8,
+      "viaduct_percent": 15,
+      "tunnel_percent": 5,
+      "via": [
+        [
+          -7.62,
+          33.15
+        ],
+        [
+          -7.87,
+          32.48
+        ]
+      ],
+      "barrier": "Moroccan plain and Marrakech approach",
+      "kind": "new_line"
+    },
+    {
+      "number": 35,
+      "name": "Lagos–Ibadan",
+      "from_city": "lagos",
+      "to_city": "ibadan",
+      "basis": "Upgrade. The existing standard-gauge passenger corridor is an engineering and demand reference. [Nigerian Railway Corporation](https://nrc.gov.ng/lagos-district/)",
+      "source_urls": [
+        "https://nrc.gov.ng/lagos-district/"
+      ],
+      "id": "launch_35_lagos__ibadan",
+      "profile": "west_central_africa",
+      "months": 36,
+      "hill_percent": 10,
+      "viaduct_percent": 18,
+      "tunnel_percent": 0,
+      "via": [
+        [
+          3.37,
+          6.86
+        ],
+        [
+          3.52,
+          7.13
+        ]
+      ],
+      "barrier": "Faster replacement works on the Lagos–Ibadan corridor",
+      "kind": "upgrade"
+    },
+    {
+      "number": 36,
+      "name": "Nairobi–Mombasa",
+      "from_city": "nairobi",
+      "to_city": "mombasa",
+      "basis": "Upgrade. Use the standard-gauge route as a reference. Compare reuse of compatible works with a separate faster alignment. [Uganda Ministry of Works and Transport corridor overview](https://works.go.ug/sgr-corridor-gains-momentum-mombasa-malaba-link-a-move-towards-stronger-east-african-connectivity/)",
+      "source_urls": [
+        "https://works.go.ug/sgr-corridor-gains-momentum-mombasa-malaba-link-a-move-towards-stronger-east-african-connectivity/"
+      ],
+      "id": "launch_36_nairobi__mombasa",
+      "profile": "east_africa",
+      "months": 60,
+      "hill_percent": 20,
+      "viaduct_percent": 20,
+      "tunnel_percent": 15,
+      "via": [
+        [
+          37.69,
+          -2.71
+        ],
+        [
+          38.56,
+          -3.4
+        ],
+        [
+          39.5875,
+          -3.998
+        ]
+      ],
+      "barrier": "Rift plateau descent and Tsavo; new faster replacement works",
+      "kind": "upgrade"
+    },
+    {
+      "number": 37,
+      "name": "Dar es Salaam–Morogoro",
+      "from_city": "dar_es_salaam",
+      "to_city": "morogoro",
+      "basis": "Upgrade. Existing electric standard-gauge line. Model the extra work needed to reach the proposed game speed. [Tanzania Railways Corporation](https://www.trc.co.tz/pages/about-sgr)",
+      "source_urls": [
+        "https://www.trc.co.tz/pages/about-sgr"
+      ],
+      "id": "launch_37_dar_es_salaam__morogoro",
+      "profile": "east_africa",
+      "months": 42,
+      "hill_percent": 15,
+      "viaduct_percent": 15,
+      "tunnel_percent": 8,
+      "via": [
+        [
+          38.65,
+          -6.78
+        ],
+        [
+          38.06,
+          -6.7
+        ]
+      ],
+      "barrier": "Uluguru foothills; new faster replacement works",
+      "kind": "upgrade"
+    },
+    {
+      "number": 38,
+      "name": "Gauteng–Durban",
+      "from_city": "johannesburg",
+      "to_city": "durban",
+      "basis": "Project concept. South Africa's HSR framework gives the corridor basis. Screen the escarpment and both urban approaches. [South Africa Department of Transport](https://www.gov.za/sites/default/files/gcis_document/202511/dotannualreport2024-25.pdf)",
+      "source_urls": [
+        "https://www.gov.za/sites/default/files/gcis_document/202511/dotannualreport2024-25.pdf"
+      ],
+      "id": "launch_38_johannesburg__durban",
+      "profile": "southern_africa",
+      "months": 66,
+      "hill_percent": 25,
+      "viaduct_percent": 15,
+      "tunnel_percent": 30,
+      "via": [
+        [
+          28.68,
+          -26.58
+        ],
+        [
+          29.88,
+          -28.56
+        ],
+        [
+          30.39,
+          -29.6
+        ]
+      ],
+      "barrier": "Great Escarpment and Drakensberg foothills",
+      "kind": "new_line"
+    },
+    {
+      "number": 39,
+      "name": "Mumbai–Surat",
+      "from_city": "mumbai",
+      "to_city": "surat",
+      "basis": "Project. Southern package of the Mumbai–Ahmedabad corridor. [NHSRCL](https://www.nhsrcl.in/en/project/project-overview)",
+      "source_urls": [
+        "https://www.nhsrcl.in/en/project/project-overview"
+      ],
+      "id": "launch_39_mumbai__surat",
+      "profile": "india",
+      "months": 42,
+      "hill_percent": 0,
+      "viaduct_percent": 40,
+      "tunnel_percent": 5,
+      "via": [
+        [
+          72.91,
+          19.3
+        ],
+        [
+          72.98,
+          19.88
+        ],
+        [
+          72.94,
+          20.37
+        ],
+        [
+          73.03,
+          20.61
+        ],
+        [
+          73.02,
+          20.85
+        ]
+      ],
+      "barrier": "Coastal floodplain; elevated and river works",
+      "kind": "new_line",
+      "crossings": [
+        {
+          "name": "Vasai Creek rail bridge",
+          "kind": "rail_bridge",
+          "geometry": {
+            "type": "Polygon",
+            "coordinates": [
+              [
+                [
+                  72.91222182540695,
+                  19.317778174593048
+                ],
+                [
+                  72.91243996589802,
+                  19.317975885609577
+                ],
+                [
+                  72.91267643505145,
+                  19.318151263086396
+                ],
+                [
+                  72.91292895554002,
+                  19.318302618042534
+                ],
+                [
+                  72.91319509545342,
+                  19.318428492847023
+                ],
+                [
+                  72.91347229171875,
+                  19.318527675256686
+                ],
+                [
+                  72.91375787478445,
+                  19.3185992100907
+                ],
+                [
+                  72.91404909432951,
+                  19.318642408429508
+                ],
+                [
+                  72.91434314575051,
+                  19.31865685424949
+                ],
+                [
+                  72.9146371971715,
+                  19.318642408429508
+                ],
+                [
+                  72.91492841671656,
+                  19.3185992100907
+                ],
+                [
+                  72.91521399978227,
+                  19.318527675256686
+                ],
+                [
+                  72.9154911960476,
+                  19.318428492847023
+                ],
+                [
+                  72.91575733596099,
+                  19.318302618042534
+                ],
+                [
+                  72.91600985644956,
+                  19.318151263086396
+                ],
+                [
+                  72.916246325603,
+                  19.317975885609577
+                ],
+                [
+                  72.91646446609407,
+                  19.317778174593048
+                ],
+                [
+                  72.92777817459306,
+                  19.306464466094067
+                ],
+                [
+                  72.92797588560958,
+                  19.306246325603
+                ],
+                [
+                  72.9281512630864,
+                  19.306009856449567
+                ],
+                [
+                  72.92830261804254,
+                  19.305757335960983
+                ],
+                [
+                  72.92842849284703,
+                  19.3054911960476
+                ],
+                [
+                  72.92852767525669,
+                  19.30521399978227
+                ],
+                [
+                  72.92859921009071,
+                  19.304928416716557
+                ],
+                [
+                  72.92864240842951,
+                  19.304637197171495
+                ],
+                [
+                  72.9286568542495,
+                  19.304343145750508
+                ],
+                [
+                  72.92864240842951,
+                  19.30404909432952
+                ],
+                [
+                  72.92859921009071,
+                  19.30375787478446
+                ],
+                [
+                  72.92852767525669,
+                  19.303472291718744
+                ],
+                [
+                  72.92842849284703,
+                  19.303195095453415
+                ],
+                [
+                  72.92830261804254,
+                  19.302928955540033
+                ],
+                [
+                  72.9281512630864,
+                  19.30267643505145
+                ],
+                [
+                  72.92797588560958,
+                  19.302439965898017
+                ],
+                [
+                  72.92777817459306,
+                  19.30222182540695
+                ],
+                [
+                  72.90777817459306,
+                  19.28222182540695
+                ],
+                [
+                  72.90756003410199,
+                  19.28202411439042
+                ],
+                [
+                  72.90732356494856,
+                  19.281848736913602
+                ],
+                [
+                  72.90707104445998,
+                  19.281697381957464
+                ],
+                [
+                  72.90680490454659,
+                  19.281571507152975
+                ],
+                [
+                  72.90652770828126,
+                  19.281472324743312
+                ],
+                [
+                  72.90624212521556,
+                  19.2814007899093
+                ],
+                [
+                  72.9059509056705,
+                  19.28135759157049
+                ],
+                [
+                  72.9056568542495,
+                  19.28134314575051
+                ],
+                [
+                  72.9053628028285,
+                  19.28135759157049
+                ],
+                [
+                  72.90507158328344,
+                  19.2814007899093
+                ],
+                [
+                  72.90478600021774,
+                  19.281472324743312
+                ],
+                [
+                  72.90450880395241,
+                  19.281571507152975
+                ],
+                [
+                  72.90424266403902,
+                  19.281697381957464
+                ],
+                [
+                  72.90399014355044,
+                  19.281848736913602
+                ],
+                [
+                  72.90375367439701,
+                  19.28202411439042
+                ],
+                [
+                  72.90353553390594,
+                  19.28222182540695
+                ],
+                [
+                  72.89222182540695,
+                  19.29353553390593
+                ],
+                [
+                  72.89202411439042,
+                  19.293753674397
+                ],
+                [
+                  72.8918487369136,
+                  19.29399014355043
+                ],
+                [
+                  72.89169738195747,
+                  19.294242664039015
+                ],
+                [
+                  72.89157150715297,
+                  19.294508803952397
+                ],
+                [
+                  72.89147232474332,
+                  19.294786000217726
+                ],
+                [
+                  72.8914007899093,
+                  19.29507158328344
+                ],
+                [
+                  72.8913575915705,
+                  19.295362802828503
+                ],
+                [
+                  72.89134314575051,
+                  19.29565685424949
+                ],
+                [
+                  72.8913575915705,
+                  19.295950905670477
+                ],
+                [
+                  72.8914007899093,
+                  19.29624212521554
+                ],
+                [
+                  72.89147232474332,
+                  19.296527708281253
+                ],
+                [
+                  72.89157150715297,
+                  19.296804904546583
+                ],
+                [
+                  72.89169738195747,
+                  19.297071044459965
+                ],
+                [
+                  72.8918487369136,
+                  19.29732356494855
+                ],
+                [
+                  72.89202411439042,
+                  19.29756003410198
+                ],
+                [
+                  72.89222182540695,
+                  19.29777817459305
+                ],
+                [
+                  72.91222182540695,
+                  19.317778174593048
+                ]
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "number": 40,
+      "name": "Surat–Ahmedabad",
+      "from_city": "surat",
+      "to_city": "ahmedabad",
+      "basis": "Project. Northern package of the same corridor. [NHSRCL](https://www.nhsrcl.in/en/project/project-overview)",
+      "source_urls": [
+        "https://www.nhsrcl.in/en/project/project-overview"
+      ],
+      "id": "launch_40_surat__ahmedabad",
+      "profile": "india",
+      "months": 42,
+      "hill_percent": 0,
+      "viaduct_percent": 35,
+      "tunnel_percent": 0,
+      "via": [
+        [
+          73.0,
+          21.68
+        ],
+        [
+          73.05,
+          21.74
+        ],
+        [
+          73.18,
+          22.31
+        ],
+        [
+          72.88,
+          22.69
+        ]
+      ],
+      "barrier": "Narmada and Mahi river crossings",
+      "kind": "new_line",
+      "crossings": [
+        {
+          "name": "Narmada rail bridge",
+          "kind": "rail_bridge",
+          "geometry": {
+            "type": "Polygon",
+            "coordinates": [
+              [
+                [
+                  73.04154956592443,
+                  21.747042028396308
+                ],
+                [
+                  73.04174891064315,
+                  21.747258676966617
+                ],
+                [
+                  73.04196853073589,
+                  21.747454743115572
+                ],
+                [
+                  73.04220631114109,
+                  21.747628338618977
+                ],
+                [
+                  73.04245996190346,
+                  21.747777791657242
+                ],
+                [
+                  73.04272704022752,
+                  21.747901662915908
+                ],
+                [
+                  73.04300497400298,
+                  21.74799875944704
+                ],
+                [
+                  73.04329108657566,
+                  21.748068146157962
+                ],
+                [
+                  73.0435826225251,
+                  21.748109154816717
+                ],
+                [
+                  73.0438767742007,
+                  21.74812139048751
+                ],
+                [
+                  73.04417070876104,
+                  21.748104735334135
+                ],
+                [
+                  73.04446159545563,
+                  21.748059349754826
+                ],
+                [
+                  73.04474663288659,
+                  21.747985670837522
+                ],
+                [
+                  73.04502307598763,
+                  21.747884408150476
+                ],
+                [
+                  73.04528826246057,
+                  21.747756536908717
+                ],
+                [
+                  73.04553963841472,
+                  21.74760328858221
+                ],
+                [
+                  73.04577478296221,
+                  21.747426139036108
+                ],
+                [
+                  73.05806632343578,
+                  21.737183188641474
+                ],
+                [
+                  73.05828297200608,
+                  21.73698384392274
+                ],
+                [
+                  73.05847903815504,
+                  21.73676422383
+                ],
+                [
+                  73.05865263365844,
+                  21.7365264434248
+                ],
+                [
+                  73.05880208669672,
+                  21.736272792662426
+                ],
+                [
+                  73.05892595795538,
+                  21.736005714338376
+                ],
+                [
+                  73.0590230544865,
+                  21.735727780562915
+                ],
+                [
+                  73.05909244119742,
+                  21.73544166799023
+                ],
+                [
+                  73.05913344985619,
+                  21.735150132040804
+                ],
+                [
+                  73.05914568552697,
+                  21.7348559803652
+                ],
+                [
+                  73.0591290303736,
+                  21.734562045804854
+                ],
+                [
+                  73.0590836447943,
+                  21.73427115911026
+                ],
+                [
+                  73.059009965877,
+                  21.733986121679305
+                ],
+                [
+                  73.05890870318994,
+                  21.733709678578265
+                ],
+                [
+                  73.05878083194818,
+                  21.733444492105324
+                ],
+                [
+                  73.05862758362167,
+                  21.733193116151178
+                ],
+                [
+                  73.05845043407557,
+                  21.73295797160369
+                ],
+                [
+                  73.00845043407557,
+                  21.67295797160369
+                ],
+                [
+                  73.00825108935685,
+                  21.67274132303338
+                ],
+                [
+                  73.00803146926411,
+                  21.672545256884426
+                ],
+                [
+                  73.00779368885891,
+                  21.67237166138102
+                ],
+                [
+                  73.00754003809654,
+                  21.672222208342756
+                ],
+                [
+                  73.00727295977248,
+                  21.67209833708409
+                ],
+                [
+                  73.00699502599701,
+                  21.67200124055296
+                ],
+                [
+                  73.00670891342433,
+                  21.671931853842036
+                ],
+                [
+                  73.0064173774749,
+                  21.67189084518328
+                ],
+                [
+                  73.0061232257993,
+                  21.67187860951249
+                ],
+                [
+                  73.00582929123895,
+                  21.671895264665864
+                ],
+                [
+                  73.00553840454437,
+                  21.671940650245173
+                ],
+                [
+                  73.00525336711341,
+                  21.672014329162476
+                ],
+                [
+                  73.00497692401237,
+                  21.672115591849522
+                ],
+                [
+                  73.00471173753942,
+                  21.67224346309128
+                ],
+                [
+                  73.00446036158527,
+                  21.67239671141779
+                ],
+                [
+                  73.00422521703779,
+                  21.67257386096389
+                ],
+                [
+                  72.99193367656422,
+                  21.682816811358524
+                ],
+                [
+                  72.99171702799391,
+                  21.683016156077258
+                ],
+                [
+                  72.99152096184496,
+                  21.683235776169997
+                ],
+                [
+                  72.99134736634156,
+                  21.683473556575198
+                ],
+                [
+                  72.99119791330328,
+                  21.683727207337572
+                ],
+                [
+                  72.99107404204462,
+                  21.683994285661623
+                ],
+                [
+                  72.9909769455135,
+                  21.684272219437084
+                ],
+                [
+                  72.99090755880258,
+                  21.684558332009768
+                ],
+                [
+                  72.9908665501438,
+                  21.684849867959194
+                ],
+                [
+                  72.99085431447303,
+                  21.685144019634798
+                ],
+                [
+                  72.9908709696264,
+                  21.685437954195145
+                ],
+                [
+                  72.9909163552057,
+                  21.685728840889738
+                ],
+                [
+                  72.990990034123,
+                  21.686013878320693
+                ],
+                [
+                  72.99109129681005,
+                  21.686290321421733
+                ],
+                [
+                  72.99121916805181,
+                  21.686555507894674
+                ],
+                [
+                  72.99137241637833,
+                  21.68680688384882
+                ],
+                [
+                  72.99154956592443,
+                  21.68704202839631
+                ],
+                [
+                  73.04154956592443,
+                  21.747042028396308
+                ]
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "number": 41,
+      "name": "Mumbai–Pune",
+      "from_city": "mumbai",
+      "to_city": "pune",
+      "basis": "Project. Branch into the Deccan with a major Western Ghats crossing. [India Press Information Bureau](https://www.pib.gov.in/newsite/erelcontent.aspx?lang=2&reg=48&relid=283198)",
+      "source_urls": [
+        "https://www.pib.gov.in/newsite/erelcontent.aspx?lang=2&reg=48&relid=283198"
+      ],
+      "id": "launch_41_mumbai__pune",
+      "profile": "india",
+      "months": 54,
+      "hill_percent": 20,
+      "viaduct_percent": 20,
+      "tunnel_percent": 35,
+      "via": [
+        [
+          72.94,
+          19.05
+        ],
+        [
+          73.0,
+          19.03
+        ],
+        [
+          73.12,
+          18.99
+        ],
+        [
+          73.36,
+          18.76
+        ],
+        [
+          73.55,
+          18.74
+        ]
+      ],
+      "barrier": "Western Ghats crossing",
+      "kind": "new_line",
+      "crossings": [
+        {
+          "name": "Thane Creek rail bridge",
+          "kind": "rail_bridge",
+          "geometry": {
+            "type": "Polygon",
+            "coordinates": [
+              [
+                [
+                  73.00347850542619,
+                  19.040435516278556
+                ],
+                [
+                  73.00375289892867,
+                  19.040328824546457
+                ],
+                [
+                  73.00401551353295,
+                  19.040195751297773
+                ],
+                [
+                  73.00426382011685,
+                  19.040037578100634
+                ],
+                [
+                  73.00449542735223,
+                  19.03985582824939
+                ],
+                [
+                  73.00470810473477,
+                  19.03965225209447
+                ],
+                [
+                  73.00489980406505,
+                  19.039428810185527
+                ],
+                [
+                  73.0050686791737,
+                  19.039187654390293
+                ],
+                [
+                  73.00521310370114,
+                  19.038931107170903
+                ],
+                [
+                  73.00533168676019,
+                  19.038661639217324
+                ],
+                [
+                  73.00542328633118,
+                  19.038381845653255
+                ],
+                [
+                  73.00548702026018,
+                  19.038094421043667
+                ],
+                [
+                  73.00552227475458,
+                  19.037802133444675
+                ],
+                [
+                  73.00552871029436,
+                  19.037507797745636
+                ],
+                [
+                  73.00550626490173,
+                  19.037214248560232
+                ],
+                [
+                  73.0054551547381,
+                  19.036924312927592
+                ],
+                [
+                  73.00537587202228,
+                  19.03664078308635
+                ],
+                [
+                  73.000316227766,
+                  19.021461850317547
+                ],
+                [
+                  73.0002095360339,
+                  19.021187456815067
+                ],
+                [
+                  73.00007646278523,
+                  19.02092484221078
+                ],
+                [
+                  72.9999182895881,
+                  19.020676535626883
+                ],
+                [
+                  72.99973653973684,
+                  19.020444928391516
+                ],
+                [
+                  72.99953296358193,
+                  19.020232251008967
+                ],
+                [
+                  72.99930952167298,
+                  19.02004055167869
+                ],
+                [
+                  72.99906836587775,
+                  19.01987167657003
+                ],
+                [
+                  72.99881181865835,
+                  19.0197272520426
+                ],
+                [
+                  72.99854235070478,
+                  19.019608668983548
+                ],
+                [
+                  72.9982625571407,
+                  19.019517069412554
+                ],
+                [
+                  72.99797513253112,
+                  19.01945333548357
+                ],
+                [
+                  72.99768284493213,
+                  19.019418080989162
+                ],
+                [
+                  72.99738850923309,
+                  19.019411645449388
+                ],
+                [
+                  72.99709496004769,
+                  19.019434090842015
+                ],
+                [
+                  72.99680502441505,
+                  19.019485201005637
+                ],
+                [
+                  72.99652149457381,
+                  19.019564483721446
+                ],
+                [
+                  72.93652149457381,
+                  19.039564483721445
+                ],
+                [
+                  72.93624710107133,
+                  19.039671175453545
+                ],
+                [
+                  72.93598448646705,
+                  19.03980424870223
+                ],
+                [
+                  72.93573617988315,
+                  19.039962421899368
+                ],
+                [
+                  72.93550457264777,
+                  19.04014417175061
+                ],
+                [
+                  72.93529189526522,
+                  19.040347747905532
+                ],
+                [
+                  72.93510019593495,
+                  19.040571189814475
+                ],
+                [
+                  72.9349313208263,
+                  19.04081234560971
+                ],
+                [
+                  72.93478689629886,
+                  19.0410688928291
+                ],
+                [
+                  72.93466831323981,
+                  19.041338360782678
+                ],
+                [
+                  72.93457671366882,
+                  19.041618154346747
+                ],
+                [
+                  72.93451297973982,
+                  19.041905578956335
+                ],
+                [
+                  72.93447772524542,
+                  19.042197866555327
+                ],
+                [
+                  72.93447128970564,
+                  19.042492202254365
+                ],
+                [
+                  72.93449373509827,
+                  19.04278575143977
+                ],
+                [
+                  72.9345448452619,
+                  19.04307568707241
+                ],
+                [
+                  72.93462412797771,
+                  19.04335921691365
+                ],
+                [
+                  72.93968377223399,
+                  19.058538149682455
+                ],
+                [
+                  72.93979046396609,
+                  19.058812543184935
+                ],
+                [
+                  72.93992353721477,
+                  19.059075157789223
+                ],
+                [
+                  72.9400817104119,
+                  19.05932346437312
+                ],
+                [
+                  72.94026346026315,
+                  19.059555071608486
+                ],
+                [
+                  72.94046703641807,
+                  19.059767748991035
+                ],
+                [
+                  72.94069047832701,
+                  19.05995944832131
+                ],
+                [
+                  72.94093163412225,
+                  19.06012832342997
+                ],
+                [
+                  72.94118818134164,
+                  19.060272747957402
+                ],
+                [
+                  72.94145764929522,
+                  19.060391331016454
+                ],
+                [
+                  72.94173744285929,
+                  19.060482930587447
+                ],
+                [
+                  72.94202486746887,
+                  19.060546664516433
+                ],
+                [
+                  72.94231715506787,
+                  19.06058191901084
+                ],
+                [
+                  72.94261149076691,
+                  19.060588354550614
+                ],
+                [
+                  72.94290503995231,
+                  19.060565909157987
+                ],
+                [
+                  72.94319497558494,
+                  19.060514798994365
+                ],
+                [
+                  72.94347850542619,
+                  19.060435516278556
+                ],
+                [
+                  73.00347850542619,
+                  19.040435516278556
+                ]
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "number": 42,
+      "name": "Bengaluru–Chennai",
+      "from_city": "bengaluru",
+      "to_city": "chennai",
+      "basis": "Project. Southern standalone line based on the wider corridor studies. [India Press Information Bureau](https://www.pib.gov.in/PressReleaseIframePage.aspx?PRID=1885431&lang=2&reg=48)",
+      "source_urls": [
+        "https://www.pib.gov.in/PressReleaseIframePage.aspx?PRID=1885431&lang=2&reg=48"
+      ],
+      "id": "launch_42_bengaluru__chennai",
+      "profile": "india",
+      "months": 48,
+      "hill_percent": 20,
+      "viaduct_percent": 20,
+      "tunnel_percent": 12,
+      "via": [
+        [
+          78.13,
+          12.92
+        ],
+        [
+          79.13,
+          12.92
+        ]
+      ],
+      "barrier": "Eastern Ghats approaches",
+      "kind": "new_line"
+    },
+    {
+      "number": 43,
+      "name": "Delhi–Jaipur",
+      "from_city": "delhi",
+      "to_city": "jaipur",
+      "basis": "Project-based concept. First part of a Delhi–Ahmedabad game spine. The source is the wider corridor study, and the split is a game choice. [India Press Information Bureau](https://www.pib.gov.in/PressReleaseIframePage.aspx?PRID=1885431&lang=2&reg=48)",
+      "source_urls": [
+        "https://www.pib.gov.in/PressReleaseIframePage.aspx?PRID=1885431&lang=2&reg=48"
+      ],
+      "id": "launch_43_delhi__jaipur",
+      "profile": "india",
+      "months": 36,
+      "hill_percent": 10,
+      "viaduct_percent": 15,
+      "tunnel_percent": 0,
+      "via": [
+        [
+          76.61,
+          28.16
+        ],
+        [
+          76.08,
+          27.89
+        ]
+      ],
+      "barrier": "Aravalli fringe",
+      "kind": "new_line"
+    },
+    {
+      "number": 44,
+      "name": "Dhaka–Chattogram",
+      "from_city": "dhaka",
+      "to_city": "chattogram",
+      "basis": "Project. Feasibility-study reference with floodplain and major river engineering to review. [Bangladesh Railway](https://railway.portal.gov.bd/sites/default/files/files/railway.portal.gov.bd/tenders/c4742973_e96a_4319_b5c7_006004ed229f/EOI_DA-CTG%20high%20speed.pdf)",
+      "source_urls": [
+        "https://railway.portal.gov.bd/sites/default/files/files/railway.portal.gov.bd/tenders/c4742973_e96a_4319_b5c7_006004ed229f/EOI_DA-CTG%20high%20speed.pdf"
+      ],
+      "id": "launch_44_dhaka__chattogram",
+      "profile": "other_south_asia",
+      "months": 48,
+      "hill_percent": 0,
+      "viaduct_percent": 45,
+      "tunnel_percent": 0,
+      "via": [
+        [
+          90.61,
+          23.57
+        ],
+        [
+          91.17,
+          23.47
+        ],
+        [
+          91.52,
+          23.02
+        ],
+        [
+          91.66,
+          22.71
+        ]
+      ],
+      "barrier": "Meghna floodplain and major river structures",
+      "kind": "new_line",
+      "crossings": [
+        {
+          "name": "Meghna floodplain rail bridges",
+          "kind": "rail_bridge",
+          "geometry": {
+            "type": "Polygon",
+            "coordinates": [
+              [
+                [
+                  90.7256594533097,
+                  23.549432422182836
+                ],
+                [
+                  90.72590416800993,
+                  23.549268746786417
+                ],
+                [
+                  90.7261316613477,
+                  23.549081873296654
+                ],
+                [
+                  90.72633974243777,
+                  23.548873601407415
+                ],
+                [
+                  90.72652640734555,
+                  23.54864593689084
+                ],
+                [
+                  90.7266898583859,
+                  23.54840107228068
+                ],
+                [
+                  90.72682852143596,
+                  23.548141365756987
+                ],
+                [
+                  90.72694106109475,
+                  23.547869318435556
+                ],
+                [
+                  90.72702639354385,
+                  23.547587550280806
+                ],
+                [
+                  90.72708369698512,
+                  23.547298774874097
+                ],
+                [
+                  90.72711241955508,
+                  23.54700577328046
+                ],
+                [
+                  90.72711228463972,
+                  23.54671136726541
+                ],
+                [
+                  90.7270832935383,
+                  23.54641839211981
+                ],
+                [
+                  90.72702572545101,
+                  23.54612966935447
+                ],
+                [
+                  90.72694013478998,
+                  23.54584797952745
+                ],
+                [
+                  90.72682734584009,
+                  23.545576035465775
+                ],
+                [
+                  90.72668844482055,
+                  23.545316456139417
+                ],
+                [
+                  90.71845651273372,
+                  23.531596569328016
+                ],
+                [
+                  90.7182928373373,
+                  23.53135185462779
+                ],
+                [
+                  90.71810596384755,
+                  23.53112436129003
+                ],
+                [
+                  90.7178976919583,
+                  23.53091628019994
+                ],
+                [
+                  90.71767002744173,
+                  23.530729615292167
+                ],
+                [
+                  90.71742516283157,
+                  23.530566164251816
+                ],
+                [
+                  90.71716545630787,
+                  23.530427501201757
+                ],
+                [
+                  90.71689340898644,
+                  23.53031496154296
+                ],
+                [
+                  90.71661164083169,
+                  23.530229629093864
+                ],
+                [
+                  90.71632286542498,
+                  23.530172325652597
+                ],
+                [
+                  90.71602986383134,
+                  23.530143603082625
+                ],
+                [
+                  90.7157354578163,
+                  23.530143737998
+                ],
+                [
+                  90.7154424826707,
+                  23.53017272909941
+                ],
+                [
+                  90.71515375990535,
+                  23.5302302971867
+                ],
+                [
+                  90.71487207007833,
+                  23.530315887847728
+                ],
+                [
+                  90.71460012601665,
+                  23.53042867679763
+                ],
+                [
+                  90.7143405466903,
+                  23.530567577817163
+                ],
+                [
+                  90.56434054669029,
+                  23.620567577817162
+                ],
+                [
+                  90.56409583199006,
+                  23.62073125321358
+                ],
+                [
+                  90.5638683386523,
+                  23.620918126703344
+                ],
+                [
+                  90.56366025756222,
+                  23.621126398592583
+                ],
+                [
+                  90.56347359265445,
+                  23.62135406310916
+                ],
+                [
+                  90.5633101416141,
+                  23.62159892771932
+                ],
+                [
+                  90.56317147856403,
+                  23.62185863424301
+                ],
+                [
+                  90.56305893890524,
+                  23.622130681564443
+                ],
+                [
+                  90.56297360645614,
+                  23.622412449719192
+                ],
+                [
+                  90.56291630301487,
+                  23.6227012251259
+                ],
+                [
+                  90.56288758044491,
+                  23.622994226719538
+                ],
+                [
+                  90.56288771536028,
+                  23.62328863273459
+                ],
+                [
+                  90.56291670646169,
+                  23.623581607880187
+                ],
+                [
+                  90.56297427454898,
+                  23.623870330645527
+                ],
+                [
+                  90.56305986521001,
+                  23.624152020472547
+                ],
+                [
+                  90.5631726541599,
+                  23.624423964534223
+                ],
+                [
+                  90.56331155517944,
+                  23.62468354386058
+                ],
+                [
+                  90.57154348726627,
+                  23.638403430671982
+                ],
+                [
+                  90.57170716266269,
+                  23.63864814537221
+                ],
+                [
+                  90.57189403615244,
+                  23.63887563870997
+                ],
+                [
+                  90.57210230804169,
+                  23.63908371980006
+                ],
+                [
+                  90.57232997255826,
+                  23.63927038470783
+                ],
+                [
+                  90.57257483716842,
+                  23.639433835748182
+                ],
+                [
+                  90.57283454369212,
+                  23.63957249879824
+                ],
+                [
+                  90.57310659101356,
+                  23.63968503845704
+                ],
+                [
+                  90.5733883591683,
+                  23.639770370906135
+                ],
+                [
+                  90.57367713457501,
+                  23.6398276743474
+                ],
+                [
+                  90.57397013616865,
+                  23.639856396917374
+                ],
+                [
+                  90.5742645421837,
+                  23.639856262002
+                ],
+                [
+                  90.5745575173293,
+                  23.63982727090059
+                ],
+                [
+                  90.57484624009464,
+                  23.639769702813297
+                ],
+                [
+                  90.57512792992166,
+                  23.63968411215227
+                ],
+                [
+                  90.57539987398334,
+                  23.639571323202368
+                ],
+                [
+                  90.5756594533097,
+                  23.639432422182836
+                ],
+                [
+                  90.7256594533097,
+                  23.549432422182836
+                ]
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "number": 45,
+      "name": "Lahore–Multan",
+      "from_city": "lahore",
+      "to_city": "multan",
+      "basis": "Upgrade. Use the conventional main line as a starting point for a staged fast-rail spine. [Pakistan Ministry of Railways](https://www.railways.gov.pk/PublicationDetail/ZDI3MjJmODUtZGFhNi00MDRhLWI2MzgtZmE0Y2RiZWQ3Zjg0)",
+      "source_urls": [
+        "https://www.railways.gov.pk/PublicationDetail/ZDI3MjJmODUtZGFhNi00MDRhLWI2MzgtZmE0Y2RiZWQ3Zjg0"
+      ],
+      "id": "launch_45_lahore__multan",
+      "profile": "other_south_asia",
+      "months": 42,
+      "hill_percent": 0,
+      "viaduct_percent": 20,
+      "tunnel_percent": 0,
+      "via": [
+        [
+          73.45,
+          30.82
+        ],
+        [
+          72.68,
+          30.03
+        ]
+      ],
+      "barrier": "Punjab floodplain and river structures",
+      "kind": "upgrade"
+    },
+    {
+      "number": 46,
+      "name": "Bandung–Cirebon",
+      "from_city": "bandung",
+      "to_city": "cirebon",
+      "basis": "Concept. Start a northern Java extension from the operational Whoosh corridor. Verify actual junction and station access at Bandung. [KCIC](https://kcic.co.id/kcic-siaran-pers/3-tahun-beroperasi-whoosh-layani-182-juta-penumpang-dan-terus-hadirkan-inovasi-layanan/)",
+      "source_urls": [
+        "https://kcic.co.id/kcic-siaran-pers/3-tahun-beroperasi-whoosh-layani-182-juta-penumpang-dan-terus-hadirkan-inovasi-layanan/"
+      ],
+      "id": "launch_46_bandung__cirebon",
+      "profile": "southeast_asia",
+      "months": 48,
+      "hill_percent": 20,
+      "viaduct_percent": 20,
+      "tunnel_percent": 15,
+      "via": [
+        [
+          107.67,
+          -6.96
+        ],
+        [
+          108.18,
+          -6.84
+        ]
+      ],
+      "barrier": "Bandung basin eastward mountain approach",
+      "kind": "new_line"
+    },
+    {
+      "number": 47,
+      "name": "Cirebon–Semarang",
+      "from_city": "cirebon",
+      "to_city": "semarang",
+      "basis": "Concept. Northern Java coastal link with floodplain and urban constraints.",
+      "source_urls": [],
+      "id": "launch_47_cirebon__semarang",
+      "profile": "southeast_asia",
+      "months": 42,
+      "hill_percent": 5,
+      "viaduct_percent": 30,
+      "tunnel_percent": 0,
+      "via": [
+        [
+          109.14,
+          -6.9
+        ],
+        [
+          109.67,
+          -6.96
+        ]
+      ],
+      "barrier": "Java north-coast floodplain",
+      "kind": "new_line"
+    },
+    {
+      "number": 48,
+      "name": "Semarang–Surabaya",
+      "from_city": "semarang",
+      "to_city": "surabaya",
+      "basis": "Concept. Complete a playable Java spine in stages.",
+      "source_urls": [],
+      "id": "launch_48_semarang__surabaya",
+      "profile": "southeast_asia",
+      "months": 48,
+      "hill_percent": 8,
+      "viaduct_percent": 25,
+      "tunnel_percent": 5,
+      "via": [
+        [
+          111.05,
+          -7.08
+        ],
+        [
+          111.9,
+          -7.12
+        ],
+        [
+          112.39,
+          -7.15
+        ]
+      ],
+      "barrier": "Java river crossings and Surabaya urban approach",
+      "kind": "new_line"
+    },
+    {
+      "number": 49,
+      "name": "Bangkok–Nakhon Ratchasima",
+      "from_city": "bangkok",
+      "to_city": "nakhon_ratchasima",
+      "basis": "Project. First section of the Thai–Chinese HSR corridor. [Thailand government project overview](https://thailand.go.th/public/issue-focus-detail/006_066?hl=en)",
+      "source_urls": [
+        "https://thailand.go.th/public/issue-focus-detail/006_066?hl=en"
+      ],
+      "id": "launch_49_bangkok__nakhon_ratchasima",
+      "profile": "southeast_asia",
+      "months": 48,
+      "hill_percent": 10,
+      "viaduct_percent": 25,
+      "tunnel_percent": 15,
+      "via": [
+        [
+          100.61,
+          14.35
+        ],
+        [
+          101.02,
+          14.53
+        ],
+        [
+          101.43,
+          14.65
+        ]
+      ],
+      "barrier": "Dong Phaya Yen foothills",
+      "kind": "new_line"
+    },
+    {
+      "number": 50,
+      "name": "Riyadh–Dammam",
+      "from_city": "riyadh",
+      "to_city": "dammam",
+      "basis": "Upgrade concept. Faster alternative on the existing eastern intercity corridor. Verify the station and freight interfaces.",
+      "source_urls": [],
+      "id": "launch_50_riyadh__dammam",
+      "profile": "gulf",
+      "months": 42,
+      "hill_percent": 0,
+      "viaduct_percent": 12,
+      "tunnel_percent": 0,
+      "via": [
+        [
+          48.06,
+          25.12
+        ],
+        [
+          49.26,
+          25.45
+        ]
+      ],
+      "barrier": "Desert formation and imported systems",
+      "kind": "upgrade"
+    },
+    {
+      "number": 51,
+      "name": "Abu Dhabi–Dubai",
+      "from_city": "abu_dhabi",
+      "to_city": "dubai",
+      "basis": "Project. Dedicated high-speed package. Track the conventional passenger network separately. [Etihad Rail](https://corporate.etihadrail.ae/en/our-projects/high-speed-rail)",
+      "source_urls": [
+        "https://corporate.etihadrail.ae/en/our-projects/high-speed-rail"
+      ],
+      "id": "launch_51_abu_dhabi__dubai",
+      "profile": "gulf",
+      "months": 36,
+      "hill_percent": 0,
+      "viaduct_percent": 30,
+      "tunnel_percent": 0,
+      "via": [
+        [
+          54.465,
+          24.43
+        ],
+        [
+          54.49,
+          24.42
+        ],
+        [
+          54.7,
+          24.46
+        ],
+        [
+          55.02,
+          24.87
+        ]
+      ],
+      "barrier": "Separate dedicated high-speed works and urban viaducts",
+      "kind": "new_line",
+      "crossings": [
+        {
+          "name": "Abu Dhabi island access rail bridge (game concept)",
+          "kind": "rail_bridge",
+          "geometry": {
+            "type": "Polygon",
+            "coordinates": [
+              [
+                [
+                  54.494085297439895,
+                  24.43021324359974
+                ],
+                [
+                  54.495066698547234,
+                  24.42976363486779
+                ],
+                [
+                  54.49599930457782,
+                  24.429219996994718
+                ],
+                [
+                  54.496874134025774,
+                  24.428587565510423
+                ],
+                [
+                  54.49768276180527,
+                  24.42787243107582
+                ],
+                [
+                  54.49841740038876,
+                  24.427081480826452
+                ],
+                [
+                  54.499070974805086,
+                  24.42622233204559
+                ],
+                [
+                  54.49963719077534,
+                  24.42530325880566
+                ],
+                [
+                  54.5001105953302,
+                  24.424333112284373
+                ],
+                [
+                  54.50048662932502,
+                  24.42332123552307
+                ],
+                [
+                  54.500761671346865,
+                  24.422277373448104
+                ],
+                [
+                  54.50093307259071,
+                  24.421211579021897
+                ],
+                [
+                  54.500999182368886,
+                  24.42013411642739
+                ],
+                [
+                  54.500959364008075,
+                  24.419055362218373
+                ],
+                [
+                  54.50081400098088,
+                  24.417985705387586
+                ],
+                [
+                  54.5005644932127,
+                  24.41693544731504
+                ],
+                [
+                  54.50021324359974,
+                  24.41591470256011
+                ],
+                [
+                  54.49976363486779,
+                  24.41493330145277
+                ],
+                [
+                  54.49921999699472,
+                  24.41400069542218
+                ],
+                [
+                  54.49858756551042,
+                  24.41312586597423
+                ],
+                [
+                  54.49787243107582,
+                  24.412317238194735
+                ],
+                [
+                  54.49708148082645,
+                  24.411582599611243
+                ],
+                [
+                  54.49622233204559,
+                  24.41092902519492
+                ],
+                [
+                  54.49530325880566,
+                  24.410362809224665
+                ],
+                [
+                  54.49433311228437,
+                  24.409889404669805
+                ],
+                [
+                  54.49332123552307,
+                  24.409513370674983
+                ],
+                [
+                  54.492277373448104,
+                  24.40923832865314
+                ],
+                [
+                  54.49121157902189,
+                  24.40906692740929
+                ],
+                [
+                  54.49013411642739,
+                  24.40900081763112
+                ],
+                [
+                  54.48905536221837,
+                  24.409040635991925
+                ],
+                [
+                  54.48798570538759,
+                  24.409185999019126
+                ],
+                [
+                  54.48693544731504,
+                  24.409435506787307
+                ],
+                [
+                  54.48591470256011,
+                  24.409786756400262
+                ],
+                [
+                  54.46091470256011,
+                  24.41978675640026
+                ],
+                [
+                  54.45993330145277,
+                  24.42023636513221
+                ],
+                [
+                  54.45900069542218,
+                  24.420780003005284
+                ],
+                [
+                  54.45812586597423,
+                  24.42141243448958
+                ],
+                [
+                  54.45731723819473,
+                  24.422127568924182
+                ],
+                [
+                  54.456582599611245,
+                  24.42291851917355
+                ],
+                [
+                  54.45592902519492,
+                  24.42377766795441
+                ],
+                [
+                  54.45536280922467,
+                  24.424696741194342
+                ],
+                [
+                  54.45488940466981,
+                  24.42566688771563
+                ],
+                [
+                  54.45451337067499,
+                  24.426678764476932
+                ],
+                [
+                  54.45423832865314,
+                  24.427722626551898
+                ],
+                [
+                  54.45406692740929,
+                  24.428788420978105
+                ],
+                [
+                  54.45400081763112,
+                  24.42986588357261
+                ],
+                [
+                  54.45404063599193,
+                  24.43094463778163
+                ],
+                [
+                  54.454185999019124,
+                  24.432014294612415
+                ],
+                [
+                  54.454435506787306,
+                  24.43306455268496
+                ],
+                [
+                  54.45478675640027,
+                  24.434085297439893
+                ],
+                [
+                  54.455236365132215,
+                  24.43506669854723
+                ],
+                [
+                  54.45578000300529,
+                  24.43599930457782
+                ],
+                [
+                  54.456412434489586,
+                  24.43687413402577
+                ],
+                [
+                  54.457127568924186,
+                  24.437682761805267
+                ],
+                [
+                  54.45791851917355,
+                  24.438417400388758
+                ],
+                [
+                  54.458777667954415,
+                  24.43907097480508
+                ],
+                [
+                  54.45969674119434,
+                  24.439637190775336
+                ],
+                [
+                  54.46066688771563,
+                  24.440110595330196
+                ],
+                [
+                  54.461678764476936,
+                  24.44048662932502
+                ],
+                [
+                  54.4627226265519,
+                  24.440761671346863
+                ],
+                [
+                  54.46378842097811,
+                  24.44093307259071
+                ],
+                [
+                  54.464865883572614,
+                  24.44099918236888
+                ],
+                [
+                  54.46594463778163,
+                  24.440959364008076
+                ],
+                [
+                  54.46701429461242,
+                  24.440814000980875
+                ],
+                [
+                  54.468064552684964,
+                  24.440564493212694
+                ],
+                [
+                  54.4690852974399,
+                  24.44021324359974
+                ],
+                [
+                  54.494085297439895,
+                  24.43021324359974
+                ]
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "number": 52,
+      "name": "Shin-Hakodate-Hokuto–Sapporo",
+      "from_city": "shin_hakodate_hokuto",
+      "to_city": "sapporo",
+      "basis": "Project. Extension from the existing Shinkansen terminus. [Japan Railway Construction Agency](https://www.jrtt.go.jp/english/project/hokkaido.html)",
+      "source_urls": [
+        "https://www.jrtt.go.jp/english/project/hokkaido.html"
+      ],
+      "legacy_id": "hokkaido-extension"
+    },
+    {
+      "number": 53,
+      "name": "Tsuruga–Osaka",
+      "from_city": "tsuruga",
+      "to_city": "osaka",
+      "basis": "Project. Extend the Hokuriku Shinkansen from its Tsuruga terminus to Shin-Osaka. Review the studied route alternatives and confirm the selected approach before qualification. [Japan Railway Construction Agency](https://www.jrtt.go.jp/project/hokuriku-tsuruhan.html)",
+      "source_urls": [
+        "https://www.jrtt.go.jp/project/hokuriku-tsuruhan.html"
+      ],
+      "legacy_id": "tsuruga-osaka"
+    },
+    {
+      "number": 54,
+      "name": "Brisbane–Gold Coast",
+      "from_city": "brisbane",
+      "to_city": "gold_coast",
+      "basis": "Concept. Short northern opening package.",
+      "source_urls": [],
+      "id": "launch_54_brisbane__gold_coast",
+      "profile": "oceania",
+      "months": 30,
+      "hill_percent": 10,
+      "viaduct_percent": 18,
+      "tunnel_percent": 5,
+      "via": [
+        [
+          153.16,
+          -27.67
+        ]
+      ],
+      "barrier": "Brisbane and Gold Coast urban corridor",
+      "kind": "new_line",
+      "crossings": [
+        {
+          "name": "Nerang River rail bridge",
+          "kind": "rail_bridge",
+          "geometry": {
+            "type": "Polygon",
+            "coordinates": [
+              [
+                [
+                  153.42136396103066,
+                  -27.973636038969325
+                ],
+                [
+                  153.4215616720472,
+                  -27.97385417946039
+                ],
+                [
+                  153.421737049524,
+                  -27.97409064861382
+                ],
+                [
+                  153.42188840448017,
+                  -27.9743431691024
+                ],
+                [
+                  153.42201427928464,
+                  -27.974609309015786
+                ],
+                [
+                  153.42211346169432,
+                  -27.974886505281116
+                ],
+                [
+                  153.42218499652833,
+                  -27.975172088346834
+                ],
+                [
+                  153.42222819486713,
+                  -27.975463307891896
+                ],
+                [
+                  153.4222426406871,
+                  -27.975757359312883
+                ],
+                [
+                  153.42222819486713,
+                  -27.976051410733874
+                ],
+                [
+                  153.42218499652833,
+                  -27.976342630278936
+                ],
+                [
+                  153.42211346169432,
+                  -27.97662821334465
+                ],
+                [
+                  153.42201427928464,
+                  -27.976905409609984
+                ],
+                [
+                  153.42188840448017,
+                  -27.977171549523366
+                ],
+                [
+                  153.421737049524,
+                  -27.97742407001195
+                ],
+                [
+                  153.4215616720472,
+                  -27.97766053916538
+                ],
+                [
+                  153.42136396103066,
+                  -27.977878679656445
+                ],
+                [
+                  153.41287867965642,
+                  -27.98636396103068
+                ],
+                [
+                  153.41266053916536,
+                  -27.986561672047213
+                ],
+                [
+                  153.41242407001192,
+                  -27.98673704952403
+                ],
+                [
+                  153.41217154952335,
+                  -27.986888404480165
+                ],
+                [
+                  153.41190540960997,
+                  -27.987014279284654
+                ],
+                [
+                  153.4116282133446,
+                  -27.987113461694317
+                ],
+                [
+                  153.4113426302789,
+                  -27.987184996528327
+                ],
+                [
+                  153.41105141073385,
+                  -27.987228194867136
+                ],
+                [
+                  153.41075735931287,
+                  -27.987242640687118
+                ],
+                [
+                  153.4104633078919,
+                  -27.987228194867136
+                ],
+                [
+                  153.41017208834683,
+                  -27.987184996528327
+                ],
+                [
+                  153.4098865052811,
+                  -27.987113461694314
+                ],
+                [
+                  153.40960930901576,
+                  -27.987014279284654
+                ],
+                [
+                  153.40934316910239,
+                  -27.986888404480165
+                ],
+                [
+                  153.4090906486138,
+                  -27.986737049524027
+                ],
+                [
+                  153.40885417946038,
+                  -27.98656167204721
+                ],
+                [
+                  153.40863603896932,
+                  -27.986363961030676
+                ],
+                [
+                  153.38863603896934,
+                  -27.966363961030677
+                ],
+                [
+                  153.3884383279528,
+                  -27.966145820539612
+                ],
+                [
+                  153.388262950476,
+                  -27.96590935138618
+                ],
+                [
+                  153.38811159551983,
+                  -27.9656568308976
+                ],
+                [
+                  153.38798572071536,
+                  -27.965390690984215
+                ],
+                [
+                  153.38788653830568,
+                  -27.965113494718885
+                ],
+                [
+                  153.38781500347167,
+                  -27.964827911653167
+                ],
+                [
+                  153.38777180513287,
+                  -27.964536692108105
+                ],
+                [
+                  153.3877573593129,
+                  -27.964242640687118
+                ],
+                [
+                  153.38777180513287,
+                  -27.963948589266128
+                ],
+                [
+                  153.38781500347167,
+                  -27.963657369721066
+                ],
+                [
+                  153.38788653830568,
+                  -27.96337178665535
+                ],
+                [
+                  153.38798572071536,
+                  -27.963094590390018
+                ],
+                [
+                  153.38811159551983,
+                  -27.962828450476636
+                ],
+                [
+                  153.388262950476,
+                  -27.962575929988052
+                ],
+                [
+                  153.3884383279528,
+                  -27.96233946083462
+                ],
+                [
+                  153.38863603896934,
+                  -27.962121320343556
+                ],
+                [
+                  153.3971213203436,
+                  -27.95363603896932
+                ],
+                [
+                  153.39733946083464,
+                  -27.95343832795279
+                ],
+                [
+                  153.39757592998808,
+                  -27.95326295047597
+                ],
+                [
+                  153.39782845047665,
+                  -27.953111595519836
+                ],
+                [
+                  153.39809459039003,
+                  -27.952985720715347
+                ],
+                [
+                  153.3983717866554,
+                  -27.952886538305684
+                ],
+                [
+                  153.3986573697211,
+                  -27.952815003471674
+                ],
+                [
+                  153.39894858926615,
+                  -27.952771805132866
+                ],
+                [
+                  153.39924264068713,
+                  -27.952757359312884
+                ],
+                [
+                  153.39953669210811,
+                  -27.952771805132866
+                ],
+                [
+                  153.39982791165318,
+                  -27.952815003471674
+                ],
+                [
+                  153.4001134947189,
+                  -27.952886538305687
+                ],
+                [
+                  153.40039069098424,
+                  -27.952985720715347
+                ],
+                [
+                  153.40065683089762,
+                  -27.953111595519836
+                ],
+                [
+                  153.4009093513862,
+                  -27.953262950475974
+                ],
+                [
+                  153.40114582053963,
+                  -27.953438327952792
+                ],
+                [
+                  153.40136396103068,
+                  -27.953636038969325
+                ],
+                [
+                  153.42136396103066,
+                  -27.973636038969325
+                ]
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "number": 55,
+      "name": "Gold Coast–Coffs Harbour",
+      "from_city": "gold_coast",
+      "to_city": "coffs_harbour",
+      "basis": "Concept. Northern coastal link with river, floodplain, and urban constraints.",
+      "source_urls": [],
+      "id": "launch_55_gold_coast__coffs_harbour",
+      "profile": "oceania",
+      "months": 54,
+      "hill_percent": 25,
+      "viaduct_percent": 20,
+      "tunnel_percent": 15,
+      "via": [
+        [
+          153.42,
+          -28.34
+        ],
+        [
+          153.26,
+          -28.82
+        ],
+        [
+          153.0,
+          -29.7
+        ]
+      ],
+      "barrier": "Coastal ranges and river floodplains",
+      "kind": "new_line"
+    },
+    {
+      "number": 56,
+      "name": "Coffs Harbour–Newcastle",
+      "from_city": "coffs_harbour",
+      "to_city": "newcastle",
+      "basis": "Concept. Continue the coastal spine to the northern end of Line 1.",
+      "source_urls": [],
+      "id": "launch_56_coffs_harbour__newcastle",
+      "profile": "oceania",
+      "months": 60,
+      "hill_percent": 25,
+      "viaduct_percent": 20,
+      "tunnel_percent": 20,
+      "via": [
+        [
+          152.84,
+          -31.44
+        ],
+        [
+          152.44,
+          -32.04
+        ],
+        [
+          151.96,
+          -32.63
+        ]
+      ],
+      "barrier": "Coastal ranges and estuaries",
+      "kind": "new_line",
+      "crossings": [
+        {
+          "name": "Hunter River rail bridge",
+          "kind": "rail_bridge",
+          "geometry": {
+            "type": "Polygon",
+            "coordinates": [
+              [
+                [
+                  151.81748845264906,
+                  -32.905007698233966
+                ],
+                [
+                  151.8176395433812,
+                  -32.90526037690453
+                ],
+                [
+                  151.8177651397295,
+                  -32.90552664833973
+                ],
+                [
+                  151.81786403213238,
+                  -32.90580394820008
+                ],
+                [
+                  151.81793526820198,
+                  -32.90608960593634
+                ],
+                [
+                  151.81797816189604,
+                  -32.90638087050836
+                ],
+                [
+                  151.8179923001248,
+                  -32.90667493687908
+                ],
+                [
+                  151.8179775467294,
+                  -32.9069689730286
+                ],
+                [
+                  151.81793404379312,
+                  -32.90726014722806
+                ],
+                [
+                  151.81786221027298,
+                  -32.907545655310756
+                ],
+                [
+                  151.81776273796507,
+                  -32.90782274767778
+                ],
+                [
+                  151.8176365848421,
+                  -32.908088755778145
+                ],
+                [
+                  151.81748496582756,
+                  -32.90834111780845
+                ],
+                [
+                  151.81730934109552,
+                  -32.90857740338437
+                ],
+                [
+                  151.8171114020081,
+                  -32.90879533694666
+                ],
+                [
+                  151.81689305482692,
+                  -32.908992819675966
+                ],
+                [
+                  151.8166564023547,
+                  -32.909167949705655
+                ],
+                [
+                  151.80667179882263,
+                  -32.91582435206036
+                ],
+                [
+                  151.80641912015207,
+                  -32.91597544279252
+                ],
+                [
+                  151.80615284871686,
+                  -32.91610103914079
+                ],
+                [
+                  151.80587554885653,
+                  -32.91619993154368
+                ],
+                [
+                  151.80558989112026,
+                  -32.9162711676133
+                ],
+                [
+                  151.80529862654825,
+                  -32.916314061307354
+                ],
+                [
+                  151.80500456017754,
+                  -32.91632819953612
+                ],
+                [
+                  151.80471052402802,
+                  -32.91631344614072
+                ],
+                [
+                  151.80441934982855,
+                  -32.91626994320442
+                ],
+                [
+                  151.80413384174585,
+                  -32.91619810968429
+                ],
+                [
+                  151.80385674937884,
+                  -32.91609863737638
+                ],
+                [
+                  151.80359074127847,
+                  -32.915972484253395
+                ],
+                [
+                  151.80333837924817,
+                  -32.91582086523888
+                ],
+                [
+                  151.80310209367224,
+                  -32.91564524050682
+                ],
+                [
+                  151.80288416010995,
+                  -32.9154473014194
+                ],
+                [
+                  151.80268667738065,
+                  -32.91522895423823
+                ],
+                [
+                  151.80251154735095,
+                  -32.91499230176603
+                ],
+                [
+                  151.78251154735094,
+                  -32.88499230176603
+                ],
+                [
+                  151.7823604566188,
+                  -32.88473962309547
+                ],
+                [
+                  151.7822348602705,
+                  -32.88447335166027
+                ],
+                [
+                  151.78213596786762,
+                  -32.88419605179992
+                ],
+                [
+                  151.78206473179802,
+                  -32.88391039406366
+                ],
+                [
+                  151.78202183810396,
+                  -32.88361912949164
+                ],
+                [
+                  151.78200769987518,
+                  -32.88332506312092
+                ],
+                [
+                  151.7820224532706,
+                  -32.8830310269714
+                ],
+                [
+                  151.78206595620688,
+                  -32.88273985277194
+                ],
+                [
+                  151.78213778972702,
+                  -32.88245434468924
+                ],
+                [
+                  151.78223726203493,
+                  -32.88217725232222
+                ],
+                [
+                  151.7823634151579,
+                  -32.881911244221854
+                ],
+                [
+                  151.78251503417243,
+                  -32.88165888219155
+                ],
+                [
+                  151.78269065890447,
+                  -32.88142259661563
+                ],
+                [
+                  151.7828885979919,
+                  -32.88120466305334
+                ],
+                [
+                  151.78310694517307,
+                  -32.88100718032403
+                ],
+                [
+                  151.78334359764528,
+                  -32.880832050294345
+                ],
+                [
+                  151.79332820117736,
+                  -32.87417564793964
+                ],
+                [
+                  151.79358087984792,
+                  -32.87402455720748
+                ],
+                [
+                  151.79384715128313,
+                  -32.87389896085921
+                ],
+                [
+                  151.79412445114346,
+                  -32.87380006845632
+                ],
+                [
+                  151.79441010887973,
+                  -32.873728832386696
+                ],
+                [
+                  151.79470137345174,
+                  -32.873685938692645
+                ],
+                [
+                  151.79499543982246,
+                  -32.87367180046388
+                ],
+                [
+                  151.79528947597197,
+                  -32.87368655385928
+                ],
+                [
+                  151.79558065017144,
+                  -32.87373005679558
+                ],
+                [
+                  151.79586615825414,
+                  -32.87380189031571
+                ],
+                [
+                  151.79614325062116,
+                  -32.87390136262362
+                ],
+                [
+                  151.79640925872152,
+                  -32.874027515746604
+                ],
+                [
+                  151.79666162075182,
+                  -32.87417913476112
+                ],
+                [
+                  151.79689790632776,
+                  -32.87435475949318
+                ],
+                [
+                  151.79711583989004,
+                  -32.8745526985806
+                ],
+                [
+                  151.79731332261935,
+                  -32.87477104576177
+                ],
+                [
+                  151.79748845264905,
+                  -32.87500769823397
+                ],
+                [
+                  151.81748845264906,
+                  -32.905007698233966
+                ]
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "number": 57,
+      "name": "Newcastle–Sydney",
+      "from_city": "newcastle",
+      "to_city": "sydney",
+      "basis": "Project. Line 1 and the preferred first Australian alignment to author.",
+      "source_urls": [],
+      "id": "launch_57_newcastle__sydney",
+      "profile": "oceania",
+      "months": 48,
+      "hill_percent": 20,
+      "viaduct_percent": 25,
+      "tunnel_percent": 20,
+      "via": [
+        [
+          151.55,
+          -33.04
+        ],
+        [
+          151.46,
+          -33.29
+        ],
+        [
+          151.2,
+          -33.54
+        ],
+        [
+          151.24,
+          -33.56
+        ],
+        [
+          151.19,
+          -33.76
+        ]
+      ],
+      "barrier": "Hawkesbury crossing and Sydney tunnels",
+      "kind": "new_line",
+      "crossings": [
+        {
+          "name": "Hawkesbury rail bridge",
+          "kind": "rail_bridge",
+          "geometry": {
+            "type": "Polygon",
+            "coordinates": [
+              [
+                [
+                  151.24581377674153,
+                  -33.54837244651701
+                ],
+                [
+                  151.2460703239609,
+                  -33.54851687104444
+                ],
+                [
+                  151.24631147975614,
+                  -33.548685746153105
+                ],
+                [
+                  151.2465349216651,
+                  -33.548877445483384
+                ],
+                [
+                  151.24673849782002,
+                  -33.549090122865934
+                ],
+                [
+                  151.24692024767126,
+                  -33.5493217301013
+                ],
+                [
+                  151.2470784208684,
+                  -33.549570036685196
+                ],
+                [
+                  151.24721149411707,
+                  -33.549832651289485
+                ],
+                [
+                  151.24731818584917,
+                  -33.550107044791964
+                ],
+                [
+                  151.247397468565,
+                  -33.550390574633205
+                ],
+                [
+                  151.2474485787286,
+                  -33.55068051026585
+                ],
+                [
+                  151.24747102412124,
+                  -33.55097405945125
+                ],
+                [
+                  151.24746458858147,
+                  -33.55126839515029
+                ],
+                [
+                  151.24742933408706,
+                  -33.55156068274928
+                ],
+                [
+                  151.24736560015805,
+                  -33.55184810735887
+                ],
+                [
+                  151.24727400058708,
+                  -33.55212790092294
+                ],
+                [
+                  151.247155417528,
+                  -33.55239736887651
+                ],
+                [
+                  151.23821114561798,
+                  -33.570285912696505
+                ],
+                [
+                  151.23806672109055,
+                  -33.5705424599159
+                ],
+                [
+                  151.2378978459819,
+                  -33.57078361571113
+                ],
+                [
+                  151.23770614665162,
+                  -33.57100705762007
+                ],
+                [
+                  151.23749346926908,
+                  -33.571210633774996
+                ],
+                [
+                  151.2372618620337,
+                  -33.57139238362623
+                ],
+                [
+                  151.2370135554498,
+                  -33.571550556823375
+                ],
+                [
+                  151.23675094084552,
+                  -33.57168363007206
+                ],
+                [
+                  151.23647654734305,
+                  -33.57179032180415
+                ],
+                [
+                  151.2361930175018,
+                  -33.57186960451996
+                ],
+                [
+                  151.23590308186917,
+                  -33.571920714683586
+                ],
+                [
+                  151.23560953268375,
+                  -33.57194316007621
+                ],
+                [
+                  151.23531519698471,
+                  -33.571936724536435
+                ],
+                [
+                  151.23502290938572,
+                  -33.57190147004203
+                ],
+                [
+                  151.23473548477614,
+                  -33.57183773611304
+                ],
+                [
+                  151.23445569121208,
+                  -33.571746136542046
+                ],
+                [
+                  151.2341862232585,
+                  -33.571627553483
+                ],
+                [
+                  151.19418622325847,
+                  -33.551627553482994
+                ],
+                [
+                  151.1939296760391,
+                  -33.55148312895556
+                ],
+                [
+                  151.19368852024385,
+                  -33.5513142538469
+                ],
+                [
+                  151.1934650783349,
+                  -33.55112255451662
+                ],
+                [
+                  151.19326150217998,
+                  -33.55090987713407
+                ],
+                [
+                  151.19307975232874,
+                  -33.550678269898704
+                ],
+                [
+                  151.1929215791316,
+                  -33.550429963314805
+                ],
+                [
+                  151.19278850588293,
+                  -33.55016734871052
+                ],
+                [
+                  151.19268181415083,
+                  -33.54989295520804
+                ],
+                [
+                  151.192602531435,
+                  -33.549609425366796
+                ],
+                [
+                  151.1925514212714,
+                  -33.54931948973415
+                ],
+                [
+                  151.19252897587876,
+                  -33.54902594054875
+                ],
+                [
+                  151.19253541141853,
+                  -33.54873160484971
+                ],
+                [
+                  151.19257066591294,
+                  -33.54843931725072
+                ],
+                [
+                  151.19263439984195,
+                  -33.54815189264113
+                ],
+                [
+                  151.19272599941291,
+                  -33.54787209907706
+                ],
+                [
+                  151.192844582472,
+                  -33.54760263112349
+                ],
+                [
+                  151.20178885438202,
+                  -33.529714087303496
+                ],
+                [
+                  151.20193327890945,
+                  -33.5294575400841
+                ],
+                [
+                  151.2021021540181,
+                  -33.52921638428887
+                ],
+                [
+                  151.20229385334838,
+                  -33.52899294237993
+                ],
+                [
+                  151.20250653073091,
+                  -33.528789366225006
+                ],
+                [
+                  151.2027381379663,
+                  -33.52860761637377
+                ],
+                [
+                  151.2029864445502,
+                  -33.528449443176626
+                ],
+                [
+                  151.20324905915447,
+                  -33.52831636992794
+                ],
+                [
+                  151.20352345265695,
+                  -33.52820967819585
+                ],
+                [
+                  151.2038069824982,
+                  -33.52813039548004
+                ],
+                [
+                  151.20409691813083,
+                  -33.528079285316416
+                ],
+                [
+                  151.20439046731624,
+                  -33.52805683992379
+                ],
+                [
+                  151.20468480301528,
+                  -33.528063275463566
+                ],
+                [
+                  151.20497709061428,
+                  -33.52809852995797
+                ],
+                [
+                  151.20526451522386,
+                  -33.52816226388696
+                ],
+                [
+                  151.20554430878792,
+                  -33.528253863457955
+                ],
+                [
+                  151.2058137767415,
+                  -33.528372446517004
+                ],
+                [
+                  151.24581377674153,
+                  -33.54837244651701
+                ]
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "number": 58,
+      "name": "Sydney–Canberra",
+      "from_city": "sydney",
+      "to_city": "canberra",
+      "basis": "Concept. Southern branch, with distinct urban and upland sections.",
+      "source_urls": [],
+      "id": "launch_58_sydney__canberra",
+      "profile": "oceania",
+      "months": 54,
+      "hill_percent": 25,
+      "viaduct_percent": 15,
+      "tunnel_percent": 15,
+      "via": [
+        [
+          150.74,
+          -34.05
+        ],
+        [
+          150.06,
+          -34.75
+        ],
+        [
+          149.72,
+          -34.87
+        ]
+      ],
+      "barrier": "Southern Highlands",
+      "kind": "new_line"
+    },
+    {
+      "number": 59,
+      "name": "Canberra–Albury-Wodonga",
+      "from_city": "canberra",
+      "to_city": "albury_wodonga",
+      "basis": "Concept. Screen an inland detour around the highest terrain.",
+      "source_urls": [],
+      "id": "launch_59_canberra__albury_wodonga",
+      "profile": "oceania",
+      "months": 60,
+      "hill_percent": 30,
+      "viaduct_percent": 15,
+      "tunnel_percent": 20,
+      "via": [
+        [
+          149.15,
+          -35.79
+        ],
+        [
+          148.75,
+          -36.15
+        ],
+        [
+          147.92,
+          -36.52
+        ]
+      ],
+      "barrier": "Detour around the highest Snowy Mountains terrain",
+      "kind": "new_line"
+    },
+    {
+      "number": 60,
+      "name": "Albury-Wodonga–Melbourne",
+      "from_city": "albury_wodonga",
+      "to_city": "melbourne",
+      "basis": "Concept. Join the southern trunk to Melbourne.",
+      "source_urls": [],
+      "id": "launch_60_albury_wodonga__melbourne",
+      "profile": "oceania",
+      "months": 48,
+      "hill_percent": 15,
+      "viaduct_percent": 15,
+      "tunnel_percent": 8,
+      "via": [
+        [
+          146.31,
+          -36.36
+        ],
+        [
+          145.96,
+          -37.04
+        ]
+      ],
+      "barrier": "Victorian uplands and Melbourne approach",
+      "kind": "new_line"
+    },
+    {
+      "number": 61,
+      "name": "Montréal–Boston",
+      "from_city": "montreal",
+      "to_city": "boston",
+      "basis": "Cross-border link between Alto and the US Northeast. A conventional intercity study gives a route starting point. Faster track and physical interfaces are game work. [FRA](https://railroads.dot.gov/elibrary/fra-approves-passenger-rail-blueprint-connect-boston-and-new-haven-montreal-add-service)",
+      "source_urls": [
+        "https://railroads.dot.gov/elibrary/fra-approves-passenger-rail-blueprint-connect-boston-and-new-haven-montreal-add-service"
+      ],
+      "id": "launch_61_montreal__boston",
+      "profile": "north_america",
+      "months": 54,
+      "hill_percent": 20,
+      "viaduct_percent": 20,
+      "tunnel_percent": 10,
+      "via": [
+        [
+          -73.55,
+          45.49
+        ],
+        [
+          -73.5,
+          45.46
+        ],
+        [
+          -73.14,
+          45.23
+        ],
+        [
+          -73.03,
+          45.17
+        ],
+        [
+          -72.97,
+          45.08
+        ],
+        [
+          -72.93,
+          44.94
+        ],
+        [
+          -72.58,
+          44.26
+        ],
+        [
+          -72.31,
+          43.65
+        ],
+        [
+          -71.53,
+          43.2
+        ]
+      ],
+      "barrier": "Saint Lawrence crossing and Vermont uplands",
+      "kind": "new_line",
+      "crossings": [
+        {
+          "name": "Saint Lawrence rail bridge",
+          "kind": "rail_bridge",
+          "geometry": {
+            "type": "Polygon",
+            "coordinates": [
+              [
+                [
+                  -73.49331155517943,
+                  45.47114740803426
+                ],
+                [
+                  -73.4930668404792,
+                  45.47098373263784
+                ],
+                [
+                  -73.49283934714144,
+                  45.47079685914808
+                ],
+                [
+                  -73.49263126605136,
+                  45.47058858725884
+                ],
+                [
+                  -73.49244460114359,
+                  45.470360922742266
+                ],
+                [
+                  -73.49228115010324,
+                  45.470116058132106
+                ],
+                [
+                  -73.49214248705317,
+                  45.46985635160841
+                ],
+                [
+                  -73.49202994739439,
+                  45.46958430428698
+                ],
+                [
+                  -73.49194461494528,
+                  45.46930253613223
+                ],
+                [
+                  -73.49188731150402,
+                  45.469013760725524
+                ],
+                [
+                  -73.49185858893405,
+                  45.468720759131884
+                ],
+                [
+                  -73.49185872384942,
+                  45.46842635311683
+                ],
+                [
+                  -73.49188771495083,
+                  45.468133377971235
+                ],
+                [
+                  -73.49194528303812,
+                  45.467844655205894
+                ],
+                [
+                  -73.49203087369915,
+                  45.467562965378875
+                ],
+                [
+                  -73.49214366264904,
+                  45.4672910213172
+                ],
+                [
+                  -73.49228256366858,
+                  45.46703144199084
+                ],
+                [
+                  -73.50257247877714,
+                  45.449881583476596
+                ],
+                [
+                  -73.50273615417356,
+                  45.449636868776366
+                ],
+                [
+                  -73.50292302766331,
+                  45.449409375438606
+                ],
+                [
+                  -73.50313129955256,
+                  45.44920129434852
+                ],
+                [
+                  -73.50335896406914,
+                  45.44901462944075
+                ],
+                [
+                  -73.50360382867929,
+                  45.448851178400396
+                ],
+                [
+                  -73.50386353520298,
+                  45.44871251535034
+                ],
+                [
+                  -73.50413558252443,
+                  45.44859997569154
+                ],
+                [
+                  -73.50441735067918,
+                  45.44851464324244
+                ],
+                [
+                  -73.50470612608588,
+                  45.44845733980117
+                ],
+                [
+                  -73.50499912767953,
+                  45.4484286172312
+                ],
+                [
+                  -73.50529353369457,
+                  45.448428752146576
+                ],
+                [
+                  -73.50558650884017,
+                  45.44845774324799
+                ],
+                [
+                  -73.50587523160551,
+                  45.448515311335285
+                ],
+                [
+                  -73.50615692143253,
+                  45.44860090199631
+                ],
+                [
+                  -73.5064288654942,
+                  45.44871369094621
+                ],
+                [
+                  -73.50668844482057,
+                  45.44885259196574
+                ],
+                [
+                  -73.55668844482057,
+                  45.47885259196574
+                ],
+                [
+                  -73.5569331595208,
+                  45.47901626736216
+                ],
+                [
+                  -73.55716065285856,
+                  45.47920314085192
+                ],
+                [
+                  -73.55736873394864,
+                  45.479411412741165
+                ],
+                [
+                  -73.55755539885641,
+                  45.47963907725774
+                ],
+                [
+                  -73.55771884989676,
+                  45.4798839418679
+                ],
+                [
+                  -73.55785751294682,
+                  45.48014364839159
+                ],
+                [
+                  -73.55797005260561,
+                  45.48041569571302
+                ],
+                [
+                  -73.55805538505471,
+                  45.48069746386777
+                ],
+                [
+                  -73.55811268849598,
+                  45.48098623927448
+                ],
+                [
+                  -73.55814141106595,
+                  45.48127924086812
+                ],
+                [
+                  -73.55814127615058,
+                  45.48157364688317
+                ],
+                [
+                  -73.55811228504916,
+                  45.48186662202877
+                ],
+                [
+                  -73.55805471696188,
+                  45.48215534479411
+                ],
+                [
+                  -73.55796912630085,
+                  45.48243703462113
+                ],
+                [
+                  -73.55785633735096,
+                  45.4827089786828
+                ],
+                [
+                  -73.55771743633142,
+                  45.48296855800916
+                ],
+                [
+                  -73.54742752122286,
+                  45.50011841652341
+                ],
+                [
+                  -73.54726384582644,
+                  45.50036313122364
+                ],
+                [
+                  -73.54707697233668,
+                  45.5005906245614
+                ],
+                [
+                  -73.54686870044743,
+                  45.50079870565148
+                ],
+                [
+                  -73.54664103593086,
+                  45.500985370559256
+                ],
+                [
+                  -73.54639617132071,
+                  45.50114882159961
+                ],
+                [
+                  -73.54613646479702,
+                  45.501287484649666
+                ],
+                [
+                  -73.54586441747557,
+                  45.50140002430846
+                ],
+                [
+                  -73.54558264932082,
+                  45.50148535675756
+                ],
+                [
+                  -73.54529387391412,
+                  45.50154266019883
+                ],
+                [
+                  -73.54500087232047,
+                  45.5015713827688
+                ],
+                [
+                  -73.54470646630543,
+                  45.50157124785343
+                ],
+                [
+                  -73.54441349115983,
+                  45.50154225675201
+                ],
+                [
+                  -73.54412476839448,
+                  45.50148468866472
+                ],
+                [
+                  -73.54384307856746,
+                  45.501399098003695
+                ],
+                [
+                  -73.5435711345058,
+                  45.501286309053796
+                ],
+                [
+                  -73.54331155517943,
+                  45.501147408034264
+                ],
+                [
+                  -73.49331155517943,
+                  45.47114740803426
+                ]
+              ]
+            ]
+          }
+        }
+      ],
+      "country_profiles": {
+        "Canada": "north_america",
+        "United States": "north_america"
+      }
+    },
+    {
+      "number": 62,
+      "name": "Querétaro–Monterrey",
+      "from_city": "santiago_de_queretaro",
+      "to_city": "monterrey",
+      "basis": "Open the northern branch via the San Luis Potosí and Saltillo axis. Screen this long corridor for a possible later split. [SICT northern passenger rail program](https://www.gob.mx/sict/prensa/atendera-tren-del-norte-a-70-mil-pasajeros-diarios-sict)",
+      "source_urls": [
+        "https://www.gob.mx/sict/prensa/atendera-tren-del-norte-a-70-mil-pasajeros-diarios-sict"
+      ],
+      "id": "launch_62_santiago_de_queretaro__monterrey",
+      "profile": "other_latin_america",
+      "months": 60,
+      "hill_percent": 20,
+      "viaduct_percent": 15,
+      "tunnel_percent": 20,
+      "via": [
+        [
+          -100.98,
+          22.16
+        ],
+        [
+          -100.99,
+          25.43
+        ]
+      ],
+      "barrier": "Mexican plateau and Sierra Madre approaches",
+      "kind": "new_line"
+    },
+    {
+      "number": 63,
+      "name": "Lima–Ica",
+      "from_city": "lima",
+      "to_city": "ica",
+      "basis": "Peruvian coastal opening. The actual proposal includes passenger and freight operations, which informs a faster game variant. [Peru Ministry of Transport and Communications](https://www.gob.pe/institucion/mtc/noticias/1051301-ministro-de-transportes-y-comunicaciones-presento-el-proyecto-del-ferrocarril-lima-ica-ante-representantes-internacionales/)",
+      "source_urls": [
+        "https://www.gob.pe/institucion/mtc/noticias/1051301-ministro-de-transportes-y-comunicaciones-presento-el-proyecto-del-ferrocarril-lima-ica-ante-representantes-internacionales/"
+      ],
+      "id": "launch_63_lima__ica",
+      "profile": "other_latin_america",
+      "months": 48,
+      "hill_percent": 15,
+      "viaduct_percent": 15,
+      "tunnel_percent": 10,
+      "via": [
+        [
+          -76.8,
+          -12.27
+        ],
+        [
+          -76.37,
+          -13.08
+        ],
+        [
+          -76.13,
+          -13.47
+        ],
+        [
+          -75.97,
+          -13.71
+        ]
+      ],
+      "barrier": "Peruvian coastal desert; avoid Pacific shoreline",
+      "kind": "new_line"
+    },
+    {
+      "number": 64,
+      "name": "Bogotá–Medellín",
+      "from_city": "bogota",
+      "to_city": "medellin",
+      "basis": "Game concept. Use an Andes crossing to test where a direct tunnel and a longer valley route create materially different tradeoffs. Author only if a complete credible route passes review.",
+      "source_urls": [],
+      "id": "launch_64_bogota__medellin",
+      "profile": "other_latin_america",
+      "months": 84,
+      "hill_percent": 35,
+      "viaduct_percent": 20,
+      "tunnel_percent": 30,
+      "via": [
+        [
+          -74.89,
+          5.2
+        ],
+        [
+          -74.42,
+          6.48
+        ],
+        [
+          -75.22,
+          6.22
+        ]
+      ],
+      "barrier": "Magdalena valley detour and Antioquia tunnels",
+      "kind": "new_line",
+      "hill_factor_percent": 400
+    },
+    {
+      "number": 65,
+      "name": "Dax–San Sebastián",
+      "from_city": "dax",
+      "to_city": "donostia_san_sebastian",
+      "basis": "Basque connector from the Bordeaux–Dax branch. Review the French and Spanish gaps and carry over any operational starter track. [SNCF Réseau southwestern project](https://www.sncf-reseau.com/fr/lignes-nouvelles-en-occitanie)",
+      "source_urls": [
+        "https://www.sncf-reseau.com/fr/lignes-nouvelles-en-occitanie"
+      ],
+      "id": "launch_65_dax__donostia_san_sebastian",
+      "profile": "france_benelux",
+      "months": 54,
+      "hill_percent": 20,
+      "viaduct_percent": 20,
+      "tunnel_percent": 15,
+      "via": [
+        [
+          -1.23,
+          43.68
+        ],
+        [
+          -1.48,
+          43.5
+        ],
+        [
+          -1.69,
+          43.34
+        ]
+      ],
+      "barrier": "Basque foothills and cross-border approaches",
+      "kind": "new_line",
+      "country_profiles": {
+        "France": "france_benelux",
+        "Spain": "iberia"
+      }
+    },
+    {
+      "number": 66,
+      "name": "Lyon–Turin",
+      "from_city": "lyon",
+      "to_city": "turin",
+      "basis": "Alpine crossing. The base tunnel and the approaches need distinct scopes and costs. [TELT](https://www.telt.eu/fr/projet/comprendre-le-lyon-turin)",
+      "source_urls": [
+        "https://www.telt.eu/fr/projet/comprendre-le-lyon-turin"
+      ],
+      "id": "launch_66_lyon__turin",
+      "profile": "france_benelux",
+      "months": 84,
+      "hill_percent": 15,
+      "viaduct_percent": 15,
+      "tunnel_percent": 45,
+      "via": [
+        [
+          5.92,
+          45.57
+        ],
+        [
+          6.35,
+          45.28
+        ],
+        [
+          6.65,
+          45.2
+        ],
+        [
+          7.05,
+          45.14
+        ],
+        [
+          7.15,
+          45.14
+        ]
+      ],
+      "barrier": "Alpine base tunnel and national approaches",
+      "kind": "new_line",
+      "tunnel_factor": 8,
+      "country_profiles": {
+        "France": "france_benelux",
+        "Italy": "central_europe"
+      }
+    },
+    {
+      "number": 67,
+      "name": "Nairobi–Kampala",
+      "from_city": "nairobi",
+      "to_city": "kampala",
+      "basis": "East African cross-border connector. Check the missing and upgrade works on the Malaba axis, then reconcile both countries' connections. [Uganda Ministry of Works and Transport](https://works.go.ug/sgr-corridor-gains-momentum-mombasa-malaba-link-a-move-towards-stronger-east-african-connectivity/)",
+      "source_urls": [
+        "https://works.go.ug/sgr-corridor-gains-momentum-mombasa-malaba-link-a-move-towards-stronger-east-african-connectivity/"
+      ],
+      "id": "launch_67_nairobi__kampala",
+      "profile": "east_africa",
+      "months": 72,
+      "hill_percent": 20,
+      "viaduct_percent": 20,
+      "tunnel_percent": 20,
+      "via": [
+        [
+          36.08,
+          -0.29
+        ],
+        [
+          35.27,
+          0.52
+        ],
+        [
+          34.28,
+          0.63
+        ],
+        [
+          33.25,
+          0.6
+        ],
+        [
+          33.18,
+          0.45
+        ],
+        [
+          33.16,
+          0.45
+        ],
+        [
+          32.95,
+          0.44
+        ]
+      ],
+      "barrier": "Rift Valley detour, Malaba border and Nile crossing",
+      "kind": "new_line",
+      "crossings": [
+        {
+          "name": "Jinja Nile rail bridge (game concept)",
+          "kind": "rail_bridge",
+          "geometry": {
+            "type": "Polygon",
+            "coordinates": [
+              [
+                [
+                  33.18,
+                  0.459
+                ],
+                [
+                  33.18088215426297,
+                  0.4589566625400498
+                ],
+                [
+                  33.181755812898146,
+                  0.45882706752362906
+                ],
+                [
+                  33.18261256209529,
+                  0.45861246302158987
+                ],
+                [
+                  33.18344415089128,
+                  0.4583149157926016
+                ],
+                [
+                  33.18424257063143,
+                  0.4579372913791352
+                ],
+                [
+                  33.18500013209717,
+                  0.45748322651072293
+                ],
+                [
+                  33.18570953955747,
+                  0.45695709408026464
+                ],
+                [
+                  33.18636396103068,
+                  0.45636396103067894
+                ],
+                [
+                  33.18695709408026,
+                  0.45570953955747284
+                ],
+                [
+                  33.18748322651072,
+                  0.45500013209717644
+                ],
+                [
+                  33.187937291379136,
+                  0.454242570631434
+                ],
+                [
+                  33.1883149157926,
+                  0.4534441508912858
+                ],
+                [
+                  33.18861246302159,
+                  0.45261256209529016
+                ],
+                [
+                  33.188827067523626,
+                  0.45175581289814515
+                ],
+                [
+                  33.18895666254005,
+                  0.4508821542629661
+                ],
+                [
+                  33.189,
+                  0.45
+                ],
+                [
+                  33.18895666254005,
+                  0.44911784573703395
+                ],
+                [
+                  33.188827067523626,
+                  0.4482441871018549
+                ],
+                [
+                  33.18861246302159,
+                  0.44738743790470986
+                ],
+                [
+                  33.1883149157926,
+                  0.4465558491087142
+                ],
+                [
+                  33.187937291379136,
+                  0.44575742936856605
+                ],
+                [
+                  33.18748322651072,
+                  0.4449998679028236
+                ],
+                [
+                  33.18695709408026,
+                  0.4442904604425272
+                ],
+                [
+                  33.18636396103068,
+                  0.4436360389693211
+                ],
+                [
+                  33.18570953955747,
+                  0.4430429059197354
+                ],
+                [
+                  33.18500013209717,
+                  0.4425167734892771
+                ],
+                [
+                  33.18424257063143,
+                  0.44206270862086483
+                ],
+                [
+                  33.18344415089128,
+                  0.44168508420739844
+                ],
+                [
+                  33.18261256209529,
+                  0.44138753697841016
+                ],
+                [
+                  33.181755812898146,
+                  0.44117293247637096
+                ],
+                [
+                  33.18088215426297,
+                  0.4410433374599502
+                ],
+                [
+                  33.18,
+                  0.441
+                ],
+                [
+                  33.16,
+                  0.441
+                ],
+                [
+                  33.15911784573703,
+                  0.4410433374599502
+                ],
+                [
+                  33.15824418710185,
+                  0.44117293247637096
+                ],
+                [
+                  33.15738743790471,
+                  0.44138753697841016
+                ],
+                [
+                  33.15655584910871,
+                  0.44168508420739844
+                ],
+                [
+                  33.15575742936856,
+                  0.44206270862086483
+                ],
+                [
+                  33.15499986790282,
+                  0.4425167734892771
+                ],
+                [
+                  33.154290460442525,
+                  0.4430429059197354
+                ],
+                [
+                  33.15363603896932,
+                  0.4436360389693211
+                ],
+                [
+                  33.15304290591973,
+                  0.4442904604425272
+                ],
+                [
+                  33.152516773489275,
+                  0.4449998679028236
+                ],
+                [
+                  33.15206270862086,
+                  0.44575742936856605
+                ],
+                [
+                  33.151685084207394,
+                  0.4465558491087142
+                ],
+                [
+                  33.151387536978405,
+                  0.44738743790470986
+                ],
+                [
+                  33.15117293247637,
+                  0.4482441871018549
+                ],
+                [
+                  33.151043337459946,
+                  0.44911784573703395
+                ],
+                [
+                  33.150999999999996,
+                  0.45
+                ],
+                [
+                  33.151043337459946,
+                  0.4508821542629661
+                ],
+                [
+                  33.15117293247637,
+                  0.45175581289814515
+                ],
+                [
+                  33.151387536978405,
+                  0.45261256209529016
+                ],
+                [
+                  33.151685084207394,
+                  0.4534441508912858
+                ],
+                [
+                  33.15206270862086,
+                  0.454242570631434
+                ],
+                [
+                  33.152516773489275,
+                  0.45500013209717644
+                ],
+                [
+                  33.15304290591973,
+                  0.45570953955747284
+                ],
+                [
+                  33.15363603896932,
+                  0.45636396103067894
+                ],
+                [
+                  33.154290460442525,
+                  0.45695709408026464
+                ],
+                [
+                  33.15499986790282,
+                  0.45748322651072293
+                ],
+                [
+                  33.15575742936856,
+                  0.4579372913791352
+                ],
+                [
+                  33.15655584910871,
+                  0.4583149157926016
+                ],
+                [
+                  33.15738743790471,
+                  0.45861246302158987
+                ],
+                [
+                  33.15824418710185,
+                  0.45882706752362906
+                ],
+                [
+                  33.15911784573703,
+                  0.4589566625400498
+                ],
+                [
+                  33.16,
+                  0.459
+                ],
+                [
+                  33.18,
+                  0.459
+                ]
+              ]
+            ]
+          }
+        }
+      ],
+      "country_profiles": {
+        "Kenya": "east_africa",
+        "Uganda": "east_africa"
+      }
+    },
+    {
+      "number": 68,
+      "name": "Lagos–Kinshasa",
+      "from_city": "lagos",
+      "to_city": "kinshasa",
+      "basis": "Game concept and coastline-detour acceptance case. Reserve it for late play. Require continuous overland geometry, qualified river crossings, and concessions across every traversed jurisdiction. [Construction design](DESIGN.md#building-a-corridor)",
+      "source_urls": [],
+      "id": "launch_68_lagos__kinshasa",
+      "profile": "west_central_africa",
+      "months": 108,
+      "hill_percent": 25,
+      "viaduct_percent": 12,
+      "tunnel_percent": 4,
+      "via": [
+        [
+          3.45,
+          6.7
+        ],
+        [
+          5.63,
+          6.33
+        ],
+        [
+          7.37,
+          5.89
+        ],
+        [
+          8.32,
+          5.01
+        ],
+        [
+          9.4,
+          4.65
+        ],
+        [
+          9.72,
+          4.1
+        ],
+        [
+          11.52,
+          3.87
+        ],
+        [
+          11.5,
+          2.9
+        ],
+        [
+          11.44,
+          2.38
+        ],
+        [
+          11.51,
+          2.08
+        ],
+        [
+          11.58,
+          1.6
+        ],
+        [
+          11.58,
+          0.39
+        ],
+        [
+          11.56,
+          -0.83
+        ],
+        [
+          12.71,
+          -2.08
+        ],
+        [
+          13.18,
+          -3.69
+        ],
+        [
+          15.28,
+          -4.26
+        ]
+      ],
+      "barrier": "Continuous overland detour around Gulf of Guinea; Congo bridge at Brazzaville–Kinshasa",
+      "kind": "new_line",
+      "hill_factor_percent": 150,
+      "crossings": [
+        {
+          "name": "Brazzaville–Kinshasa Congo rail bridge",
+          "kind": "rail_bridge",
+          "geometry": {
+            "type": "Polygon",
+            "coordinates": [
+              [
+                [
+                  15.317307431057536,
+                  -4.325055019697847
+                ],
+                [
+                  15.317374323193711,
+                  -4.325341725752924
+                ],
+                [
+                  15.317412791118334,
+                  -4.325633607815881
+                ],
+                [
+                  15.317422464364263,
+                  -4.325927854902891
+                ],
+                [
+                  15.317403249772848,
+                  -4.326221633253654
+                ],
+                [
+                  15.317355332391111,
+                  -4.326512113622058
+                ],
+                [
+                  15.31727917368963,
+                  -4.326796498523361
+                ],
+                [
+                  15.317175507118336,
+                  -4.327072049175504
+                ],
+                [
+                  15.317045331042978,
+                  -4.327336111875075
+                ],
+                [
+                  15.316889899130324,
+                  -4.327586143553926
+                ],
+                [
+                  15.316710708274659,
+                  -4.327819736270309
+                ],
+                [
+                  15.316509484181882,
+                  -4.328034640398669
+                ],
+                [
+                  15.316288164750004,
+                  -4.328228786294773
+                ],
+                [
+                  15.316048881406141,
+                  -4.328400304227508
+                ],
+                [
+                  15.3157939385797,
+                  -4.328547542385424
+                ],
+                [
+                  15.315525791509463,
+                  -4.32866908278457
+                ],
+                [
+                  15.315247022598305,
+                  -4.328763754924461
+                ],
+                [
+                  15.28640130416908,
+                  -4.3370053887613835
+                ],
+                [
+                  15.286114598114002,
+                  -4.33707228089756
+                ],
+                [
+                  15.285822716051047,
+                  -4.337110748822184
+                ],
+                [
+                  15.285528468964037,
+                  -4.337120422068112
+                ],
+                [
+                  15.285234690613274,
+                  -4.337101207476697
+                ],
+                [
+                  15.28494421024487,
+                  -4.337053290094959
+                ],
+                [
+                  15.284659825343567,
+                  -4.336977131393479
+                ],
+                [
+                  15.284384274691424,
+                  -4.336873464822184
+                ],
+                [
+                  15.284120211991853,
+                  -4.336743288746826
+                ],
+                [
+                  15.283870180313002,
+                  -4.336587856834171
+                ],
+                [
+                  15.28363658759662,
+                  -4.3364086659785075
+                ],
+                [
+                  15.283421683468259,
+                  -4.336207441885731
+                ],
+                [
+                  15.283227537572156,
+                  -4.3359861224538525
+                ],
+                [
+                  15.28305601963942,
+                  -4.33574683910999
+                ],
+                [
+                  15.282908781481503,
+                  -4.335491896283548
+                ],
+                [
+                  15.282787241082357,
+                  -4.335223749213313
+                ],
+                [
+                  15.282692568942466,
+                  -4.334944980302153
+                ],
+                [
+                  15.262692568942464,
+                  -4.264944980302153
+                ],
+                [
+                  15.26262567680629,
+                  -4.2646582742470756
+                ],
+                [
+                  15.262587208881666,
+                  -4.264366392184119
+                ],
+                [
+                  15.262577535635737,
+                  -4.264072145097109
+                ],
+                [
+                  15.262596750227152,
+                  -4.263778366746346
+                ],
+                [
+                  15.262644667608889,
+                  -4.263487886377942
+                ],
+                [
+                  15.26272082631037,
+                  -4.263203501476639
+                ],
+                [
+                  15.262824492881665,
+                  -4.262927950824496
+                ],
+                [
+                  15.262954668957022,
+                  -4.262663888124925
+                ],
+                [
+                  15.263110100869676,
+                  -4.262413856446074
+                ],
+                [
+                  15.263289291725341,
+                  -4.262180263729691
+                ],
+                [
+                  15.263490515818118,
+                  -4.261965359601331
+                ],
+                [
+                  15.263711835249996,
+                  -4.261771213705227
+                ],
+                [
+                  15.263951118593859,
+                  -4.2615996957724915
+                ],
+                [
+                  15.2642060614203,
+                  -4.261452457614576
+                ],
+                [
+                  15.264474208490537,
+                  -4.26133091721543
+                ],
+                [
+                  15.264752977401695,
+                  -4.261236245075539
+                ],
+                [
+                  15.29359869583092,
+                  -4.252994611238616
+                ],
+                [
+                  15.293885401885998,
+                  -4.2529277191024395
+                ],
+                [
+                  15.294177283948953,
+                  -4.252889251177816
+                ],
+                [
+                  15.294471531035963,
+                  -4.252879577931888
+                ],
+                [
+                  15.294765309386726,
+                  -4.252898792523303
+                ],
+                [
+                  15.29505578975513,
+                  -4.252946709905041
+                ],
+                [
+                  15.295340174656433,
+                  -4.253022868606521
+                ],
+                [
+                  15.295615725308576,
+                  -4.253126535177816
+                ],
+                [
+                  15.295879788008147,
+                  -4.253256711253174
+                ],
+                [
+                  15.296129819686998,
+                  -4.2534121431658285
+                ],
+                [
+                  15.29636341240338,
+                  -4.253591334021492
+                ],
+                [
+                  15.296578316531741,
+                  -4.253792558114269
+                ],
+                [
+                  15.296772462427844,
+                  -4.254013877546147
+                ],
+                [
+                  15.296943980360581,
+                  -4.25425316089001
+                ],
+                [
+                  15.297091218518498,
+                  -4.254508103716452
+                ],
+                [
+                  15.297212758917643,
+                  -4.254776250786687
+                ],
+                [
+                  15.297307431057535,
+                  -4.2550550196978465
+                ],
+                [
+                  15.317307431057536,
+                  -4.325055019697847
+                ]
+              ]
+            ]
+          }
+        }
+      ],
+      "country_profiles": {
+        "Nigeria": "west_central_africa",
+        "Cameroon": "west_central_africa",
+        "Gabon": "west_central_africa",
+        "Republic of the Congo": "west_central_africa",
+        "Democratic Republic of the Congo": "west_central_africa"
+      }
+    },
+    {
+      "number": 69,
+      "name": "Jaipur–Ahmedabad",
+      "from_city": "jaipur",
+      "to_city": "ahmedabad",
+      "basis": "Connect the Delhi–Jaipur and Ahmedabad–Surat packages for a through Delhi–Mumbai service. The game split follows the wider Delhi–Ahmedabad study. [India Press Information Bureau](https://www.pib.gov.in/PressReleaseIframePage.aspx?PRID=1885431&lang=2&reg=48)",
+      "source_urls": [
+        "https://www.pib.gov.in/PressReleaseIframePage.aspx?PRID=1885431&lang=2&reg=48"
+      ],
+      "id": "launch_69_jaipur__ahmedabad",
+      "profile": "india",
+      "months": 54,
+      "hill_percent": 15,
+      "viaduct_percent": 20,
+      "tunnel_percent": 10,
+      "via": [
+        [
+          73.88,
+          24.58
+        ],
+        [
+          72.44,
+          23.6
+        ]
+      ],
+      "barrier": "Aravalli crossing",
+      "kind": "new_line"
+    },
+    {
+      "number": 70,
+      "name": "Kuala Lumpur–Singapore",
+      "from_city": "kuala_lumpur",
+      "to_city": "singapore",
+      "basis": "Cross-border line with a required strait crossing and concessions. Use the published concept inquiry as a lead. [MyHSR Corporation](https://www.myhsr.com.my/tenders/kl-sg-hsr-project)",
+      "source_urls": [
+        "https://www.myhsr.com.my/tenders/kl-sg-hsr-project"
+      ],
+      "id": "launch_70_kuala_lumpur__singapore",
+      "profile": "southeast_asia",
+      "months": 60,
+      "hill_percent": 10,
+      "viaduct_percent": 30,
+      "tunnel_percent": 8,
+      "via": [
+        [
+          101.94,
+          2.73
+        ],
+        [
+          102.25,
+          2.32
+        ],
+        [
+          102.95,
+          1.85
+        ],
+        [
+          103.35,
+          1.65
+        ],
+        [
+          103.55,
+          1.5
+        ],
+        [
+          103.615,
+          1.375
+        ],
+        [
+          103.65,
+          1.34
+        ],
+        [
+          103.72,
+          1.32
+        ]
+      ],
+      "barrier": "Johor Strait rail bridge, game concept near the Tuas crossing",
+      "kind": "new_line",
+      "crossings": [
+        {
+          "name": "Johor Strait rail bridge (game concept)",
+          "kind": "rail_bridge",
+          "geometry": {
+            "type": "Polygon",
+            "coordinates": [
+              [
+                [
+                  103.65777817459306,
+                  1.3477781745930533
+                ],
+                [
+                  103.65797588560959,
+                  1.347560034101983
+                ],
+                [
+                  103.65815126308641,
+                  1.347323564948551
+                ],
+                [
+                  103.65830261804254,
+                  1.3470710444599705
+                ],
+                [
+                  103.65842849284704,
+                  1.346804904546588
+                ],
+                [
+                  103.65852767525669,
+                  1.3465277082812561
+                ],
+                [
+                  103.65859921009071,
+                  1.3462421252155414
+                ],
+                [
+                  103.65864240842951,
+                  1.345950905670482
+                ],
+                [
+                  103.6586568542495,
+                  1.3456568542494933
+                ],
+                [
+                  103.65864240842951,
+                  1.3453628028285047
+                ],
+                [
+                  103.65859921009071,
+                  1.3450715832834452
+                ],
+                [
+                  103.65852767525669,
+                  1.3447860002177305
+                ],
+                [
+                  103.65842849284704,
+                  1.3445088039523987
+                ],
+                [
+                  103.65830261804254,
+                  1.3442426640390162
+                ],
+                [
+                  103.65815126308641,
+                  1.3439901435504356
+                ],
+                [
+                  103.65797588560959,
+                  1.3437536743970036
+                ],
+                [
+                  103.65777817459306,
+                  1.3435355339059334
+                ],
+                [
+                  103.64646446609407,
+                  1.332221825406947
+                ],
+                [
+                  103.646246325603,
+                  1.3320241143904195
+                ],
+                [
+                  103.64600985644957,
+                  1.3318487369135998
+                ],
+                [
+                  103.645757335961,
+                  1.3316973819574622
+                ],
+                [
+                  103.6454911960476,
+                  1.3315715071529732
+                ],
+                [
+                  103.64521399978227,
+                  1.3314723247433105
+                ],
+                [
+                  103.64492841671657,
+                  1.3314007899092972
+                ],
+                [
+                  103.6446371971715,
+                  1.3313575915704903
+                ],
+                [
+                  103.64434314575051,
+                  1.331343145750507
+                ],
+                [
+                  103.64404909432952,
+                  1.3313575915704903
+                ],
+                [
+                  103.64375787478446,
+                  1.3314007899092972
+                ],
+                [
+                  103.64347229171875,
+                  1.3314723247433105
+                ],
+                [
+                  103.64319509545342,
+                  1.3315715071529732
+                ],
+                [
+                  103.64292895554003,
+                  1.3316973819574622
+                ],
+                [
+                  103.64267643505146,
+                  1.3318487369135998
+                ],
+                [
+                  103.64243996589802,
+                  1.3320241143904195
+                ],
+                [
+                  103.64222182540695,
+                  1.332221825406947
+                ],
+                [
+                  103.60722182540694,
+                  1.3672218254069468
+                ],
+                [
+                  103.60702411439041,
+                  1.367439965898017
+                ],
+                [
+                  103.60684873691359,
+                  1.367676435051449
+                ],
+                [
+                  103.60669738195746,
+                  1.3679289555400296
+                ],
+                [
+                  103.60657150715296,
+                  1.3681950954534121
+                ],
+                [
+                  103.60647232474331,
+                  1.368472291718744
+                ],
+                [
+                  103.60640078990929,
+                  1.3687578747844587
+                ],
+                [
+                  103.60635759157049,
+                  1.3690490943295182
+                ],
+                [
+                  103.6063431457505,
+                  1.3693431457505068
+                ],
+                [
+                  103.60635759157049,
+                  1.3696371971714953
+                ],
+                [
+                  103.60640078990929,
+                  1.3699284167165549
+                ],
+                [
+                  103.60647232474331,
+                  1.3702139997822695
+                ],
+                [
+                  103.60657150715296,
+                  1.3704911960476014
+                ],
+                [
+                  103.60669738195746,
+                  1.370757335960984
+                ],
+                [
+                  103.60684873691359,
+                  1.3710098564495645
+                ],
+                [
+                  103.60702411439041,
+                  1.3712463256029965
+                ],
+                [
+                  103.60722182540694,
+                  1.3714644660940667
+                ],
+                [
+                  103.61853553390593,
+                  1.3827781745930532
+                ],
+                [
+                  103.618753674397,
+                  1.3829758856095806
+                ],
+                [
+                  103.61899014355043,
+                  1.3831512630864002
+                ],
+                [
+                  103.619242664039,
+                  1.3833026180425378
+                ],
+                [
+                  103.6195088039524,
+                  1.3834284928470268
+                ],
+                [
+                  103.61978600021773,
+                  1.3835276752566896
+                ],
+                [
+                  103.62007158328343,
+                  1.3835992100907029
+                ],
+                [
+                  103.6203628028285,
+                  1.3836424084295098
+                ],
+                [
+                  103.62065685424949,
+                  1.3836568542494931
+                ],
+                [
+                  103.62095090567048,
+                  1.3836424084295098
+                ],
+                [
+                  103.62124212521555,
+                  1.3835992100907029
+                ],
+                [
+                  103.62152770828125,
+                  1.3835276752566896
+                ],
+                [
+                  103.62180490454658,
+                  1.3834284928470268
+                ],
+                [
+                  103.62207104445997,
+                  1.3833026180425378
+                ],
+                [
+                  103.62232356494854,
+                  1.3831512630864002
+                ],
+                [
+                  103.62256003410198,
+                  1.3829758856095806
+                ],
+                [
+                  103.62277817459305,
+                  1.3827781745930532
+                ],
+                [
+                  103.65777817459306,
+                  1.3477781745930533
+                ]
+              ]
+            ]
+          }
+        }
+      ],
+      "country_profiles": {
+        "Malaysia": "southeast_asia",
+        "Singapore": "southeast_asia"
+      }
+    },
+    {
+      "number": 71,
+      "name": "Houston–Austin",
+      "from_city": "houston",
+      "to_city": "austin",
+      "basis": "Concept. Westward Texas connection, enabling Houston–Austin–San Antonio through-running and an alternative to Dallas.",
+      "source_urls": [],
+      "id": "launch_71_houston__austin",
+      "profile": "north_america",
+      "months": 36,
+      "hill_percent": 10,
+      "viaduct_percent": 15,
+      "tunnel_percent": 0,
+      "via": [
+        [
+          -96.17,
+          29.97
+        ],
+        [
+          -96.6,
+          30.15
+        ]
+      ],
+      "barrier": "Brazos and Colorado river works, Texas floodplains and Austin approach",
+      "kind": "new_line"
+    },
+    {
+      "number": 72,
+      "name": "Tsuruga–Maibara",
+      "from_city": "tsuruga",
+      "to_city": "maibara",
+      "id": "launch_72_tsuruga__maibara",
+      "profile": "japan",
+      "months": 48,
+      "hill_percent": 20,
+      "viaduct_percent": 20,
+      "tunnel_percent": 30,
+      "via": [
+        [
+          136.12,
+          35.57
+        ],
+        [
+          136.16,
+          35.48
+        ],
+        [
+          136.24,
+          35.39
+        ]
+      ],
+      "barrier": "Historical Maibara alternative: mountain approaches, new HSR and Tokaido junction capacity; existing conventional railway is not purchased",
+      "basis": "Game alternative based on a historically studied route, not the currently selected Hokuriku extension. Includes HSR junction/capacity works at Maibara; the strategic train family abstracts interoperability.",
+      "source_urls": [
+        "https://www.city.maibara.lg.jp/material/files/group/5/97252097.pdf"
+      ],
+      "kind": "new_line"
+    },
+    {
+      "number": 73,
+      "name": "Valencia–Camp de Tarragona",
+      "from_city": "valencia",
+      "to_city": "camp_de_tarragona",
+      "id": "launch_73_valencia__camp_de_tarragona",
+      "profile": "iberia",
+      "months": 54,
+      "hill_percent": 15,
+      "viaduct_percent": 15,
+      "tunnel_percent": 10,
+      "via": [
+        [
+          -0.27,
+          39.65
+        ],
+        [
+          -0.08,
+          39.98
+        ],
+        [
+          0.28,
+          40.43
+        ],
+        [
+          0.56,
+          40.72
+        ],
+        [
+          0.78,
+          41.1
+        ]
+      ],
+      "barrier": "New dedicated HSR/upgrade package toward Barcelona; existing Camp de Tarragona–Barcelona HSR is reused, not charged again",
+      "basis": "Game dedicated-HSR completion alternative inspired by Mediterranean corridor upgrades. Only the Valencia–Camp de Tarragona works are priced; existing conventional track and Tarragona–Barcelona HSR are not new construction. Authored terrain shares, not a surveyed project or procurement estimate.",
+      "source_urls": [
+        "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/transportes-movilidad-sostenible/Paginas/2025/070225-puente-alta-velocidad-valencia.aspx"
+      ],
+      "kind": "dedicated_hsr"
+    },
+    {
+      "number": 74,
+      "name": "Porto–Vigo",
+      "from_city": "porto",
+      "to_city": "stop_node_12819737430",
+      "id": "launch_74_porto__vigo",
+      "profile": "iberia",
+      "months": 54,
+      "hill_percent": 20,
+      "viaduct_percent": 20,
+      "tunnel_percent": 20,
+      "via": [
+        [
+          -8.61,
+          41.28
+        ],
+        [
+          -8.43,
+          41.55
+        ],
+        [
+          -8.58,
+          41.77
+        ],
+        [
+          -8.65,
+          42.01
+        ]
+      ],
+      "barrier": "Minho crossing, hilly approaches and cross-border interface; enables Portugal–Galicia through services",
+      "basis": "Planned Porto–Vigo high-speed corridor, with an official 50-minute end-to-end target. Regional engineering quantities and duration are strategic game estimates. The common game train family abstracts gauge/electrification interfaces with existing Portuguese/Galician services.",
+      "source_urls": [
+        "https://www.infraestruturasdeportugal.pt/pt-pt/rede-de-alta-velocidade"
+      ],
+      "kind": "new_line",
+      "minutes": 50
+    }
+  ],
+  "terminals": [
+    {
+      "id": "mombasa",
+      "station_name": "Mombasa / Miritini (planned HSR terminal)",
+      "station_lon": 39.5875,
+      "station_lat": -3.998
+    },
+    {
+      "id": "quebec",
+      "station_name": "Québec City (authored inland HSR terminal)",
+      "station_lon": -71.22064170617934,
+      "station_lat": 46.82320848626552
+    },
+    {
+      "id": "casablanca",
+      "station_name": "Casa Voyageurs (planned HSR connection)",
+      "station_lat": 33.59036,
+      "station_lon": -7.58967
+    }
+  ],
+  "services": [
+    {
+      "id": "connector_kanazawa__osaka_via_maibara",
+      "cities": [
+        "kanazawa",
+        "tsuruga",
+        "maibara",
+        "kyoto",
+        "osaka"
+      ]
+    },
+    {
+      "id": "connector_kanazawa__nagoya_via_maibara",
+      "cities": [
+        "kanazawa",
+        "tsuruga",
+        "maibara",
+        "nagoya"
+      ]
+    },
+    {
+      "id": "connector_valencia__barcelona",
+      "cities": [
+        "valencia",
+        "camp_de_tarragona",
+        "barcelona"
+      ]
+    },
+    {
+      "id": "connector_valencia__perpignan",
+      "cities": [
+        "valencia",
+        "camp_de_tarragona",
+        "barcelona",
+        "figueres",
+        "perpignan"
+      ]
+    },
+    {
+      "id": "connector_lisbon__pontevedra",
+      "cities": [
+        "lisbon",
+        "porto",
+        "stop_node_12819737430",
+        "stop_node_453651815"
+      ]
+    }
+  ]
+}

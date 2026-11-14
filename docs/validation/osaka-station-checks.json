@@ -1,0 +1,32 @@
+{
+  "date": "2026-11-13T00:10:29.612Z",
+  "passed": true,
+  "wasm_sha256": "5e5ec14adaf977dd168708611c6d5b883d5e2c8e7fb4607a5e9e42fe79a48547",
+  "display_sha256": "833898f638293f2d5b9823a5961c59ef97fcc1de3dac15129f1aba8a08a9f60c",
+  "pixels": {
+    "onSource": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false
+    ],
+    "onOldApproach": false
+  },
+  "checks": [
+    "Osaka hub is at Shin-Osaka; original service and both construction approaches share the imported Kyoto approach and station endpoint",
+    "Actual Go-rendered legacy-service highlight follows the imported track; the old city-centre approach has no selected-route pixels",
+    "Read-only route selection/focus and reload preserve both campaign checkpoint and exact durable save bytes"
+  ],
+  "limitations": [
+    "Browser visual check and native build/unit tests; the running native game must be restarted to load the correction."
+  ]
+}

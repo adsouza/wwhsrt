@@ -1,16 +1,16 @@
 {
-  "date": "2026-11-12T03:24:38.264Z",
+  "date": "2026-11-12T13:46:31.560Z",
   "browser": "153.0.8010.12",
-  "wasm_sha256": "262c98c1fc9b633f0c096dedd2c3a5a55e7245665f712c022b19ba85ec0ec5b9",
+  "wasm_sha256": "a995dbf72d8fff62a445271be2ee5ae3c97db0880c48ae8ee0ba795b45cbc1a6",
   "checks": [
-    "Twelve cities, three operational public stations, named 400-seat train family and actual costs; contextual first-month action earns starter revenue; guidance dismissal/settings and fleet detail disclosure leave checkpoint unchanged; stationless/public city inspection",
+    "Twelve cities, three operational public stations, named 400-seat train family and actual costs; ordinary first-month control earns starter revenue; per-concept dismissal/settings and fleet detail disclosure leave checkpoint unchanged; stationless/public city inspection",
     "Substantial barrier and priced terrain alternatives reconcile; one full-gap loan funds a standalone project; both initially stationless endpoints receive timed station works; ordinary guidance leads through construction, opening, local fleet lease, applied service and positive revenue; every report reconciles on a Chinese phone layout",
     "Station/fleet/business state resumes identically; exported browser save opens headlessly; cached offline continuation works; accepted commands replay to an identical native-headless/WASM checkpoint"
   ],
   "limitations": [
     "Phone/touch/IME are emulated; physical phones and native assistive technology remain unqualified.",
-    "Direct services only; through-running and transfers are milestone 3."
+    "This check covers the earlier business flow under network-v3 rules; network-specific scenarios are in check-milestone3.cjs."
   ],
-  "checkpoint": "f954b9ecafda1af28abdf43079dff4d56f8bc387aa3c529498a614b4dc0ad6b9",
+  "checkpoint": "8b4d2a478b7fbcb19c8085bbb2dcc3b54a1b0c17c18644fc50bf1a23732aabbb",
   "result": "passed"
 }

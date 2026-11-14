@@ -13,7 +13,7 @@ protection under Title 17 U.S.C. within the United States. SRTM's source terms
 also state: copyright by the United States Government; no copyright claimed under
 Title 17 U.S.C. See the linked source terms for distribution outside the US.
 
-Lake Biwa outline and Japan shoreline: Natural Earth 1:10m lakes and countries,
+Lake Biwa outline and Japan/China/Taiwan shorelines: Natural Earth 1:10m lakes and countries,
 public domain. Other countries retain the prior 1:110m display geometry.
 https://www.naturalearthdata.com/about/terms-of-use/
 https://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-admin-0-countries/
@@ -25,3 +25,9 @@ Labels and small lake point symbols are approximate context, not surveyed locati
 Raster sources, SHA-256 identities, imagery-source headers and generation details
 are recorded in terrain.json and tools/prepare-terrain.py. Ordinary game builds
 and offline play use the checked-in derived assets without downloading terrain.
+
+
+Australia, South Africa and Chile display shorelines use Natural Earth 1:10m
+country geometry from the pinned mask in `data/construction/route-land.v1.json.gz`
+(public domain). They replace coarse country rings and are screened against the
+launch construction paths; metadata is in `world-land.metadata.json`.

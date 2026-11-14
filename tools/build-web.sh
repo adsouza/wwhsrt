@@ -5,7 +5,7 @@ GOMEMLIMIT=768MiB GOMAXPROCS=2 GOOS=js GOARCH=wasm go build -p 1 -trimpath -o we
 cp "$(go env GOROOT)/lib/wasm/wasm_exec.js" web/wasm_exec.js
 cp assets/fonts/rail-ui.ttf web/rail-ui.ttf
 cp assets/branding/favicon.svg web/favicon.svg
-cp assets/terrain/ATTRIBUTION.md web/terrain-credits.txt
+cat assets/terrain/ATTRIBUTION.md assets/scenario/NETWORK_ATTRIBUTION.md > web/terrain-credits.txt
 python3 - <<'PY'
 import hashlib,json,pathlib
 root=pathlib.Path('web')
