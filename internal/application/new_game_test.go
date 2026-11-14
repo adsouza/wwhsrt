@@ -33,7 +33,16 @@ func TestNewGameReplacesCampaignAtomicallyAndResumes(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if f.Month != (gameapi.Month{Year: 2029, Month: 1}) || f.MonthsResolved != 0 || f.Player.Name != "Sunrise Rail" || f.Player.Cash != 10_000_000_000 || f.Debt != 0 || len(f.Reports) != 0 || len(f.Projects) != 0 || len(f.IdleLines) != 0 || f.Pending != (gameapi.CashFlows{}) || len(f.Services) != 1 || len(f.Fleet) != 2 || f.Services[0] != (gameapi.Service{CorridorID: "tokyo-nagoya", Frequency: 6, Fare: 9000}) {
+	if f.Month != (gameapi.Month{Year: 2029, Month: 1}) || f.MonthsResolved != 0 || f.Player.Name != "Sunrise Rail" ||
+		f.Player.Cash != 10_000_000_000 ||
+		f.Debt != 0 ||
+		len(f.Reports) != 0 ||
+		len(f.Projects) != 0 ||
+		len(f.IdleLines) != 0 ||
+		f.Pending != (gameapi.CashFlows{}) ||
+		len(f.Services) != 1 ||
+		len(f.Fleet) != 2 ||
+		f.Services[0] != (gameapi.Service{CorridorID: "tokyo-nagoya", Frequency: 6, Fare: 9000}) {
 		t.Fatal("restart did not restore starting company", f)
 	}
 	if f.Revision != before.Revision+1 {
@@ -42,7 +51,10 @@ func TestNewGameReplacesCampaignAtomicallyAndResumes(t *testing.T) {
 	if _, err := g.Apply(reset); err == nil || err.Error() != "stale_revision" {
 		t.Fatal("duplicate restart accepted", err)
 	}
-	if _, err := g.Apply(gameapi.Command{Kind: gameapi.AdvanceMonth, Revision: 0}); err == nil || err.Error() != "stale_revision" {
+	if _, err := g.Apply(
+		gameapi.Command{Kind: gameapi.AdvanceMonth, Revision: 0},
+	); err == nil ||
+		err.Error() != "stale_revision" {
 		t.Fatal("old campaign command accepted", err)
 	}
 	if g.Snapshot().Checkpoint != f.Checkpoint {

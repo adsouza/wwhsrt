@@ -20,7 +20,14 @@ func TestServicePickingUsesOpenCommittedGeometryAndOverlaps(t *testing.T) {
 		x, y := c.Screen(mapview.Project(a.Lat, a.Lon)), c.Screen(mapview.Project(b.Lat, b.Lon))
 		return mapview.Point{X: (x.X + y.X) / 2, Y: (x.Y + y.Y) / 2}
 	}
-	if ids := PickServiceSections(c, f, mid(valley[0], valley[1])); !reflect.DeepEqual(ids, []string{"public", "overlap"}) {
+	if ids := PickServiceSections(
+		c,
+		f,
+		mid(valley[0], valley[1]),
+	); !reflect.DeepEqual(
+		ids,
+		[]string{"public", "overlap"},
+	) {
 		t.Fatal(ids)
 	}
 	if ids := PickServiceSections(c, f, mid(direct[0], direct[1])); len(ids) != 0 {

@@ -8,9 +8,40 @@ import (
 )
 
 func TestRegionalConstructionCostsAndInvalidIntervals(t *testing.T) {
-	row := gameapi.Corridor{ID: "new", FromCity: "a", ToCity: "b", DailyMarket: 500, OutsideCost: 1000, Alignments: []gameapi.Alignment{{ID: "new", KM: 4, Minutes: 5, Months: 12, SurfaceKM: 1, HillKM: 1, ViaductKM: 1, TunnelKM: 1, Path: []gameapi.GeoPoint{{}, {Lat: 1, Lon: 1}}}}}
+	row := gameapi.Corridor{
+		ID:          "new",
+		FromCity:    "a",
+		ToCity:      "b",
+		DailyMarket: 500,
+		OutsideCost: 1000,
+		Alignments: []gameapi.Alignment{
+			{
+				ID:        "new",
+				KM:        4,
+				Minutes:   5,
+				Months:    12,
+				SurfaceKM: 1,
+				HillKM:    1,
+				ViaductKM: 1,
+				TunnelKM:  1,
+				Path:      []gameapi.GeoPoint{{}, {Lat: 1, Lon: 1}},
+			},
+		},
+	}
 	for _, base := range []gameapi.Money{1_000_000_000, 3_000_000_000} {
-		row.Alignments[0].CostIntervals = []gameapi.ConstructionInterval{{Country: "Fixture", ProfileID: "regional", BasePerKM: base, SurfaceKM: 1, HillKM: 1, ViaductKM: 1, TunnelKM: 1, HillFactorPercent: 150, TunnelFactor: 5}}
+		row.Alignments[0].CostIntervals = []gameapi.ConstructionInterval{
+			{
+				Country:           "Fixture",
+				ProfileID:         "regional",
+				BasePerKM:         base,
+				SurfaceKM:         1,
+				HillKM:            1,
+				ViaductKM:         1,
+				TunnelKM:          1,
+				HillFactorPercent: 150,
+				TunnelFactor:      5,
+			},
+		}
 		c, e := NewCatalog([]gameapi.Corridor{row})
 		if e != nil {
 			t.Fatal(e)
@@ -58,14 +89,18 @@ func TestEveryLaunchProspectBuildsAndOpensAtItsBoundary(t *testing.T) {
 		w.company.Cash = 100_000_000_000_000 // Explicitly funded command/boundary fixture, not an earned campaign.
 		a := co.Alignments[0]
 		cash := w.company.Cash
-		w, e = w.Change(gameapi.Command{Kind: gameapi.BuildLine, CorridorID: co.ID, AlignmentID: a.ID, Revision: w.revision})
+		w, e = w.Change(
+			gameapi.Command{Kind: gameapi.BuildLine, CorridorID: co.ID, AlignmentID: a.ID, Revision: w.revision},
+		)
 		if e != nil {
 			t.Fatal(co.ID, e)
 		}
 		if w.company.Cash != cash-a.Cost+a.Grant || w.projects[0].Ready != a.Months {
 			t.Fatal("construction accounting", co.ID)
 		}
-		if _, e = w.Change(gameapi.Command{Kind: gameapi.BuildLine, CorridorID: co.ID, AlignmentID: a.ID, Revision: w.revision}); e == nil {
+		if _, e = w.Change(
+			gameapi.Command{Kind: gameapi.BuildLine, CorridorID: co.ID, AlignmentID: a.ID, Revision: w.revision},
+		); e == nil {
 			t.Fatal("duplicate construction", co.ID)
 		}
 		w.months = a.Months - 1
@@ -86,9 +121,24 @@ func TestEveryLaunchProspectBuildsAndOpensAtItsBoundary(t *testing.T) {
 
 func TestParallelConstructionRequiresAnExplicitDistinctProject(t *testing.T) {
 	a := gameapi.Alignment{ID: "a", KM: 10, Minutes: 5, SurfaceKM: 10, Path: []gameapi.GeoPoint{{}, {Lat: 1, Lon: 1}}}
-	public := gameapi.Corridor{ID: "public", FromCity: "a", ToCity: "b", Existing: true, DailyMarket: 1000, OutsideCost: 1000, Alignments: []gameapi.Alignment{a}}
+	public := gameapi.Corridor{
+		ID:          "public",
+		FromCity:    "a",
+		ToCity:      "b",
+		Existing:    true,
+		DailyMarket: 1000,
+		OutsideCost: 1000,
+		Alignments:  []gameapi.Alignment{a},
+	}
 	a.Months = 12
-	newLine := gameapi.Corridor{ID: "new", FromCity: "a", ToCity: "b", DailyMarket: 1000, OutsideCost: 1000, Alignments: []gameapi.Alignment{a}}
+	newLine := gameapi.Corridor{
+		ID:          "new",
+		FromCity:    "a",
+		ToCity:      "b",
+		DailyMarket: 1000,
+		OutsideCost: 1000,
+		Alignments:  []gameapi.Alignment{a},
+	}
 	if _, e := NewCatalog([]gameapi.Corridor{public, newLine}); e == nil {
 		t.Fatal("ordinary duplicate accepted")
 	}

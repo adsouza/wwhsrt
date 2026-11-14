@@ -20,7 +20,8 @@ func TestM2StationDeliveryAndIndependentOperation(t *testing.T) {
 	store := &memoryStore{}
 	g := openTest(t, store)
 	f := g.Snapshot()
-	if len(f.Stations) != 3 || f.TrainFamily.Seats != 400 || f.TrainFamily.LeaseMonthly != 40_000_000 || f.TrainFamily.ID != "swift-400" {
+	if len(f.Stations) != 3 || f.TrainFamily.Seats != 400 || f.TrainFamily.LeaseMonthly != 40_000_000 ||
+		f.TrainFamily.ID != "swift-400" {
 		t.Fatal("starter facilities/family missing", f.Stations, f.TrainFamily)
 	}
 	for _, id := range []gameapi.CityID{"tokyo", "nagoya", "osaka"} {
@@ -96,7 +97,12 @@ func TestM2EstimatesReconcileAndProjectionsAreIsolated(t *testing.T) {
 	g := openTest(t, nil)
 	f := g.Snapshot()
 	before := f.Checkpoint
-	want := map[string]gameapi.Money{"tsuruga-osaka/mountain": 1_981_611_000_000, "tsuruga-osaka/valley": 1_163_340_000_000, "hokkaido-extension/mountain": 2_303_565_000_000, "hokkaido-extension/valley": 1_643_235_000_000}
+	want := map[string]gameapi.Money{
+		"tsuruga-osaka/mountain":      1_981_611_000_000,
+		"tsuruga-osaka/valley":        1_163_340_000_000,
+		"hokkaido-extension/mountain": 2_303_565_000_000,
+		"hokkaido-extension/valley":   1_643_235_000_000,
+	}
 	for _, c := range f.Corridors {
 		for _, a := range c.Alignments {
 			e := a.Estimate
@@ -112,7 +118,8 @@ func TestM2EstimatesReconcileAndProjectionsAreIsolated(t *testing.T) {
 	f.TrainFamily.Seats = 1
 	f.Corridors[0].Alignments[0].Estimate.Management = 1
 	after := g.Snapshot()
-	if after.Checkpoint != before || after.Stations[0].Owner == "hacked" || after.TrainFamily.Seats != 400 || after.Corridors[0].Alignments[0].Estimate.Management != 0 {
+	if after.Checkpoint != before || after.Stations[0].Owner == "hacked" || after.TrainFamily.Seats != 400 ||
+		after.Corridors[0].Alignments[0].Estimate.Management != 0 {
 		t.Fatal("facilities/family/estimate projection aliases world")
 	}
 	forecast, err := g.Forecast(gameapi.ForecastRequest{CorridorID: "tokyo-nagoya", Frequency: 6, Fare: 9000})

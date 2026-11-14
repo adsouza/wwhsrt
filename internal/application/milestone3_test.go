@@ -14,20 +14,56 @@ func TestM3ExtendStarterThroughTokyoNagoyaOsaka(t *testing.T) {
 	before := g.Snapshot()
 	q := gameapi.ForecastRequest{CorridorID: "tokyo-osaka", Frequency: 6, Fare: 13800, ReplaceServiceID: "tokyo-nagoya"}
 	forecast, err := g.Forecast(q)
-	if err != nil || !forecast.Open || forecast.KM != 552 || forecast.Minutes != 156 || forecast.FleetNeeded != 3 || forecast.FleetAvailable != 2 || forecast.AdditionalLeases != 1 {
+	if err != nil || !forecast.Open || forecast.KM != 552 || forecast.Minutes != 156 || forecast.FleetNeeded != 3 ||
+		forecast.FleetAvailable != 2 ||
+		forecast.AdditionalLeases != 1 {
 		t.Fatal(forecast, err)
 	}
 	if g.Snapshot().Checkpoint != before.Checkpoint {
 		t.Fatal("extension preview mutated state")
 	}
-	rejected(t, g, gameapi.Command{Kind: gameapi.ExtendService, CorridorID: q.CorridorID, ReplaceServiceID: q.ReplaceServiceID, Frequency: q.Frequency, Fare: q.Fare}, "fleet_shortage")
+	rejected(
+		t,
+		g,
+		gameapi.Command{
+			Kind:             gameapi.ExtendService,
+			CorridorID:       q.CorridorID,
+			ReplaceServiceID: q.ReplaceServiceID,
+			Frequency:        q.Frequency,
+			Fare:             q.Fare,
+		},
+		"fleet_shortage",
+	)
 	store.fail = true
-	rejected(t, g, gameapi.Command{Kind: gameapi.ExtendService, CorridorID: q.CorridorID, ReplaceServiceID: q.ReplaceServiceID, Frequency: q.Frequency, Fare: q.Fare, LeaseCount: 1}, "storage_failed")
+	rejected(
+		t,
+		g,
+		gameapi.Command{
+			Kind:             gameapi.ExtendService,
+			CorridorID:       q.CorridorID,
+			ReplaceServiceID: q.ReplaceServiceID,
+			Frequency:        q.Frequency,
+			Fare:             q.Fare,
+			LeaseCount:       1,
+		},
+		"storage_failed",
+	)
 	if g.Snapshot().Checkpoint != before.Checkpoint {
 		t.Fatal("failed extension changed service/fleet")
 	}
 	store.fail = false
-	f := act(t, g, gameapi.Command{Kind: gameapi.ExtendService, CorridorID: q.CorridorID, ReplaceServiceID: q.ReplaceServiceID, Frequency: q.Frequency, Fare: q.Fare, LeaseCount: 1})
+	f := act(
+		t,
+		g,
+		gameapi.Command{
+			Kind:             gameapi.ExtendService,
+			CorridorID:       q.CorridorID,
+			ReplaceServiceID: q.ReplaceServiceID,
+			Frequency:        q.Frequency,
+			Fare:             q.Fare,
+			LeaseCount:       1,
+		},
+	)
 	if len(f.Fleet) != 3 || len(f.IdleLines) != 0 {
 		t.Fatal("starter fleet not transferred exactly once", f.Fleet, f.IdleLines)
 	}
@@ -39,7 +75,8 @@ func TestM3ExtendStarterThroughTokyoNagoyaOsaka(t *testing.T) {
 	f = act(t, g, gameapi.Command{Kind: gameapi.AdvanceMonth})
 	n := f.Network
 	r := f.Reports[0]
-	if n.Carried == 0 || r.Passengers != n.Carried || r.Revenue != n.Revenue || r.LeaseCosts != 120_000_000 || len(f.Day) != 12 {
+	if n.Carried == 0 || r.Passengers != n.Carried || r.Revenue != n.Revenue || r.LeaseCosts != 120_000_000 ||
+		len(f.Day) != 12 {
 		t.Fatal("network settlement/day missing", r)
 	}
 	if r.ClosingCash-before.Player.Cash-(714_132_000-315_425_800) != forecast.CompanyChange {
@@ -73,7 +110,9 @@ func TestM3LegacyV2MigrationPreservesHistoryAndFailureAtomicity(t *testing.T) {
 	s := &memoryStore{b: fixture}
 	g := openTest(t, s)
 	f := g.Snapshot()
-	if string(s.b) != string(fixture) || f.MonthsResolved != 2 || f.Reports[0].Revenue != 1_150_596_000 || len(f.Fleet) != 2 || f.Network.Available {
+	if string(s.b) != string(fixture) || f.MonthsResolved != 2 || f.Reports[0].Revenue != 1_150_596_000 ||
+		len(f.Fleet) != 2 ||
+		f.Network.Available {
 		t.Fatal("v2 history was rewritten")
 	}
 	s.fail = true
@@ -95,9 +134,31 @@ func TestM3LegacyV2MigrationPreservesHistoryAndFailureAtomicity(t *testing.T) {
 }
 func TestM3InvalidPathsCapacityAndReportTampering(t *testing.T) {
 	g := openTest(t, nil)
-	rejected(t, g, gameapi.Command{Kind: gameapi.SetService, CorridorID: "tokyo>osaka>tokyo", Frequency: 1, Fare: 9000}, "no_route")
-	rejected(t, g, gameapi.Command{Kind: gameapi.ExtendService, CorridorID: "tokyo-osaka-express", ReplaceServiceID: "tokyo-nagoya", Frequency: 6, Fare: 13800, LeaseCount: 1}, "invalid_extension")
-	rejected(t, g, gameapi.Command{Kind: gameapi.SetService, CorridorID: "tokyo-tsuruga", Frequency: 1, Fare: 9000}, "line_not_open")
+	rejected(
+		t,
+		g,
+		gameapi.Command{Kind: gameapi.SetService, CorridorID: "tokyo>osaka>tokyo", Frequency: 1, Fare: 9000},
+		"no_route",
+	)
+	rejected(
+		t,
+		g,
+		gameapi.Command{
+			Kind:             gameapi.ExtendService,
+			CorridorID:       "tokyo-osaka-express",
+			ReplaceServiceID: "tokyo-nagoya",
+			Frequency:        6,
+			Fare:             13800,
+			LeaseCount:       1,
+		},
+		"invalid_extension",
+	)
+	rejected(
+		t,
+		g,
+		gameapi.Command{Kind: gameapi.SetService, CorridorID: "tokyo-tsuruga", Frequency: 1, Fare: 9000},
+		"line_not_open",
+	)
 	act(t, g, gameapi.Command{Kind: gameapi.AdvanceMonth})
 	raw, _ := g.Export()
 	var env envelope

@@ -86,12 +86,23 @@ func TestShijiazhuangJinanSharedTrackDrawnOnceAndAllRoutesRemainPickable(t *test
 	}
 	camera := mapview.Fit(1200, 800, []mapview.Point{mapview.Project(36.7, 116.4), mapview.Project(37.5, 117.3)})
 	x, y := camera.Screen(a), camera.Screen(b)
-	hits := PickServiceSections(camera, gameapi.Frame{Corridors: raw.Corridors}, mapview.Point{X: (x.X + y.X) / 2, Y: (x.Y + y.Y) / 2})
+	hits := PickServiceSections(
+		camera,
+		gameapi.Frame{Corridors: raw.Corridors},
+		mapview.Point{X: (x.X + y.X) / 2, Y: (x.Y + y.Y) / 2},
+	)
 	seen := map[string]bool{}
 	for _, id := range hits {
 		seen[id] = true
 	}
-	for _, id := range []string{"public_jinan__shijiazhuang", "public_jinan__tianjin", "public_jinan__shangqiu", "public_jinan__zhengzhou", "public_beijing__shangqiu", "public_shijiazhuang__tianjin"} {
+	for _, id := range []string{
+		"public_jinan__shijiazhuang",
+		"public_jinan__tianjin",
+		"public_jinan__shangqiu",
+		"public_jinan__zhengzhou",
+		"public_beijing__shangqiu",
+		"public_shijiazhuang__tianjin",
+	} {
 		if !seen[id] {
 			t.Fatal("deduplicating drawn track hid a selectable route", id, hits)
 		}

@@ -33,7 +33,24 @@ func TestNativePublicNetworkSearchAndRegionRotation(t *testing.T) {
 		if locale == "zh-Hans" {
 			query = "北京 上海"
 		}
-		g := &Game{Port: port, Frame: port.Snapshot(), Map: m, width: 390, height: 844, Camera: mapview.New(390, 260), State: ui.State{Locale: locale, View: "services", Region: "china", ServiceCorridor: "route_beijing__shanghai", Frequency: 2, Fare: 16000, ServiceQuery: query, Disclosures: map[string]bool{"route-search": true}}}
+		g := &Game{
+			Port:   port,
+			Frame:  port.Snapshot(),
+			Map:    m,
+			width:  390,
+			height: 844,
+			Camera: mapview.New(390, 260),
+			State: ui.State{
+				Locale:          locale,
+				View:            "services",
+				Region:          "china",
+				ServiceCorridor: "route_beijing__shanghai",
+				Frequency:       2,
+				Fare:            16000,
+				ServiceQuery:    query,
+				Disclosures:     map[string]bool{"route-search": true},
+			},
+		}
 		g.host.build(g)
 		if g.host.routeSearch == nil || g.host.routeSearchField.Text() != query {
 			t.Fatal("no native editable route search")
@@ -73,10 +90,27 @@ func TestNativeExistingPublicConnectionOpensServicesWithoutConstruction(t *testi
 			t.Fatal("public line offered for construction")
 		}
 	}
-	for _, pair := range []struct{ from, to, id string }{{"beijing", "tianjin", "public_beijing__tianjin"}, {"chengdu", "chongqing", "public_chengdu__chongqing"}, {"chengdu", "xi_an", "public_chengdu__xi_an"}} {
+	for _, pair := range []struct{ from, to, id string }{
+		{"beijing", "tianjin", "public_beijing__tianjin"},
+		{"chengdu", "chongqing", "public_chengdu__chongqing"},
+		{"chengdu", "xi_an", "public_chengdu__xi_an"},
+	} {
 		for _, lang := range []string{"en", "zh-Hans"} {
 			for _, width := range []int{320, 1280} {
-				g := &Game{Port: port, Frame: f, Map: m, width: width, height: 844, State: ui.State{Locale: lang, View: "build", FromCity: gameapi.CityID(pair.from), ToCity: gameapi.CityID(pair.to), Disclosures: map[string]bool{"opportunities": true}}}
+				g := &Game{
+					Port:   port,
+					Frame:  f,
+					Map:    m,
+					width:  width,
+					height: 844,
+					State: ui.State{
+						Locale:      lang,
+						View:        "build",
+						FromCity:    gameapi.CityID(pair.from),
+						ToCity:      gameapi.CityID(pair.to),
+						Disclosures: map[string]bool{"opportunities": true},
+					},
+				}
 				g.host.layout(g)
 				g.host.build(g)
 				b := g.host.actions["plan-existing-service"]

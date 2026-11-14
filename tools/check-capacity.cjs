@@ -1,24 +1,173 @@
-const {control,language}=require('./ui-helpers.cjs');
+const { control, language } = require('./ui-helpers.cjs');
 // Reproduce the reported 4+4+4+1 private-section overload through real controls.
-const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
-const {execFileSync}=require('node:child_process'),{chromium}=require('playwright');
-const url=process.argv[2]||'http://127.0.0.1:8765/',out=path.resolve('docs/validation');
-const snap=p=>p.evaluate(()=>railSnapshot());
-async function command(p,id,trace,c){const rev=(await snap(p)).frame.revision;await (await control(p,'#'+id)).click();await p.waitForFunction(async r=>(await railSnapshot()).frame.revision===r+1,rev);await p.waitForFunction(()=>document.getElementById('game').getAttribute('aria-busy')==='false');trace.push(c);}
-(async()=>{const browser=await chromium.launch({headless:true,args:['--enable-unsafe-swiftshader']});const timer=setTimeout(()=>browser.close(),240000);const result={date:new Date().toISOString(),browser:browser.version(),wasm_sha256:crypto.createHash('sha256').update(fs.readFileSync('web/main.wasm')).digest('hex'),ui_sha256:crypto.createHash('sha256').update(Buffer.concat(['web/app.js','web/style.css','web/index.html'].map(f=>fs.readFileSync(f)))).digest('hex'),checks:[],limitations:['Phone/keyboard are emulated; native OS input and physical devices are not qualified.']};try{
- const ctx=await browser.newContext({viewport:{width:1280,height:900},reducedMotion:'reduce'}),p=await ctx.newPage(),trace=[],errors=[];p.on('pageerror',e=>errors.push(e.message));await p.goto(url);await p.waitForFunction(()=>!!window.railSnapshot,null,{timeout:60000});
- await (await control(p,'#tab-company')).click();await (await control(p,'#loan-amount')).fill('3,000,000,000');await command(p,'borrow',trace,{kind:'take_loan',amount:300000000000});await (await control(p,'#tab-build')).click();await (await control(p,'[data-corridor=tsuruga-osaka]')).click();await command(p,'build-line',trace,{kind:'build_line',corridor_id:'tsuruga-osaka',alignment_id:'mountain'});for(let i=0;i<3;i++)await command(p,'advance-year',trace,{kind:'advance_year'});
- await (await control(p,'#tab-services')).click();for(const id of ['tsuruga-osaka','nagoya-tsuruga-express','tokyo-tsuruga']){
-  await (await control(p,'#service-corridor')).selectOption(id);await (await control(p,'#fare')).fill('90');await p.waitForFunction(()=>document.querySelectorAll('#forecast-values>div').length>0);const needed=await p.locator('#fleet-count').evaluate(e=>Number(e.dataset.needed));
-  for(let i=0;i<needed;i++)await command(p,'lease-train',trace,{kind:'lease_train',corridor_id:id});await p.waitForFunction(()=>!document.getElementById('apply-service').disabled);await command(p,'apply-service',trace,{kind:'set_service',corridor_id:id,frequency:4,fare:9000});
- }
- const before=(await snap(p)).frame.checkpoint,bytes=await p.evaluate(()=>railStorageLoad());await (await control(p,'#service-corridor')).selectOption('tokyo-tsuruga-express');await (await control(p,'#frequency')).fill('1');await p.waitForFunction(()=>document.getElementById('capacity-values').textContent.includes('13 requested / 12 available'));
- assert.equal(await p.locator('#capacity-disclosure').evaluate(e=>e.open),false);assert(await p.locator('#capacity-values').isHidden());assert((await p.locator('#capacity-summary').innerText()).includes('13 requested / 12 available'));await (await control(p,'#capacity-values')).scrollIntoViewIfNeeded();const text=await p.locator('#capacity-values').innerText();for(const want of ['Tsuruga','Osaka','Nagoya','Tokyo','express','Other services already request','This draft','At most 0 daily return trips'])assert(text.includes(want),want+' missing');assert(await p.locator('#apply-service').isDisabled());assert.equal(await p.locator('#forecast-values>div').count(),0);assert((await p.locator('#status').innerText()).includes('draft is not applied'));assert.equal((await snap(p)).frame.checkpoint,before);assert.equal(await p.evaluate(()=>railStorageLoad()),bytes);assert.equal(await p.locator('.learning-cue:visible').count(),0);
- await p.locator('#service-capacity').evaluate(e=>{const box=document.getElementById('inspector'),boxTop=box.getBoundingClientRect().top;box.scrollTop+=e.getBoundingClientRect().top-boxTop-80;});await p.screenshot({path:path.join(out,'capacity-overload-desktop.png')});result.checks.push('A real 4+4+4+1 draft reports Tsuruga–Osaka 13/12, names every contributing service and the draft, shows the 12 other requests and a zero-frequency remaining allowance; stale revenue is cleared, Apply is disabled and no tutorial cue competes with the error; checkpoint/durable bytes stay unchanged');
- await p.setViewportSize({width:320,height:740});await language(p,'zh-Hans');await p.waitForFunction(()=>document.getElementById('capacity-values').textContent.includes('申请 13 / 可用 12'));assert(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));assert((await p.locator('#capacity-values').innerText()).includes('其他服务已申请'));await p.screenshot({path:path.join(out,'capacity-overload-phone-zh.png'),fullPage:true});
- await p.reload();await p.waitForFunction(()=>!!window.railSnapshot,null,{timeout:60000});await p.waitForFunction(()=>document.getElementById('capacity-values').textContent.includes('申请 13 / 可用 12'));assert.equal((await snap(p)).frame.checkpoint,before);result.checks.push('The rejected draft and named explanation survive reload and reflow at 320px in Simplified Chinese');
- await language(p,'en');await (await control(p,'#service-corridor')).selectOption('tsuruga-osaka');await (await control(p,'#frequency')).fill('3');await p.waitForFunction(()=>document.getElementById('capacity-values').textContent.includes('11 requested / 12 available'));await p.waitForFunction(()=>!document.getElementById('apply-service').disabled);await command(p,'apply-service',trace,{kind:'set_service',corridor_id:'tsuruga-osaka',frequency:3,fare:9000});
- await (await control(p,'#service-corridor')).selectOption('tokyo-tsuruga-express');await (await control(p,'#frequency')).fill('1');await p.waitForFunction(()=>document.getElementById('capacity-values').textContent.includes('12 requested / 12 available'));assert(!(await p.locator('#service-capacity').getAttribute('class')).includes('over-capacity'));await command(p,'lease-train',trace,{kind:'lease_train',corridor_id:'tokyo-tsuruga-express'});await p.waitForFunction(()=>!document.getElementById('apply-service').disabled);await command(p,'apply-service',trace,{kind:'set_service',corridor_id:'tokyo-tsuruga-express',frequency:1,fare:18925});assert.equal((await snap(p)).frame.services.find(s=>s.corridor_id==='tokyo-tsuruga-express').frequency,1);
- result.checks.push('Lowering an existing contributor from four to three frees exactly one daily return path; the formerly blocked draft becomes 12/12 and can be leased/applied, without double-counting the edited service');
- fs.writeFileSync('build/capacity-commands.json',JSON.stringify(trace));const native=JSON.parse(execFileSync(path.resolve('build/headless'),['-commands',path.resolve('build/capacity-commands.json')],{encoding:'utf8',maxBuffer:32*1024*1024,stdio:['ignore','pipe','pipe']}));assert.equal(native.checkpoint,(await snap(p)).frame.checkpoint);assert.deepEqual(errors,[]);result.checkpoint=native.checkpoint;result.checks.push('The accepted UI command trace replays to the identical native-headless/WASM checkpoint');result.passed=true;fs.writeFileSync(path.join(out,'capacity-checks.json'),JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify(result,null,2));await ctx.close();
-}finally{clearTimeout(timer);await browser.close();}})().catch(e=>{console.error(e);process.exitCode=1;});
+const assert = require('node:assert/strict'),
+  fs = require('node:fs'),
+  path = require('node:path'),
+  crypto = require('node:crypto');
+const { execFileSync } = require('node:child_process'),
+  { chromium } = require('playwright');
+const url = process.argv[2] || 'http://127.0.0.1:8765/',
+  out = path.resolve('docs/validation');
+const snap = (p) => p.evaluate(() => railSnapshot());
+async function command(p, id, trace, c) {
+  const rev = (await snap(p)).frame.revision;
+  await (await control(p, '#' + id)).click();
+  await p.waitForFunction(async (r) => (await railSnapshot()).frame.revision === r + 1, rev);
+  await p.waitForFunction(() => document.getElementById('game').getAttribute('aria-busy') === 'false');
+  trace.push(c);
+}
+(async () => {
+  const browser = await chromium.launch({ headless: true, args: ['--enable-unsafe-swiftshader'] });
+  const timer = setTimeout(() => browser.close(), 240000);
+  const result = {
+    date: new Date().toISOString(),
+    browser: browser.version(),
+    wasm_sha256: crypto.createHash('sha256').update(fs.readFileSync('web/main.wasm')).digest('hex'),
+    ui_sha256: crypto
+      .createHash('sha256')
+      .update(Buffer.concat(['web/app.js', 'web/style.css', 'web/index.html'].map((f) => fs.readFileSync(f))))
+      .digest('hex'),
+    checks: [],
+    limitations: ['Phone/keyboard are emulated; native OS input and physical devices are not qualified.'],
+  };
+  try {
+    const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, reducedMotion: 'reduce' }),
+      p = await ctx.newPage(),
+      trace = [],
+      errors = [];
+    p.on('pageerror', (e) => errors.push(e.message));
+    await p.goto(url);
+    await p.waitForFunction(() => !!window.railSnapshot, null, { timeout: 60000 });
+    await (await control(p, '#tab-company')).click();
+    await (await control(p, '#loan-amount')).fill('3,000,000,000');
+    await command(p, 'borrow', trace, { kind: 'take_loan', amount: 300000000000 });
+    await (await control(p, '#tab-build')).click();
+    await (await control(p, '[data-corridor=tsuruga-osaka]')).click();
+    await command(p, 'build-line', trace, {
+      kind: 'build_line',
+      corridor_id: 'tsuruga-osaka',
+      alignment_id: 'mountain',
+    });
+    for (let i = 0; i < 3; i++) await command(p, 'advance-year', trace, { kind: 'advance_year' });
+    await (await control(p, '#tab-services')).click();
+    for (const id of ['tsuruga-osaka', 'nagoya-tsuruga-express', 'tokyo-tsuruga']) {
+      await (await control(p, '#service-corridor')).selectOption(id);
+      await (await control(p, '#fare')).fill('90');
+      await p.waitForFunction(() => document.querySelectorAll('#forecast-values>div').length > 0);
+      const needed = await p.locator('#fleet-count').evaluate((e) => Number(e.dataset.needed));
+      for (let i = 0; i < needed; i++) await command(p, 'lease-train', trace, { kind: 'lease_train', corridor_id: id });
+      await p.waitForFunction(() => !document.getElementById('apply-service').disabled);
+      await command(p, 'apply-service', trace, { kind: 'set_service', corridor_id: id, frequency: 4, fare: 9000 });
+    }
+    const before = (await snap(p)).frame.checkpoint,
+      bytes = await p.evaluate(() => railStorageLoad());
+    await (await control(p, '#service-corridor')).selectOption('tokyo-tsuruga-express');
+    await (await control(p, '#frequency')).fill('1');
+    await p.waitForFunction(() =>
+      document.getElementById('capacity-values').textContent.includes('13 requested / 12 available'),
+    );
+    assert.equal(await p.locator('#capacity-disclosure').evaluate((e) => e.open), false);
+    assert(await p.locator('#capacity-values').isHidden());
+    assert((await p.locator('#capacity-summary').innerText()).includes('13 requested / 12 available'));
+    await (await control(p, '#capacity-values')).scrollIntoViewIfNeeded();
+    const text = await p.locator('#capacity-values').innerText();
+    for (const want of [
+      'Tsuruga',
+      'Osaka',
+      'Nagoya',
+      'Tokyo',
+      'express',
+      'Other services already request',
+      'This draft',
+      'At most 0 daily return trips',
+    ])
+      assert(text.includes(want), want + ' missing');
+    assert(await p.locator('#apply-service').isDisabled());
+    assert.equal(await p.locator('#forecast-values>div').count(), 0);
+    assert((await p.locator('#status').innerText()).includes('draft is not applied'));
+    assert.equal((await snap(p)).frame.checkpoint, before);
+    assert.equal(await p.evaluate(() => railStorageLoad()), bytes);
+    assert.equal(await p.locator('.learning-cue:visible').count(), 0);
+    await p.locator('#service-capacity').evaluate((e) => {
+      const box = document.getElementById('inspector'),
+        boxTop = box.getBoundingClientRect().top;
+      box.scrollTop += e.getBoundingClientRect().top - boxTop - 80;
+    });
+    await p.screenshot({ path: path.join(out, 'capacity-overload-desktop.png') });
+    result.checks.push(
+      'A real 4+4+4+1 draft reports Tsuruga–Osaka 13/12, ' +
+        'names every contributing service and the draft, ' +
+        'shows the 12 other requests and a zero-frequency remaining allowance; ' +
+        'stale revenue is cleared, Apply is disabled and no tutorial cue competes with the error; ' +
+        'checkpoint/durable bytes stay unchanged',
+    );
+    await p.setViewportSize({ width: 320, height: 740 });
+    await language(p, 'zh-Hans');
+    await p.waitForFunction(() => document.getElementById('capacity-values').textContent.includes('申请 13 / 可用 12'));
+    assert(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+    assert((await p.locator('#capacity-values').innerText()).includes('其他服务已申请'));
+    await p.screenshot({ path: path.join(out, 'capacity-overload-phone-zh.png'), fullPage: true });
+    await p.reload();
+    await p.waitForFunction(() => !!window.railSnapshot, null, { timeout: 60000 });
+    await p.waitForFunction(() => document.getElementById('capacity-values').textContent.includes('申请 13 / 可用 12'));
+    assert.equal((await snap(p)).frame.checkpoint, before);
+    result.checks.push(
+      'The rejected draft and named explanation survive reload and reflow at 320px in Simplified Chinese',
+    );
+    await language(p, 'en');
+    await (await control(p, '#service-corridor')).selectOption('tsuruga-osaka');
+    await (await control(p, '#frequency')).fill('3');
+    await p.waitForFunction(() =>
+      document.getElementById('capacity-values').textContent.includes('11 requested / 12 available'),
+    );
+    await p.waitForFunction(() => !document.getElementById('apply-service').disabled);
+    await command(p, 'apply-service', trace, {
+      kind: 'set_service',
+      corridor_id: 'tsuruga-osaka',
+      frequency: 3,
+      fare: 9000,
+    });
+    await (await control(p, '#service-corridor')).selectOption('tokyo-tsuruga-express');
+    await (await control(p, '#frequency')).fill('1');
+    await p.waitForFunction(() =>
+      document.getElementById('capacity-values').textContent.includes('12 requested / 12 available'),
+    );
+    assert(!(await p.locator('#service-capacity').getAttribute('class')).includes('over-capacity'));
+    await command(p, 'lease-train', trace, { kind: 'lease_train', corridor_id: 'tokyo-tsuruga-express' });
+    await p.waitForFunction(() => !document.getElementById('apply-service').disabled);
+    await command(p, 'apply-service', trace, {
+      kind: 'set_service',
+      corridor_id: 'tokyo-tsuruga-express',
+      frequency: 1,
+      fare: 18925,
+    });
+    assert.equal((await snap(p)).frame.services.find((s) => s.corridor_id === 'tokyo-tsuruga-express').frequency, 1);
+    result.checks.push(
+      'Lowering an existing contributor from four to three frees exactly one daily return path; ' +
+        'the formerly blocked draft becomes 12/12 and can be leased/applied, ' +
+        'without double-counting the edited service',
+    );
+    fs.writeFileSync('build/capacity-commands.json', JSON.stringify(trace));
+    const native = JSON.parse(
+      execFileSync(path.resolve('build/headless'), ['-commands', path.resolve('build/capacity-commands.json')], {
+        encoding: 'utf8',
+        maxBuffer: 32 * 1024 * 1024,
+        stdio: ['ignore', 'pipe', 'pipe'],
+      }),
+    );
+    assert.equal(native.checkpoint, (await snap(p)).frame.checkpoint);
+    assert.deepEqual(errors, []);
+    result.checkpoint = native.checkpoint;
+    result.checks.push('The accepted UI command trace replays to the identical native-headless/WASM checkpoint');
+    result.passed = true;
+    fs.writeFileSync(path.join(out, 'capacity-checks.json'), JSON.stringify(result, null, 2) + '\n');
+    console.log(JSON.stringify(result, null, 2));
+    await ctx.close();
+  } finally {
+    clearTimeout(timer);
+    await browser.close();
+  }
+})().catch((e) => {
+  console.error(e);
+  process.exitCode = 1;
+});

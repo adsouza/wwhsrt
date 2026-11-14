@@ -9,12 +9,19 @@ cat assets/terrain/ATTRIBUTION.md assets/scenario/NETWORK_ATTRIBUTION.md > web/t
 python3 - <<'PY'
 import hashlib,json,pathlib
 root=pathlib.Path('web')
-files=['index.html','map.html','app.js','style.css','wasm_exec.js','main.wasm','rail-ui.ttf','favicon.svg','terrain-credits.txt']
+files=['index.html','map.html','app.js','style.css','wasm_exec.js','main.wasm',
+       'rail-ui.ttf','favicon.svg','terrain-credits.txt']
 version=hashlib.sha256(b''.join((root/f).read_bytes() for f in files)).hexdigest()[:16]
 source="const CACHE='wwhsrt-m1-"+version+"';\nconst FILES="+json.dumps(['./']+files)+";\n"
 source+='''self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES))));
-self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('wwhsrt-m1-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
-self.addEventListener('fetch',e=>{if(e.request.method!=='GET'||new URL(e.request.url).origin!==self.location.origin)return;e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)));});
+self.addEventListener('activate',e=>e.waitUntil(
+  caches.keys()
+    .then(keys=>Promise.all(keys.filter(k=>k.startsWith('wwhsrt-m1-')&&k!==CACHE).map(k=>caches.delete(k))))
+    .then(()=>self.clients.claim())));
+self.addEventListener('fetch',e=>{
+  if(e.request.method!=='GET'||new URL(e.request.url).origin!==self.location.origin)return;
+  e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)));
+});
 '''
 (root/'sw.js').write_text(source)
 print('Built offline web bundle',version)

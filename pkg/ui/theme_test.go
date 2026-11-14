@@ -33,7 +33,20 @@ func TestThemeTextContrast(t *testing.T) {
 	}
 	for _, mode := range []string{"light", "dark"} {
 		p := PaletteFor(State{Appearance: mode})
-		pairs := map[string][2]color.NRGBA{"body": {p.Text, p.Background}, "panel": {p.Text, p.Surface}, "control": {p.Text, p.Control}, "hover": {p.Text, p.Hover}, "muted": {p.Muted, p.Surface}, "selected": {p.Accent, p.Selected}, "primary": {p.OnAction, p.Action}, "primary-hover": {p.OnAction, p.ActionHover}, "warning": {p.WarningText, p.Warning}, "warning-hover": {p.WarningText, p.WarningHover}, "terrain-label": {p.TerrainText, p.TerrainFill}, "map-label": {p.Text, p.Land}}
+		pairs := map[string][2]color.NRGBA{
+			"body":          {p.Text, p.Background},
+			"panel":         {p.Text, p.Surface},
+			"control":       {p.Text, p.Control},
+			"hover":         {p.Text, p.Hover},
+			"muted":         {p.Muted, p.Surface},
+			"selected":      {p.Accent, p.Selected},
+			"primary":       {p.OnAction, p.Action},
+			"primary-hover": {p.OnAction, p.ActionHover},
+			"warning":       {p.WarningText, p.Warning},
+			"warning-hover": {p.WarningText, p.WarningHover},
+			"terrain-label": {p.TerrainText, p.TerrainFill},
+			"map-label":     {p.Text, p.Land},
+		}
 		for name, pair := range pairs {
 			a, b := luminance(pair[0]), luminance(pair[1])
 			if a < b {

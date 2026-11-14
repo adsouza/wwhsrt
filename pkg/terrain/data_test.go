@@ -34,7 +34,12 @@ func TestGeoreferencedTerrainLoadsAndProjects(t *testing.T) {
 }
 func TestBadTerrainCannotLoadAsFlatLand(t *testing.T) {
 	files := fstest.MapFS{}
-	for _, name := range []string{"terrain/terrain.json", "terrain/features.json", "terrain/hokkaido.png", "terrain/kansai.png"} {
+	for _, name := range []string{
+		"terrain/terrain.json",
+		"terrain/features.json",
+		"terrain/hokkaido.png",
+		"terrain/kansai.png",
+	} {
 		b, e := assets.Terrain.ReadFile(name)
 		if e != nil {
 			t.Fatal(e)

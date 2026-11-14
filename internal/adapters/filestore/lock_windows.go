@@ -17,7 +17,14 @@ func Lock(path string) (func(), error) {
 		return nil, e
 	}
 	o := new(windows.Overlapped)
-	if e = windows.LockFileEx(windows.Handle(f.Fd()), windows.LOCKFILE_EXCLUSIVE_LOCK|windows.LOCKFILE_FAIL_IMMEDIATELY, 0, 1, 0, o); e != nil {
+	if e = windows.LockFileEx(
+		windows.Handle(f.Fd()),
+		windows.LOCKFILE_EXCLUSIVE_LOCK|windows.LOCKFILE_FAIL_IMMEDIATELY,
+		0,
+		1,
+		0,
+		o,
+	); e != nil {
 		f.Close()
 		return nil, e
 	}

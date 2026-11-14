@@ -100,12 +100,14 @@ func TestPublicNetworkChinaServiceAndContinuation(t *testing.T) {
 		t.Fatal("sparse demand dropped")
 	}
 	r := f.Reports[0]
-	if r.Revenue <= 0 || r.AccessCosts <= 0 || r.ClosingCash != r.OpeningCash+r.Revenue-r.Costs+r.Grants+r.Borrowed-r.Repaid-r.Construction {
+	if r.Revenue <= 0 || r.AccessCosts <= 0 ||
+		r.ClosingCash != r.OpeningCash+r.Revenue-r.Costs+r.Grants+r.Borrowed-r.Repaid-r.Construction {
 		t.Fatal("monthly ledger")
 	}
 	before := f.Checkpoint
 	outside, e := g.InspectMarket("lagos", "kinshasa", "business")
-	if e != nil || outside.Demand <= 0 || outside.Carried != 0 || outside.Demand != outside.Road+outside.Air+outside.Conventional+outside.NoTrip {
+	if e != nil || outside.Demand <= 0 || outside.Carried != 0 ||
+		outside.Demand != outside.Road+outside.Air+outside.Conventional+outside.NoTrip {
 		t.Fatalf("outside market: %+v %v", outside, e)
 	}
 	if g.Snapshot().Checkpoint != before {
@@ -130,7 +132,10 @@ func TestPublicNetworkLegacyUpgradeAtomicAndPinned(t *testing.T) {
 	raw := append([]byte{}, s.b...)
 	g := openPublic(t, s)
 	f := g.Snapshot()
-	if !bytes.Equal(s.b, raw) || f.MonthsResolved != before.MonthsResolved || f.Player != before.Player || !reflect.DeepEqual(f.Reports, before.Reports) || !reflect.DeepEqual(f.Fleet, before.Fleet) || !reflect.DeepEqual(f.Network, before.Network) {
+	if !bytes.Equal(s.b, raw) || f.MonthsResolved != before.MonthsResolved || f.Player != before.Player ||
+		!reflect.DeepEqual(f.Reports, before.Reports) ||
+		!reflect.DeepEqual(f.Fleet, before.Fleet) ||
+		!reflect.DeepEqual(f.Network, before.Network) {
 		t.Fatal("read upgrade rewrote historical state")
 	}
 	s.fail = true
@@ -202,7 +207,10 @@ func TestPublicNetworkSourceAndPhysicalCapacity(t *testing.T) {
 			co = c
 		}
 	}
-	if !reflect.DeepEqual(co.SharedSections, []string{"public_maibara__nagoya", "public_kyoto__maibara", "public_kyoto__osaka"}) {
+	if !reflect.DeepEqual(
+		co.SharedSections,
+		[]string{"public_maibara__nagoya", "public_kyoto__maibara", "public_kyoto__osaka"},
+	) {
 		t.Fatal("legacy express bypasses shared Maibara/Kyoto track capacity", co.SharedSections)
 	}
 	// Existing express and newly imported locals must consume the same resources.
@@ -248,11 +256,19 @@ func TestExistingChineseConnectionsRejectDuplicateConstruction(t *testing.T) {
 		if !found {
 			t.Fatalf("existing public link missing: %s", id)
 		}
-		_, err := g.Apply(gameapi.Command{Kind: gameapi.BuildLine, CorridorID: id, AlignmentID: "prototype", Revision: before.Revision})
+		_, err := g.Apply(
+			gameapi.Command{
+				Kind:        gameapi.BuildLine,
+				CorridorID:  id,
+				AlignmentID: "prototype",
+				Revision:    before.Revision,
+			},
+		)
 		if err == nil || err.Error() != "already_built" {
 			t.Fatalf("%s duplicate build: %v", id, err)
 		}
-		if f := g.Snapshot(); f.Checkpoint != before.Checkpoint || len(f.Projects) != 0 || !bytes.Equal(saved, store.b) {
+		if f := g.Snapshot(); f.Checkpoint != before.Checkpoint || len(f.Projects) != 0 ||
+			!bytes.Equal(saved, store.b) {
 			t.Fatal("rejected duplicate build changed company")
 		}
 		quote, e := g.Forecast(gameapi.ForecastRequest{CorridorID: id, Frequency: 2, Fare: 9000})

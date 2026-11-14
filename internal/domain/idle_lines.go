@@ -40,7 +40,16 @@ func (w World) IdleLines() []gameapi.IdleLine {
 			continue
 		}
 		a, _ := w.alignment(co, "")
-		result = append(result, gameapi.IdleLine{CorridorID: co.ID, FromCity: co.FromCity, ToCity: co.ToCity, NeedsTrains: fleet == 0, Maintenance: a.Cost / maintenanceDivisor})
+		result = append(
+			result,
+			gameapi.IdleLine{
+				CorridorID:  co.ID,
+				FromCity:    co.FromCity,
+				ToCity:      co.ToCity,
+				NeedsTrains: fleet == 0,
+				Maintenance: a.Cost / maintenanceDivisor,
+			},
+		)
 	}
 	for _, route := range routes {
 		count := w.FleetCount(route.ID)
@@ -65,7 +74,15 @@ func (w World) IdleLines() []gameapi.IdleLine {
 			}
 		}
 		if !merged {
-			result = append(result, gameapi.IdleLine{CorridorID: route.ID, FromCity: route.Cities[0], ToCity: route.Cities[len(route.Cities)-1], Leases: gameapi.Money(count) * w.leaseMonthly()})
+			result = append(
+				result,
+				gameapi.IdleLine{
+					CorridorID: route.ID,
+					FromCity:   route.Cities[0],
+					ToCity:     route.Cities[len(route.Cities)-1],
+					Leases:     gameapi.Money(count) * w.leaseMonthly(),
+				},
+			)
 		}
 	}
 	return result

@@ -95,7 +95,18 @@ func ReportPane(s State) string {
 // Disclosure state is presentation only and is bounded to known sections.
 func Disclosure(s State, id string) bool { return s.Disclosures[id] }
 func SetDisclosure(s *State, id string, open bool) {
-	allowed := map[string]bool{"idle": true, "capacity": true, "service-path": true, "opportunities": true, "funding": true, "company-funding": true, "report-costs": true, "city-list": true, "station": true, "build-details": true}
+	allowed := map[string]bool{
+		"idle":            true,
+		"capacity":        true,
+		"service-path":    true,
+		"opportunities":   true,
+		"funding":         true,
+		"company-funding": true,
+		"report-costs":    true,
+		"city-list":       true,
+		"station":         true,
+		"build-details":   true,
+	}
 	if !allowed[id] {
 		return
 	}

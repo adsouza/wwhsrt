@@ -31,20 +31,33 @@ func (h *host) replayControls(g *Game, label nativeLabel, button nativeButton, c
 	label(t("representativeDay"), 14)
 	p := ui.PaletteFor(g.State)
 	var play *widget.Button
-	slider := widget.NewSlider(widget.SliderOpts.WidgetOpts(widget.WidgetOpts.MinSize(60, 44), widget.WidgetOpts.LayoutData(widget.RowLayoutData{Stretch: true})), widget.SliderOpts.Direction(widget.DirectionHorizontal), widget.SliderOpts.MinMax(0, 1439), widget.SliderOpts.InitialCurrent(g.State.ReplayMinute), widget.SliderOpts.Images(&widget.SliderTrackImage{Idle: uimage.NewNineSliceColor(p.Border)}, &widget.ButtonImage{Idle: uimage.NewNineSliceColor(p.Action)}), widget.SliderOpts.ChangedHandler(func(a *widget.SliderChangedEventArgs) {
-		// Widget initialization/rebuilds are not player seeks. Deferred events
-		// from a replaced panel must not pause the current playback either.
-		if h.replaySlider != a.Slider || a.Current == g.State.ReplayMinute {
-			return
-		}
-		g.State.ReplayMinute = a.Current
-		g.State.ReplayPlaying = false
-		g.replayTick = 0
-		if play != nil {
-			play.SetText(t("playDay"))
-		}
-		h.persist(g)
-	}))
+	slider := widget.NewSlider(
+		widget.SliderOpts.WidgetOpts(
+			widget.WidgetOpts.MinSize(60, 44),
+			widget.WidgetOpts.LayoutData(widget.RowLayoutData{Stretch: true}),
+		),
+		widget.SliderOpts.Direction(widget.DirectionHorizontal),
+		widget.SliderOpts.MinMax(0, 1439),
+		widget.SliderOpts.InitialCurrent(g.State.ReplayMinute),
+		widget.SliderOpts.Images(
+			&widget.SliderTrackImage{Idle: uimage.NewNineSliceColor(p.Border)},
+			&widget.ButtonImage{Idle: uimage.NewNineSliceColor(p.Action)},
+		),
+		widget.SliderOpts.ChangedHandler(func(a *widget.SliderChangedEventArgs) {
+			// Widget initialization/rebuilds are not player seeks. Deferred events
+			// from a replaced panel must not pause the current playback either.
+			if h.replaySlider != a.Slider || a.Current == g.State.ReplayMinute {
+				return
+			}
+			g.State.ReplayMinute = a.Current
+			g.State.ReplayPlaying = false
+			g.replayTick = 0
+			if play != nil {
+				play.SetText(t("playDay"))
+			}
+			h.persist(g)
+		}),
+	)
 	// InitialCurrent initializes both the value and Ebiten UI's change baseline.
 	// Assigning Current here emits a seek on the first Render and stops Play.
 	h.replaySlider = slider
@@ -81,14 +94,21 @@ func (h *host) replayControls(g *Game, label nativeLabel, button nativeButton, c
 		h.persist(g)
 	})
 	var face text.Face = &text.GoTextFace{Source: g.Map.Font, Size: 13}
-	h.trainDescription = widget.NewText(widget.TextOpts.Text("", &face, p.Text), widget.TextOpts.MaxWidth(float64(min(360, g.width)-60)))
+	h.trainDescription = widget.NewText(
+		widget.TextOpts.Text("", &face, p.Text),
+		widget.TextOpts.MaxWidth(float64(min(360, g.width)-60)),
+	)
 	content.AddChild(h.trainDescription)
 	h.updateTrainDescription(g)
 }
 func (h *host) updateTrainDescription(g *Game) {
 	width := float64(min(360, g.width) - 60)
 	face := &text.GoTextFace{Source: g.Map.Font, Size: 13}
-	h.trainDescription.Label = ui.WrapText(ui.ReplayClock(g.replayTime())+" · "+render.TrainDescription(g.Camera, g.Frame, g.State, g.replayTime()), width, func(s string) float64 { return text.Advance(s, face) })
+	h.trainDescription.Label = ui.WrapText(
+		ui.ReplayClock(g.replayTime())+" · "+render.TrainDescription(g.Camera, g.Frame, g.State, g.replayTime()),
+		width,
+		func(s string) float64 { return text.Advance(s, face) },
+	)
 }
 func (h *host) networkMarkets(g *Game, label nativeLabel) {
 	t := func(key string) string { return ui.Text(g.State.Locale, key) }
@@ -122,9 +142,36 @@ func (h *host) networkMarkets(g *Game, label nativeLabel) {
 			continue
 		}
 		label(t("finiteDemand")+": "+fmt.Sprint(m.Demand)+" · "+t("companyJourneys")+": "+fmt.Sprint(m.Carried), 14)
-		label(fmt.Sprintf("%s %d · %s %d · %s %d · %s %d", t("mode_road"), m.Road, t("mode_air"), m.Air, t("mode_conventional"), m.Conventional, t("mode_no_trip"), m.NoTrip), 14)
+		label(
+			fmt.Sprintf(
+				"%s %d · %s %d · %s %d · %s %d",
+				t("mode_road"),
+				m.Road,
+				t("mode_air"),
+				m.Air,
+				t("mode_conventional"),
+				m.Conventional,
+				t("mode_no_trip"),
+				m.NoTrip,
+			),
+			14,
+		)
 		for _, offer := range m.Offers {
-			label(t("mode_"+offer.Mode)+" · "+ui.Cash(offer.Fare)+fmt.Sprintf(" · %d min", offer.Minutes)+"\n"+t("generalizedCost")+": "+ui.Cash(offer.Generalized), 13)
+			label(
+				t(
+					"mode_"+offer.Mode,
+				)+" · "+ui.Cash(
+					offer.Fare,
+				)+fmt.Sprintf(
+					" · %d min",
+					offer.Minutes,
+				)+"\n"+t(
+					"generalizedCost",
+				)+": "+ui.Cash(
+					offer.Generalized,
+				),
+				13,
+			)
 		}
 	}
 	for _, flow := range g.Frame.Network.Journeys {
@@ -139,7 +186,17 @@ func (h *host) networkMarkets(g *Game, label nativeLabel) {
 			r, _ := ui.ServiceRoute(g.Frame, id)
 			parts += ui.RouteName(r, g.State.Locale)
 		}
-		label(fmt.Sprintf("%d · %s\n%s · %s %d", flow.Passengers, parts, ui.Cash(flow.Fare), t("transferCount"), len(flow.Transfers)), 14)
+		label(
+			fmt.Sprintf(
+				"%d · %s\n%s · %s %d",
+				flow.Passengers,
+				parts,
+				ui.Cash(flow.Fare),
+				t("transferCount"),
+				len(flow.Transfers),
+			),
+			14,
+		)
 	}
 }
 func (h *host) marketControls(g *Game, label nativeLabel, button nativeButton) {
@@ -159,9 +216,19 @@ func (h *host) marketControls(g *Game, label nativeLabel, button nativeButton) {
 		choices = append(choices, choice{string(city.ID), t(string(city.ID))})
 	}
 	label(t("fromCity"), 13)
-	h.selectChoice(g, string(g.State.MarketFrom), choices, func(id string) { g.State.MarketFrom = gameapi.CityID(id); g.dirty = true; h.persist(g) })
+	h.selectChoice(
+		g,
+		string(g.State.MarketFrom),
+		choices,
+		func(id string) { g.State.MarketFrom = gameapi.CityID(id); g.dirty = true; h.persist(g) },
+	)
 	label(t("toCity"), 13)
-	h.selectChoice(g, string(g.State.MarketTo), choices, func(id string) { g.State.MarketTo = gameapi.CityID(id); g.dirty = true; h.persist(g) })
+	h.selectChoice(
+		g,
+		string(g.State.MarketTo),
+		choices,
+		func(id string) { g.State.MarketTo = gameapi.CityID(id); g.dirty = true; h.persist(g) },
+	)
 
 	button(t(g.State.MarketClass+"Travel"), func() {
 		if g.State.MarketClass == "business" {

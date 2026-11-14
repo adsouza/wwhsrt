@@ -289,7 +289,15 @@ func openMode(store Store, log *slog.Logger, expanded bool) (*Game, error) {
 				targetVersion = 10
 			}
 			if header.Version < targetVersion {
-				log.Info("storage.upgrade_read", "from_version", header.Version, "to_version", targetVersion, "preserved_months", w.Months())
+				log.Info(
+					"storage.upgrade_read",
+					"from_version",
+					header.Version,
+					"to_version",
+					targetVersion,
+					"preserved_months",
+					w.Months(),
+				)
 			}
 		} else {
 			b, _ = encode(g.w)
@@ -302,17 +310,73 @@ func openMode(store Store, log *slog.Logger, expanded bool) (*Game, error) {
 	if expanded {
 		rules = "network-v10"
 	}
-	log.Info("world.opened", "world_id", "first-business", "revision", g.w.Revision(), "scenario_sha256", scenarioSHA, "network_sha256", networkSHA, "rules_version", rules, "public_network_sha256", publicSHA, "network_since", g.w.NetworkSince())
+	log.Info(
+		"world.opened",
+		"world_id",
+		"first-business",
+		"revision",
+		g.w.Revision(),
+		"scenario_sha256",
+		scenarioSHA,
+		"network_sha256",
+		networkSHA,
+		"rules_version",
+		rules,
+		"public_network_sha256",
+		publicSHA,
+		"network_since",
+		g.w.NetworkSince(),
+	)
 	return g, nil
 }
 func data(w domain.World) payload {
-	return payload{NetworkSHA: networkSHA, NetworkSince: w.NetworkSince(), ScenarioSHA: scenarioSHA, BusinessSHA: businessSHA, Rules: "network-v3", Revision: w.Revision(), Months: w.Months(), Company: w.Company(), Reports: w.Reports(), Projects: w.Projects(), Services: w.Services(), Fleet: w.Fleet(), Debt: w.Debt(), Pending: w.Pending(), NextTrain: w.NextTrain()}
+	return payload{
+		NetworkSHA:   networkSHA,
+		NetworkSince: w.NetworkSince(),
+		ScenarioSHA:  scenarioSHA,
+		BusinessSHA:  businessSHA,
+		Rules:        "network-v3",
+		Revision:     w.Revision(),
+		Months:       w.Months(),
+		Company:      w.Company(),
+		Reports:      w.Reports(),
+		Projects:     w.Projects(),
+		Services:     w.Services(),
+		Fleet:        w.Fleet(),
+		Debt:         w.Debt(),
+		Pending:      w.Pending(),
+		NextTrain:    w.NextTrain(),
+	}
 }
 func stateData(w domain.World) any {
 	p := data(w)
 	if w.Expanded() {
 		p.Rules = "network-v10"
-		return connectorPayload{regionalPayload{constructionPayload{connectivityPayload{topologyPayload{balancedPayload{expandedPayload{p, publicSHA, w.CatalogSince()}, economySHA, w.EconomySince()}, w.TopologySince(), publicV1SHA}, w.ConnectivitySince(), previousRepairSHA}, w.ConstructionSince(), launchPriorSHA}, w.RegionalSince(), regionalPriorSHA}, w.ConnectorSince(), connectorPriorSHA}
+		return connectorPayload{
+			regionalPayload{
+				constructionPayload{
+					connectivityPayload{
+						topologyPayload{
+							balancedPayload{
+								expandedPayload{p, publicSHA, w.CatalogSince()},
+								economySHA,
+								w.EconomySince(),
+							},
+							w.TopologySince(),
+							publicV1SHA,
+						},
+						w.ConnectivitySince(),
+						previousRepairSHA,
+					},
+					w.ConstructionSince(),
+					launchPriorSHA,
+				},
+				w.RegionalSince(),
+				regionalPriorSHA,
+			},
+			w.ConnectorSince(),
+			connectorPriorSHA,
+		}
 	}
 	return p
 }
@@ -333,29 +397,62 @@ func decode(b []byte) (domain.World, error) {
 		return bad()
 	}
 	var env envelope
-	if strict(b, &env) != nil || env.Format != "wwhsrt-first-business" || (env.Version != 2 && env.Version != 3) || hash(env.Payload) != env.SHA {
+	if strict(b, &env) != nil || env.Format != "wwhsrt-first-business" || (env.Version != 2 && env.Version != 3) ||
+		hash(env.Payload) != env.SHA {
 		return bad()
 	}
 	if env.Version == 2 {
 		var old legacyPayload
-		if strict(env.Payload, &old) != nil || !complete(env.Payload, reflect.TypeOf(old)) || old.ScenarioSHA != scenarioSHA || old.BusinessSHA != businessSHA || old.Rules != "first-business-v2" {
+		if strict(env.Payload, &old) != nil || !complete(env.Payload, reflect.TypeOf(old)) ||
+			old.ScenarioSHA != scenarioSHA ||
+			old.BusinessSHA != businessSHA ||
+			old.Rules != "first-business-v2" {
 			return bad()
 		}
 		c, e := catalog()
 		if e != nil {
 			return bad()
 		}
-		return domain.Restore(c, old.Revision, old.Months, old.Company, old.Reports, old.Projects, old.Services, old.Fleet, old.Debt, old.Pending, old.NextTrain, domain.Cutovers{Network: old.Months, Economy: old.Months})
+		return domain.Restore(
+			c,
+			old.Revision,
+			old.Months,
+			old.Company,
+			old.Reports,
+			old.Projects,
+			old.Services,
+			old.Fleet,
+			old.Debt,
+			old.Pending,
+			old.NextTrain,
+			domain.Cutovers{Network: old.Months, Economy: old.Months},
+		)
 	}
 	var p payload
-	if strict(env.Payload, &p) != nil || !complete(env.Payload, reflect.TypeOf(p)) || p.ScenarioSHA != scenarioSHA || p.BusinessSHA != businessSHA || p.Rules != "network-v3" || p.NetworkSHA != networkSHA {
+	if strict(env.Payload, &p) != nil || !complete(env.Payload, reflect.TypeOf(p)) || p.ScenarioSHA != scenarioSHA ||
+		p.BusinessSHA != businessSHA ||
+		p.Rules != "network-v3" ||
+		p.NetworkSHA != networkSHA {
 		return bad()
 	}
 	c, e := catalog()
 	if e != nil {
 		return bad()
 	}
-	return domain.Restore(c, p.Revision, p.Months, p.Company, p.Reports, p.Projects, p.Services, p.Fleet, p.Debt, p.Pending, p.NextTrain, domain.Cutovers{Network: p.NetworkSince, Economy: p.Months})
+	return domain.Restore(
+		c,
+		p.Revision,
+		p.Months,
+		p.Company,
+		p.Reports,
+		p.Projects,
+		p.Services,
+		p.Fleet,
+		p.Debt,
+		p.Pending,
+		p.NextTrain,
+		domain.Cutovers{Network: p.NetworkSince, Economy: p.Months},
+	)
 }
 func (g *Game) frame() gameapi.Frame {
 	p, _ := json.Marshal(stateData(g.w))
@@ -371,7 +468,31 @@ func (g *Game) frame() gameapi.Frame {
 			day = append(day, trip)
 		}
 	}
-	return gameapi.Frame{PublicNetwork: g.expanded, Routes: routes, Network: network, Day: day, WorldID: "first-business", Revision: g.w.Revision(), Month: domain.Calendar(g.w.Months()), MonthsResolved: g.w.Months(), CampaignMonths: domain.CampaignMonths, Player: g.w.Company(), Cities: append([]gameapi.City{}, g.cities...), Stations: g.w.Stations(), TrainFamily: g.w.TrainFamily(), Reports: g.w.Reports(), Checkpoint: hash(p), Corridors: g.displayCorridors(), Projects: g.w.Projects(), Services: g.w.Services(), Fleet: g.w.Fleet(), IdleLines: g.w.IdleLines(), Debt: g.w.Debt(), DebtLimit: domain.DebtLimit, Pending: g.w.Pending()}
+	return gameapi.Frame{
+		PublicNetwork:  g.expanded,
+		Routes:         routes,
+		Network:        network,
+		Day:            day,
+		WorldID:        "first-business",
+		Revision:       g.w.Revision(),
+		Month:          domain.Calendar(g.w.Months()),
+		MonthsResolved: g.w.Months(),
+		CampaignMonths: domain.CampaignMonths,
+		Player:         g.w.Company(),
+		Cities:         append([]gameapi.City{}, g.cities...),
+		Stations:       g.w.Stations(),
+		TrainFamily:    g.w.TrainFamily(),
+		Reports:        g.w.Reports(),
+		Checkpoint:     hash(p),
+		Corridors:      g.displayCorridors(),
+		Projects:       g.w.Projects(),
+		Services:       g.w.Services(),
+		Fleet:          g.w.Fleet(),
+		IdleLines:      g.w.IdleLines(),
+		Debt:           g.w.Debt(),
+		DebtLimit:      domain.DebtLimit,
+		Pending:        g.w.Pending(),
+	}
 }
 func (g *Game) Forecast(q gameapi.ForecastRequest) (gameapi.Forecast, error) {
 	g.mu.Lock()
@@ -383,7 +504,27 @@ func (g *Game) Export() ([]byte, error) { g.mu.Lock(); defer g.mu.Unlock(); retu
 func (g *Game) Apply(c gameapi.Command) (gameapi.Frame, error) {
 	g.mu.Lock()
 	defer g.mu.Unlock()
-	g.log.Info("command.received", "kind", c.Kind, "revision", c.Revision, "service_or_corridor_id", c.CorridorID, "alignment_id", c.AlignmentID, "replace_service_id", c.ReplaceServiceID, "frequency", c.Frequency, "fare_cents", c.Fare, "lease_count", c.LeaseCount, "amount_cents", c.Amount)
+	g.log.Info(
+		"command.received",
+		"kind",
+		c.Kind,
+		"revision",
+		c.Revision,
+		"service_or_corridor_id",
+		c.CorridorID,
+		"alignment_id",
+		c.AlignmentID,
+		"replace_service_id",
+		c.ReplaceServiceID,
+		"frequency",
+		c.Frequency,
+		"fare_cents",
+		c.Fare,
+		"lease_count",
+		c.LeaseCount,
+		"amount_cents",
+		c.Amount,
+	)
 	w, e := g.w.Change(c)
 	if e != nil {
 		g.log.Info("command.rejected", "code", e.Error())
@@ -404,9 +545,37 @@ func (g *Game) Apply(c gameapi.Command) (gameapi.Frame, error) {
 	f := g.frame()
 	if f.MonthsResolved > previousMonths {
 		for _, r := range f.Reports[previousMonths:] {
-			g.log.Info("month.resolved", "year", r.Month.Year, "month", r.Month.Month, "journeys", r.Passengers, "revenue_cents", r.Revenue, "costs_cents", r.Costs, "closing_cash_cents", r.ClosingCash)
+			g.log.Info(
+				"month.resolved",
+				"year",
+				r.Month.Year,
+				"month",
+				r.Month.Month,
+				"journeys",
+				r.Passengers,
+				"revenue_cents",
+				r.Revenue,
+				"costs_cents",
+				r.Costs,
+				"closing_cash_cents",
+				r.ClosingCash,
+			)
 		}
-		g.log.Info("network.resolved", "requested", f.Network.Requested, "carried", f.Network.Carried, "transfers", f.Network.Transfers, "rejected", f.Network.Rejected, "alternate_served", f.Network.AlternateServed, "checkpoint", f.Checkpoint)
+		g.log.Info(
+			"network.resolved",
+			"requested",
+			f.Network.Requested,
+			"carried",
+			f.Network.Carried,
+			"transfers",
+			f.Network.Transfers,
+			"rejected",
+			f.Network.Rejected,
+			"alternate_served",
+			f.Network.AlternateServed,
+			"checkpoint",
+			f.Checkpoint,
+		)
 	}
 	g.log.Info("command.committed", "kind", c.Kind, "revision", f.Revision, "checkpoint", f.Checkpoint)
 	return f, nil

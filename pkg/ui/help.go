@@ -55,10 +55,35 @@ type HelpEvent struct {
 }
 
 var helpTopics = func() []HelpTopic {
-	rows := [][3]string{{"getting_started", "map", "start"}, {"city_demand", "map", "city"}, {"connections", "build", "endpoints"}, {"terrain", "build", "alignments"}, {"funding", "company", "finance"}, {"construction", "build", "project"}, {"fleet", "services", "fleet"}, {"service_plans", "services", "service-plan"}, {"fares_demand", "services", "fares"}, {"through_services", "services", "through"}, {"capacity", "services", "capacity"}, {"monthly_report", "report", "accounts"}, {"idle_assets", "services", "idle"}, {"operating_day", "map", "replay"}}
+	rows := [][3]string{
+		{"getting_started", "map", "start"},
+		{"city_demand", "map", "city"},
+		{"connections", "build", "endpoints"},
+		{"terrain", "build", "alignments"},
+		{"funding", "company", "finance"},
+		{"construction", "build", "project"},
+		{"fleet", "services", "fleet"},
+		{"service_plans", "services", "service-plan"},
+		{"fares_demand", "services", "fares"},
+		{"through_services", "services", "through"},
+		{"capacity", "services", "capacity"},
+		{"monthly_report", "report", "accounts"},
+		{"idle_assets", "services", "idle"},
+		{"operating_day", "map", "replay"},
+	}
 	out := []HelpTopic{}
 	for _, r := range rows {
-		out = append(out, HelpTopic{ID: r[0], TitleKey: "learnTitle_" + r[0], SummaryKey: "learnSummary_" + r[0], DetailKey: "learnDetail_" + r[0], View: r[1], Anchor: r[2]})
+		out = append(
+			out,
+			HelpTopic{
+				ID:         r[0],
+				TitleKey:   "learnTitle_" + r[0],
+				SummaryKey: "learnSummary_" + r[0],
+				DetailKey:  "learnDetail_" + r[0],
+				View:       r[1],
+				Anchor:     r[2],
+			},
+		)
 	}
 	return out
 }()
@@ -194,7 +219,8 @@ func ApplyHelpEvent(s *State, e HelpEvent) {
 			s.Help.Expanded = t.Anchor
 		}
 	case "leave":
-		if e.Value == "map" || e.Value == "build" || e.Value == "services" || e.Value == "company" || e.Value == "report" {
+		if e.Value == "map" || e.Value == "build" || e.Value == "services" || e.Value == "company" ||
+			e.Value == "report" {
 			s.View = e.Value
 			if e.Value != "services" {
 				s.ReviewMap = false
@@ -242,7 +268,22 @@ func HelpTopics(locale, query string) []HelpTopic {
 	q := strings.ToLower(strings.TrimSpace(query))
 	out := []HelpTopic{}
 	for _, t := range helpTopics {
-		text := t.ID + " " + Text(locale, t.TitleKey) + " " + Text(locale, t.SummaryKey) + " " + Text(locale, t.DetailKey) + " " + Text("en", t.TitleKey) + " " + Text("zh-Hans", t.TitleKey)
+		text := t.ID + " " + Text(
+			locale,
+			t.TitleKey,
+		) + " " + Text(
+			locale,
+			t.SummaryKey,
+		) + " " + Text(
+			locale,
+			t.DetailKey,
+		) + " " + Text(
+			"en",
+			t.TitleKey,
+		) + " " + Text(
+			"zh-Hans",
+			t.TitleKey,
+		)
 		if q == "" || strings.Contains(strings.ToLower(text), q) {
 			out = append(out, t)
 		}
@@ -250,7 +291,20 @@ func HelpTopics(locale, query string) []HelpTopic {
 	return out
 }
 func BlockingHelpIssue(issue string) bool {
-	for _, prefix := range []string{"invalid_", "storage_", "stale_", "insufficient_", "fleet_", "loan_", "track_", "station_", "line_not_", "cash_", "action_limit", "no_route"} {
+	for _, prefix := range []string{
+		"invalid_",
+		"storage_",
+		"stale_",
+		"insufficient_",
+		"fleet_",
+		"loan_",
+		"track_",
+		"station_",
+		"line_not_",
+		"cash_",
+		"action_limit",
+		"no_route",
+	} {
 		if strings.HasPrefix(issue, prefix) {
 			return true
 		}
@@ -276,7 +330,12 @@ func helpSlots(s State) [][2]string {
 		if BuildPane(s) == "projects" {
 			return nil
 		}
-		slots = [][2]string{{"endpoints", "connections"}, {"alignments", "terrain"}, {"funding", "funding"}, {"project", "construction"}}
+		slots = [][2]string{
+			{"endpoints", "connections"},
+			{"alignments", "terrain"},
+			{"funding", "funding"},
+			{"project", "construction"},
+		}
 	case "services":
 		if ServicePane(s) == "fleet" {
 			return [][2]string{{"fleet", "fleet"}}
@@ -284,7 +343,14 @@ func helpSlots(s State) [][2]string {
 		if ServicePane(s) == "analysis" {
 			return [][2]string{{"capacity", "capacity"}, {"fares", "fares_demand"}}
 		}
-		slots = [][2]string{{"service-plan", "service_plans"}, {"through", "through_services"}, {"fares", "fares_demand"}, {"fleet-plan", "fleet"}, {"capacity", "capacity"}, {"idle", "idle_assets"}}
+		slots = [][2]string{
+			{"service-plan", "service_plans"},
+			{"through", "through_services"},
+			{"fares", "fares_demand"},
+			{"fleet-plan", "fleet"},
+			{"capacity", "capacity"},
+			{"idle", "idle_assets"},
+		}
 	case "company":
 		if CompanyPane(s) != "finance" {
 			return nil
@@ -293,17 +359,33 @@ func helpSlots(s State) [][2]string {
 	case "report":
 		slots = [][2]string{{"accounts", "monthly_report"}, {"capacity", "capacity"}, {"idle", "idle_assets"}}
 	default:
-		slots = [][2]string{{"start", "getting_started"}, {"city", "city_demand"}, {"replay", "operating_day"}, {"idle", "idle_assets"}}
+		slots = [][2]string{
+			{"start", "getting_started"},
+			{"city", "city_demand"},
+			{"replay", "operating_day"},
+			{"idle", "idle_assets"},
+		}
 	}
 	return slots
 }
 func BuildHelpModel(f gameapi.Frame, s State, forecast *gameapi.Forecast, issue string) HelpModel {
 	NormalizeHelp(&s)
-	m := HelpModel{Cue: HelpFor(f, s), Slots: []HelpSlot{}, Results: HelpTopics(s.Locale, s.Help.Query), ArticleFacts: []Detail{}}
+	m := HelpModel{
+		Cue:          HelpFor(f, s),
+		Slots:        []HelpSlot{},
+		Results:      HelpTopics(s.Locale, s.Help.Query),
+		ArticleFacts: []Detail{},
+	}
 	// An under-provisioned draft needs fleet help beside its lease controls,
 	// even if one train is already assigned. Extension quotes can lease atomically.
 	fleet := s.Help.Concepts["fleet"]
-	if forecast != nil && s.View == "services" && ServicePane(s) == "plan" && !s.Help.Open && !s.Expanded && !s.Help.Muted && s.ReplaceServiceID == "" && forecast.FleetNeeded > forecast.FleetAvailable && !fleet.Dismissed && !fleet.Completed && m.Cue.Concept != "idle_assets" {
+	if forecast != nil && s.View == "services" && ServicePane(s) == "plan" && !s.Help.Open && !s.Expanded &&
+		!s.Help.Muted &&
+		s.ReplaceServiceID == "" &&
+		forecast.FleetNeeded > forecast.FleetAvailable &&
+		!fleet.Dismissed &&
+		!fleet.Completed &&
+		m.Cue.Concept != "idle_assets" {
 		m.Cue = Guidance{Concept: "fleet", Anchor: "fleet-plan", Key: "learnSummary_fleet"}
 	}
 	if BlockingHelpIssue(issue) {

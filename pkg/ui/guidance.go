@@ -34,7 +34,10 @@ func HelpFor(f gameapi.Frame, s State) Guidance {
 		}
 		return Guidance{}
 	}
-	if len(f.IdleLines) > 0 && (s.View == "map" || s.View == "report" && ReportPane(s) == "overview" || s.View == "services" && ServicePane(s) == "plan") {
+	if len(f.IdleLines) > 0 &&
+		(s.View == "map" || s.View == "report" && ReportPane(
+			s,
+		) == "overview" || s.View == "services" && ServicePane(s) == "plan") {
 		if g := cue("idle_assets", "idle"); g.Concept != "" {
 			return g
 		}

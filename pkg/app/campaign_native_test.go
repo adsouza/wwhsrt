@@ -38,11 +38,19 @@ func TestNativeCampaignCompletionExplainsStoppedTimeAndOffersConfirmedRestart(t 
 				f := port.Snapshot()
 				f.CampaignMonths = 360
 				f.MonthsResolved = 359
-				g := &Game{Port: port, Frame: f, Map: &render.Map{Font: font}, width: size[0], height: size[1], State: ui.NewGameState(ui.State{Locale: locale}, f)}
+				g := &Game{
+					Port:   port,
+					Frame:  f,
+					Map:    &render.Map{Font: font},
+					width:  size[0],
+					height: size[1],
+					State:  ui.NewGameState(ui.State{Locale: locale}, f),
+				}
 				g.State.Help.Muted = true
 				g.host.build(g)
 				event.ExecuteDeferred()
-				if g.host.actions["advance"] == nil || g.host.actions["advance"].GetWidget().Disabled || g.host.actions["campaign-new-game"] != nil {
+				if g.host.actions["advance"] == nil || g.host.actions["advance"].GetWidget().Disabled ||
+					g.host.actions["campaign-new-game"] != nil {
 					t.Fatal("campaign ended before its final month")
 				}
 				g.Frame.MonthsResolved = 360
@@ -58,7 +66,8 @@ func TestNativeCampaignCompletionExplainsStoppedTimeAndOffersConfirmedRestart(t 
 					footer.Validate()
 					found := false
 					for _, child := range footer.Children() {
-						if label, ok := child.(*widget.Text); ok && strings.Contains(label.Label, ui.Text(locale, "campaignEndTitle")) {
+						if label, ok := child.(*widget.Text); ok &&
+							strings.Contains(label.Label, ui.Text(locale, "campaignEndTitle")) {
 							found = true
 							if !strings.Contains(label.Label, "30") {
 								t.Fatal("elapsed years missing")

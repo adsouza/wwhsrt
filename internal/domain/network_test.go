@@ -41,7 +41,8 @@ func networkConservation(t *testing.T, n gameapi.NetworkReport) {
 		alternate += m.AlternateServed
 		rejected += m.Rejected
 	}
-	if carried != n.Carried || requested != n.Requested || demand != n.Demand || alternate != n.AlternateServed || rejected != n.Rejected {
+	if carried != n.Carried || requested != n.Requested || demand != n.Demand || alternate != n.AlternateServed ||
+		rejected != n.Rejected {
 		t.Fatal("network totals do not reconcile")
 	}
 	var revenue gameapi.Money
@@ -80,7 +81,8 @@ func networkConservation(t *testing.T, n gameapi.NetworkReport) {
 		}
 	}
 	for _, station := range n.Stations {
-		if station.Calls > station.Capacity || station.Transfers > station.Boardings || station.Transfers > station.Alightings {
+		if station.Calls > station.Capacity || station.Transfers > station.Boardings ||
+			station.Transfers > station.Alightings {
 			t.Fatal("station activity invalid", station)
 		}
 	}
@@ -124,7 +126,9 @@ func TestNetworkThroughJourneyAndIntermediateSeats(t *testing.T) {
 	}
 	plans[0].Fare = 13800
 	day := w.RepresentativeDay(n)
-	if len(day) != 12 || len(day[0].Calls) != 3 || day[0].Calls[1].CityID != "nagoya" || day[0].Calls[1].Departure-day[0].Calls[1].Arrival != 4 || day[0].Arrival-day[0].Departure != 156 {
+	if len(day) != 12 || len(day[0].Calls) != 3 || day[0].Calls[1].CityID != "nagoya" ||
+		day[0].Calls[1].Departure-day[0].Calls[1].Arrival != 4 ||
+		day[0].Arrival-day[0].Departure != 156 {
 		t.Fatal("representative through day missing Nagoya dwell", day)
 	}
 	if !reflect.DeepEqual(n, w.simulate(plans, 0)) || !reflect.DeepEqual(day, w.RepresentativeDay(n)) {
@@ -139,7 +143,11 @@ func FuzzNetworkConservation(f *testing.F) {
 	f.Fuzz(func(t *testing.T, a, b, c uint8, fare uint16) {
 		w := networkWorld(t)
 		price := gameapi.Money(1000 + int(fare)%29001)
-		plans := []gameapi.Service{{CorridorID: "tokyo-nagoya", Frequency: int(a) % 17, Fare: price}, {CorridorID: "nagoya-osaka", Frequency: int(b) % 17, Fare: price}, {CorridorID: "tokyo-osaka", Frequency: int(c) % 17, Fare: price}}
+		plans := []gameapi.Service{
+			{CorridorID: "tokyo-nagoya", Frequency: int(a) % 17, Fare: price},
+			{CorridorID: "nagoya-osaka", Frequency: int(b) % 17, Fare: price},
+			{CorridorID: "tokyo-osaka", Frequency: int(c) % 17, Fare: price},
+		}
 		n := w.simulate(plans, 1)
 		networkConservation(t, n)
 		if !reflect.DeepEqual(n, w.simulate([]gameapi.Service{plans[2], plans[0], plans[1]}, 1)) {
@@ -149,13 +157,17 @@ func FuzzNetworkConservation(f *testing.F) {
 }
 func TestNetworkTransfersExpressAndSharedBottleneck(t *testing.T) {
 	w := networkWorld(t)
-	plans := []gameapi.Service{{CorridorID: "tokyo-nagoya", Frequency: 8, Fare: 9000}, {CorridorID: "nagoya-osaka", Frequency: 8, Fare: 5000}}
+	plans := []gameapi.Service{
+		{CorridorID: "tokyo-nagoya", Frequency: 8, Fare: 9000},
+		{CorridorID: "nagoya-osaka", Frequency: 8, Fare: 5000},
+	}
 	n := w.simulate(plans, 0)
 	networkConservation(t, n)
 	transfer := 0
 	for _, flow := range n.Journeys {
 		if flow.From == "tokyo" && flow.To == "osaka" {
-			if len(flow.Services) != 2 || len(flow.Transfers) != 1 || flow.Transfers[0] != "nagoya" || flow.Fare != 14000 {
+			if len(flow.Services) != 2 || len(flow.Transfers) != 1 || flow.Transfers[0] != "nagoya" ||
+				flow.Fare != 14000 {
 				t.Fatal(flow)
 			}
 			transfer += flow.Passengers
@@ -220,7 +232,11 @@ func TestNetworkFeederAndOutsideEligibility(t *testing.T) {
 	}
 }
 func TestNetworkRationCompleteJourneysAndRounding(t *testing.T) {
-	r := []capacityRequest{{id: "through", need: 100, legs: []string{"east", "west"}}, {id: "east-local", need: 100, legs: []string{"east"}}, {id: "west-local", need: 100, legs: []string{"west"}}}
+	r := []capacityRequest{
+		{id: "through", need: 100, legs: []string{"east", "west"}},
+		{id: "east-local", need: 100, legs: []string{"east"}},
+		{id: "west-local", need: 100, legs: []string{"west"}},
+	}
 	caps := map[string]int{"east": 100, "west": 60}
 	ration(r, caps)
 	if r[0].served != 30 || r[1].served != 70 || r[2].served != 30 || caps["east"] != 0 || caps["west"] != 0 {

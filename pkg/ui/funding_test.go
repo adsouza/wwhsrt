@@ -6,7 +6,16 @@ import (
 )
 
 func TestFundingBreakdownExplainsCashAndDeficits(t *testing.T) {
-	f := gameapi.Frame{Corridors: []gameapi.Corridor{{ID: "a-b", FromCity: "a", ToCity: "b", Alignments: []gameapi.Alignment{{ID: "tunnel", Cost: 10_000_003, Grant: 9_000_002}}}}}
+	f := gameapi.Frame{
+		Corridors: []gameapi.Corridor{
+			{
+				ID:         "a-b",
+				FromCity:   "a",
+				ToCity:     "b",
+				Alignments: []gameapi.Alignment{{ID: "tunnel", Cost: 10_000_003, Grant: 9_000_002}},
+			},
+		},
+	}
 	s := State{FromCity: "b", ToCity: "a"} // Empty choice uses the named default alignment.
 	for _, row := range []struct{ cash, available, deficit, gap gameapi.Money }{
 		{300_001, 300_001, 0, 700_000},
@@ -17,7 +26,14 @@ func TestFundingBreakdownExplainsCashAndDeficits(t *testing.T) {
 	} {
 		f.Player.Cash = row.cash
 		q, ok := FundingBreakdown(f, s)
-		if !ok || q.CorridorID != "a-b" || q.FromCity != "a" || q.ToCity != "b" || q.AlignmentID != "tunnel" || q.Cost != 10_000_003 || q.Grant != 9_000_002 || q.Contribution != 1_000_001 || q.CashAvailable != row.available || q.CashDeficit != row.deficit || q.Shortfall != row.gap || FundingShortfall(f, s) != row.gap {
+		if !ok || q.CorridorID != "a-b" || q.FromCity != "a" || q.ToCity != "b" || q.AlignmentID != "tunnel" ||
+			q.Cost != 10_000_003 ||
+			q.Grant != 9_000_002 ||
+			q.Contribution != 1_000_001 ||
+			q.CashAvailable != row.available ||
+			q.CashDeficit != row.deficit ||
+			q.Shortfall != row.gap ||
+			FundingShortfall(f, s) != row.gap {
 			t.Fatal("funding explanation disagrees with quote", row, q)
 		}
 		if f.Player.Cash != row.cash || s.AlignmentID != "" {

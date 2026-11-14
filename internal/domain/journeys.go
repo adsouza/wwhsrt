@@ -49,7 +49,15 @@ func (w World) rides(plans []gameapi.Service, delivered map[string]int) map[game
 			co, _ := w.catalog.find(id)
 			a, _ := w.alignment(co, "")
 			next := km + a.KM
-			fares[id] = plan.Fare*gameapi.Money(next)/gameapi.Money(route.KM) - plan.Fare*gameapi.Money(km)/gameapi.Money(route.KM)
+			fares[id] = plan.Fare*gameapi.Money(
+				next,
+			)/gameapi.Money(
+				route.KM,
+			) - plan.Fare*gameapi.Money(
+				km,
+			)/gameapi.Money(
+				route.KM,
+			)
 			km = next
 		}
 		for _, direction := range []int{1, -1} {
@@ -91,7 +99,19 @@ func (w World) rides(plans []gameapi.Service, delivered map[string]int) map[game
 					// Cumulative fare rounding makes every full ride equal the
 					// displayed terminal fare, in either direction, to the cent.
 					fare := cumulative[end] - cumulative[start]
-					out[from] = append(out[from], ride{route.ID, from, to, legs, append([]gameapi.CityID{}, cities[start+1:end+1]...), fare, timings[end] - timings[start] + dwell, w.serviceWait(frequency)})
+					out[from] = append(
+						out[from],
+						ride{
+							route.ID,
+							from,
+							to,
+							legs,
+							append([]gameapi.CityID{}, cities[start+1:end+1]...),
+							fare,
+							timings[end] - timings[start] + dwell,
+							w.serviceWait(frequency),
+						},
+					)
 				}
 			}
 		}
@@ -101,7 +121,11 @@ func (w World) rides(plans []gameapi.Service, delivered map[string]int) map[game
 
 // Enumerate once per origin/class rather than once per possible destination.
 // Keep exactly the same three best acyclic, at-most-three-service itineraries.
-func (w World) itinerariesFrom(from gameapi.CityID, class string, graph map[gameapi.CityID][]ride) map[gameapi.CityID][]itinerary {
+func (w World) itinerariesFrom(
+	from gameapi.CityID,
+	class string,
+	graph map[gameapi.CityID][]ride,
+) map[gameapi.CityID][]itinerary {
 	vot := gameapi.Money(15)
 	if class == "business" {
 		vot = 50
@@ -118,7 +142,16 @@ func (w World) itinerariesFrom(from gameapi.CityID, class string, graph map[game
 				minutes += r.minutes + r.wait
 				ids = append(ids, r.service+":"+string(r.from)+">"+string(r.to))
 			}
-			rows := append(result[at], itinerary{strings.Join(ids, "|"), append([]ride{}, path...), fare + vot*gameapi.Money(minutes), fare, minutes})
+			rows := append(
+				result[at],
+				itinerary{
+					strings.Join(ids, "|"),
+					append([]ride{}, path...),
+					fare + vot*gameapi.Money(minutes),
+					fare,
+					minutes,
+				},
+			)
 			sort.Slice(rows, func(i, j int) bool {
 				if rows[i].cost != rows[j].cost {
 					return rows[i].cost < rows[j].cost
@@ -171,7 +204,10 @@ func (w World) outside(from, to gameapi.MarketCity, class string) []gameapi.Mode
 	}
 	out := []gameapi.ModeOffer{}
 	add := func(mode string, fare gameapi.Money, minutes int) {
-		out = append(out, gameapi.ModeOffer{Mode: mode, Fare: fare, Minutes: minutes, Generalized: fare + vot*gameapi.Money(minutes)})
+		out = append(
+			out,
+			gameapi.ModeOffer{Mode: mode, Fare: fare, Minutes: minutes, Generalized: fare + vot*gameapi.Money(minutes)},
+		)
 	}
 	if from.RoadRegion == to.RoadRegion {
 		add("road", 800+gameapi.Money(km)*12, 30+(km*60+79)/80)

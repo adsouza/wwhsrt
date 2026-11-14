@@ -33,7 +33,12 @@ func TestEqualEarthAndPickingTransform(t *testing.T) {
 
 func TestPhoneCanInspectHokkaidoCorridor(t *testing.T) {
 	c := New(390, 680)
-	points := []Point{Project(41.904, 140.648), Project(42.514, 140.38), Project(42.63, 141.6), Project(43.0687, 141.3507)}
+	points := []Point{
+		Project(41.904, 140.648),
+		Project(42.514, 140.38),
+		Project(42.63, 141.6),
+		Project(43.0687, 141.3507),
+	}
 	c.Focus(points)
 	if c.Zoom <= 8 {
 		t.Fatal("regional zoom leaves the short corridor too small on a phone")

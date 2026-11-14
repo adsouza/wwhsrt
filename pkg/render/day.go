@@ -93,7 +93,15 @@ func PickTrain(c mapview.Camera, f gameapi.Frame, minute float64, at mapview.Poi
 func TrainDescription(c mapview.Camera, f gameapi.Frame, s ui.State, minute float64) string {
 	for _, p := range TrainPositions(c, f, minute) {
 		if p.ID == s.SelectedTrain {
-			return fmt.Sprintf("%s: %s · %s: %d km/h · %s: %.1f%%", ui.Text(s.Locale, "nextStop"), ui.Text(s.Locale, string(p.Next)), ui.Text(s.Locale, "averageSpeed"), p.Speed, ui.Text(s.Locale, "networkLoad"), float64(p.LoadPermille)/10)
+			return fmt.Sprintf(
+				"%s: %s · %s: %d km/h · %s: %.1f%%",
+				ui.Text(s.Locale, "nextStop"),
+				ui.Text(s.Locale, string(p.Next)),
+				ui.Text(s.Locale, "averageSpeed"),
+				p.Speed,
+				ui.Text(s.Locale, "networkLoad"),
+				float64(p.LoadPermille)/10,
+			)
 		}
 	}
 	for _, trip := range f.Day {
@@ -120,7 +128,15 @@ func (m *Map) drawDay(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s ui
 		}
 		vector.FillRect(dst, float32(at.X-13), float32(at.Y-7), 26, 14, p.Action, true)
 		vector.FillRect(dst, float32(at.X-10), float32(at.Y-4), 20, 5, p.Surface, true)
-		vector.FillRect(dst, float32(at.X-10), float32(at.Y-4), 20*float32(train.LoadPermille)/1000, 5, p.Construction, true)
+		vector.FillRect(
+			dst,
+			float32(at.X-10),
+			float32(at.Y-4),
+			20*float32(train.LoadPermille)/1000,
+			5,
+			p.Construction,
+			true,
+		)
 	}
 	if s.Watching {
 		vector.FillRect(dst, float32(c.Width-78), 12, 66, 28, p.Surface, true)

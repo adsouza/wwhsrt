@@ -37,12 +37,34 @@ func TestNativePanelsFitAvailableWidth(t *testing.T) {
 						if width < 800 {
 							panel, mapWidth = width, width
 						}
-						g := &Game{Port: port, Frame: port.Snapshot(), width: width, height: 844,
-							Map: &render.Map{Font: font}, Camera: mapview.Camera{Width: float64(mapWidth), Height: 300},
-							State: ui.State{Locale: locale, View: view, Dark: dark, FromCity: "shin_hakodate_hokuto", ToCity: "sapporo", AlignmentID: "mountain", ServiceCorridor: "tokyo-nagoya", Frequency: 6, Fare: 9000, LoanAmount: "1000000", DraftName: "晨曦国际高速铁路运输与基础设施开发公司"}}
+						g := &Game{
+							Port:   port,
+							Frame:  port.Snapshot(),
+							width:  width,
+							height: 844,
+							Map:    &render.Map{Font: font},
+							Camera: mapview.Camera{Width: float64(mapWidth), Height: 300},
+							State: ui.State{
+								Locale:          locale,
+								View:            view,
+								Dark:            dark,
+								FromCity:        "shin_hakodate_hokuto",
+								ToCity:          "sapporo",
+								AlignmentID:     "mountain",
+								ServiceCorridor: "tokyo-nagoya",
+								Frequency:       6,
+								Fare:            9000,
+								LoanAmount:      "1000000",
+								DraftName:       "晨曦国际高速铁路运输与基础设施开发公司",
+							},
+						}
 						g.host.build(g)
 						if w, _ := g.host.scroll.PreferredSize(); w > g.host.scroll.ViewRect().Dx() {
-							t.Errorf("sidebar content needs %d px but viewport has %d px", w, g.host.scroll.ViewRect().Dx())
+							t.Errorf(
+								"sidebar content needs %d px but viewport has %d px",
+								w,
+								g.host.scroll.ViewRect().Dx(),
+							)
 						}
 						footer := g.host.ui.Container.Children()[1]
 						if w, _ := footer.PreferredSize(); w > panel {

@@ -12,7 +12,14 @@ import (
 	"wwhsrt/pkg/ui"
 )
 
-func (h *host) financeForm(g *Game, t func(string) string, label nativeLabel, button nativeButton, content *widget.Container, width int) {
+func (h *host) financeForm(
+	g *Game,
+	t func(string) string,
+	label nativeLabel,
+	button nativeButton,
+	content *widget.Container,
+	width int,
+) {
 	p := ui.PaletteFor(g.State)
 	remaining := g.Frame.DebtLimit - g.Frame.Debt
 	label(t("creditAvailable")+"\n"+ui.Cash(remaining), 15)
@@ -34,7 +41,24 @@ func (h *host) financeForm(g *Game, t func(string) string, label nativeLabel, bu
 			note.Label = t("loanInterest") + "\n" + ui.Cash((g.Frame.Debt+amount+599)/600-(g.Frame.Debt+599)/600)
 		}
 	}
-	input := widget.NewTextInput(widget.TextInputOpts.WidgetOpts(widget.WidgetOpts.MinSize(60, 44), widget.WidgetOpts.LayoutData(widget.RowLayoutData{Stretch: true})), widget.TextInputOpts.Image(&widget.TextInputImage{Idle: uimage.NewNineSliceColor(p.Control), Disabled: uimage.NewNineSliceColor(p.Disabled)}), widget.TextInputOpts.Face(&face), widget.TextInputOpts.Color(&widget.TextInputColor{Idle: p.Text, Disabled: p.Muted, Caret: p.Accent}), widget.TextInputOpts.Padding(widget.NewInsetsSimple(10)), widget.TextInputOpts.ChangedHandler(func(a *widget.TextInputChangedEventArgs) { g.State.LoanAmount = a.InputText; h.persist(g); update() }))
+	input := widget.NewTextInput(
+		widget.TextInputOpts.WidgetOpts(
+			widget.WidgetOpts.MinSize(60, 44),
+			widget.WidgetOpts.LayoutData(widget.RowLayoutData{Stretch: true}),
+		),
+		widget.TextInputOpts.Image(
+			&widget.TextInputImage{
+				Idle:     uimage.NewNineSliceColor(p.Control),
+				Disabled: uimage.NewNineSliceColor(p.Disabled),
+			},
+		),
+		widget.TextInputOpts.Face(&face),
+		widget.TextInputOpts.Color(&widget.TextInputColor{Idle: p.Text, Disabled: p.Muted, Caret: p.Accent}),
+		widget.TextInputOpts.Padding(widget.NewInsetsSimple(10)),
+		widget.TextInputOpts.ChangedHandler(
+			func(a *widget.TextInputChangedEventArgs) { g.State.LoanAmount = a.InputText; h.persist(g); update() },
+		),
+	)
 	input.SetText(g.State.LoanAmount)
 	h.loanInput = input
 	content.AddChild(input)
@@ -57,7 +81,10 @@ func (h *host) financeProject(g *Game, t func(string) string, label nativeLabel,
 		})
 		if gap := q.Shortfall; gap > 0 {
 			label(t("shortfallInterest")+"\n"+ui.Cash((g.Frame.Debt+gap+599)/600-(g.Frame.Debt+599)/600), 14)
-			b := button(t("borrowShortfall")+"\n"+ui.Cash(gap), func() { g.State.LoanAmount = ui.DollarInput(gap); h.send(g, gameapi.TakeLoan) })
+			b := button(
+				t("borrowShortfall")+"\n"+ui.Cash(gap),
+				func() { g.State.LoanAmount = ui.DollarInput(gap); h.send(g, gameapi.TakeLoan) },
+			)
 			b.GetWidget().Disabled = h.busy || gap > g.Frame.DebtLimit-g.Frame.Debt
 		}
 		label(t("fundingLoanHelp"), 14)

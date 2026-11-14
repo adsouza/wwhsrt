@@ -120,7 +120,14 @@ func (h *host) windowUpdate(g *Game) bool {
 			w, height := ebiten.WindowSize()
 			if w >= 320 && height >= 480 && m != nil {
 				x, y := ebiten.WindowPosition()
-				placement := windowPlacement{Width: w, Height: height, X: x, Y: y, MonitorName: m.Name(), Maximized: ebiten.IsWindowMaximized()}
+				placement := windowPlacement{
+					Width:       w,
+					Height:      height,
+					X:           x,
+					Y:           y,
+					MonitorName: m.Name(),
+					Maximized:   ebiten.IsWindowMaximized(),
+				}
 				for i, monitor := range ebiten.AppendMonitors(nil) {
 					if monitor == m {
 						placement.MonitorIndex = i
@@ -135,7 +142,8 @@ func (h *host) windowUpdate(g *Game) bool {
 			}
 		}
 	}
-	if h.windowDirty && (h.windowClosing || now.Sub(h.windowChanged) >= 400*time.Millisecond && now.Sub(h.windowAttempt) >= time.Second) {
+	if h.windowDirty &&
+		(h.windowClosing || now.Sub(h.windowChanged) >= 400*time.Millisecond && now.Sub(h.windowAttempt) >= time.Second) {
 		h.windowAttempt = now
 		message := h.message
 		h.persist(g)

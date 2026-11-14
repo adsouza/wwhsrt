@@ -28,7 +28,8 @@ func prospectPaths(f gameapi.Frame, s ui.State) []prospectPath {
 			continue
 		}
 		a := co.Alignments[0]
-		selected := s.View == "build" && (co.FromCity == s.FromCity && co.ToCity == s.ToCity || co.FromCity == s.ToCity && co.ToCity == s.FromCity)
+		selected := s.View == "build" &&
+			(co.FromCity == s.FromCity && co.ToCity == s.ToCity || co.FromCity == s.ToCity && co.ToCity == s.FromCity)
 		if selected {
 			for _, candidate := range co.Alignments {
 				if candidate.ID == s.AlignmentID {

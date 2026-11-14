@@ -179,16 +179,31 @@ func (h *host) send(g *Game, kind string) {
 	if h.busy || h.windowClosing || h.confirmNewGame && kind != gameapi.NewGame {
 		return
 	}
-	if (kind == gameapi.AdvanceMonth || kind == gameapi.AdvanceYear) && g.State.View == "services" && ui.ServiceDirty(g.State, g.Frame) {
+	if (kind == gameapi.AdvanceMonth || kind == gameapi.AdvanceYear) && g.State.View == "services" &&
+		ui.ServiceDirty(g.State, g.Frame) {
 		h.message = "draft_not_applied"
 		g.dirty = true
 		return
 	}
 	h.busy = true
 	g.dirty = true
-	c := gameapi.Command{Kind: kind, Revision: g.Frame.Revision, Name: g.State.DraftName, CorridorID: g.State.ServiceCorridor, Frequency: g.State.Frequency, Fare: g.State.Fare}
+	c := gameapi.Command{
+		Kind:       kind,
+		Revision:   g.Frame.Revision,
+		Name:       g.State.DraftName,
+		CorridorID: g.State.ServiceCorridor,
+		Frequency:  g.State.Frequency,
+		Fare:       g.State.Fare,
+	}
 	if kind == gameapi.ExtendService {
-		forecast, err := g.Port.Forecast(gameapi.ForecastRequest{CorridorID: g.State.ServiceCorridor, Frequency: g.State.Frequency, Fare: g.State.Fare, ReplaceServiceID: g.State.ReplaceServiceID})
+		forecast, err := g.Port.Forecast(
+			gameapi.ForecastRequest{
+				CorridorID:       g.State.ServiceCorridor,
+				Frequency:        g.State.Frequency,
+				Fare:             g.State.Fare,
+				ReplaceServiceID: g.State.ReplaceServiceID,
+			},
+		)
 		if err != nil {
 			h.busy = false
 			h.message = err.Error()
@@ -299,7 +314,8 @@ func (h *host) update(g *Game) {
 		}
 		return
 	}
-	if inpututil.IsKeyJustPressed(ebiten.KeyEscape) && g.State.Help.Open && h.helpSearchField.UncommittedTextLengthInBytes() == 0 {
+	if inpututil.IsKeyJustPressed(ebiten.KeyEscape) && g.State.Help.Open &&
+		h.helpSearchField.UncommittedTextLengthInBytes() == 0 {
 		h.helpEvent(g, ui.HelpEvent{Kind: "close"})
 		return
 	}
@@ -317,7 +333,9 @@ func (h *host) update(g *Game) {
 	if g.State.View == "company" && h.loanInput != nil && h.loanInput.IsFocused() {
 		h.blurName()
 	}
-	if g.State.View == "company" && h.loanInput != nil && h.loanInput.IsFocused() && (ebiten.IsKeyPressed(ebiten.KeyMeta) || ebiten.IsKeyPressed(ebiten.KeyControl)) && inpututil.IsKeyJustPressed(ebiten.KeyA) {
+	if g.State.View == "company" && h.loanInput != nil && h.loanInput.IsFocused() &&
+		(ebiten.IsKeyPressed(ebiten.KeyMeta) || ebiten.IsKeyPressed(ebiten.KeyControl)) &&
+		inpututil.IsKeyJustPressed(ebiten.KeyA) {
 		h.loanInput.SetText(loanBefore)
 		h.loanInput.SelectAll()
 	}
@@ -405,13 +423,17 @@ func (h *host) build(g *Game) {
 		previousName = h.nameCache
 	}
 	previousLoan := h.loanInput
-	refocusLoan := previousLoan != nil && previousLoan.IsFocused() && g.State.View == "company" && ui.CompanyPane(g.State) == "finance" && !g.State.Help.Open
+	refocusLoan := previousLoan != nil && previousLoan.IsFocused() && g.State.View == "company" &&
+		ui.CompanyPane(g.State) == "finance" &&
+		!g.State.Help.Open
 	loanAllSelected := refocusLoan && previousLoan.SelectedText() == previousLoan.GetText()
 	if previousLoan != nil {
 		previousLoan.Focus(false)
 	}
 	h.loanInput = nil
-	refocusName := h.nameInput != nil && h.nameInput.IsFocused() && g.State.View == "company" && !g.State.Expanded && !h.confirmNewGame && !g.State.Help.Open
+	refocusName := h.nameInput != nil && h.nameInput.IsFocused() && g.State.View == "company" && !g.State.Expanded &&
+		!h.confirmNewGame &&
+		!g.State.Help.Open
 	h.blurName()
 	if h.nameInput != nil {
 		h.syncName(g)
@@ -446,17 +468,50 @@ func (h *host) build(g *Game) {
 	if g.State.View == "services" && ui.ServicePane(g.State) == "plan" {
 		spacing = 6
 	}
-	content := widget.NewContainer(widget.ContainerOpts.Layout(widget.NewRowLayout(widget.RowLayoutOpts.Direction(widget.DirectionVertical), widget.RowLayoutOpts.Padding(&widget.Insets{Left: 16, Right: 16, Top: 12, Bottom: 12}), widget.RowLayoutOpts.Spacing(spacing))))
+	content := widget.NewContainer(
+		widget.ContainerOpts.Layout(
+			widget.NewRowLayout(
+				widget.RowLayoutOpts.Direction(widget.DirectionVertical),
+				widget.RowLayoutOpts.Padding(&widget.Insets{Left: 16, Right: 16, Top: 12, Bottom: 12}),
+				widget.RowLayoutOpts.Spacing(spacing),
+			),
+		),
+	)
 	h.content = content
 	h.contentWidth = contentWidth
 	wrap := func(value string, size float64, width int) string {
 		return ui.WrapText(value, float64(width), func(s string) float64 { return text.Advance(s, *face(size)) })
 	}
 	label := func(value string, size float64) {
-		h.content.AddChild(widget.NewText(widget.TextOpts.Text(wrap(value, size, h.contentWidth-32), face(size), p.Text), widget.TextOpts.MaxWidth(float64(h.contentWidth-32))))
+		h.content.AddChild(
+			widget.NewText(
+				widget.TextOpts.Text(wrap(value, size, h.contentWidth-32), face(size), p.Text),
+				widget.TextOpts.MaxWidth(float64(h.contentWidth-32)),
+			),
+		)
 	}
 	button := func(title string, fn func()) *widget.Button {
-		b := widget.NewButton(widget.ButtonOpts.WidgetOpts(widget.WidgetOpts.MinSize(44, 44), widget.WidgetOpts.LayoutData(widget.RowLayoutData{Stretch: true, MaxWidth: h.contentWidth - 32})), widget.ButtonOpts.Image(&widget.ButtonImage{Idle: uimage.NewNineSliceColor(p.Control), Hover: uimage.NewNineSliceColor(p.Selected), Pressed: uimage.NewNineSliceColor(p.Pressed), Disabled: uimage.NewNineSliceColor(p.Disabled)}), widget.ButtonOpts.Text(wrap(title, 14, h.contentWidth-56), face(14), &widget.ButtonTextColor{Idle: p.Text, Disabled: p.Muted}), widget.ButtonOpts.TextPadding(widget.NewInsetsSimple(10)), widget.ButtonOpts.ClickedHandler(func(*widget.ButtonClickedEventArgs) { fn() }))
+		b := widget.NewButton(
+			widget.ButtonOpts.WidgetOpts(
+				widget.WidgetOpts.MinSize(44, 44),
+				widget.WidgetOpts.LayoutData(widget.RowLayoutData{Stretch: true, MaxWidth: h.contentWidth - 32}),
+			),
+			widget.ButtonOpts.Image(
+				&widget.ButtonImage{
+					Idle:     uimage.NewNineSliceColor(p.Control),
+					Hover:    uimage.NewNineSliceColor(p.Selected),
+					Pressed:  uimage.NewNineSliceColor(p.Pressed),
+					Disabled: uimage.NewNineSliceColor(p.Disabled),
+				},
+			),
+			widget.ButtonOpts.Text(
+				wrap(title, 14, h.contentWidth-56),
+				face(14),
+				&widget.ButtonTextColor{Idle: p.Text, Disabled: p.Muted},
+			),
+			widget.ButtonOpts.TextPadding(widget.NewInsetsSimple(10)),
+			widget.ButtonOpts.ClickedHandler(func(*widget.ButtonClickedEventArgs) { fn() }),
+		)
 		h.content.AddChild(b)
 		return b
 	}
@@ -542,13 +597,27 @@ func (h *host) build(g *Game) {
 		oldScroll = h.scroll.ScrollTop
 	}
 	scrollRect := image.Rect(x, y, x+contentWidth, y+max(1, height))
-	scroll := widget.NewScrollContainer(widget.ScrollContainerOpts.Content(content), widget.ScrollContainerOpts.StretchContentWidth(), widget.ScrollContainerOpts.Image(&widget.ScrollContainerImage{Idle: uimage.NewNineSliceColor(p.Background), Mask: uimage.NewNineSliceColor(color.White)}), widget.ScrollContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(scrollRect)))
+	scroll := widget.NewScrollContainer(
+		widget.ScrollContainerOpts.Content(content),
+		widget.ScrollContainerOpts.StretchContentWidth(),
+		widget.ScrollContainerOpts.Image(
+			&widget.ScrollContainerImage{
+				Idle: uimage.NewNineSliceColor(p.Background),
+				Mask: uimage.NewNineSliceColor(color.White),
+			},
+		),
+		widget.ScrollContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(scrollRect)),
+	)
 	scroll.SetLocation(scrollRect)
 	scroll.ScrollTop = oldScroll
 	h.scroll = scroll
 	h.lastView = g.State.View
 	root.AddChild(scroll)
-	footer := widget.NewContainer(widget.ContainerOpts.Layout(placed{}), widget.ContainerOpts.BackgroundImage(uimage.NewNineSliceColor(p.Surface)), widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(h.workspace.Footer)))
+	footer := widget.NewContainer(
+		widget.ContainerOpts.Layout(placed{}),
+		widget.ContainerOpts.BackgroundImage(uimage.NewNineSliceColor(p.Surface)),
+		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(h.workspace.Footer)),
+	)
 	status := t("saved")
 	if h.message != "" {
 		status = t(h.message)
@@ -563,7 +632,11 @@ func (h *host) build(g *Game) {
 		statusWidth = fw - 24
 		statusRect = image.Rect(12, 0, fw-12, 32)
 	}
-	h.statusLabel = widget.NewText(widget.TextOpts.Text(wrap(status, 12, statusWidth-12), face(12), p.Text), widget.TextOpts.MaxWidth(float64(statusWidth-12)), widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(statusRect)))
+	h.statusLabel = widget.NewText(
+		widget.TextOpts.Text(wrap(status, 12, statusWidth-12), face(12), p.Text),
+		widget.TextOpts.MaxWidth(float64(statusWidth-12)),
+		widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(statusRect)),
+	)
 	footer.AddChild(h.statusLabel)
 	start, bw, by := fw-276, 132, 8
 	if h.workspace.Compact {
@@ -577,7 +650,13 @@ func (h *host) build(g *Game) {
 		}
 		endWidth := fw - 132 - start
 		notice := t("campaignEndTitle") + "\n" + ui.CampaignEndDetail(g.State.Locale, g.Frame)
-		footer.AddChild(widget.NewText(widget.TextOpts.Text(wrap(notice, 12, endWidth), face(12), p.Text), widget.TextOpts.MaxWidth(float64(endWidth)), widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(image.Rect(start, by, start+endWidth, by+44)))))
+		footer.AddChild(
+			widget.NewText(
+				widget.TextOpts.Text(wrap(notice, 12, endWidth), face(12), p.Text),
+				widget.TextOpts.MaxWidth(float64(endWidth)),
+				widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(image.Rect(start, by, start+endWidth, by+44))),
+			),
+		)
 		b := h.fixedButton(g, t("campaignRestart"), image.Rect(fw-124, by, fw-8, by+44), func() { h.openNewGame(g) })
 		b.GetWidget().Disabled = h.busy
 		h.actions["campaign-new-game"] = b
@@ -605,12 +684,43 @@ func (h *host) build(g *Game) {
 	}
 	if g.State.Expanded {
 		root = widget.NewContainer(widget.ContainerOpts.Layout(placed{}))
-		b := widget.NewButton(widget.ButtonOpts.WidgetOpts(widget.WidgetOpts.LayoutData(image.Rect(max(0, g.width-280), 12, g.width-12, 60))), widget.ButtonOpts.Image(&widget.ButtonImage{Idle: uimage.NewNineSliceColor(p.Control), Hover: uimage.NewNineSliceColor(p.Control), Pressed: uimage.NewNineSliceColor(p.Control)}), widget.ButtonOpts.Text(t("backPlanner"), face(15), &widget.ButtonTextColor{Idle: p.Text, Disabled: p.Muted}), widget.ButtonOpts.ClickedHandler(func(*widget.ButtonClickedEventArgs) { g.State.Expanded = false; h.layout(g); g.dirty = true }))
+		b := widget.NewButton(
+			widget.ButtonOpts.WidgetOpts(
+				widget.WidgetOpts.LayoutData(image.Rect(max(0, g.width-280), 12, g.width-12, 60)),
+			),
+			widget.ButtonOpts.Image(
+				&widget.ButtonImage{
+					Idle:    uimage.NewNineSliceColor(p.Control),
+					Hover:   uimage.NewNineSliceColor(p.Control),
+					Pressed: uimage.NewNineSliceColor(p.Control),
+				},
+			),
+			widget.ButtonOpts.Text(
+				t("backPlanner"),
+				face(15),
+				&widget.ButtonTextColor{Idle: p.Text, Disabled: p.Muted},
+			),
+			widget.ButtonOpts.ClickedHandler(
+				func(*widget.ButtonClickedEventArgs) { g.State.Expanded = false; h.layout(g); g.dirty = true },
+			),
+		)
 		root.AddChild(b)
 		h.mapControls = append(h.mapControls, image.Rect(max(0, g.width-280), 12, g.width-12, 60))
 		if g.State.View == "build" {
 			contentWidth = g.width - 20
-			content = widget.NewContainer(widget.ContainerOpts.Layout(widget.NewRowLayout(widget.RowLayoutOpts.Direction(widget.DirectionVertical), widget.RowLayoutOpts.Padding(widget.NewInsetsSimple(10)), widget.RowLayoutOpts.Spacing(4))), widget.ContainerOpts.BackgroundImage(uimage.NewNineSliceColor(p.Surface)), widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(image.Rect(0, int(g.Camera.Height), g.width, g.height))))
+			content = widget.NewContainer(
+				widget.ContainerOpts.Layout(
+					widget.NewRowLayout(
+						widget.RowLayoutOpts.Direction(widget.DirectionVertical),
+						widget.RowLayoutOpts.Padding(widget.NewInsetsSimple(10)),
+						widget.RowLayoutOpts.Spacing(4),
+					),
+				),
+				widget.ContainerOpts.BackgroundImage(uimage.NewNineSliceColor(p.Surface)),
+				widget.ContainerOpts.WidgetOpts(
+					widget.WidgetOpts.LayoutData(image.Rect(0, int(g.Camera.Height), g.width, g.height)),
+				),
+			)
 			h.content = content
 			h.contentWidth = contentWidth
 			label(t("prospectHint"), 14)

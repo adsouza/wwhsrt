@@ -33,7 +33,12 @@ func (h *host) configureSidebarScroll(g *Game, root *widget.Container) {
 		}),
 		widget.SliderOpts.Images(
 			&widget.SliderTrackImage{Idle: uimage.NewNineSliceColor(p.Control)},
-			&widget.ButtonImage{Idle: uimage.NewNineSliceColor(p.Accent), Hover: uimage.NewNineSliceColor(p.Text), Pressed: uimage.NewNineSliceColor(p.Pressed)}),
+			&widget.ButtonImage{
+				Idle:    uimage.NewNineSliceColor(p.Accent),
+				Hover:   uimage.NewNineSliceColor(p.Text),
+				Pressed: uimage.NewNineSliceColor(p.Pressed),
+			},
+		),
 		widget.SliderOpts.ChangedHandler(func(a *widget.SliderChangedEventArgs) {
 			if h.scroll == scroll && !g.dirty && !g.State.Expanded {
 				h.setSidebarScroll(float64(a.Current) / sidebarScrollSteps)
@@ -73,7 +78,9 @@ func (h *host) scrollSidebar(pixels float64) {
 }
 
 func (h *host) sidebarKeyboard(g *Game) {
-	editing := h.routeSearch != nil && h.routeSearch.IsFocused() || g.State.Help.Open && h.helpSearchField.IsFocused() || g.State.View == "company" && (h.field.IsFocused() || h.loanInput != nil && h.loanInput.IsFocused())
+	editing := h.routeSearch != nil && h.routeSearch.IsFocused() ||
+		g.State.Help.Open && h.helpSearchField.IsFocused() ||
+		g.State.View == "company" && (h.field.IsFocused() || h.loanInput != nil && h.loanInput.IsFocused())
 	if h.scroll == nil || g.State.Expanded || editing {
 		return
 	}

@@ -32,7 +32,15 @@ func TestNativeProspectsMapListDragAndCommittedAvailability(t *testing.T) {
 	f := p.Snapshot()
 	for _, locale := range []string{"en", "zh-Hans"} {
 		for _, size := range [][2]int{{390, 844}, {1280, 850}} {
-			g := &Game{Port: p, Frame: f, Map: m, width: size[0], height: size[1], Camera: mapview.New(800, 700), State: ui.State{Locale: locale, View: "map", FromCity: "arbitrary", ToCity: "other"}}
+			g := &Game{
+				Port:   p,
+				Frame:  f,
+				Map:    m,
+				width:  size[0],
+				height: size[1],
+				Camera: mapview.New(800, 700),
+				State:  ui.State{Locale: locale, View: "map", FromCity: "arbitrary", ToCity: "other"},
+			}
 			g.host.layout(g)
 			co := ui.ConstructionOpportunities(f)[0]
 			path := co.Alignments[0].Path
@@ -73,7 +81,10 @@ func TestNativeProspectsMapListDragAndCommittedAvailability(t *testing.T) {
 				t.Fatal("cannot browse full map")
 			}
 			g.State.Expanded = false
-			g.Frame.Projects = append(append([]gameapi.Project{}, f.Projects...), gameapi.Project{CorridorID: other.ID, Ready: 100, AlignmentID: other.Alignments[0].ID})
+			g.Frame.Projects = append(
+				append([]gameapi.Project{}, f.Projects...),
+				gameapi.Project{CorridorID: other.ID, Ready: 100, AlignmentID: other.Alignments[0].ID},
+			)
 			g.host.build(g)
 			if g.host.actions["prospect-"+other.ID] != nil {
 				t.Fatal("started line stayed in prospects")
@@ -102,10 +113,30 @@ func TestNativeWorldwideProspectPickerFitsAndSelectsDedicatedHSR(t *testing.T) {
 	if len(ui.ConstructionOpportunities(f)) != 74 {
 		t.Fatal("catalog incomplete")
 	}
-	for _, target := range []string{"launch_26_lisbon__porto", "launch_71_houston__austin", "launch_72_tsuruga__maibara", "launch_73_valencia__camp_de_tarragona", "launch_74_porto__vigo"} {
+	for _, target := range []string{
+		"launch_26_lisbon__porto",
+		"launch_71_houston__austin",
+		"launch_72_tsuruga__maibara",
+		"launch_73_valencia__camp_de_tarragona",
+		"launch_74_porto__vigo",
+	} {
 		for _, locale := range []string{"en", "zh-Hans"} {
 			for _, size := range [][2]int{{320, 480}, {1440, 900}} {
-				g := &Game{Port: port, Frame: f, Map: m, width: size[0], height: size[1], Camera: mapview.New(800, 700), State: ui.State{Locale: locale, View: "build", FromCity: "tsuruga", ToCity: "osaka", AlignmentID: "mountain"}}
+				g := &Game{
+					Port:   port,
+					Frame:  f,
+					Map:    m,
+					width:  size[0],
+					height: size[1],
+					Camera: mapview.New(800, 700),
+					State: ui.State{
+						Locale:      locale,
+						View:        "build",
+						FromCity:    "tsuruga",
+						ToCity:      "osaka",
+						AlignmentID: "mountain",
+					},
+				}
 				g.host.layout(g)
 				g.host.build(g)
 				if len(g.host.combos) == 0 {

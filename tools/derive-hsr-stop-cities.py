@@ -51,6 +51,7 @@ def km(lat1, lon1, lat2, lon2):
 def track_components(encoded):
     import base64
     import zlib
+
     lines = []
     for deltas in json.loads(zlib.decompress(base64.b64decode(encoded))):
         x = y = 0
@@ -123,9 +124,10 @@ def mollweide(lat, lon, radius=6378137.0):
 
 def wkb_polygons(blob):
     import struct
+
     flags = blob[3]
     envelope = {0: 0, 1: 32, 2: 48, 3: 48, 4: 64}[(flags >> 1) & 7]
-    data, pos = blob[8 + envelope:], 0
+    data, pos = blob[8 + envelope :], 0
 
     def read(fmt, little):
         nonlocal pos
@@ -169,15 +171,25 @@ def inside(x, y, polygons):
 
 def load_ghsl(path):
     import sqlite3
+
     db = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
     centres = []
     for uc_id, name, country, pop, blob in db.execute(
-            f"SELECT ID_UC_G0, GC_UCN_MAI_2025, GC_CNT_UNN_2025, GC_POP_TOT_2025, geom FROM {GHSL_TABLE}"):
+        f"SELECT ID_UC_G0, GC_UCN_MAI_2025, GC_CNT_UNN_2025, GC_POP_TOT_2025, geom FROM {GHSL_TABLE}"
+    ):
         polygons = wkb_polygons(blob)
         xs = [x for rings in polygons for x, _ in rings[0]]
         ys = [y for rings in polygons for _, y in rings[0]]
-        centres.append({"id": uc_id, "name": name, "country": country, "population": round(pop),
-                        "bbox": (min(xs), min(ys), max(xs), max(ys)), "polygons": polygons})
+        centres.append(
+            {
+                "id": uc_id,
+                "name": name,
+                "country": country,
+                "population": round(pop),
+                "bbox": (min(xs), min(ys), max(xs), max(ys)),
+                "polygons": polygons,
+            }
+        )
     return centres
 
 
@@ -209,7 +221,7 @@ def main(overlay_path, geonames_path, ghsl_path=None):
     html = Path(overlay_path).read_text(encoding="utf-8")
     marker = 'id="wwhsrt-network-data">'
     start = html.index(marker) + len(marker)
-    data = json.loads(html[start:html.index("</script>", start)])
+    data = json.loads(html[start : html.index("</script>", start)])
     unlinked = set(data["stationMetadata"]["stationsWithoutMappedLink"])
 
     cities = []
@@ -239,8 +251,17 @@ def main(overlay_path, geonames_path, ghsl_path=None):
             unassigned += 1
             continue
         city, _ = max(candidates, key=lambda t: (t[0][5], -t[1], -t[0][0]))
-        entry = agg.setdefault(city[0], {"city": city, "names": set(), "tiers": collections.Counter(), "linked": 0,
-                                         "components": set(), "points": []})
+        entry = agg.setdefault(
+            city[0],
+            {
+                "city": city,
+                "names": set(),
+                "tiers": collections.Counter(),
+                "linked": 0,
+                "components": set(),
+                "points": [],
+            },
+        )
         entry["points"].append((lat, lon))
         component = nearest_component(vertices, lat, lon, STATION_TRACK_KM)
         if component is not None:
@@ -266,18 +287,25 @@ def main(overlay_path, geonames_path, ghsl_path=None):
         if dist <= METRO_KM:
             covered += 1
             continue
-        rows.append({
-            "geonameid": gid, "city": c[1], "country_code": c[4], "population": c[5],
-            "lat": c[2], "lng": c[3],
-            "evidence": min(entry["tiers"], key=TIER_ORDER.get),
-            "stations": sum(entry["tiers"].values()),
-            "stations_with_mapped_link": entry["linked"],
-            "tagged_or_published": entry["tiers"]["tagged_stop"] + entry["tiers"]["operator_published"],
-            "sample_stations": "; ".join(sorted(entry["names"])[:3]),
-            "nearest_metro": metro, "nearest_metro_km": round(dist),
-            "_components": entry["components"],
-            "_points": entry["points"],
-        })
+        rows.append(
+            {
+                "geonameid": gid,
+                "city": c[1],
+                "country_code": c[4],
+                "population": c[5],
+                "lat": c[2],
+                "lng": c[3],
+                "evidence": min(entry["tiers"], key=TIER_ORDER.get),
+                "stations": sum(entry["tiers"].values()),
+                "stations_with_mapped_link": entry["linked"],
+                "tagged_or_published": entry["tiers"]["tagged_stop"] + entry["tiers"]["operator_published"],
+                "sample_stations": "; ".join(sorted(entry["names"])[:3]),
+                "nearest_metro": metro,
+                "nearest_metro_km": round(dist),
+                "_components": entry["components"],
+                "_points": entry["points"],
+            }
+        )
     component_cities = collections.defaultdict(set)
     for row in rows:
         for component in row["_components"]:
@@ -286,8 +314,15 @@ def main(overlay_path, geonames_path, ghsl_path=None):
         comps = row.pop("_components")
         reached = sorted(set().union(*(component_metros[c] for c in comps))) if comps else []
         others = set().union(*(component_cities[c] for c in comps)) - {row["geonameid"]} if comps else set()
-        row["corridor_class"] = ("no_track_match" if not comps else "reaches_metro" if reached
-                                 else "candidate_pair" if others else "isolated")
+        row["corridor_class"] = (
+            "no_track_match"
+            if not comps
+            else "reaches_metro"
+            if reached
+            else "candidate_pair"
+            if others
+            else "isolated"
+        )
         row["component_metros"] = "; ".join(reached[:4]) + ("; …" if len(reached) > 4 else "")
         row["component_other_cities"] = len(others)
     evidence = {}
@@ -337,55 +372,110 @@ def main(overlay_path, geonames_path, ghsl_path=None):
             writer.writerow({"rank": rank, **row})
 
     strong = [r for r in rows if r["evidence"] != "proximity_only"]
-    thresholds = {f">={t}": {"all": sum(r["population"] >= t for r in rows), "tagged_or_published": sum(r["population"] >= t for r in strong)}
-                  for t in (1_000_000, 500_000, 250_000, 100_000)}
+    thresholds = {
+        f">={t}": {
+            "all": sum(r["population"] >= t for r in rows),
+            "tagged_or_published": sum(r["population"] >= t for r in strong),
+        }
+        for t in (1_000_000, 500_000, 250_000, 100_000)
+    }
     meta = {
         "schema_version": 1,
         "generated_on": datetime.date.today().isoformat(),
-        "status": "Screening candidates for the planned city catalog; not qualified starting infrastructure or service stops",
+        "status": "Screening candidates for the planned city catalog; "
+        "not qualified starting infrastructure or service stops",
         "inputs": {
-            "station_layer": {"description": "Launch network preview station candidates (OpenStreetMap via QLever)",
-                              "source_hashes": data["stationMetadata"]["sourceHashes"], "station_count": len(data["stations"])},
-            "geonames": {"file": Path(geonames_path).name, "sha256": sha256(geonames_path),
-                         "source": "https://download.geonames.org/export/dump/cities15000.zip",
-                         "license": "CC BY 4.0", "attribution": "GeoNames (https://www.geonames.org/)"},
+            "station_layer": {
+                "description": "Launch network preview station candidates (OpenStreetMap via QLever)",
+                "source_hashes": data["stationMetadata"]["sourceHashes"],
+                "station_count": len(data["stations"]),
+            },
+            "geonames": {
+                "file": Path(geonames_path).name,
+                "sha256": sha256(geonames_path),
+                "source": "https://download.geonames.org/export/dump/cities15000.zip",
+                "license": "CC BY 4.0",
+                "attribution": "GeoNames (https://www.geonames.org/)",
+            },
             "playable_metros": {"file": "playable-metros.v1.json", "sha256": sha256(METROS)},
-            "ghsl_ucdb": ({"file": Path(ghsl_path).name, "sha256": sha256(ghsl_path), "release": "R2024A V1.2",
-                           "population_field": "GC_POP_TOT_2025", "edge_tolerance_km": GHSL_FALLBACK_KM,
-                           "match_order": ["GeoNames point inside", "assigned station inside", "within edge_tolerance_km of the outline"],
-                           "overrides": {str(k): {"ucdb_id": v[0], "reason": v[1]} for k, v in GHSL_OVERRIDES.items()},
-                           "source": "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_UCDB_GLOBE_R2024A/",
-                           "license": "CC BY 4.0", "attribution": "European Commission, GHSL Urban Centre Database R2024A"}
-                          if ghsl_path else None),
-            "service_evidence": ({"file": EVIDENCE.name, "sha256": sha256(EVIDENCE), "rows": len(evidence)}
-                                 if EVIDENCE.exists() else None),
+            "ghsl_ucdb": (
+                {
+                    "file": Path(ghsl_path).name,
+                    "sha256": sha256(ghsl_path),
+                    "release": "R2024A V1.2",
+                    "population_field": "GC_POP_TOT_2025",
+                    "edge_tolerance_km": GHSL_FALLBACK_KM,
+                    "match_order": [
+                        "GeoNames point inside",
+                        "assigned station inside",
+                        "within edge_tolerance_km of the outline",
+                    ],
+                    "overrides": {str(k): {"ucdb_id": v[0], "reason": v[1]} for k, v in GHSL_OVERRIDES.items()},
+                    "source": "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_UCDB_GLOBE_R2024A/",
+                    "license": "CC BY 4.0",
+                    "attribution": "European Commission, GHSL Urban Centre Database R2024A",
+                }
+                if ghsl_path
+                else None
+            ),
+            "service_evidence": (
+                {"file": EVIDENCE.name, "sha256": sha256(EVIDENCE), "rows": len(evidence)}
+                if EVIDENCE.exists()
+                else None
+            ),
         },
-        "method": {"assign_km": ASSIGN_KM, "metro_coverage_km": METRO_KM, "station_track_km": STATION_TRACK_KM,
-                   "track_join_cell_deg": JOIN_CELL_DEG,
-                   "corridor_class_use": "Informational only; the service check decides inclusion",
-                   "corridor_classes": {"reaches_metro": "Track component comes within metro_coverage_km of a playable metro",
-                                        "candidate_pair": "No metro, but another candidate city has a station on the same component",
-                                        "isolated": "Only this city has a station on the component",
-                                        "no_track_match": "No station within station_track_km of preview track"},
-                   "assignment": "Most populous GeoNames populated place within assign_km of each station",
-                   "evidence_order": list(TIER_ORDER)},
-        "summary": {"stations_unassigned": unassigned, "cities_with_station": len(agg),
-                    "covered_by_playable_metro": covered, "candidate_cities": len(rows),
-                    "with_tagged_or_published_stop": len(strong), "population_thresholds": thresholds,
-                    "service_yes_1m_by_country": dict(collections.Counter(
-                        r["country_code"] for r in rows if r["hsr_service"] == "yes" and r["population"] >= 1_000_000).most_common()),
-                    "service_checked": {value: sum(r["hsr_service"] == value for r in rows)
-                                        for value in ("yes", "no", "uncertain", "unchecked")},
-                    "corridor_classes": {cls: {"all": sum(r["corridor_class"] == cls for r in rows),
-                                               ">=1000000": sum(r["corridor_class"] == cls and r["population"] >= 1_000_000 for r in rows)}
-                                         for cls in CORRIDOR_ORDER},
-                    "candidates_100k_by_country": dict(collections.Counter(r["country_code"] for r in rows if r["population"] >= 100_000).most_common())},
+        "method": {
+            "assign_km": ASSIGN_KM,
+            "metro_coverage_km": METRO_KM,
+            "station_track_km": STATION_TRACK_KM,
+            "track_join_cell_deg": JOIN_CELL_DEG,
+            "corridor_class_use": "Informational only; the service check decides inclusion",
+            "corridor_classes": {
+                "reaches_metro": "Track component comes within metro_coverage_km of a playable metro",
+                "candidate_pair": "No metro, but another candidate city has a station on the same component",
+                "isolated": "Only this city has a station on the component",
+                "no_track_match": "No station within station_track_km of preview track",
+            },
+            "assignment": "Most populous GeoNames populated place within assign_km of each station",
+            "evidence_order": list(TIER_ORDER),
+        },
+        "summary": {
+            "stations_unassigned": unassigned,
+            "cities_with_station": len(agg),
+            "covered_by_playable_metro": covered,
+            "candidate_cities": len(rows),
+            "with_tagged_or_published_stop": len(strong),
+            "population_thresholds": thresholds,
+            "service_yes_1m_by_country": dict(
+                collections.Counter(
+                    r["country_code"] for r in rows if r["hsr_service"] == "yes" and r["population"] >= 1_000_000
+                ).most_common()
+            ),
+            "service_checked": {
+                value: sum(r["hsr_service"] == value for r in rows) for value in ("yes", "no", "uncertain", "unchecked")
+            },
+            "corridor_classes": {
+                cls: {
+                    "all": sum(r["corridor_class"] == cls for r in rows),
+                    ">=1000000": sum(r["corridor_class"] == cls and r["population"] >= 1_000_000 for r in rows),
+                }
+                for cls in CORRIDOR_ORDER
+            },
+            "candidates_100k_by_country": dict(
+                collections.Counter(r["country_code"] for r in rows if r["population"] >= 100_000).most_common()
+            ),
+        },
         "caveats": [
-            "GeoNames populations are not a common metropolitan definition; many Chinese entries are prefecture totals.",
-            "Evidence tiers reflect OpenStreetMap tagging practice; Chinese and Japanese stations are rarely tagged as high-speed stops.",
-            "The station layer includes upgraded conventional lines and stops within 400 m of tagged track; a station is not proof of high-speed service.",
+            "GeoNames populations are not a common metropolitan definition; "
+            "many Chinese entries are prefecture totals.",
+            "Evidence tiers reflect OpenStreetMap tagging practice; "
+            "Chinese and Japanese stations are rarely tagged as high-speed stops.",
+            "The station layer includes upgraded conventional lines and stops within 400 m of tagged track; "
+            "a station is not proof of high-speed service.",
             "A fixed metro-coverage radius mishandles broad metro regions and large cities just outside it.",
-            "Track components come from a speed-tag extract; terminal approaches below the tag threshold split real networks, so metro reach (not track continuity) bridges those gaps.",
+            "Track components come from a speed-tag extract; "
+            "terminal approaches below the tag threshold split real networks, "
+            "so metro reach (not track continuity) bridges those gaps.",
         ],
     }
     OUT_META.write_text(json.dumps(meta, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")

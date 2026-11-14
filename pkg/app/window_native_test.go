@@ -55,7 +55,10 @@ func TestNativeWindowPreferencesPreserveLegacyUIAndFailedWrites(t *testing.T) {
 		t.Fatal(err)
 	}
 	frame := port.Snapshot()
-	state := ui.NewGameState(ui.State{Locale: "zh-Hans", Motion: false, HideTerrain: true, Appearance: "dark", Dark: true}, frame)
+	state := ui.NewGameState(
+		ui.State{Locale: "zh-Hans", Motion: false, HideTerrain: true, Appearance: "dark", Dark: true},
+		frame,
+	)
 	state.DraftName, state.View, state.HintDismissed = "Unsaved company draft", "company", true
 	legacy, _ := json.Marshal(state)
 	if err := os.WriteFile(preferencesPath, legacy, 0600); err != nil {
@@ -76,7 +79,8 @@ func TestNativeWindowPreferencesPreserveLegacyUIAndFailedWrites(t *testing.T) {
 	}
 	reloaded := &Game{Port: port, Frame: frame}
 	reloaded.host.init(reloaded)
-	if !reflect.DeepEqual(reloaded.State, state) || reloaded.host.window == nil || *reloaded.host.window != w || g.host.windowDirty {
+	if !reflect.DeepEqual(reloaded.State, state) || reloaded.host.window == nil || *reloaded.host.window != w ||
+		g.host.windowDirty {
 		t.Fatal("placement/UI did not round trip")
 	}
 	// A new campaign resets local drafts while preserving native placement.
@@ -84,7 +88,11 @@ func TestNativeWindowPreferencesPreserveLegacyUIAndFailedWrites(t *testing.T) {
 	reloaded.host.persist(reloaded)
 	b, _ := os.ReadFile(preferencesPath)
 	var prefs nativePreferences
-	if err := json.Unmarshal(b, &prefs); err != nil || prefs.Window == nil || *prefs.Window != w || prefs.DraftName != frame.Player.Name {
+	if err := json.Unmarshal(
+		b,
+		&prefs,
+	); err != nil || prefs.Window == nil || *prefs.Window != w ||
+		prefs.DraftName != frame.Player.Name {
 		t.Fatal("new game lost placement", err)
 	}
 	// A failed write remains pending and cannot affect the original file/game.

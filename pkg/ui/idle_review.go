@@ -38,7 +38,10 @@ func IdleHighlights(f gameapi.Frame) []IdleHighlight {
 				}
 				for _, a := range co.Alignments {
 					if a.ID == alignment && len(a.Path) > 1 {
-						out = append(out, IdleHighlight{line.CorridorID, co.ID, co.FromCity, co.ToCity, a.Path, IdleFleetOnly(line)})
+						out = append(
+							out,
+							IdleHighlight{line.CorridorID, co.ID, co.FromCity, co.ToCity, a.Path, IdleFleetOnly(line)},
+						)
 						break
 					}
 				}

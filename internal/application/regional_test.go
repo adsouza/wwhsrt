@@ -12,7 +12,13 @@ import (
 )
 
 func TestRegionalV8UpgradePreservesHistoricalAccountsAndAssets(t *testing.T) {
-	for _, fixture := range []string{"regional-v8.json", "regional-cutover-v8.json", "regional-assets-v8.json", "regional-texas-v8.json", "regional-korea-v8.json"} {
+	for _, fixture := range []string{
+		"regional-v8.json",
+		"regional-cutover-v8.json",
+		"regional-assets-v8.json",
+		"regional-texas-v8.json",
+		"regional-korea-v8.json",
+	} {
 		t.Run(fixture, func(t *testing.T) {
 			raw, err := os.ReadFile("testdata/" + fixture)
 			if err != nil {
@@ -20,13 +26,20 @@ func TestRegionalV8UpgradePreservesHistoricalAccountsAndAssets(t *testing.T) {
 			}
 			var env envelope
 			var old constructionPayload
-			if json.Unmarshal(raw, &env) != nil || json.Unmarshal(env.Payload, &old) != nil || env.Version != 8 || old.PublicSHA != regionalPriorSHA {
+			if json.Unmarshal(raw, &env) != nil || json.Unmarshal(env.Payload, &old) != nil || env.Version != 8 ||
+				old.PublicSHA != regionalPriorSHA {
 				t.Fatal("fixture is not genuine v8")
 			}
 			store := &memoryStore{b: raw}
 			g := openPublic(t, store)
 			f := g.Snapshot()
-			if !bytes.Equal(raw, store.b) || !reflect.DeepEqual(old.Reports, f.Reports) || old.Company != f.Player || !reflect.DeepEqual(old.Projects, f.Projects) || !reflect.DeepEqual(old.Services, f.Services) || !reflect.DeepEqual(old.Fleet, f.Fleet) || old.Debt != f.Debt || old.Pending != f.Pending || g.w.RegionalSince() != old.Months {
+			if !bytes.Equal(raw, store.b) || !reflect.DeepEqual(old.Reports, f.Reports) || old.Company != f.Player ||
+				!reflect.DeepEqual(old.Projects, f.Projects) ||
+				!reflect.DeepEqual(old.Services, f.Services) ||
+				!reflect.DeepEqual(old.Fleet, f.Fleet) ||
+				old.Debt != f.Debt ||
+				old.Pending != f.Pending ||
+				g.w.RegionalSince() != old.Months {
 				t.Fatal("read upgrade changed saved company state")
 			}
 			if fixture == "regional-texas-v8.json" {
@@ -39,26 +52,42 @@ func TestRegionalV8UpgradePreservesHistoricalAccountsAndAssets(t *testing.T) {
 						current = r
 					}
 				}
-				if !oldRoute.Open || current.Open || !reflect.DeepEqual(oldRoute.Cities, []gameapi.CityID{"houston", "dallas", "austin", "san_antonio"}) {
+				if !oldRoute.Open || current.Open ||
+					!reflect.DeepEqual(
+						oldRoute.Cities,
+						[]gameapi.CityID{"houston", "dallas", "austin", "san_antonio"},
+					) {
 					t.Fatal("existing Texas service was redirected over unbuilt new track", oldRoute, current)
 				}
 			}
 			store.fail = true
-			if _, err := g.Apply(gameapi.Command{Kind: gameapi.AdvanceMonth, Revision: f.Revision}); err == nil || g.Snapshot().Checkpoint != f.Checkpoint || !bytes.Equal(raw, store.b) {
+			if _, err := g.Apply(
+				gameapi.Command{Kind: gameapi.AdvanceMonth, Revision: f.Revision},
+			); err == nil || g.Snapshot().Checkpoint != f.Checkpoint ||
+				!bytes.Equal(raw, store.b) {
 				t.Fatal("failed migration commit changed memory/save")
 			}
 			store.fail = false
 			f = publicCommand(t, g, gameapi.Command{Kind: gameapi.AdvanceMonth})
-			if !reflect.DeepEqual(f.Reports[:old.Months], old.Reports) || openPublic(t, store).Snapshot().Checkpoint != f.Checkpoint {
+			if !reflect.DeepEqual(f.Reports[:old.Months], old.Reports) ||
+				openPublic(t, store).Snapshot().Checkpoint != f.Checkpoint {
 				t.Fatal("historical/new demand epochs cannot reload")
 			}
 			var next connectorPayload
 			json.Unmarshal(store.b, &env)
 			json.Unmarshal(env.Payload, &next)
-			if env.Version != 10 || next.Rules != "network-v10" || next.RegionalSince != old.Months || next.RegionalPriorSHA != regionalPriorSHA || next.PublicSHA != hash(assets.PublicNetwork) || next.ConstructionSince != old.ConstructionSince {
+			if env.Version != 10 || next.Rules != "network-v10" || next.RegionalSince != old.Months ||
+				next.RegionalPriorSHA != regionalPriorSHA ||
+				next.PublicSHA != hash(assets.PublicNetwork) ||
+				next.ConstructionSince != old.ConstructionSince {
 				t.Fatal("migration catalog identity/epochs incorrect")
 			}
-			for _, mutate := range []func(*connectorPayload){func(p *connectorPayload) { p.RegionalPriorSHA = "unknown" }, func(p *connectorPayload) { p.RegionalSince = -1 }, func(p *connectorPayload) { p.RegionalSince = p.Months + 1 }, func(p *connectorPayload) { p.RegionalSince = 0; p.ConstructionSince = p.Months }} {
+			for _, mutate := range []func(*connectorPayload){
+				func(p *connectorPayload) { p.RegionalPriorSHA = "unknown" },
+				func(p *connectorPayload) { p.RegionalSince = -1 },
+				func(p *connectorPayload) { p.RegionalSince = p.Months + 1 },
+				func(p *connectorPayload) { p.RegionalSince = 0; p.ConstructionSince = p.Months },
+			} {
 				bad := next
 				mutate(&bad)
 				env.Payload, _ = json.Marshal(bad)
@@ -100,7 +129,8 @@ func TestRegionalTaipeiThroughServiceCarriesPassengersAndReloads(t *testing.T) {
 	f = publicCommand(t, g, gameapi.Command{Kind: gameapi.AdvanceMonth})
 	carried := false
 	for _, j := range f.Network.Journeys {
-		if (j.From == "taipei" && j.To == "kaohsiung" || j.To == "taipei" && j.From == "kaohsiung") && j.Passengers > 0 {
+		if (j.From == "taipei" && j.To == "kaohsiung" || j.To == "taipei" && j.From == "kaohsiung") &&
+			j.Passengers > 0 {
 			carried = true
 		}
 	}
@@ -182,7 +212,8 @@ func TestRegionalHoustonAustinEnablesNewSanAntonioThroughService(t *testing.T) {
 	f := publicCommand(t, g, gameapi.Command{Kind: gameapi.AdvanceMonth})
 	carried := false
 	for _, j := range f.Network.Journeys {
-		if (j.From == "houston" && j.To == "san_antonio" || j.To == "houston" && j.From == "san_antonio") && j.Passengers > 0 {
+		if (j.From == "houston" && j.To == "san_antonio" || j.To == "houston" && j.From == "san_antonio") &&
+			j.Passengers > 0 {
 			carried = true
 		}
 	}

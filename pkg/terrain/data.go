@@ -76,7 +76,8 @@ func Load(files fs.FS) (Data, error) {
 	d.Regions = manifest.Regions
 	for i := range d.Regions {
 		r := &d.Regions[i]
-		if r.Zoom != 8 || r.TilesX < 1 || r.TilesX > 4 || r.TilesY < 1 || r.TilesY > 4 || r.Width != r.TilesX*256 || r.Height != r.TilesY*256 {
+		if r.Zoom != 8 || r.TilesX < 1 || r.TilesX > 4 || r.TilesY < 1 || r.TilesY > 4 || r.Width != r.TilesX*256 ||
+			r.Height != r.TilesY*256 {
 			return d, fmt.Errorf("invalid terrain dimensions")
 		}
 		b, e = fs.ReadFile(files, "terrain/"+r.File)

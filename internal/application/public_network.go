@@ -138,18 +138,28 @@ func publicHistoryCatalog() (domain.Catalog, error) {
 			historyError = e
 			return
 		}
-		priorLaunchCatalog = priorLaunchCatalog.WithPrevious(previousPublicCatalog).WithConnectivityPrior(previousRepairCatalog)
+		priorLaunchCatalog = priorLaunchCatalog.WithPrevious(previousPublicCatalog).
+			WithConnectivityPrior(previousRepairCatalog)
 		if priorRegionalCatalog, e = archived(assets.PublicNetworkV4Compressed, regionalPriorSHA); e != nil {
 			historyError = e
 			return
 		}
-		priorRegionalCatalog = priorRegionalCatalog.WithPrevious(previousPublicCatalog).WithConnectivityPrior(previousRepairCatalog).WithConstructionPrior(priorLaunchCatalog)
+		priorRegionalCatalog = priorRegionalCatalog.WithPrevious(previousPublicCatalog).
+			WithConnectivityPrior(previousRepairCatalog).
+			WithConstructionPrior(priorLaunchCatalog)
 		if priorConnectorCatalog, e = archived(assets.PublicNetworkV5Compressed, connectorPriorSHA); e != nil {
 			historyError = e
 			return
 		}
-		priorConnectorCatalog = priorConnectorCatalog.WithPrevious(previousPublicCatalog).WithConnectivityPrior(previousRepairCatalog).WithConstructionPrior(priorLaunchCatalog).WithRegionalPrior(priorRegionalCatalog)
-		historyCatalog = importedCatalog.WithPrevious(previousPublicCatalog).WithConnectivityPrior(previousRepairCatalog).WithConstructionPrior(priorLaunchCatalog).WithRegionalPrior(priorRegionalCatalog).WithConnectorPrior(priorConnectorCatalog)
+		priorConnectorCatalog = priorConnectorCatalog.WithPrevious(previousPublicCatalog).
+			WithConnectivityPrior(previousRepairCatalog).
+			WithConstructionPrior(priorLaunchCatalog).
+			WithRegionalPrior(priorRegionalCatalog)
+		historyCatalog = importedCatalog.WithPrevious(previousPublicCatalog).
+			WithConnectivityPrior(previousRepairCatalog).
+			WithConstructionPrior(priorLaunchCatalog).
+			WithRegionalPrior(priorRegionalCatalog).
+			WithConnectorPrior(priorConnectorCatalog)
 	})
 	return historyCatalog, historyError
 }
@@ -169,7 +179,9 @@ func decodeExpanded(b []byte, c domain.Catalog) (domain.World, error) {
 		}
 		return old.UpgradeCatalog(c)
 	}
-	if env.Version != 4 && env.Version != 5 && env.Version != 6 && env.Version != 7 && env.Version != 8 && env.Version != 9 && env.Version != 10 {
+	if env.Version != 4 && env.Version != 5 && env.Version != 6 && env.Version != 7 && env.Version != 8 &&
+		env.Version != 9 &&
+		env.Version != 10 {
 		return bad()
 	}
 	var p expandedPayload
@@ -181,21 +193,43 @@ func decodeExpanded(b []byte, c domain.Catalog) (domain.World, error) {
 	connectorSince := 0
 	if env.Version == 10 {
 		var modern connectorPayload
-		if strict(env.Payload, &modern) != nil || !complete(env.Payload, reflect.TypeOf(modern)) || modern.ConnectorPriorSHA != connectorPriorSHA || modern.RegionalPriorSHA != regionalPriorSHA || modern.LaunchPriorSHA != launchPriorSHA || modern.EconomySHA != economySHA || modern.PriorPublicSHA != publicV1SHA || modern.PreviousRepairSHA != previousRepairSHA || modern.Rules != "network-v10" {
+		if strict(env.Payload, &modern) != nil || !complete(env.Payload, reflect.TypeOf(modern)) ||
+			modern.ConnectorPriorSHA != connectorPriorSHA ||
+			modern.RegionalPriorSHA != regionalPriorSHA ||
+			modern.LaunchPriorSHA != launchPriorSHA ||
+			modern.EconomySHA != economySHA ||
+			modern.PriorPublicSHA != publicV1SHA ||
+			modern.PreviousRepairSHA != previousRepairSHA ||
+			modern.Rules != "network-v10" {
 			return bad()
 		}
 		p = modern.expandedPayload
-		economySince, topologySince, connectivitySince, constructionSince, regionalSince, connectorSince = modern.EconomySince, modern.TopologySince, modern.ConnectivitySince, modern.ConstructionSince, modern.RegionalSince, modern.ConnectorSince
+		economySince, topologySince, connectivitySince, constructionSince, regionalSince, connectorSince =
+			modern.EconomySince, modern.TopologySince, modern.ConnectivitySince,
+			modern.ConstructionSince, modern.RegionalSince, modern.ConnectorSince
 	} else if env.Version == 9 {
 		var modern regionalPayload
-		if strict(env.Payload, &modern) != nil || !complete(env.Payload, reflect.TypeOf(modern)) || modern.RegionalPriorSHA != regionalPriorSHA || modern.LaunchPriorSHA != launchPriorSHA || modern.EconomySHA != economySHA || modern.PriorPublicSHA != publicV1SHA || modern.PreviousRepairSHA != previousRepairSHA || modern.Rules != "network-v9" {
+		if strict(env.Payload, &modern) != nil || !complete(env.Payload, reflect.TypeOf(modern)) ||
+			modern.RegionalPriorSHA != regionalPriorSHA ||
+			modern.LaunchPriorSHA != launchPriorSHA ||
+			modern.EconomySHA != economySHA ||
+			modern.PriorPublicSHA != publicV1SHA ||
+			modern.PreviousRepairSHA != previousRepairSHA ||
+			modern.Rules != "network-v9" {
 			return bad()
 		}
 		p = modern.expandedPayload
-		economySince, topologySince, connectivitySince, constructionSince, regionalSince = modern.EconomySince, modern.TopologySince, modern.ConnectivitySince, modern.ConstructionSince, modern.RegionalSince
+		economySince, topologySince, connectivitySince, constructionSince, regionalSince =
+			modern.EconomySince, modern.TopologySince, modern.ConnectivitySince,
+			modern.ConstructionSince, modern.RegionalSince
 	} else if env.Version == 8 {
 		var modern constructionPayload
-		if strict(env.Payload, &modern) != nil || !complete(env.Payload, reflect.TypeOf(modern)) || modern.LaunchPriorSHA != launchPriorSHA || modern.EconomySHA != economySHA || modern.PriorPublicSHA != publicV1SHA || modern.PreviousRepairSHA != previousRepairSHA || modern.Rules != "network-v8" {
+		if strict(env.Payload, &modern) != nil || !complete(env.Payload, reflect.TypeOf(modern)) ||
+			modern.LaunchPriorSHA != launchPriorSHA ||
+			modern.EconomySHA != economySHA ||
+			modern.PriorPublicSHA != publicV1SHA ||
+			modern.PreviousRepairSHA != previousRepairSHA ||
+			modern.Rules != "network-v8" {
 			return bad()
 		}
 		p = modern.expandedPayload
@@ -205,7 +239,11 @@ func decodeExpanded(b []byte, c domain.Catalog) (domain.World, error) {
 		constructionSince = modern.ConstructionSince
 	} else if env.Version == 7 {
 		var modern connectivityPayload
-		if strict(env.Payload, &modern) != nil || !complete(env.Payload, reflect.TypeOf(modern)) || modern.EconomySHA != economySHA || modern.PriorPublicSHA != publicV1SHA || modern.PreviousRepairSHA != previousRepairSHA || modern.Rules != "network-v7" {
+		if strict(env.Payload, &modern) != nil || !complete(env.Payload, reflect.TypeOf(modern)) ||
+			modern.EconomySHA != economySHA ||
+			modern.PriorPublicSHA != publicV1SHA ||
+			modern.PreviousRepairSHA != previousRepairSHA ||
+			modern.Rules != "network-v7" {
 			return bad()
 		}
 		p = modern.expandedPayload
@@ -214,7 +252,10 @@ func decodeExpanded(b []byte, c domain.Catalog) (domain.World, error) {
 		connectivitySince = modern.ConnectivitySince
 	} else if env.Version == 6 {
 		var modern topologyPayload
-		if strict(env.Payload, &modern) != nil || !complete(env.Payload, reflect.TypeOf(modern)) || modern.EconomySHA != economySHA || modern.PriorPublicSHA != publicV1SHA || modern.Rules != "network-v6" {
+		if strict(env.Payload, &modern) != nil || !complete(env.Payload, reflect.TypeOf(modern)) ||
+			modern.EconomySHA != economySHA ||
+			modern.PriorPublicSHA != publicV1SHA ||
+			modern.Rules != "network-v6" {
 			return bad()
 		}
 		p = modern.expandedPayload
@@ -222,7 +263,9 @@ func decodeExpanded(b []byte, c domain.Catalog) (domain.World, error) {
 		topologySince = modern.TopologySince
 	} else if env.Version == 5 {
 		var modern balancedPayload
-		if strict(env.Payload, &modern) != nil || !complete(env.Payload, reflect.TypeOf(modern)) || modern.EconomySHA != economySHA || modern.Rules != "network-v5" {
+		if strict(env.Payload, &modern) != nil || !complete(env.Payload, reflect.TypeOf(modern)) ||
+			modern.EconomySHA != economySHA ||
+			modern.Rules != "network-v5" {
 			return bad()
 		}
 		p = modern.expandedPayload
@@ -249,10 +292,12 @@ func decodeExpanded(b []byte, c domain.Catalog) (domain.World, error) {
 	if env.Version < 6 {
 		expectedPublic = publicV1SHA
 	}
-	if p.PublicSHA != expectedPublic || p.ScenarioSHA != scenarioSHA || p.BusinessSHA != businessSHA || p.NetworkSHA != networkSHA {
+	if p.PublicSHA != expectedPublic || p.ScenarioSHA != scenarioSHA || p.BusinessSHA != businessSHA ||
+		p.NetworkSHA != networkSHA {
 		return bad()
 	}
-	if env.Version < 10 || topologySince > 0 || connectivitySince > 0 || constructionSince > 0 || regionalSince > 0 || connectorSince > 0 {
+	if env.Version < 10 || topologySince > 0 || connectivitySince > 0 || constructionSince > 0 || regionalSince > 0 ||
+		connectorSince > 0 {
 		var e error
 		c, e = publicHistoryCatalog()
 		if e != nil {
@@ -260,30 +305,91 @@ func decodeExpanded(b []byte, c domain.Catalog) (domain.World, error) {
 		}
 	}
 	// Epochs a save predates stay zero, which Restore reads as "not yet cut over".
-	at := domain.Cutovers{Network: p.NetworkSince, Catalog: p.CatalogSince, Economy: economySince, Topology: topologySince, Connectivity: connectivitySince, Construction: constructionSince, Regional: regionalSince, Connector: connectorSince}
+	at := domain.Cutovers{
+		Network:      p.NetworkSince,
+		Catalog:      p.CatalogSince,
+		Economy:      economySince,
+		Topology:     topologySince,
+		Connectivity: connectivitySince,
+		Construction: constructionSince,
+		Regional:     regionalSince,
+		Connector:    connectorSince,
+	}
 	if env.Version == 9 {
-		w, e := domain.Restore(priorConnectorCatalog, p.Revision, p.Months, p.Company, p.Reports, p.Projects, p.Services, p.Fleet, p.Debt, p.Pending, p.NextTrain, at)
+		w, e := domain.Restore(
+			priorConnectorCatalog,
+			p.Revision,
+			p.Months,
+			p.Company,
+			p.Reports,
+			p.Projects,
+			p.Services,
+			p.Fleet,
+			p.Debt,
+			p.Pending,
+			p.NextTrain,
+			at,
+		)
 		if e != nil {
 			return bad()
 		}
 		return w.UpgradeConnectors(c)
 	}
 	if env.Version == 8 {
-		w, e := domain.Restore(priorRegionalCatalog, p.Revision, p.Months, p.Company, p.Reports, p.Projects, p.Services, p.Fleet, p.Debt, p.Pending, p.NextTrain, at)
+		w, e := domain.Restore(
+			priorRegionalCatalog,
+			p.Revision,
+			p.Months,
+			p.Company,
+			p.Reports,
+			p.Projects,
+			p.Services,
+			p.Fleet,
+			p.Debt,
+			p.Pending,
+			p.NextTrain,
+			at,
+		)
 		if e != nil {
 			return bad()
 		}
 		return w.UpgradeRegional(c)
 	}
 	if env.Version == 7 {
-		w, e := domain.Restore(priorLaunchCatalog, p.Revision, p.Months, p.Company, p.Reports, p.Projects, p.Services, p.Fleet, p.Debt, p.Pending, p.NextTrain, at)
+		w, e := domain.Restore(
+			priorLaunchCatalog,
+			p.Revision,
+			p.Months,
+			p.Company,
+			p.Reports,
+			p.Projects,
+			p.Services,
+			p.Fleet,
+			p.Debt,
+			p.Pending,
+			p.NextTrain,
+			at,
+		)
 		if e != nil {
 			return bad()
 		}
 		return w.UpgradeConstruction(c)
 	}
 	if env.Version == 6 {
-		w, e := domain.Restore(previousRepairCatalog, p.Revision, p.Months, p.Company, p.Reports, p.Projects, p.Services, p.Fleet, p.Debt, p.Pending, p.NextTrain, at)
+		w, e := domain.Restore(
+			previousRepairCatalog,
+			p.Revision,
+			p.Months,
+			p.Company,
+			p.Reports,
+			p.Projects,
+			p.Services,
+			p.Fleet,
+			p.Debt,
+			p.Pending,
+			p.NextTrain,
+			at,
+		)
 		if e != nil {
 			return bad()
 		}
@@ -297,13 +403,39 @@ func decodeExpanded(b []byte, c domain.Catalog) (domain.World, error) {
 		}
 		pc := previousPublicCatalog
 
-		w, e := domain.Restore(pc, p.Revision, p.Months, p.Company, p.Reports, p.Projects, p.Services, p.Fleet, p.Debt, p.Pending, p.NextTrain, at)
+		w, e := domain.Restore(
+			pc,
+			p.Revision,
+			p.Months,
+			p.Company,
+			p.Reports,
+			p.Projects,
+			p.Services,
+			p.Fleet,
+			p.Debt,
+			p.Pending,
+			p.NextTrain,
+			at,
+		)
 		if e != nil {
 			return bad()
 		}
 		return w.UpgradeTopology(c)
 	}
-	return domain.Restore(c, p.Revision, p.Months, p.Company, p.Reports, p.Projects, p.Services, p.Fleet, p.Debt, p.Pending, p.NextTrain, at)
+	return domain.Restore(
+		c,
+		p.Revision,
+		p.Months,
+		p.Company,
+		p.Reports,
+		p.Projects,
+		p.Services,
+		p.Fleet,
+		p.Debt,
+		p.Pending,
+		p.NextTrain,
+		at,
+	)
 }
 
 func (g *Game) InspectMarket(from, to gameapi.CityID, class string) (gameapi.MarketRun, error) {

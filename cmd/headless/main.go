@@ -43,7 +43,9 @@ func run() error {
 		return e
 	}
 	if *name != "" {
-		if _, e = g.Apply(gameapi.Command{Kind: gameapi.RenameCompany, Revision: g.Snapshot().Revision, Name: *name}); e != nil {
+		if _, e = g.Apply(
+			gameapi.Command{Kind: gameapi.RenameCompany, Revision: g.Snapshot().Revision, Name: *name},
+		); e != nil {
 			return e
 		}
 	}

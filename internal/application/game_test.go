@@ -67,7 +67,12 @@ func TestPersistenceAndCommandFailureAreAtomic(t *testing.T) {
 	g := openTest(t, s)
 	before := g.Snapshot()
 	bytesBefore := string(s.b)
-	for _, c := range []gameapi.Command{{Kind: gameapi.AdvanceMonth, Revision: 1}, {Kind: "spend_money"}, {Kind: gameapi.RenameCompany, Name: "\n"}, {Kind: gameapi.RenameCompany, Name: "abc\u202edef"}} {
+	for _, c := range []gameapi.Command{
+		{Kind: gameapi.AdvanceMonth, Revision: 1},
+		{Kind: "spend_money"},
+		{Kind: gameapi.RenameCompany, Name: "\n"},
+		{Kind: gameapi.RenameCompany, Name: "abc\u202edef"},
+	} {
 		if _, e := g.Apply(c); e == nil {
 			t.Fatal("invalid command accepted")
 		}
@@ -170,7 +175,10 @@ func TestDevelopmentRevisionBoundPreservesRestorableState(t *testing.T) {
 	raw, _ = json.Marshal(env)
 	g = openTest(t, &memoryStore{b: raw})
 	before := g.Snapshot().Checkpoint
-	if _, e := g.Apply(gameapi.Command{Kind: gameapi.RenameCompany, Revision: 1_000_000, Name: "Next"}); e == nil || e.Error() != "action_limit" {
+	if _, e := g.Apply(
+		gameapi.Command{Kind: gameapi.RenameCompany, Revision: 1_000_000, Name: "Next"},
+	); e == nil ||
+		e.Error() != "action_limit" {
 		t.Fatal("revision boundary not enforced", e)
 	}
 	if g.Snapshot().Checkpoint != before {

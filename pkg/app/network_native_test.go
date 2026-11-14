@@ -24,7 +24,17 @@ func TestNativeNetworkViewsFit(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, command := range []gameapi.Command{{Kind: gameapi.ExtendService, CorridorID: "tokyo-osaka", ReplaceServiceID: "tokyo-nagoya", Frequency: 6, Fare: 13800, LeaseCount: 1}, {Kind: gameapi.AdvanceMonth}} {
+	for _, command := range []gameapi.Command{
+		{
+			Kind:             gameapi.ExtendService,
+			CorridorID:       "tokyo-osaka",
+			ReplaceServiceID: "tokyo-nagoya",
+			Frequency:        6,
+			Fare:             13800,
+			LeaseCount:       1,
+		},
+		{Kind: gameapi.AdvanceMonth},
+	} {
 		command.Revision = port.Snapshot().Revision
 		if _, err = port.Apply(command); err != nil {
 			t.Fatal(err)
@@ -40,7 +50,27 @@ func TestNativeNetworkViewsFit(t *testing.T) {
 						if width < 800 {
 							mapWidth = width
 						}
-						g := &Game{Port: port, Frame: f, width: width, height: 844, Map: &render.Map{Font: font}, Camera: mapview.Camera{Width: float64(mapWidth), Height: 280}, State: ui.State{Locale: locale, Dark: dark, View: view, ServiceCorridor: "tokyo-osaka", Frequency: 6, Fare: 13800, NetworkDetails: true, FleetDetails: true, Watching: true, SelectedTrain: f.Day[0].ID, ReplayMinute: 50}}
+						g := &Game{
+							Port:   port,
+							Frame:  f,
+							width:  width,
+							height: 844,
+							Map:    &render.Map{Font: font},
+							Camera: mapview.Camera{Width: float64(mapWidth), Height: 280},
+							State: ui.State{
+								Locale:          locale,
+								Dark:            dark,
+								View:            view,
+								ServiceCorridor: "tokyo-osaka",
+								Frequency:       6,
+								Fare:            13800,
+								NetworkDetails:  true,
+								FleetDetails:    true,
+								Watching:        true,
+								SelectedTrain:   f.Day[0].ID,
+								ReplayMinute:    50,
+							},
+						}
 						g.host.build(g)
 						if w, _ := g.host.scroll.PreferredSize(); w > g.host.scroll.ViewRect().Dx() {
 							t.Fatalf("network content %d wider than available %d", w, g.host.scroll.ViewRect().Dx())

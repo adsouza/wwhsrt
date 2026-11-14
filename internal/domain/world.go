@@ -43,7 +43,10 @@ func NewCatalog(rows []gameapi.Corridor) (Catalog, error) {
 			a, b = b, a
 		}
 		pair := a + "/" + b
-		if r.ID == "" || seen[r.ID] || r.FromCity == r.ToCity || r.DailyMarket < 1 || r.DailyMarket > 100000 || r.OutsideCost < 1000 || r.OutsideCost > 100000 || len(r.Alignments) < 1 {
+		if r.ID == "" || seen[r.ID] || r.FromCity == r.ToCity || r.DailyMarket < 1 || r.DailyMarket > 100000 ||
+			r.OutsideCost < 1000 ||
+			r.OutsideCost > 100000 ||
+			len(r.Alignments) < 1 {
 			return c, errCode("invalid_scenario")
 		}
 		seen[r.ID] = true
@@ -74,7 +77,17 @@ func NewCatalog(rows []gameapi.Corridor) (Catalog, error) {
 				maxPoints = 2048
 				maxKM, maxMinutes = 2000, 1000
 			}
-			if a.ID == "" || ids[a.ID] || a.KM < 1 || a.KM > maxKM || a.Minutes < 1 || a.Minutes > maxMinutes || a.SurfaceKM < 0 || a.HillKM < 0 || a.ViaductKM < 0 || a.TunnelKM < 0 || a.ConnectorKM < 0 || a.ConnectorKM > a.KM || a.SurfaceKM+a.HillKM+a.ViaductKM+a.TunnelKM != a.KM || len(a.Path) < 2 || len(a.Path) > maxPoints || (!r.Existing && (a.Months < 1 || a.Months > 120)) {
+			if a.ID == "" || ids[a.ID] || a.KM < 1 || a.KM > maxKM || a.Minutes < 1 || a.Minutes > maxMinutes ||
+				a.SurfaceKM < 0 ||
+				a.HillKM < 0 ||
+				a.ViaductKM < 0 ||
+				a.TunnelKM < 0 ||
+				a.ConnectorKM < 0 ||
+				a.ConnectorKM > a.KM ||
+				a.SurfaceKM+a.HillKM+a.ViaductKM+a.TunnelKM != a.KM ||
+				len(a.Path) < 2 ||
+				len(a.Path) > maxPoints ||
+				(!r.Existing && (a.Months < 1 || a.Months > 120)) {
 				return c, errCode("invalid_scenario")
 			}
 			ids[a.ID] = true
@@ -130,7 +143,9 @@ func (c Catalog) Corridors() []gameapi.Corridor {
 		out[i].SharedSections = append([]string{}, out[i].SharedSections...)
 		out[i].Alignments = append([]gameapi.Alignment{}, out[i].Alignments...)
 		for j := range out[i].Alignments {
-			out[i].Alignments[j].CostIntervals = append([]gameapi.ConstructionInterval(nil), out[i].Alignments[j].CostIntervals...)
+			out[i].Alignments[j].CostIntervals = append(
+				[]gameapi.ConstructionInterval(nil),
+				out[i].Alignments[j].CostIntervals...)
 			out[i].Alignments[j].Path = append([]gameapi.GeoPoint{}, out[i].Alignments[j].Path...)
 		}
 	}
@@ -175,7 +190,15 @@ type World struct {
 }
 
 func New(c Catalog) World {
-	return World{catalog: c, company: gameapi.Company{ID: "company-1", Name: "Sunrise Rail", Cash: StartingCash}, reports: []gameapi.Report{}, projects: []gameapi.Project{}, services: []gameapi.Service{{CorridorID: "tokyo-nagoya", Frequency: 6, Fare: 9000}}, fleet: []gameapi.FleetLease{{ID: 1, CorridorID: "tokyo-nagoya"}, {ID: 2, CorridorID: "tokyo-nagoya"}}, nextTrain: 3}
+	return World{
+		catalog:   c,
+		company:   gameapi.Company{ID: "company-1", Name: "Sunrise Rail", Cash: StartingCash},
+		reports:   []gameapi.Report{},
+		projects:  []gameapi.Project{},
+		services:  []gameapi.Service{{CorridorID: "tokyo-nagoya", Frequency: 6, Fare: 9000}},
+		fleet:     []gameapi.FleetLease{{ID: 1, CorridorID: "tokyo-nagoya"}, {ID: 2, CorridorID: "tokyo-nagoya"}},
+		nextTrain: 3,
+	}
 }
 func Calendar(offset int) gameapi.Month {
 	return gameapi.Month{Year: 2029 + offset/12, Month: 1 + offset%12}
@@ -264,7 +287,11 @@ func (w World) legacyForecast(q gameapi.ForecastRequest) (gameapi.Forecast, erro
 	if q.Frequency < 0 || q.Frequency > MaxFrequency || q.Fare < MinFare || q.Fare > MaxFare {
 		return gameapi.Forecast{}, errCode("invalid_service")
 	}
-	result := gameapi.Forecast{FleetNeeded: required(q.Frequency, a.Minutes), FleetAvailable: w.FleetCount(c.ID), Open: w.operational(c)}
+	result := gameapi.Forecast{
+		FleetNeeded:    required(q.Frequency, a.Minutes),
+		FleetAvailable: w.FleetCount(c.ID),
+		Open:           w.operational(c),
+	}
 	d := int64(days(Calendar(w.months)))
 	f := int64(q.Frequency)
 	if f > 0 {
@@ -307,7 +334,8 @@ func (w World) Change(c gameapi.Command) (World, error) {
 		return w, e
 	}
 	next.revision++
-	if next.company.Cash > moneyLimit || next.company.Cash < -moneyLimit || next.pending.Borrowed > moneyLimit || next.pending.Repaid > moneyLimit {
+	if next.company.Cash > moneyLimit || next.company.Cash < -moneyLimit || next.pending.Borrowed > moneyLimit ||
+		next.pending.Repaid > moneyLimit {
 		return w, errCode("cash_limit")
 	}
 	return next, nil
@@ -366,7 +394,16 @@ func (w *World) change(c gameapi.Command) error {
 		w.company.Cash -= net
 		w.pending.Construction += a.Cost
 		w.pending.Grants += a.Grant
-		w.projects = append(w.projects, gameapi.Project{CorridorID: c.CorridorID, AlignmentID: a.ID, Owner: w.company.ID, Started: w.months, Ready: w.months + a.Months})
+		w.projects = append(
+			w.projects,
+			gameapi.Project{
+				CorridorID:  c.CorridorID,
+				AlignmentID: a.ID,
+				Owner:       w.company.ID,
+				Started:     w.months,
+				Ready:       w.months + a.Months,
+			},
+		)
 	case gameapi.LeaseTrain:
 		route, ok := w.route(c.CorridorID)
 		if !ok {
@@ -411,7 +448,10 @@ func (w *World) change(c gameapi.Command) error {
 		if forecast.FleetNeeded > forecast.FleetAvailable {
 			return errCode("fleet_shortage")
 		}
-		plans := withService(w.services, gameapi.Service{CorridorID: c.CorridorID, Frequency: c.Frequency, Fare: c.Fare})
+		plans := withService(
+			w.services,
+			gameapi.Service{CorridorID: c.CorridorID, Frequency: c.Frequency, Fare: c.Fare},
+		)
 		if w.catalog.network.ID != "" {
 			if err := w.validateOwnedCapacity(plans, c.CorridorID); err != nil {
 				return err
@@ -440,7 +480,16 @@ func (w *World) change(c gameapi.Command) error {
 	return nil
 }
 func (w *World) resolve() error {
-	r := gameapi.Report{Month: Calendar(w.months), CompanyID: w.company.ID, OpeningCash: StartingCash, Construction: w.pending.Construction, Grants: w.pending.Grants, Borrowed: w.pending.Borrowed, Repaid: w.pending.Repaid, Services: []gameapi.ServiceRun{}}
+	r := gameapi.Report{
+		Month:        Calendar(w.months),
+		CompanyID:    w.company.ID,
+		OpeningCash:  StartingCash,
+		Construction: w.pending.Construction,
+		Grants:       w.pending.Grants,
+		Borrowed:     w.pending.Borrowed,
+		Repaid:       w.pending.Repaid,
+		Services:     []gameapi.ServiceRun{},
+	}
 	if len(w.reports) > 0 {
 		r.OpeningCash = w.reports[len(w.reports)-1].ClosingCash
 	}
@@ -460,7 +509,18 @@ func (w *World) resolve() error {
 				a, _ := w.alignment(co, "")
 				alignment = a.ID
 			}
-			r.Services = append(r.Services, gameapi.ServiceRun{CorridorID: service.ID, AlignmentID: alignment, RequestedFrequency: plan.Frequency, Frequency: service.Delivered, Fare: plan.Fare, Passengers: service.Boardings, Revenue: service.Revenue})
+			r.Services = append(
+				r.Services,
+				gameapi.ServiceRun{
+					CorridorID:         service.ID,
+					AlignmentID:        alignment,
+					RequestedFrequency: plan.Frequency,
+					Frequency:          service.Delivered,
+					Fare:               plan.Fare,
+					Passengers:         service.Boardings,
+					Revenue:            service.Revenue,
+				},
+			)
 			r.RunningCosts += service.Running
 			r.AccessCosts += service.Access
 			r.StationCosts += service.Handling
@@ -472,13 +532,25 @@ func (w *World) resolve() error {
 				continue
 			}
 			a, _ := w.alignment(c, "")
-			forecast, e := w.Forecast(gameapi.ForecastRequest{CorridorID: s.CorridorID, Frequency: s.Frequency, Fare: s.Fare})
+			forecast, e := w.Forecast(
+				gameapi.ForecastRequest{CorridorID: s.CorridorID, Frequency: s.Frequency, Fare: s.Fare},
+			)
 			if e != nil {
 				return e
 			}
 			r.Passengers += forecast.Passengers
 			r.Revenue += forecast.Revenue
-			r.Services = append(r.Services, gameapi.ServiceRun{CorridorID: s.CorridorID, AlignmentID: a.ID, Frequency: s.Frequency, Passengers: forecast.Passengers, Revenue: forecast.Revenue, Fare: s.Fare})
+			r.Services = append(
+				r.Services,
+				gameapi.ServiceRun{
+					CorridorID:  s.CorridorID,
+					AlignmentID: a.ID,
+					Frequency:   s.Frequency,
+					Passengers:  forecast.Passengers,
+					Revenue:     forecast.Revenue,
+					Fare:        s.Fare,
+				},
+			)
 			km := gameapi.Money(s.Frequency * 2 * a.KM * days(r.Month))
 			r.RunningCosts += km * runningPerKM
 			if c.Existing {
@@ -511,7 +583,8 @@ func (w *World) resolve() error {
 	return nil
 }
 func ValidName(name string) bool {
-	if !utf8.ValidString(name) || strings.TrimSpace(name) != name || utf8.RuneCountInString(name) < 1 || utf8.RuneCountInString(name) > 40 {
+	if !utf8.ValidString(name) || strings.TrimSpace(name) != name || utf8.RuneCountInString(name) < 1 ||
+		utf8.RuneCountInString(name) > 40 {
 		return false
 	}
 	for _, r := range name {
@@ -532,16 +605,64 @@ type Cutovers struct {
 }
 
 func (w World) cutovers() Cutovers {
-	return Cutovers{Network: w.networkSince, Catalog: w.catalogSince, Economy: w.economySince, Topology: w.topologySince, Connectivity: w.connectivitySince, Construction: w.constructionSince, Regional: w.regionalSince, Connector: w.connectorSince}
+	return Cutovers{
+		Network:      w.networkSince,
+		Catalog:      w.catalogSince,
+		Economy:      w.economySince,
+		Topology:     w.topologySince,
+		Connectivity: w.connectivitySince,
+		Construction: w.constructionSince,
+		Regional:     w.regionalSince,
+		Connector:    w.connectorSince,
+	}
 }
 
 // Restore validates the development business snapshot without executing commands.
-func Restore(c Catalog, revision uint64, months int, company gameapi.Company, reports []gameapi.Report, projects []gameapi.Project, services []gameapi.Service, fleet []gameapi.FleetLease, debt gameapi.Money, pending gameapi.CashFlows, nextTrain uint64, at Cutovers) (World, error) {
+func Restore(
+	c Catalog,
+	revision uint64,
+	months int,
+	company gameapi.Company,
+	reports []gameapi.Report,
+	projects []gameapi.Project,
+	services []gameapi.Service,
+	fleet []gameapi.FleetLease,
+	debt gameapi.Money,
+	pending gameapi.CashFlows,
+	nextTrain uint64,
+	at Cutovers,
+) (World, error) {
 	fail := func() (World, error) { return World{}, errCode("invalid_save") }
-	if months < 0 || months > CampaignMonths || revision > MaxRevision || company.ID != "company-1" || !ValidName(company.Name) || company.Cash > moneyLimit || company.Cash < -moneyLimit || reports == nil || len(reports) != months || projects == nil || services == nil || fleet == nil || len(projects) > len(c.corridors) || len(services) > len(c.corridors)+len(c.network.Routes) || debt < 0 || debt > DebtLimit || nextTrain < 3 || nextTrain > MaxRevision+3 {
+	if months < 0 || months > CampaignMonths || revision > MaxRevision || company.ID != "company-1" ||
+		!ValidName(company.Name) ||
+		company.Cash > moneyLimit ||
+		company.Cash < -moneyLimit ||
+		reports == nil ||
+		len(reports) != months ||
+		projects == nil ||
+		services == nil ||
+		fleet == nil ||
+		len(projects) > len(c.corridors) ||
+		len(services) > len(c.corridors)+len(c.network.Routes) ||
+		debt < 0 ||
+		debt > DebtLimit ||
+		nextTrain < 3 ||
+		nextTrain > MaxRevision+3 {
 		return fail()
 	}
-	w := World{catalog: c, revision: revision, months: months, company: company, reports: append([]gameapi.Report{}, reports...), projects: append([]gameapi.Project{}, projects...), services: append([]gameapi.Service{}, services...), fleet: append([]gameapi.FleetLease{}, fleet...), debt: debt, pending: pending, nextTrain: nextTrain}
+	w := World{
+		catalog:   c,
+		revision:  revision,
+		months:    months,
+		company:   company,
+		reports:   append([]gameapi.Report{}, reports...),
+		projects:  append([]gameapi.Project{}, projects...),
+		services:  append([]gameapi.Service{}, services...),
+		fleet:     append([]gameapi.FleetLease{}, fleet...),
+		debt:      debt,
+		pending:   pending,
+		nextTrain: nextTrain,
+	}
 	since := at.Network
 	if since < 0 || since > months {
 		return fail()
@@ -552,7 +673,8 @@ func Restore(c Catalog, revision uint64, months int, company gameapi.Company, re
 		return fail()
 	}
 	w.catalogSince = at.Catalog
-	if w.catalogSince < 0 || w.catalogSince > months || w.economySince < w.catalogSince || (w.catalogSince > 0 && c.prior == nil) {
+	if w.catalogSince < 0 || w.catalogSince > months || w.economySince < w.catalogSince ||
+		(w.catalogSince > 0 && c.prior == nil) {
 		return fail()
 	}
 	w.topologySince = at.Topology
@@ -560,19 +682,23 @@ func Restore(c Catalog, revision uint64, months int, company gameapi.Company, re
 		return fail()
 	}
 	w.connectivitySince = at.Connectivity
-	if w.connectivitySince < 0 || w.connectivitySince > months || (w.connectivitySince > 0 && (c.connectivityPrior == nil || w.connectivitySince < w.topologySince)) {
+	if w.connectivitySince < 0 || w.connectivitySince > months ||
+		(w.connectivitySince > 0 && (c.connectivityPrior == nil || w.connectivitySince < w.topologySince)) {
 		return fail()
 	}
 	w.constructionSince = at.Construction
-	if w.constructionSince < 0 || w.constructionSince > months || (w.constructionSince > 0 && (c.constructionPrior == nil || w.constructionSince < w.connectivitySince)) {
+	if w.constructionSince < 0 || w.constructionSince > months ||
+		(w.constructionSince > 0 && (c.constructionPrior == nil || w.constructionSince < w.connectivitySince)) {
 		return fail()
 	}
 	w.regionalSince = at.Regional
-	if w.regionalSince < 0 || w.regionalSince > months || (w.regionalSince > 0 && c.regionalPrior == nil) || (c.regionalPrior != nil && w.regionalSince < w.constructionSince) {
+	if w.regionalSince < 0 || w.regionalSince > months || (w.regionalSince > 0 && c.regionalPrior == nil) ||
+		(c.regionalPrior != nil && w.regionalSince < w.constructionSince) {
 		return fail()
 	}
 	w.connectorSince = at.Connector
-	if w.connectorSince < 0 || w.connectorSince > months || (w.connectorSince > 0 && c.connectorPrior == nil) || (c.connectorPrior != nil && w.connectorSince < w.regionalSince) {
+	if w.connectorSince < 0 || w.connectorSince > months || (w.connectorSince > 0 && c.connectorPrior == nil) ||
+		(c.connectorPrior != nil && w.connectorSince < w.regionalSince) {
 		return fail()
 	}
 	// Validate referenced infrastructure before any historical network replay.
@@ -581,7 +707,9 @@ func Restore(c Catalog, revision uint64, months int, company gameapi.Company, re
 	for _, p := range projects {
 		co, ok := c.find(p.CorridorID)
 		a, found := alternative(co, p.AlignmentID)
-		if !ok || !found || co.Existing || seen[p.CorridorID] || p.Owner != company.ID || p.Started < 0 || p.Started > months || p.Ready != p.Started+a.Months {
+		if !ok || !found || co.Existing || seen[p.CorridorID] || p.Owner != company.ID || p.Started < 0 ||
+			p.Started > months ||
+			p.Ready != p.Started+a.Months {
 			return fail()
 		}
 		seen[p.CorridorID] = true
@@ -593,10 +721,24 @@ func Restore(c Catalog, revision uint64, months int, company gameapi.Company, re
 	validMoney := func(n gameapi.Money) bool { return n >= 0 && n <= moneyLimit }
 	for i, r := range reports {
 		historical := w.atMonth(i)
-		if r.Month != Calendar(i) || r.CompanyID != company.ID || r.OpeningCash != cash || r.Passengers < 0 || r.Passengers > 100000000 {
+		if r.Month != Calendar(i) || r.CompanyID != company.ID || r.OpeningCash != cash || r.Passengers < 0 ||
+			r.Passengers > 100000000 {
 			return fail()
 		}
-		for _, n := range []gameapi.Money{r.Revenue, r.Costs, r.RunningCosts, r.AccessCosts, r.StationCosts, r.LeaseCosts, r.Maintenance, r.Interest, r.Construction, r.Grants, r.Borrowed, r.Repaid} {
+		for _, n := range []gameapi.Money{
+			r.Revenue,
+			r.Costs,
+			r.RunningCosts,
+			r.AccessCosts,
+			r.StationCosts,
+			r.LeaseCosts,
+			r.Maintenance,
+			r.Interest,
+			r.Construction,
+			r.Grants,
+			r.Borrowed,
+			r.Repaid,
+		} {
 			if !validMoney(n) {
 				return fail()
 			}
@@ -608,13 +750,18 @@ func Restore(c Catalog, revision uint64, months int, company gameapi.Company, re
 		passengers := 0
 		runs := map[string]bool{}
 		for _, run := range r.Services {
-			if runs[run.CorridorID] || run.Frequency < 0 || run.Frequency > MaxFrequency || run.Fare < MinFare || run.Fare > MaxFare || run.Passengers < 0 || !validMoney(run.Revenue) {
+			if runs[run.CorridorID] || run.Frequency < 0 || run.Frequency > MaxFrequency || run.Fare < MinFare ||
+				run.Fare > MaxFare ||
+				run.Passengers < 0 ||
+				!validMoney(run.Revenue) {
 				return fail()
 			}
 			if i < since {
 				co, ok := c.find(run.CorridorID)
 				_, exists := alternative(co, run.AlignmentID)
-				if !ok || !exists || run.RequestedFrequency != 0 || run.Passengers > run.Frequency*trainSeats*2*days(r.Month) || run.Revenue != gameapi.Money(run.Passengers)*run.Fare {
+				if !ok || !exists || run.RequestedFrequency != 0 ||
+					run.Passengers > run.Frequency*trainSeats*2*days(r.Month) ||
+					run.Revenue != gameapi.Money(run.Passengers)*run.Fare {
 					return fail()
 				}
 			} else {
@@ -651,7 +798,9 @@ func Restore(c Catalog, revision uint64, months int, company gameapi.Company, re
 		} else if !w.validNetworkReport(r, i) {
 			return fail()
 		}
-		if r.ClosingCash != cash+r.Revenue-r.Costs+r.Grants+r.Borrowed-r.Repaid-r.Construction || r.ClosingCash > moneyLimit || r.ClosingCash < -moneyLimit {
+		if r.ClosingCash != cash+r.Revenue-r.Costs+r.Grants+r.Borrowed-r.Repaid-r.Construction ||
+			r.ClosingCash > moneyLimit ||
+			r.ClosingCash < -moneyLimit {
 			return fail()
 		}
 		cash = r.ClosingCash
@@ -665,7 +814,8 @@ func Restore(c Catalog, revision uint64, months int, company gameapi.Company, re
 			return fail()
 		}
 	}
-	if company.Cash != cash+pending.Grants+pending.Borrowed-pending.Repaid-pending.Construction || debt != borrowed-repaid+pending.Borrowed-pending.Repaid {
+	if company.Cash != cash+pending.Grants+pending.Borrowed-pending.Repaid-pending.Construction ||
+		debt != borrowed-repaid+pending.Borrowed-pending.Repaid {
 		return fail()
 	}
 	if committed != construction+pending.Construction || awarded != grants+pending.Grants {
@@ -697,7 +847,10 @@ func Restore(c Catalog, revision uint64, months int, company gameapi.Company, re
 	seen = map[string]bool{}
 	for _, s := range services {
 		route, ok := w.route(s.CorridorID)
-		if !ok || seen[s.CorridorID] || !route.Open || s.Frequency < 0 || s.Frequency > MaxFrequency || s.Fare < MinFare || s.Fare > MaxFare || w.FleetCount(s.CorridorID) < required(s.Frequency, route.Minutes) {
+		if !ok || seen[s.CorridorID] || !route.Open || s.Frequency < 0 || s.Frequency > MaxFrequency ||
+			s.Fare < MinFare ||
+			s.Fare > MaxFare ||
+			w.FleetCount(s.CorridorID) < required(s.Frequency, route.Minutes) {
 			return fail()
 		}
 		seen[s.CorridorID] = true

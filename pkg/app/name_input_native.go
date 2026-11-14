@@ -52,18 +52,30 @@ func newNameInput(field *textinput.Field, value string, face text.Face, palette 
 	if field.Text() != value {
 		field.SetTextAndSelection(value, len(value), len(value))
 	}
-	e := &nameInput{field: field, face: face, palette: palette, readClipboard: clipboard.ReadAll, writeClipboard: clipboard.WriteAll, focusMap: make(map[widget.FocusDirection]widget.Focuser)}
+	e := &nameInput{
+		field:          field,
+		face:           face,
+		palette:        palette,
+		readClipboard:  clipboard.ReadAll,
+		writeClipboard: clipboard.WriteAll,
+		focusMap:       make(map[widget.FocusDirection]widget.Focuser),
+	}
 	e.anchor, e.caret = field.Selection()
 	e.observed = e.snapshot()
-	e.w = widget.NewWidget(widget.WidgetOpts.MinSize(60, 44), widget.WidgetOpts.LayoutData(widget.RowLayoutData{Stretch: true}), widget.WidgetOpts.TrackHover(true),
-		widget.WidgetOpts.CursorHovered(input.CURSOR_TEXT), widget.WidgetOpts.CursorPressed(input.CURSOR_TEXT),
+	e.w = widget.NewWidget(
+		widget.WidgetOpts.MinSize(60, 44),
+		widget.WidgetOpts.LayoutData(widget.RowLayoutData{Stretch: true}),
+		widget.WidgetOpts.TrackHover(true),
+		widget.WidgetOpts.CursorHovered(input.CURSOR_TEXT),
+		widget.WidgetOpts.CursorPressed(input.CURSOR_TEXT),
 		widget.WidgetOpts.MouseButtonPressedHandler(func(a *widget.WidgetMouseButtonPressedEventArgs) {
 			if a.Button != ebiten.MouseButtonLeft || e.w.Disabled {
 				return
 			}
 			e.Focus(true)
 			e.pointerDown(a.OffsetX, ebiten.IsKeyPressed(ebiten.KeyShift), time.Now())
-		}))
+		}),
+	)
 	return e
 }
 
@@ -375,7 +387,15 @@ func (e *nameInput) updateInput() error {
 	if handled || e.field.UncommittedTextLengthInBytes() > 0 {
 		return nil
 	}
-	meta, ctrl, shift, alt := ebiten.IsKeyPressed(ebiten.KeyMeta), ebiten.IsKeyPressed(ebiten.KeyControl), ebiten.IsKeyPressed(ebiten.KeyShift), ebiten.IsKeyPressed(ebiten.KeyAlt)
+	meta, ctrl, shift, alt := ebiten.IsKeyPressed(
+		ebiten.KeyMeta,
+	), ebiten.IsKeyPressed(
+		ebiten.KeyControl,
+	), ebiten.IsKeyPressed(
+		ebiten.KeyShift,
+	), ebiten.IsKeyPressed(
+		ebiten.KeyAlt,
+	)
 	shortcut, word, edge := ctrl, ctrl, false
 	if runtime.GOOS == "darwin" {
 		shortcut, word, edge = meta, alt, meta
@@ -384,7 +404,14 @@ func (e *nameInput) updateInput() error {
 		for _, c := range []struct {
 			k      ebiten.Key
 			action string
-		}{{ebiten.KeyA, "all"}, {ebiten.KeyC, "copy"}, {ebiten.KeyX, "cut"}, {ebiten.KeyV, "paste"}, {ebiten.KeyZ, "undo"}, {ebiten.KeyY, "redo"}} {
+		}{
+			{ebiten.KeyA, "all"},
+			{ebiten.KeyC, "copy"},
+			{ebiten.KeyX, "cut"},
+			{ebiten.KeyV, "paste"},
+			{ebiten.KeyZ, "undo"},
+			{ebiten.KeyY, "redo"},
+		} {
 			if nameKeyPressed(c.k, false) {
 				action := c.action
 				if action == "undo" && shift {
@@ -397,7 +424,16 @@ func (e *nameInput) updateInput() error {
 	for _, c := range []struct {
 		k      ebiten.Key
 		action string
-	}{{ebiten.KeyLeft, "left"}, {ebiten.KeyRight, "right"}, {ebiten.KeyHome, "home"}, {ebiten.KeyEnd, "end"}, {ebiten.KeyBackspace, "backspace"}, {ebiten.KeyDelete, "delete"}, {ebiten.KeyEnter, "blur"}, {ebiten.KeyEscape, "blur"}} {
+	}{
+		{ebiten.KeyLeft, "left"},
+		{ebiten.KeyRight, "right"},
+		{ebiten.KeyHome, "home"},
+		{ebiten.KeyEnd, "end"},
+		{ebiten.KeyBackspace, "backspace"},
+		{ebiten.KeyDelete, "delete"},
+		{ebiten.KeyEnter, "blur"},
+		{ebiten.KeyEscape, "blur"},
+	} {
 		if nameKeyPressed(c.k, true) {
 			return e.command(c.action, shift, word, edge)
 		}
@@ -422,7 +458,16 @@ func (e *nameInput) Render(screen *ebiten.Image) {
 		border = p.Accent
 	}
 	vector.FillRect(screen, float32(r.Min.X), float32(r.Min.Y), float32(r.Dx()), float32(r.Dy()), bg, false)
-	vector.StrokeRect(screen, float32(r.Min.X)+.5, float32(r.Min.Y)+.5, float32(r.Dx()-1), float32(r.Dy()-1), 1, border, false)
+	vector.StrokeRect(
+		screen,
+		float32(r.Min.X)+.5,
+		float32(r.Min.Y)+.5,
+		float32(r.Dx()-1),
+		float32(r.Dy()-1),
+		1,
+		border,
+		false,
+	)
 	r = e.textRect()
 	if r.Empty() {
 		return

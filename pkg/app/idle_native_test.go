@@ -56,7 +56,15 @@ func TestNativeIdleWarningsFitAndOpenServicePlanning(t *testing.T) {
 				if size[0] < 800 {
 					mapW, mapH = size[0], max(180, size[1]/3)
 				}
-				g := &Game{Port: port, Frame: frame, Map: &render.Map{Font: font}, width: size[0], height: size[1], Camera: mapview.New(float64(mapW), float64(mapH)), State: ui.State{Locale: locale, View: "report", Portrait: size[1] > size[0]}}
+				g := &Game{
+					Port:   port,
+					Frame:  frame,
+					Map:    &render.Map{Font: font},
+					width:  size[0],
+					height: size[1],
+					Camera: mapview.New(float64(mapW), float64(mapH)),
+					State:  ui.State{Locale: locale, View: "report", Portrait: size[1] > size[0]},
+				}
 				g.host.build(g)
 				event.ExecuteDeferred()
 				footer := g.host.ui.Container.Children()[1].(*widget.Container)
@@ -74,7 +82,8 @@ func TestNativeIdleWarningsFitAndOpenServicePlanning(t *testing.T) {
 				}
 				review.ClickedEvent.Fire(&widget.ButtonClickedEventArgs{Button: review})
 				event.ExecuteDeferred()
-				if g.State.View != "services" || g.State.ServiceCorridor != frame.IdleLines[0].CorridorID || g.State.Expanded {
+				if g.State.View != "services" || g.State.ServiceCorridor != frame.IdleLines[0].CorridorID ||
+					g.State.Expanded {
 					t.Fatal("review did not open affected line")
 				}
 				for _, line := range ui.IdleHighlights(frame) {
@@ -105,7 +114,17 @@ func TestNativeIdleThroughFleetReviewFramesBothSections(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, c := range []gameapi.Command{{Kind: gameapi.ExtendService, CorridorID: "tokyo-osaka", ReplaceServiceID: "tokyo-nagoya", Frequency: 6, Fare: 13800, LeaseCount: 1}, {Kind: gameapi.SetService, CorridorID: "tokyo-osaka", Frequency: 0, Fare: 13800}} {
+	for _, c := range []gameapi.Command{
+		{
+			Kind:             gameapi.ExtendService,
+			CorridorID:       "tokyo-osaka",
+			ReplaceServiceID: "tokyo-nagoya",
+			Frequency:        6,
+			Fare:             13800,
+			LeaseCount:       1,
+		},
+		{Kind: gameapi.SetService, CorridorID: "tokyo-osaka", Frequency: 0, Fare: 13800},
+	} {
 		c.Revision = port.Snapshot().Revision
 		if _, e := port.Apply(c); e != nil {
 			t.Fatal(e)

@@ -60,7 +60,8 @@ func TestWorldCoastReplacesRegionalOutlinesExactlyOnce(t *testing.T) {
 	if e = json.Unmarshal(b, &metadata); e != nil {
 		t.Fatal(e)
 	}
-	if metadata.Refinements["Japan"].Vertices < 4000 || metadata.Refinements["China"].Vertices < 9000 || metadata.Refinements["Taiwan"].Vertices < 300 {
+	if metadata.Refinements["Japan"].Vertices < 4000 || metadata.Refinements["China"].Vertices < 9000 ||
+		metadata.Refinements["Taiwan"].Vertices < 300 {
 		t.Fatal("detailed country shorelines missing")
 	}
 }

@@ -31,7 +31,20 @@ func TestNativeNewGameConfirmationFitsAndCancels(t *testing.T) {
 	for _, locale := range []string{"en", "zh-Hans"} {
 		for _, size := range [][2]int{{320, 480}, {390, 844}, {800, 600}, {1200, 800}} {
 			t.Run(fmt.Sprintf("%s/%v", locale, size), func(t *testing.T) {
-				g := &Game{Port: port, Frame: port.Snapshot(), Map: &render.Map{Font: font}, width: size[0], height: size[1], Camera: mapview.Camera{Width: float64(size[0]), Height: 200}, State: ui.State{Locale: locale, View: "company", DraftName: "Unapplied company name", LoanAmount: "12345"}}
+				g := &Game{
+					Port:   port,
+					Frame:  port.Snapshot(),
+					Map:    &render.Map{Font: font},
+					width:  size[0],
+					height: size[1],
+					Camera: mapview.Camera{Width: float64(size[0]), Height: 200},
+					State: ui.State{
+						Locale:     locale,
+						View:       "company",
+						DraftName:  "Unapplied company name",
+						LoanAmount: "12345",
+					},
+				}
 				g.host.openNewGame(g)
 				g.host.build(g)
 				event.ExecuteDeferred()
@@ -52,7 +65,9 @@ func TestNativeNewGameConfirmationFitsAndCancels(t *testing.T) {
 				cancel := actions.Children()[0].(*widget.Button)
 				cancel.ClickedEvent.Fire(&widget.ButtonClickedEventArgs{Button: cancel})
 				event.ExecuteDeferred()
-				if g.host.confirmNewGame || g.State.DraftName != "Unapplied company name" || g.State.LoanAmount != "12345" || port.Snapshot().Checkpoint != before {
+				if g.host.confirmNewGame || g.State.DraftName != "Unapplied company name" ||
+					g.State.LoanAmount != "12345" ||
+					port.Snapshot().Checkpoint != before {
 					t.Fatal("cancel changed game or drafts")
 				}
 			})

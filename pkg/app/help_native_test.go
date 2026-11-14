@@ -33,7 +33,14 @@ func TestNativeHelpLayersFitAndPreserveTask(t *testing.T) {
 		for _, dark := range []bool{false, true} {
 			for _, size := range [][2]int{{320, 480}, {390, 844}, {800, 600}, {1200, 800}, {1920, 1080}} {
 				t.Run(fmt.Sprintf("%s/%v/%v", locale, dark, size), func(t *testing.T) {
-					g := &Game{Port: port, Frame: port.Snapshot(), Map: m, width: size[0], height: size[1], State: ui.NewGameState(ui.State{Locale: locale, Dark: dark}, port.Snapshot())}
+					g := &Game{
+						Port:   port,
+						Frame:  port.Snapshot(),
+						Map:    m,
+						width:  size[0],
+						height: size[1],
+						State:  ui.NewGameState(ui.State{Locale: locale, Dark: dark}, port.Snapshot()),
+					}
 					g.State.View = "services"
 					g.State.Fare = 12300
 					g.State.Frequency = 8
@@ -66,7 +73,10 @@ func TestNativeHelpLayersFitAndPreserveTask(t *testing.T) {
 					g.host.build(g)
 					explain = g.host.helpAnchors["fares"]
 					if explain == nil {
-						ui.ApplyHelpEvent(&g.State, ui.HelpEvent{Kind: "expand", Concept: "fares_demand", Anchor: "fares"})
+						ui.ApplyHelpEvent(
+							&g.State,
+							ui.HelpEvent{Kind: "expand", Concept: "fares_demand", Anchor: "fares"},
+						)
 						g.host.build(g)
 					} else {
 						explain.ClickedEvent.Fire(&widget.ButtonClickedEventArgs{Button: explain})
@@ -96,7 +106,9 @@ func TestNativeHelpLayersFitAndPreserveTask(t *testing.T) {
 					}
 					g.host.helpEvent(g, ui.HelpEvent{Kind: "close"})
 					g.host.build(g)
-					if g.State.Fare != 12300 || g.State.Frequency != 8 || g.State.DraftName != "Draft 草案" || g.State.View != "services" || g.host.scroll.ScrollTop != expectedScroll {
+					if g.State.Fare != 12300 || g.State.Frequency != 8 || g.State.DraftName != "Draft 草案" ||
+						g.State.View != "services" ||
+						g.host.scroll.ScrollTop != expectedScroll {
 						t.Fatal("reference lost task", g.State, g.host.scroll.ScrollTop)
 					}
 					g.State.View = "build"

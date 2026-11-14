@@ -57,16 +57,28 @@ func TestStarterRevenueForecastAndCapacity(t *testing.T) {
 	}
 	after := act(t, g, gameapi.Command{Kind: gameapi.AdvanceMonth})
 	r := after.Reports[0]
-	if r.Revenue != f.Revenue || r.Passengers != f.Passengers || r.ClosingCash != before.Player.Cash+r.Revenue-r.Costs || r.ClosingCash <= before.Player.Cash {
+	if r.Revenue != f.Revenue || r.Passengers != f.Passengers ||
+		r.ClosingCash != before.Player.Cash+r.Revenue-r.Costs ||
+		r.ClosingCash <= before.Player.Cash {
 		t.Fatal("tickets not collected or cash did not reconcile", r)
 	}
 }
 func TestConstructionOpeningAndDisconnectedOperation(t *testing.T) {
 	s := &memoryStore{}
 	g := openTest(t, s)
-	rejected(t, g, gameapi.Command{Kind: gameapi.BuildLine, CorridorID: "hokkaido-extension", AlignmentID: "mountain"}, "insufficient_cash")
+	rejected(
+		t,
+		g,
+		gameapi.Command{Kind: gameapi.BuildLine, CorridorID: "hokkaido-extension", AlignmentID: "mountain"},
+		"insufficient_cash",
+	)
 	financedBuild(t, g, "hokkaido-extension", "mountain")
-	rejected(t, g, gameapi.Command{Kind: gameapi.BuildLine, CorridorID: "hokkaido-extension", AlignmentID: "valley"}, "already_built")
+	rejected(
+		t,
+		g,
+		gameapi.Command{Kind: gameapi.BuildLine, CorridorID: "hokkaido-extension", AlignmentID: "valley"},
+		"already_built",
+	)
 	rejected(t, g, gameapi.Command{Kind: gameapi.LeaseTrain, CorridorID: "hokkaido-extension"}, "line_not_open")
 	for i := 0; i < 4; i++ {
 		act(t, g, gameapi.Command{Kind: gameapi.AdvanceYear})
@@ -141,7 +153,12 @@ func TestBuildSaveFailureAndFinancialFrameIsolation(t *testing.T) {
 	before := g.Snapshot()
 	raw := string(s.b)
 	s.fail = true
-	rejected(t, g, gameapi.Command{Kind: gameapi.BuildLine, CorridorID: "tsuruga-osaka", AlignmentID: "valley"}, "storage_failed")
+	rejected(
+		t,
+		g,
+		gameapi.Command{Kind: gameapi.BuildLine, CorridorID: "tsuruga-osaka", AlignmentID: "valley"},
+		"storage_failed",
+	)
 	if string(s.b) != raw || g.Snapshot().Checkpoint != before.Checkpoint {
 		t.Fatal("failed build spent cash")
 	}
@@ -163,7 +180,13 @@ func TestRestoreRejectsFinancialAndOwnershipCorruption(t *testing.T) {
 	raw, _ := g.Export()
 	var original envelope
 	_ = json.Unmarshal(raw, &original)
-	for name, mutate := range map[string]func(*payload){"debt": func(p *payload) { p.Debt = 0 }, "owner": func(p *payload) { p.Projects[0].Owner = "rival" }, "ready": func(p *payload) { p.Projects[0].Ready = 0 }, "duplicate-fleet": func(p *payload) { p.Fleet[1].ID = p.Fleet[0].ID }, "phantom-riders": func(p *payload) { p.Reports[0].Services[0].Passengers++ }} {
+	for name, mutate := range map[string]func(*payload){
+		"debt":            func(p *payload) { p.Debt = 0 },
+		"owner":           func(p *payload) { p.Projects[0].Owner = "rival" },
+		"ready":           func(p *payload) { p.Projects[0].Ready = 0 },
+		"duplicate-fleet": func(p *payload) { p.Fleet[1].ID = p.Fleet[0].ID },
+		"phantom-riders":  func(p *payload) { p.Reports[0].Services[0].Passengers++ },
+	} {
 		t.Run(name, func(t *testing.T) {
 			var p payload
 			_ = json.Unmarshal(original.Payload, &p)

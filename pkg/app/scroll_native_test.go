@@ -40,8 +40,18 @@ func TestNativeReportScrollEventsReachBothEnds(t *testing.T) {
 				if size[0] < 800 {
 					mapW, mapH = size[0], max(180, size[1]/3)
 				}
-				g := &Game{Port: port, Frame: port.Snapshot(), Map: &render.Map{Font: font}, width: size[0], height: size[1],
-					Camera: mapview.Camera{Width: float64(mapW), Height: float64(mapH)}, State: ui.State{Locale: locale, View: "report", ReportPane: "accounts"}}
+				g := &Game{
+					Port:   port,
+					Frame:  port.Snapshot(),
+					Map:    &render.Map{Font: font},
+					width:  size[0],
+					height: size[1],
+					Camera: mapview.Camera{
+						Width:  float64(mapW),
+						Height: float64(mapH),
+					},
+					State: ui.State{Locale: locale, View: "report", ReportPane: "accounts"},
+				}
 				g.host.build(g)
 				h := &g.host
 				event.ExecuteDeferred()
@@ -59,7 +69,9 @@ func TestNativeReportScrollEventsReachBothEnds(t *testing.T) {
 					t.Fatal("overflow has no visible scrollbar")
 				}
 				wheel := func(delta float64) {
-					h.scroll.GetWidget().ScrolledEvent.Fire(&widget.WidgetScrolledEventArgs{Widget: h.scroll.GetWidget(), Y: delta})
+					h.scroll.GetWidget().ScrolledEvent.Fire(
+						&widget.WidgetScrolledEventArgs{Widget: h.scroll.GetWidget(), Y: delta},
+					)
 					event.ExecuteDeferred()
 				}
 				wheel(-.25)
@@ -75,7 +87,9 @@ func TestNativeReportScrollEventsReachBothEnds(t *testing.T) {
 					t.Fatal("wheel cannot return to top")
 				}
 				h.scrollbar.Current = sidebarScrollSteps / 2
-				h.scrollbar.ChangedEvent.Fire(&widget.SliderChangedEventArgs{Slider: h.scrollbar, Current: h.scrollbar.Current, Dragging: true})
+				h.scrollbar.ChangedEvent.Fire(
+					&widget.SliderChangedEventArgs{Slider: h.scrollbar, Current: h.scrollbar.Current, Dragging: true},
+				)
 				event.ExecuteDeferred()
 				if h.scroll.ScrollTop != .5 {
 					t.Fatal("dragging scrollbar does not move report")
@@ -90,13 +104,17 @@ func TestNativeReportScrollEventsReachBothEnds(t *testing.T) {
 				g.State.View = "map"
 				h.build(g)
 				event.ExecuteDeferred()
-				stale.GetWidget().ScrolledEvent.Fire(&widget.WidgetScrolledEventArgs{Widget: stale.GetWidget(), Y: -1000})
+				stale.GetWidget().ScrolledEvent.Fire(
+					&widget.WidgetScrolledEventArgs{Widget: stale.GetWidget(), Y: -1000},
+				)
 				event.ExecuteDeferred()
 				if h.scroll.ScrollTop != 0 {
 					t.Fatal("old report event scrolled a different view")
 				}
 				g.State.Expanded = true
-				h.scroll.GetWidget().ScrolledEvent.Fire(&widget.WidgetScrolledEventArgs{Widget: h.scroll.GetWidget(), Y: -1000})
+				h.scroll.GetWidget().ScrolledEvent.Fire(
+					&widget.WidgetScrolledEventArgs{Widget: h.scroll.GetWidget(), Y: -1000},
+				)
 				event.ExecuteDeferred()
 				if h.scroll.ScrollTop != 0 {
 					t.Fatal("expanded map input scrolled the hidden sidebar")

@@ -3,6 +3,7 @@
 Usage: python3 tools/prepare-skeleton-assets.py /path/to/NotoSansSC[wght].ttf
 Requires fonttools==4.54.1. Fetch the source from the URL in assets/fonts/README.md.
 """
+
 import hashlib
 import json
 from pathlib import Path
@@ -20,7 +21,20 @@ if hashlib.sha256(source).hexdigest() != expected:
 geo = json.loads((root / "data/prototypes/natural-earth-110m.countries.geojson").read_text())
 rings = []
 for feature in geo["features"]:
-    if feature["properties"]["name"] not in ["China", "Taiwan", "Japan", "South Korea", "North Korea", "Mongolia", "Russia", "Myanmar", "Vietnam", "Laos", "Thailand", "Cambodia"]:
+    if feature["properties"]["name"] not in [
+        "China",
+        "Taiwan",
+        "Japan",
+        "South Korea",
+        "North Korea",
+        "Mongolia",
+        "Russia",
+        "Myanmar",
+        "Vietnam",
+        "Laos",
+        "Thailand",
+        "Cambodia",
+    ]:
         continue
     geom = feature["geometry"]
     polys = geom["coordinates"] if geom["type"] == "MultiPolygon" else [geom["coordinates"]]

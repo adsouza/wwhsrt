@@ -33,7 +33,10 @@ func TestSchemaAndExample(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for path, want := range map[string][]byte{"save-v1.schema.json": append(schema, '\n'), "fixtures/minimal-save-v1.json": append(save, '\n')} {
+	for path, want := range map[string][]byte{
+		"save-v1.schema.json":           append(schema, '\n'),
+		"fixtures/minimal-save-v1.json": append(save, '\n'),
+	} {
 		if *updateContracts {
 			if err := os.WriteFile(path, want, 0644); err != nil {
 				t.Fatal(err)
@@ -74,13 +77,24 @@ func TestLargeIntegerAndTamperBoundaries(t *testing.T) {
 	if decoded.World.Companies[0].Cash != p.World.Companies[0].Cash || decoded.World.Seed != p.World.Seed {
 		t.Fatal("64-bit precision lost")
 	}
-	if _, err := DecodeV1(bytes.Replace(encoded, []byte("9007199254740993"), []byte("9007199254740994"), 1)); err == nil {
+	if _, err := DecodeV1(
+		bytes.Replace(encoded, []byte("9007199254740993"), []byte("9007199254740994"), 1),
+	); err == nil {
 		t.Fatal("accepted modified payload")
 	}
-	if _, err := DecodeV1(bytes.Replace(encoded, []byte(`"schema_version":1`), []byte(`"schema_version":2`), 1)); err == nil {
+	if _, err := DecodeV1(
+		bytes.Replace(encoded, []byte(`"schema_version":1`), []byte(`"schema_version":2`), 1),
+	); err == nil {
 		t.Fatal("accepted future schema")
 	}
-	if _, err := DecodeV1(bytes.Replace(encoded, []byte(`"format":"wwhsrt-save"`), []byte(`"format":"wwhsrt-save","format":"wwhsrt-save"`), 1)); err == nil {
+	if _, err := DecodeV1(
+		bytes.Replace(
+			encoded,
+			[]byte(`"format":"wwhsrt-save"`),
+			[]byte(`"format":"wwhsrt-save","format":"wwhsrt-save"`),
+			1,
+		),
+	); err == nil {
 		t.Fatal("accepted duplicate field")
 	}
 	if _, err := DecodeV1(append(encoded, []byte("{}")...)); err == nil {
@@ -106,7 +120,8 @@ func TestAllWideScalarsAreQuoted(t *testing.T) {
 			if fieldType.Kind() == reflect.Pointer {
 				fieldType = fieldType.Elem()
 			}
-			if (fieldType.Kind() == reflect.Int64 || fieldType.Kind() == reflect.Uint64) && !strings.Contains(f.Tag.Get("json"), ",string") {
+			if (fieldType.Kind() == reflect.Int64 || fieldType.Kind() == reflect.Uint64) &&
+				!strings.Contains(f.Tag.Get("json"), ",string") {
 				t.Errorf("%s.%s must encode as a decimal string", v.Name(), f.Name)
 			}
 			check(f.Type)

@@ -39,7 +39,18 @@ func TestExtensionLeasesPastThirtyTwoTrains(t *testing.T) {
 	for i := 0; i < 30; i++ {
 		act(t, g, gameapi.Command{Kind: gameapi.LeaseTrain, CorridorID: "nagoya-osaka"})
 	}
-	f := act(t, g, gameapi.Command{Kind: gameapi.ExtendService, CorridorID: "tokyo-osaka", ReplaceServiceID: "tokyo-nagoya", Frequency: 6, Fare: 13800, LeaseCount: 1})
+	f := act(
+		t,
+		g,
+		gameapi.Command{
+			Kind:             gameapi.ExtendService,
+			CorridorID:       "tokyo-osaka",
+			ReplaceServiceID: "tokyo-nagoya",
+			Frequency:        6,
+			Fare:             13800,
+			LeaseCount:       1,
+		},
+	)
 	if len(f.Fleet) != 33 {
 		t.Fatal("extension did not order its additional lease", len(f.Fleet))
 	}

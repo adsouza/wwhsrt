@@ -48,7 +48,16 @@ func StationDetails(f gameapi.Frame, locale string, id gameapi.CityID) []Detail 
 func TrainDetails(f gameapi.Frame, locale string) []Detail {
 	t := func(k string) string { return Text(locale, k) }
 	a := f.TrainFamily
-	return []Detail{{t("trainFamily"), t(a.NameKey)}, {t("seatsPerTrain"), strconv.Itoa(a.Seats)}, {t("trainLease"), Cash(a.LeaseMonthly)}, {t("trainRunning"), Cash(a.RunningPerKM)}, {t("trackAccess"), Cash(a.PublicAccessPerKM)}, {t("stationHandling"), Cash(a.StationPerJourney)}, {t("trainDay"), strconv.Itoa(a.DailyMinutes / 60)}, {t("trainTurnaround"), strconv.Itoa(a.RoundTripTurnaround)}}
+	return []Detail{
+		{t("trainFamily"), t(a.NameKey)},
+		{t("seatsPerTrain"), strconv.Itoa(a.Seats)},
+		{t("trainLease"), Cash(a.LeaseMonthly)},
+		{t("trainRunning"), Cash(a.RunningPerKM)},
+		{t("trackAccess"), Cash(a.PublicAccessPerKM)},
+		{t("stationHandling"), Cash(a.StationPerJourney)},
+		{t("trainDay"), strconv.Itoa(a.DailyMinutes / 60)},
+		{t("trainTurnaround"), strconv.Itoa(a.RoundTripTurnaround)},
+	}
 }
 func EstimateDetails(a gameapi.Alignment, locale string) []Detail {
 	t := func(k string) string { return Text(locale, k) }
@@ -61,10 +70,20 @@ func EstimateDetails(a gameapi.Alignment, locale string) []Detail {
 		key   string
 		money gameapi.Money
 		km    int
-	}{{"surfaceWorks", e.Surface, a.SurfaceKM}, {"hillWorks", e.Hills, a.HillKM}, {"viaductWorks", e.Viaducts, a.ViaductKM}, {"tunnelWorks", e.Tunnels, a.TunnelKM}} {
+	}{
+		{"surfaceWorks", e.Surface, a.SurfaceKM},
+		{"hillWorks", e.Hills, a.HillKM},
+		{"viaductWorks", e.Viaducts, a.ViaductKM},
+		{"tunnelWorks", e.Tunnels, a.TunnelKM},
+	} {
 		if r.km > 0 {
 			rows = append(rows, Detail{t(r.key) + " · " + strconv.Itoa(r.km) + " km", Cash(r.money)})
 		}
 	}
-	return append(rows, Detail{t("managementAllowance"), Cash(e.Management)}, Detail{t("contingencyAllowance"), Cash(e.Contingency)}, Detail{t("totalCost"), Cash(a.Cost)})
+	return append(
+		rows,
+		Detail{t("managementAllowance"), Cash(e.Management)},
+		Detail{t("contingencyAllowance"), Cash(e.Contingency)},
+		Detail{t("totalCost"), Cash(a.Cost)},
+	)
 }

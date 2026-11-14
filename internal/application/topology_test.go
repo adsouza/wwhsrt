@@ -11,7 +11,15 @@ import (
 )
 
 func TestRepairedConnectionsCarryPassengersAndReload(t *testing.T) {
-	pairs := [][2]gameapi.CityID{{"sendai", "shin_hakodate_hokuto"}, {"london", "paris"}, {"paris", "lyon"}, {"milan", "rome"}, {"berlin", "munich"}, {"new_york", "boston"}, {"changchun", "shenyang"}}
+	pairs := [][2]gameapi.CityID{
+		{"sendai", "shin_hakodate_hokuto"},
+		{"london", "paris"},
+		{"paris", "lyon"},
+		{"milan", "rome"},
+		{"berlin", "munich"},
+		{"new_york", "boston"},
+		{"changchun", "shenyang"},
+	}
 	for _, pair := range pairs {
 		t.Run(string(pair[0])+"_"+string(pair[1]), func(t *testing.T) {
 			store := &memoryStore{}
@@ -37,7 +45,11 @@ func TestRepairedConnectionsCarryPassengersAndReload(t *testing.T) {
 			for i := 0; i < fc.FleetNeeded; i++ {
 				publicCommand(t, g, gameapi.Command{Kind: gameapi.LeaseTrain, CorridorID: route.ID})
 			}
-			publicCommand(t, g, gameapi.Command{Kind: gameapi.SetService, CorridorID: route.ID, Frequency: 1, Fare: q.Fare})
+			publicCommand(
+				t,
+				g,
+				gameapi.Command{Kind: gameapi.SetService, CorridorID: route.ID, Frequency: 1, Fare: q.Fare},
+			)
 			f = publicCommand(t, g, gameapi.Command{Kind: gameapi.AdvanceMonth})
 			carried := false
 			for _, j := range f.Network.Journeys {
@@ -72,12 +84,20 @@ func TestTopologyV5UpgradePreservesHistoricalEconomyAndFleet(t *testing.T) {
 	store := &memoryStore{b: raw}
 	g := openPublic(t, store)
 	f := g.Snapshot()
-	if !bytes.Equal(raw, store.b) || !reflect.DeepEqual(f.Reports, prior.Reports) || !reflect.DeepEqual(f.Fleet, prior.Fleet) || !reflect.DeepEqual(f.Services, prior.Services) || f.Player != prior.Company || g.w.TopologySince() != 2 || g.w.EconomySince() != 0 {
+	if !bytes.Equal(raw, store.b) || !reflect.DeepEqual(f.Reports, prior.Reports) ||
+		!reflect.DeepEqual(f.Fleet, prior.Fleet) ||
+		!reflect.DeepEqual(f.Services, prior.Services) ||
+		f.Player != prior.Company ||
+		g.w.TopologySince() != 2 ||
+		g.w.EconomySince() != 0 {
 		t.Fatal("opening rewrote historical state")
 	}
 	checkpoint := f.Checkpoint
 	store.fail = true
-	if _, e := g.Apply(gameapi.Command{Kind: gameapi.AdvanceMonth, Revision: f.Revision}); e == nil || g.Snapshot().Checkpoint != checkpoint || !bytes.Equal(raw, store.b) {
+	if _, e := g.Apply(
+		gameapi.Command{Kind: gameapi.AdvanceMonth, Revision: f.Revision},
+	); e == nil || g.Snapshot().Checkpoint != checkpoint ||
+		!bytes.Equal(raw, store.b) {
 		t.Fatal("failed upgrade was not atomic")
 	}
 	store.fail = false
@@ -88,13 +108,18 @@ func TestTopologyV5UpgradePreservesHistoricalEconomyAndFleet(t *testing.T) {
 	var next connectorPayload
 	json.Unmarshal(store.b, &env)
 	json.Unmarshal(env.Payload, &next)
-	if env.Version != 10 || next.TopologySince != 2 || next.PriorPublicSHA != hash(assets.PublicNetworkV1) || next.PublicSHA != hash(assets.PublicNetwork) || next.Rules != "network-v10" {
+	if env.Version != 10 || next.TopologySince != 2 || next.PriorPublicSHA != hash(assets.PublicNetworkV1) ||
+		next.PublicSHA != hash(assets.PublicNetwork) ||
+		next.Rules != "network-v10" {
 		t.Fatal("topology identity/cutover not pinned")
 	}
 	if openPublic(t, store).Snapshot().Checkpoint != f.Checkpoint {
 		t.Fatal("mixed topology history does not restore")
 	}
-	for _, change := range []func(*connectorPayload){func(p *connectorPayload) { p.PriorPublicSHA = "unknown" }, func(p *connectorPayload) { p.TopologySince = 4 }} {
+	for _, change := range []func(*connectorPayload){
+		func(p *connectorPayload) { p.PriorPublicSHA = "unknown" },
+		func(p *connectorPayload) { p.TopologySince = 4 },
+	} {
 		bad := next
 		change(&bad)
 		env.Payload, _ = json.Marshal(bad)
@@ -117,8 +142,12 @@ func TestTopologyRetainsPublishedRouteIdentitiesAndFleetRequirements(t *testing.
 	}
 	for _, c := range old.Corridors {
 		n, ok := current[c.ID]
-		correctedUlsan := ok && len(n.Alignments) > 0 && (c.FromCity == "ulsan" || c.ToCity == "ulsan") && n.Alignments[0].KM <= c.Alignments[0].KM && n.Alignments[0].Minutes <= c.Alignments[0].Minutes
-		if !ok || n.FromCity != c.FromCity || n.ToCity != c.ToCity || (!correctedUlsan && (n.Alignments[0].KM != c.Alignments[0].KM || n.Alignments[0].Minutes != c.Alignments[0].Minutes)) {
+		correctedUlsan := ok && len(n.Alignments) > 0 && (c.FromCity == "ulsan" || c.ToCity == "ulsan") &&
+			n.Alignments[0].KM <= c.Alignments[0].KM &&
+			n.Alignments[0].Minutes <= c.Alignments[0].Minutes
+		if !ok || n.FromCity != c.FromCity || n.ToCity != c.ToCity ||
+			(!correctedUlsan && (n.Alignments[0].KM != c.Alignments[0].KM ||
+				n.Alignments[0].Minutes != c.Alignments[0].Minutes)) {
 			t.Fatal("published corridor identity/timing changed", c.ID)
 		}
 	}
@@ -128,7 +157,8 @@ func TestTopologyRetainsPublishedRouteIdentitiesAndFleetRequirements(t *testing.
 	}
 	for _, r := range old.Network.Routes {
 		n, ok := routes[r.ID]
-		if !ok || !reflect.DeepEqual(n.Cities, r.Cities) || !reflect.DeepEqual(n.Sections, r.Sections) || !reflect.DeepEqual(n.Stops, r.Stops) {
+		if !ok || !reflect.DeepEqual(n.Cities, r.Cities) || !reflect.DeepEqual(n.Sections, r.Sections) ||
+			!reflect.DeepEqual(n.Stops, r.Stops) {
 			t.Fatal("accepted service pattern changed", r.ID)
 		}
 	}

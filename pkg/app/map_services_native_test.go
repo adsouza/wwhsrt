@@ -33,7 +33,21 @@ func TestNativeMapServiceClickDragThroughChoicesAndClear(t *testing.T) {
 	before, _ := p.Export()
 	for _, locale := range []string{"en", "zh-Hans"} {
 		for _, size := range [][2]int{{390, 844}, {1280, 850}} {
-			g := &Game{Port: p, Frame: f, Map: m, width: size[0], height: size[1], Camera: mapview.New(800, 700), State: ui.State{Locale: locale, View: "map", ServiceCorridor: "unrelated", FromCity: "tsuruga", ToCity: "osaka"}}
+			g := &Game{
+				Port:   p,
+				Frame:  f,
+				Map:    m,
+				width:  size[0],
+				height: size[1],
+				Camera: mapview.New(800, 700),
+				State: ui.State{
+					Locale:          locale,
+					View:            "map",
+					ServiceCorridor: "unrelated",
+					FromCity:        "tsuruga",
+					ToCity:          "osaka",
+				},
+			}
 			g.host.layout(g)
 			var points []mapview.Point
 			for _, co := range f.Corridors {
@@ -61,7 +75,8 @@ func TestNativeMapServiceClickDragThroughChoicesAndClear(t *testing.T) {
 					z := g.Camera.Screen(mapview.Project(stop.Lat, stop.Lon))
 					near = near || math.Hypot(q.X-z.X, q.Y-z.Y) <= 8
 				}
-				if !near && len(render.PickServiceSections(g.Camera, f, q)) > 0 && render.PickProspect(g.Camera, f, g.State, q) == "" {
+				if !near && len(render.PickServiceSections(g.Camera, f, q)) > 0 &&
+					render.PickProspect(g.Camera, f, g.State, q) == "" {
 					at, found = q, true
 					break
 				}
@@ -76,7 +91,8 @@ func TestNativeMapServiceClickDragThroughChoicesAndClear(t *testing.T) {
 			}
 			g.moved = false
 			g.finish(at)
-			if g.State.View != "services" || g.State.ServicePane != "plan" || len(g.State.ServiceMapSections) == 0 || !g.State.ReviewMap {
+			if g.State.View != "services" || g.State.ServicePane != "plan" || len(g.State.ServiceMapSections) == 0 ||
+				!g.State.ReviewMap {
 				t.Fatal(g.State)
 			}
 			if g.State.FromCity != "tsuruga" || g.State.ToCity != "osaka" {

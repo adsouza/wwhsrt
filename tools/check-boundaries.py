@@ -1,9 +1,12 @@
 """Check production import boundaries without initializing graphics or audio."""
+
 import json
 import subprocess
 
 decoder = json.JSONDecoder()
-raw = subprocess.check_output(["go", "list", "-json", "./internal/domain", "./pkg/gameapi", "./internal/application"], text=True)
+raw = subprocess.check_output(
+    ["go", "list", "-json", "./internal/domain", "./pkg/gameapi", "./internal/application"], text=True
+)
 packages = []
 while raw.strip():
     package, end = decoder.raw_decode(raw.lstrip())

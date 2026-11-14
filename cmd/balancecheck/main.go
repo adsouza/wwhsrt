@@ -75,7 +75,22 @@ func main() {
 			continue
 		}
 		r := routes[co.ID]
-		a, b, d := run(old, co.ID, 4, 9000), run(next, co.ID, 4, 9000), run(next, co.ID, r.SuggestedFrequency, r.SuggestedFare)
+		a, b, d := run(
+			old,
+			co.ID,
+			4,
+			9000,
+		), run(
+			next,
+			co.ID,
+			4,
+			9000,
+		), run(
+			next,
+			co.ID,
+			r.SuggestedFrequency,
+			r.SuggestedFare,
+		)
 		if a.Forecast.Contribution > 0 {
 			before++
 		}
@@ -85,7 +100,11 @@ func main() {
 		if d.Forecast.Contribution > 0 {
 			after++
 		}
-		if d.Forecast.Costs != d.Forecast.RunningCosts+d.Forecast.AccessCosts+d.Forecast.HandlingCosts+d.Forecast.LeaseCosts+d.Forecast.MaintenanceCosts {
+		if d.Forecast.Costs != d.Forecast.RunningCosts+
+			d.Forecast.AccessCosts+
+			d.Forecast.HandlingCosts+
+			d.Forecast.LeaseCosts+
+			d.Forecast.MaintenanceCosts {
 			panic("cost reconciliation")
 		}
 		rows = append(rows, row{co.ID, co.FromCity, co.ToCity, a, b, d})
@@ -99,7 +118,18 @@ func main() {
 		ExistingRoutes, LegacyProfitable, RebalancedFixedProfitable, SuggestedProfitable int
 		Scope                                                                            string
 		Rows                                                                             []row
-	}{fmt.Sprintf("%x", sha256.Sum256(source)), fmt.Sprintf("%x", sha256.Sum256(assets.Economy)), rules, len(rows), before, fixed, after, "Each candidate is forecast independently alongside the starter service in January 2029; not a combined portfolio or empirical ridership certification.", rows}
+	}{
+		fmt.Sprintf("%x", sha256.Sum256(source)),
+		fmt.Sprintf("%x", sha256.Sum256(assets.Economy)),
+		rules,
+		len(rows),
+		before,
+		fixed,
+		after,
+		"Each candidate is forecast independently alongside the starter service in January 2029; " +
+			"not a combined portfolio or empirical ridership certification.",
+		rows,
+	}
 	b, e := json.MarshalIndent(result, "", "  ")
 	if e != nil {
 		panic(e)
@@ -112,5 +142,12 @@ func main() {
 	} else {
 		os.Stdout.Write(b)
 	}
-	fmt.Fprintf(os.Stderr, "Existing routes %d; profitable legacy %d, new rules with old defaults %d, suggested plans %d\n", len(rows), before, fixed, after)
+	fmt.Fprintf(
+		os.Stderr,
+		"Existing routes %d; profitable legacy %d, new rules with old defaults %d, suggested plans %d\n",
+		len(rows),
+		before,
+		fixed,
+		after,
+	)
 }

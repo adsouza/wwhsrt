@@ -21,7 +21,17 @@ const MaxFare gameapi.Money = 30000
 
 // This slice has one train family, so every persisted lease has this family.
 func TrainFamily() gameapi.TrainFamily {
-	return gameapi.TrainFamily{ID: "swift-400", NameKey: "swift400", Seats: trainSeats, LeaseMonthly: LeaseMonthly, RunningPerKM: runningPerKM, PublicAccessPerKM: publicAccessPerKM, StationPerJourney: stationPerJourney, DailyMinutes: trainDayMinutes, RoundTripTurnaround: roundTripTurnaround}
+	return gameapi.TrainFamily{
+		ID:                  "swift-400",
+		NameKey:             "swift400",
+		Seats:               trainSeats,
+		LeaseMonthly:        LeaseMonthly,
+		RunningPerKM:        runningPerKM,
+		PublicAccessPerKM:   publicAccessPerKM,
+		StationPerJourney:   stationPerJourney,
+		DailyMinutes:        trainDayMinutes,
+		RoundTripTurnaround: roundTripTurnaround,
+	}
 }
 
 // The station lifecycle is completely determined by the pinned starter network

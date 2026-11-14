@@ -62,7 +62,22 @@ func TestNativeCapacityExplanationFitsAndNamesConflictingServices(t *testing.T) 
 					if width < 800 {
 						mw = width
 					}
-					g := &Game{Port: port, Frame: port.Snapshot(), width: width, height: 844, Map: &render.Map{Font: font}, Camera: mapview.New(float64(mw), 280), State: ui.State{Locale: locale, Dark: dark, View: "services", ServiceCorridor: "tokyo-tsuruga-express", Frequency: 1, Fare: 18925}}
+					g := &Game{
+						Port:   port,
+						Frame:  port.Snapshot(),
+						width:  width,
+						height: 844,
+						Map:    &render.Map{Font: font},
+						Camera: mapview.New(float64(mw), 280),
+						State: ui.State{
+							Locale:          locale,
+							Dark:            dark,
+							View:            "services",
+							ServiceCorridor: "tokyo-tsuruga-express",
+							Frequency:       1,
+							Fare:            18925,
+						},
+					}
 					ui.SetDisclosure(&g.State, "capacity", true)
 					g.host.build(g)
 					if w, _ := g.host.scroll.PreferredSize(); w > g.host.scroll.ViewRect().Dx() {
@@ -70,8 +85,20 @@ func TestNativeCapacityExplanationFitsAndNamesConflictingServices(t *testing.T) 
 					}
 					copy := ""
 					buttons := map[string]func(){}
-					g.host.buildServices(g, func(k string) string { return ui.Text(locale, k) }, func(s string, _ float64) { copy += s + "\n" }, func(s string, fn func()) *widget.Button { buttons[s] = fn; return widget.NewButton() })
-					for _, want := range []string{"13", "12", ui.Text(locale, "capacityOtherServices"), ui.Text(locale, "tsuruga"), ui.Text(locale, "nagoya"), ui.Text(locale, "capacityDraftLimit")} {
+					g.host.buildServices(
+						g,
+						func(k string) string { return ui.Text(locale, k) },
+						func(s string, _ float64) { copy += s + "\n" },
+						func(s string, fn func()) *widget.Button { buttons[s] = fn; return widget.NewButton() },
+					)
+					for _, want := range []string{
+						"13",
+						"12",
+						ui.Text(locale, "capacityOtherServices"),
+						ui.Text(locale, "tsuruga"),
+						ui.Text(locale, "nagoya"),
+						ui.Text(locale, "capacityDraftLimit"),
+					} {
 						if !strings.Contains(copy, want) {
 							t.Fatal("missing native capacity reason", want, copy)
 						}
@@ -80,7 +107,9 @@ func TestNativeCapacityExplanationFitsAndNamesConflictingServices(t *testing.T) 
 						t.Fatal("unsolicited cue competes with blocking capacity error")
 					}
 					g.host.message = "set_service"
-					g.host.actions["frequency-minus"].ClickedEvent.Fire(&widget.ButtonClickedEventArgs{Button: g.host.actions["frequency-minus"]})
+					g.host.actions["frequency-minus"].ClickedEvent.Fire(
+						&widget.ButtonClickedEventArgs{Button: g.host.actions["frequency-minus"]},
+					)
 					event.ExecuteDeferred()
 					if g.host.message != "draft_not_applied" {
 						t.Fatal("draft edit left a misleading saved receipt", g.host.message)

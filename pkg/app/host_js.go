@@ -96,7 +96,16 @@ func (h *host) snapshot(g *Game, full bool) map[string]any {
 	for _, city := range g.Frame.Cities {
 		points[string(city.ID)] = render.CityPoint(g.Camera, city)
 	}
-	v := map[string]any{"source_station": g.Map.PublicStop(g.State.SourceStation), "regions": mapview.VisibleRegions(g.State.Portrait), "workspace": ui.Workspace(h.viewportWidth, h.viewportHeight, g.State), "state": g.State, "texts": ui.Catalog(g.State.Locale), "camera": g.Camera, "points": points, "palette": ui.PaletteFor(g.State)}
+	v := map[string]any{
+		"source_station": g.Map.PublicStop(g.State.SourceStation),
+		"regions":        mapview.VisibleRegions(g.State.Portrait),
+		"workspace":      ui.Workspace(h.viewportWidth, h.viewportHeight, g.State),
+		"state":          g.State,
+		"texts":          ui.Catalog(g.State.Locale),
+		"camera":         g.Camera,
+		"points":         points,
+		"palette":        ui.PaletteFor(g.State),
+	}
 	if full || !h.sentFrame || h.sentRevision != g.Frame.Revision {
 		v["frame"] = g.Frame
 		h.sentFrame, h.sentRevision = true, g.Frame.Revision
@@ -152,7 +161,11 @@ func (h *host) run(g *Game) {
 			} else {
 				forecast, e = g.Port.Forecast(q)
 			}
-			v := map[string]any{"forecast": forecast, "capacity_details": ui.CapacityDetails(g.Frame, g.State.Locale, forecast.CapacityUsage), "capacity_summary": ui.CapacitySummary(g.Frame, g.State.Locale, forecast.CapacityUsage)}
+			v := map[string]any{
+				"forecast":         forecast,
+				"capacity_details": ui.CapacityDetails(g.Frame, g.State.Locale, forecast.CapacityUsage),
+				"capacity_summary": ui.CapacitySummary(g.Frame, g.State.Locale, forecast.CapacityUsage),
+			}
 			if e != nil {
 				v["error"] = e.Error()
 			}
@@ -172,7 +185,14 @@ func (h *host) run(g *Game) {
 			}
 			var forecast *gameapi.Forecast
 			if q.State.ServiceCorridor != "" && (q.State.View == "services" || q.State.Help.Open) {
-				f, e := g.Port.Forecast(gameapi.ForecastRequest{CorridorID: q.State.ServiceCorridor, Frequency: q.State.Frequency, Fare: q.State.Fare, ReplaceServiceID: q.State.ReplaceServiceID})
+				f, e := g.Port.Forecast(
+					gameapi.ForecastRequest{
+						CorridorID:       q.State.ServiceCorridor,
+						Frequency:        q.State.Frequency,
+						Fare:             q.State.Fare,
+						ReplaceServiceID: q.State.ReplaceServiceID,
+					},
+				)
 				if e == nil || q.State.Help.Topic == "capacity" {
 					forecast = &f
 				}
@@ -180,7 +200,9 @@ func (h *host) run(g *Game) {
 					q.Issue = e.Error()
 				}
 			}
-			b, _ := json.Marshal(map[string]any{"model": ui.BuildHelpModel(g.Frame, q.State, forecast, q.Issue), "state": q.State})
+			b, _ := json.Marshal(
+				map[string]any{"model": ui.BuildHelpModel(g.Frame, q.State, forecast, q.Issue), "state": q.State},
+			)
 			r.resolve.Invoke(string(b))
 		case "guidance":
 			var state ui.State
@@ -199,7 +221,8 @@ func (h *host) run(g *Game) {
 				h.viewportHeight = viewport.Height
 			}
 			if json.Unmarshal([]byte(r.body), &s) == nil {
-				if s.ReplayMinute != g.State.ReplayMinute || s.Watching != g.State.Watching || s.ReplayPlaying != g.State.ReplayPlaying {
+				if s.ReplayMinute != g.State.ReplayMinute || s.Watching != g.State.Watching ||
+					s.ReplayPlaying != g.State.ReplayPlaying {
 					g.replayTick = 0
 				}
 				s.ReplayMinute = max(0, min(1439, s.ReplayMinute))
@@ -251,7 +274,12 @@ func (h *host) run(g *Game) {
 			}
 			h.reply(g, r, nil, false)
 		case "replay":
-			b, _ := json.Marshal(map[string]any{"minute": g.replayTime(), "description": render.TrainDescription(g.Camera, g.Frame, g.State, g.replayTime())})
+			b, _ := json.Marshal(
+				map[string]any{
+					"minute":      g.replayTime(),
+					"description": render.TrainDescription(g.Camera, g.Frame, g.State, g.replayTime()),
+				},
+			)
 			r.resolve.Invoke(string(b))
 		case "fit":
 			if g.State.Region != "" && g.State.Region != "east-asia" {

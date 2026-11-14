@@ -8,7 +8,22 @@ import (
 )
 
 func helpFixture() (gameapi.Frame, State) {
-	return gameapi.Frame{Corridors: []gameapi.Corridor{{ID: "a-b", FromCity: "a", ToCity: "b", Alignments: []gameapi.Alignment{{ID: "route", Cost: 100000, Grant: 10000}}}}}, State{Locale: "en", View: "build", FromCity: "a", ToCity: "b", AlignmentID: "route"}
+	return gameapi.Frame{
+		Corridors: []gameapi.Corridor{
+			{
+				ID:         "a-b",
+				FromCity:   "a",
+				ToCity:     "b",
+				Alignments: []gameapi.Alignment{{ID: "route", Cost: 100000, Grant: 10000}},
+			},
+		},
+	}, State{
+		Locale:      "en",
+		View:        "build",
+		FromCity:    "a",
+		ToCity:      "b",
+		AlignmentID: "route",
+	}
 }
 func TestContextGuidancePerConceptAndPersistence(t *testing.T) {
 	f, s := helpFixture()
@@ -80,7 +95,10 @@ func TestHelpReferencePreservesTaskAndNewGameLearning(t *testing.T) {
 	}
 	ApplyHelpEvent(&s, HelpEvent{Kind: "query", Value: "fare"})
 	ApplyHelpEvent(&s, HelpEvent{Kind: "close"})
-	if !s.Expanded || s.View != draft.View || s.FromCity != draft.FromCity || s.Fare != draft.Fare || s.DraftName != draft.DraftName || s.ReplaceServiceID != draft.ReplaceServiceID || s.Help.ReturnScroll != .6 {
+	if !s.Expanded || s.View != draft.View || s.FromCity != draft.FromCity || s.Fare != draft.Fare ||
+		s.DraftName != draft.DraftName ||
+		s.ReplaceServiceID != draft.ReplaceServiceID ||
+		s.Help.ReturnScroll != .6 {
 		t.Fatal("lost task", s)
 	}
 	RecordHelpAction(&s, f, gameapi.BuildLine)
@@ -165,7 +183,16 @@ func TestHelpFactsExposeAuthoritativeQuotesAndForecasts(t *testing.T) {
 	if values[Text("en", "fundingGap")] != "= "+Cash(90200) || values[Text("en", "fundingDeficit")] != "+ "+Cash(200) {
 		t.Fatal("funding explanation does not reconcile", facts)
 	}
-	forecast := gameapi.Forecast{FleetAvailable: 1, FleetNeeded: 3, Passengers: 77, Revenue: 43210, Contribution: -1234, CompanyChange: 9876, FeederRevenue: 321, Minutes: 156}
+	forecast := gameapi.Forecast{
+		FleetAvailable: 1,
+		FleetNeeded:    3,
+		Passengers:     77,
+		Revenue:        43210,
+		Contribution:   -1234,
+		CompanyChange:  9876,
+		FeederRevenue:  321,
+		Minutes:        156,
+	}
 	facts = HelpFacts(f, s, "fares_demand", &forecast)
 	values = map[string]string{}
 	for _, row := range facts {

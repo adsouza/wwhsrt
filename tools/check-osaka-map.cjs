@@ -1,17 +1,126 @@
-const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
-const {chromium}=require('playwright'),{control}=require('./ui-helpers.cjs');
-const snap=p=>p.evaluate(()=>railSnapshot()),url=process.argv[2]||'http://127.0.0.1:8765/';
-function point(c,lat,lon){const t=Math.asin(Math.sqrt(3)/2*Math.sin(lat*Math.PI/180)),t2=t*t,t6=t2*t2*t2,p={x:2*Math.sqrt(3)*(lon*Math.PI/180)*Math.cos(t)/(3*(1.340264-3*.081106*t2+t6*(7*.000893+9*.003796*t2))),y:t*(1.340264-.081106*t2+t6*(.000893+.003796*t2))},z=Math.min(Math.max(1,c.Width-72)/(c.Max.X-c.Min.X),Math.max(1,c.Height-80)/(c.Max.Y-c.Min.Y))*c.Zoom;return [c.Width/2+(p.x-(c.Max.X+c.Min.X)/2)*z+c.PanX,c.Height/2-(p.y-(c.Max.Y+c.Min.Y)/2)*z+c.PanY]}
-(async()=>{const b=await chromium.launch({headless:true,args:['--enable-unsafe-swiftshader']}),timer=setTimeout(()=>b.close(),120000);try{
- const ctx=await b.newContext({viewport:{width:1440,height:960},reducedMotion:'reduce'}),p=await ctx.newPage(),errors=[];p.on('pageerror',e=>errors.push(e.message));await p.goto(url);await p.waitForFunction(()=>!!window.railSnapshot,null,{timeout:60000});const initial=await snap(p),raw=await p.evaluate(()=>railStorageLoad());
- await(await control(p,'#region-select')).selectOption('japan');await(await control(p,'#tab-services')).click();await p.locator('#service-corridor').selectOption('public_kyoto__osaka');await(await control(p,'#focus-route')).click();await p.waitForFunction(async()=>(await railSnapshot()).camera.Zoom>5);
- await p.locator('#service-corridor').selectOption('nagoya-osaka');await p.waitForFunction(async()=>(await railSnapshot()).state.service_corridor==='nagoya-osaka');
- if(await p.locator('#dock-map-tools').evaluate(e=>e.open))await p.locator('#dock-map-tools>summary').click();
- const s=await snap(p),city=s.frame.cities.find(c=>c.id==='osaka');assert.equal(city.station_name,'Shin-Ōsaka');const end={lat:city.station_lat,lon:city.station_lon},tail=s.frame.corridors.find(c=>c.id==='public_kyoto__osaka').alignments[0].path;
- for(const c of s.frame.corridors.filter(c=>['nagoya-osaka','tsuruga-osaka'].includes(c.id)))for(const a of c.alignments){assert.deepEqual(a.path.at(-1),end);assert.deepEqual(a.path.slice(-tail.length),tail)}
- const box=await p.locator('#map-frame').boundingBox(),png=await p.screenshot({clip:box}),ink=s.palette.draft,old=[34.73222,135.53338],samples=tail.slice(1).map((q,i)=>point(s.camera,(q.lat+tail[i].lat)/2,(q.lon+tail[i].lon)/2));
- const pixels=await p.evaluate(async q=>{const im=await createImageBitmap(new Blob([Uint8Array.from(atob(q.png),c=>c.charCodeAt(0))],{type:'image/png'})),c=new OffscreenCanvas(im.width,im.height),ctx=c.getContext('2d');ctx.drawImage(im,0,0);const d=ctx.getImageData(0,0,im.width,im.height).data;const hit=([x,y])=>{x=Math.round(x);y=Math.round(y);if(x<4||y<4||x>=im.width-4||y>=im.height-4)return null;for(let dx=-3;dx<=3;dx++)for(let dy=-3;dy<=3;dy++){const i=((y+dy)*im.width+x+dx)*4;if(q.ink.every((v,n)=>Math.abs(d[i+n]-v)<5))return true}return false};return {onSource:q.samples.map(hit),onOldApproach:hit(q.old)}} ,{png:png.toString('base64'),ink:[ink.R,ink.G,ink.B],samples,old:point(s.camera,...old)});
- assert(pixels.onSource.filter(Boolean).length>=5);assert.equal(pixels.onOldApproach,false);await p.screenshot({path:'docs/validation/osaka-station-desktop.png'});
- assert.equal((await snap(p)).frame.checkpoint,initial.frame.checkpoint);assert.equal(await p.evaluate(()=>railStorageLoad()),raw);await p.reload();await p.waitForFunction(()=>!!window.railSnapshot,null,{timeout:60000});assert.equal((await snap(p)).frame.checkpoint,initial.frame.checkpoint);assert.deepEqual(errors,[]);
- const result={date:new Date().toISOString(),passed:true,wasm_sha256:crypto.createHash('sha256').update(fs.readFileSync('web/main.wasm')).digest('hex'),display_sha256:crypto.createHash('sha256').update(fs.readFileSync('assets/scenario/rail-display-paths.json')).digest('hex'),pixels,checks:['Osaka hub is at Shin-Osaka; original service and both construction approaches share the imported Kyoto approach and station endpoint','Actual Go-rendered legacy-service highlight follows the imported track; the old city-centre approach has no selected-route pixels','Read-only route selection/focus and reload preserve both campaign checkpoint and exact durable save bytes'],limitations:['Browser visual check and native build/unit tests; the running native game must be restarted to load the correction.']};fs.writeFileSync('docs/validation/osaka-station-checks.json',JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify(result,null,2));await ctx.close();
- }finally{clearTimeout(timer);await b.close()}})().catch(e=>{console.error(e);process.exitCode=1});
+const assert = require('node:assert/strict'),
+  fs = require('node:fs'),
+  path = require('node:path'),
+  crypto = require('node:crypto');
+const { chromium } = require('playwright'),
+  { control } = require('./ui-helpers.cjs');
+const snap = (p) => p.evaluate(() => railSnapshot()),
+  url = process.argv[2] || 'http://127.0.0.1:8765/';
+function point(c, lat, lon) {
+  const t = Math.asin((Math.sqrt(3) / 2) * Math.sin((lat * Math.PI) / 180)),
+    t2 = t * t,
+    t6 = t2 * t2 * t2,
+    p = {
+      x:
+        (2 * Math.sqrt(3) * ((lon * Math.PI) / 180) * Math.cos(t)) /
+        (3 * (1.340264 - 3 * 0.081106 * t2 + t6 * (7 * 0.000893 + 9 * 0.003796 * t2))),
+      y: t * (1.340264 - 0.081106 * t2 + t6 * (0.000893 + 0.003796 * t2)),
+    },
+    z =
+      Math.min(Math.max(1, c.Width - 72) / (c.Max.X - c.Min.X), Math.max(1, c.Height - 80) / (c.Max.Y - c.Min.Y)) *
+      c.Zoom;
+  return [
+    c.Width / 2 + (p.x - (c.Max.X + c.Min.X) / 2) * z + c.PanX,
+    c.Height / 2 - (p.y - (c.Max.Y + c.Min.Y) / 2) * z + c.PanY,
+  ];
+}
+(async () => {
+  const b = await chromium.launch({ headless: true, args: ['--enable-unsafe-swiftshader'] }),
+    timer = setTimeout(() => b.close(), 120000);
+  try {
+    const ctx = await b.newContext({ viewport: { width: 1440, height: 960 }, reducedMotion: 'reduce' }),
+      p = await ctx.newPage(),
+      errors = [];
+    p.on('pageerror', (e) => errors.push(e.message));
+    await p.goto(url);
+    await p.waitForFunction(() => !!window.railSnapshot, null, { timeout: 60000 });
+    const initial = await snap(p),
+      raw = await p.evaluate(() => railStorageLoad());
+    await (await control(p, '#region-select')).selectOption('japan');
+    await (await control(p, '#tab-services')).click();
+    await p.locator('#service-corridor').selectOption('public_kyoto__osaka');
+    await (await control(p, '#focus-route')).click();
+    await p.waitForFunction(async () => (await railSnapshot()).camera.Zoom > 5);
+    await p.locator('#service-corridor').selectOption('nagoya-osaka');
+    await p.waitForFunction(async () => (await railSnapshot()).state.service_corridor === 'nagoya-osaka');
+    if (await p.locator('#dock-map-tools').evaluate((e) => e.open)) await p.locator('#dock-map-tools>summary').click();
+    const s = await snap(p),
+      city = s.frame.cities.find((c) => c.id === 'osaka');
+    assert.equal(city.station_name, 'Shin-Ōsaka');
+    const end = { lat: city.station_lat, lon: city.station_lon },
+      tail = s.frame.corridors.find((c) => c.id === 'public_kyoto__osaka').alignments[0].path;
+    for (const c of s.frame.corridors.filter((c) => ['nagoya-osaka', 'tsuruga-osaka'].includes(c.id)))
+      for (const a of c.alignments) {
+        assert.deepEqual(a.path.at(-1), end);
+        assert.deepEqual(a.path.slice(-tail.length), tail);
+      }
+    const box = await p.locator('#map-frame').boundingBox(),
+      png = await p.screenshot({ clip: box }),
+      ink = s.palette.draft,
+      old = [34.73222, 135.53338],
+      samples = tail.slice(1).map((q, i) => point(s.camera, (q.lat + tail[i].lat) / 2, (q.lon + tail[i].lon) / 2));
+    const pixels = await p.evaluate(
+      async (q) => {
+        const im = await createImageBitmap(
+            new Blob([Uint8Array.from(atob(q.png), (c) => c.charCodeAt(0))], { type: 'image/png' }),
+          ),
+          c = new OffscreenCanvas(im.width, im.height),
+          ctx = c.getContext('2d');
+        ctx.drawImage(im, 0, 0);
+        const d = ctx.getImageData(0, 0, im.width, im.height).data;
+        const hit = ([x, y]) => {
+          x = Math.round(x);
+          y = Math.round(y);
+          if (x < 4 || y < 4 || x >= im.width - 4 || y >= im.height - 4) return null;
+          for (let dx = -3; dx <= 3; dx++)
+            for (let dy = -3; dy <= 3; dy++) {
+              const i = ((y + dy) * im.width + x + dx) * 4;
+              if (q.ink.every((v, n) => Math.abs(d[i + n] - v) < 5)) return true;
+            }
+          return false;
+        };
+        return { onSource: q.samples.map(hit), onOldApproach: hit(q.old) };
+      },
+      { png: png.toString('base64'), ink: [ink.R, ink.G, ink.B], samples, old: point(s.camera, ...old) },
+    );
+    assert(pixels.onSource.filter(Boolean).length >= 5);
+    assert.equal(pixels.onOldApproach, false);
+    await p.screenshot({ path: 'docs/validation/osaka-station-desktop.png' });
+    assert.equal((await snap(p)).frame.checkpoint, initial.frame.checkpoint);
+    assert.equal(await p.evaluate(() => railStorageLoad()), raw);
+    await p.reload();
+    await p.waitForFunction(() => !!window.railSnapshot, null, { timeout: 60000 });
+    assert.equal((await snap(p)).frame.checkpoint, initial.frame.checkpoint);
+    assert.deepEqual(errors, []);
+    const result = {
+      date: new Date().toISOString(),
+      passed: true,
+      wasm_sha256: crypto.createHash('sha256').update(fs.readFileSync('web/main.wasm')).digest('hex'),
+      display_sha256: crypto
+        .createHash('sha256')
+        .update(fs.readFileSync('assets/scenario/rail-display-paths.json'))
+        .digest('hex'),
+      pixels,
+      checks: [
+        'Osaka hub is at Shin-Osaka; ' +
+          'original service and both construction approaches share the imported Kyoto approach and station endpoint',
+        'Actual Go-rendered legacy-service highlight follows the imported track; ' +
+          'the old city-centre approach has no selected-route pixels',
+        'Read-only route selection/focus and reload preserve both campaign checkpoint and exact durable save bytes',
+      ],
+      limitations: [
+        'Browser visual check and native build/unit tests; ' +
+          'the running native game must be restarted to load the correction.',
+      ],
+    };
+    fs.writeFileSync('docs/validation/osaka-station-checks.json', JSON.stringify(result, null, 2) + '\n');
+    console.log(JSON.stringify(result, null, 2));
+    await ctx.close();
+  } finally {
+    clearTimeout(timer);
+    await b.close();
+  }
+})().catch((e) => {
+  console.error(e);
+  process.exitCode = 1;
+});

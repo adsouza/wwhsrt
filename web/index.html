@@ -1,61 +1,294 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#1264D5"><title>World-wide High-speed Rail Tycoon</title><link rel="icon" type="image/svg+xml" href="favicon.svg"><script>try{const p=JSON.parse(localStorage.getItem('wwhsrt-business-ui-v2'))||{};document.documentElement.dataset.theme=p.appearance==='dark'||p.appearance!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}catch{document.documentElement.dataset.theme=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}</script><link rel="stylesheet" href="style.css"></head>
-<body>
-<div id="startup" role="status"><div class="brandmark" aria-hidden="true">↗</div><h1>World-wide High-speed Rail Tycoon</h1><p id="loading">Preparing your railway…</p><button id="reload" hidden>Reload</button></div>
-<div id="game" hidden>
-  <header><div class="wordmark"><img src="favicon.svg" alt="" width="40" height="40"><span data-t="title"></span></div><div class="clock"><span data-t="month" class="eyebrow"></span><strong id="month"></strong></div><div class="cash"><span data-t="cash" class="eyebrow"></span><strong id="cash"></strong></div><label class="language"><span data-t="language" class="sr-only"></span><select id="language"><option value="en">English</option><option value="zh-Hans">简体中文</option></select></label></header>
-  <main>
-    <section id="map-panel" aria-label="Railway map">
-      <iframe id="map-frame" title="Equal Earth map; cities also available in the city list" allow="autoplay"></iframe>
-      <div class="map-tools"><button id="fit" data-t="fit"></button><button id="focus-route" data-t="focusRoute"></button><button id="zoom-in" data-t="zoomIn"></button><button id="zoom-out" data-t="zoomOut"></button><button id="terrain-toggle" data-t="terrain" aria-pressed="true"></button><button id="expand" data-t="fullScreen" aria-pressed="false"></button></div>
-      <div id="expanded-help" data-help-anchor="expanded-endpoint" hidden></div><p class="illustration"><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" data-t="mapAttribution"></a></p><div id="replay-controls"><button id="watch-day" data-t="watchDay"></button><div id="replay-panel" hidden><label for="replay-minute" data-t="representativeDay"></label><input id="replay-minute" type="range" min="0" max="1439" step="1"><output id="replay-clock"></output><button id="replay-play" data-t="playDay"></button><label for="replay-train" data-t="inspectTrain"></label><select id="replay-train"></select><p id="train-inspector"></p></div></div>
-    </section>
-    <aside id="inspector">
-      <div class="section-head"><span class="pill" data-t="offline"></span><span class="eyebrow" data-t="scope"></span></div>
-      <section id="idle-warning" class="idle-warning" hidden role="status"><strong id="idle-title"></strong><p id="idle-summary"></p><button id="review-idle" data-t="reviewIdleLines"></button></section>
-      <nav aria-label="Management"><button id="tab-map" data-view="map" data-t="explore" aria-current="page"></button><button id="tab-build" data-view="build" data-t="build"></button><button id="tab-services" data-view="services" data-t="services"></button><button id="tab-report" data-view="report" data-t="report"></button><button id="tab-company" data-view="company" data-t="company"></button><button id="help-open" data-t="fieldNotes"></button></nav><section id="field-notes" class="view" hidden aria-labelledby="field-notes-title"><button id="help-back" data-t="returnTask"></button><h1 id="field-notes-title" data-t="fieldNotes"></h1><label for="help-search" data-t="searchHelp"></label><input id="help-search" type="search" maxlength="128" autocomplete="off"><div id="help-article"></div><div id="help-results" class="city-list"></div></section>
-      <section id="view-map" class="view" aria-labelledby="cities-heading">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <meta name="theme-color" content="#1264D5" />
+    <title>World-wide High-speed Rail Tycoon</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <script>
+      try {
+        const p = JSON.parse(localStorage.getItem('wwhsrt-business-ui-v2')) || {};
+        document.documentElement.dataset.theme =
+          p.appearance === 'dark' || (p.appearance !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches)
+            ? 'dark'
+            : 'light';
+      } catch {
+        document.documentElement.dataset.theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+    </script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="startup" role="status">
+      <div class="brandmark" aria-hidden="true">↗</div>
+      <h1>World-wide High-speed Rail Tycoon</h1>
+      <p id="loading">Preparing your railway…</p>
+      <button id="reload" hidden>Reload</button>
+    </div>
+    <div id="game" hidden>
+      <header>
+        <div class="wordmark"><img src="favicon.svg" alt="" width="40" height="40" /><span data-t="title"></span></div>
+        <div class="clock"><span data-t="month" class="eyebrow"></span><strong id="month"></strong></div>
+        <div class="cash"><span data-t="cash" class="eyebrow"></span><strong id="cash"></strong></div>
+        <label class="language"
+          ><span data-t="language" class="sr-only"></span
+          ><select id="language">
+            <option value="en">English</option>
+            <option value="zh-Hans">简体中文</option>
+          </select></label
+        >
+      </header>
+      <main>
+        <section id="map-panel" aria-label="Railway map">
+          <iframe
+            id="map-frame"
+            title="Equal Earth map; cities also available in the city list"
+            allow="autoplay"
+          ></iframe>
+          <div class="map-tools">
+            <button id="fit" data-t="fit"></button><button id="focus-route" data-t="focusRoute"></button
+            ><button id="zoom-in" data-t="zoomIn"></button><button id="zoom-out" data-t="zoomOut"></button
+            ><button id="terrain-toggle" data-t="terrain" aria-pressed="true"></button
+            ><button id="expand" data-t="fullScreen" aria-pressed="false"></button>
+          </div>
+          <div id="expanded-help" data-help-anchor="expanded-endpoint" hidden></div>
+          <p class="illustration">
+            <a
+              href="https://www.openstreetmap.org/copyright"
+              target="_blank"
+              rel="noopener"
+              data-t="mapAttribution"
+            ></a>
+          </p>
+          <div id="replay-controls">
+            <button id="watch-day" data-t="watchDay"></button>
+            <div id="replay-panel" hidden>
+              <label for="replay-minute" data-t="representativeDay"></label
+              ><input id="replay-minute" type="range" min="0" max="1439" step="1" /><output id="replay-clock"></output
+              ><button id="replay-play" data-t="playDay"></button
+              ><label for="replay-train" data-t="inspectTrain"></label
+              ><select id="replay-train"></select>
+              <p id="train-inspector"></p>
+            </div>
+          </div>
+        </section>
+        <aside id="inspector">
+          <div class="section-head">
+            <span class="pill" data-t="offline"></span><span class="eyebrow" data-t="scope"></span>
+          </div>
+          <section id="idle-warning" class="idle-warning" hidden role="status">
+            <strong id="idle-title"></strong>
+            <p id="idle-summary"></p>
+            <button id="review-idle" data-t="reviewIdleLines"></button>
+          </section>
+          <nav aria-label="Management">
+            <button id="tab-map" data-view="map" data-t="explore" aria-current="page"></button
+            ><button id="tab-build" data-view="build" data-t="build"></button
+            ><button id="tab-services" data-view="services" data-t="services"></button
+            ><button id="tab-report" data-view="report" data-t="report"></button
+            ><button id="tab-company" data-view="company" data-t="company"></button
+            ><button id="help-open" data-t="fieldNotes"></button>
+          </nav>
+          <section id="field-notes" class="view" hidden aria-labelledby="field-notes-title">
+            <button id="help-back" data-t="returnTask"></button>
+            <h1 id="field-notes-title" data-t="fieldNotes"></h1>
+            <label for="help-search" data-t="searchHelp"></label
+            ><input id="help-search" type="search" maxlength="128" autocomplete="off" />
+            <div id="help-article"></div>
+            <div id="help-results" class="city-list"></div>
+          </section>
+          <section id="view-map" class="view" aria-labelledby="cities-heading">
+            <div data-help-anchor="start"></div>
+            <div data-help-anchor="idle"></div>
+            <div data-help-anchor="replay"></div>
+            <h1 id="cities-heading" data-t="cities"></h1>
+            <label for="search" data-t="search"></label><input id="search" type="search" autocomplete="off" />
+            <div id="city-list" class="city-list"></div>
+            <p id="no-results" hidden data-t="noResults"></p>
+            <div data-help-anchor="city"></div>
+            <section id="city-details" class="city-details" aria-live="polite"></section>
+          </section>
+          <section id="view-build" class="view" hidden aria-labelledby="build-heading">
+            <h1 id="build-heading" data-t="build"></h1>
+            <p data-t="prospectHint"></p>
+            <button id="browse-prospects" data-t="browseProspects"></button>
+            <p id="selected-prospect"></p>
+            <div data-help-anchor="endpoints"></div>
+            <h2 data-t="plans"></h2>
+            <div id="opportunities" class="city-list"></div>
+            <div id="build-status" role="status"></div>
+            <progress id="project-progress" hidden></progress
+            ><button id="project-service" class="primary" hidden data-t="services"></button>
+            <div data-help-anchor="project"></div>
+            <div id="build-package" hidden>
+              <dl id="build-preview"></dl>
+              <div id="alignments"></div>
+              <div data-help-anchor="alignments"></div>
+              <dl id="quote"></dl>
+              <p id="funding-gap"></p>
+              <button id="borrow-shortfall-build" data-t="borrowShortfall"></button
+              ><button id="finance-link" data-t="finance"></button>
+              <div data-help-anchor="funding"></div>
+              <button id="build-line" class="primary" data-t="commitBuild"></button>
+              <h2 data-t="engineeringBreakdown"></h2>
+              <dl id="engineering-values"></dl>
+              <p id="station-package" data-t="stationPackage"></p>
+              <p class="hint" data-t="buildHint"></p>
+              <p class="hint" id="terrain-explanation"></p>
+              <p data-t="estimateNote"></p>
+            </div>
+          </section>
+          <section id="view-services" class="view" hidden aria-labelledby="services-heading">
+            <h1 id="services-heading" data-t="services"></h1>
+            <section id="idle-details" class="idle-warning" hidden>
+              <strong id="idle-highlight-label"></strong>
+              <div id="idle-line-list"></div>
+              <p data-t="idleExplanation"></p>
+            </section>
+            <p id="train-summary"></p>
+            <details id="train-details">
+              <summary data-t="fleetDetails"></summary>
+              <dl id="train-values"></dl>
+            </details>
+            <p data-t="networkService"></p>
 
-        <div data-help-anchor="start"></div><div data-help-anchor="idle"></div><div data-help-anchor="replay"></div><h1 id="cities-heading" data-t="cities"></h1><label for="search" data-t="search"></label><input id="search" type="search" autocomplete="off"><div id="city-list" class="city-list"></div><p id="no-results" hidden data-t="noResults"></p>
-        <div data-help-anchor="city"></div><section id="city-details" class="city-details" aria-live="polite"></section>
-      </section>
-      <section id="view-build" class="view" hidden aria-labelledby="build-heading">
-        <h1 id="build-heading" data-t="build"></h1>
-        <p data-t="prospectHint"></p><button id="browse-prospects" data-t="browseProspects"></button><p id="selected-prospect"></p>
-        <div data-help-anchor="endpoints"></div><h2 data-t="plans"></h2><div id="opportunities" class="city-list"></div>
-        <div id="build-status" role="status"></div><progress id="project-progress" hidden></progress><button id="project-service" class="primary" hidden data-t="services"></button><div data-help-anchor="project"></div><div id="build-package" hidden><dl id="build-preview"></dl><div id="alignments"></div><div data-help-anchor="alignments"></div><dl id="quote"></dl>
-        <p id="funding-gap"></p><button id="borrow-shortfall-build" data-t="borrowShortfall"></button><button id="finance-link" data-t="finance"></button>
-        <div data-help-anchor="funding"></div><button id="build-line" class="primary" data-t="commitBuild"></button>
-        <h2 data-t="engineeringBreakdown"></h2><dl id="engineering-values"></dl><p id="station-package" data-t="stationPackage"></p><p class="hint" data-t="buildHint"></p><p class="hint" id="terrain-explanation"></p><p data-t="estimateNote"></p></div>
-      </section>
-      <section id="view-services" class="view" hidden aria-labelledby="services-heading">
-        <h1 id="services-heading" data-t="services"></h1><section id="idle-details" class="idle-warning" hidden><strong id="idle-highlight-label"></strong><div id="idle-line-list"></div><p data-t="idleExplanation"></p></section>
-        <p id="train-summary"></p><details id="train-details"><summary data-t="fleetDetails"></summary><dl id="train-values"></dl></details><p data-t="networkService"></p>
-
-        <div data-help-anchor="idle"></div><label for="service-corridor" data-t="selectService"></label><select id="service-corridor"></select><p id="service-path"></p><label id="extension-choice" class="motion" hidden><input id="extend-starter" type="checkbox"><span data-t="extendStarter"></span></label><p id="extension-price"></p>
-        <div data-help-anchor="through"></div><label for="frequency" data-t="frequency"></label><input id="frequency" type="number" inputmode="numeric" min="0" max="16" step="1">
-        <section id="service-capacity" hidden aria-labelledby="capacity-title"><h2 id="capacity-title" data-t="capacityTitle"></h2><dl id="capacity-values"></dl></section>
-        <label for="fare" data-t="fare"></label><input id="fare" type="number" inputmode="decimal" min="10" max="300" step="1">
-        <div data-help-anchor="fares"></div><p id="fleet-count"></p><div class="service-actions"><button id="lease-train" data-t="leaseTrain"></button><button id="return-train" data-t="returnTrain"></button></div>
-        <div data-help-anchor="fleet"></div><p id="service-draft-note" class="hint"></p><button id="restore-plan" data-t="restorePlan"></button><h2 data-t="forecast"></h2><p id="forecast-status" role="status"></p><dl id="forecast-values"></dl>
-        <div data-help-anchor="capacity"></div><div data-help-anchor="service-plan"></div><button id="apply-service" class="primary" data-t="applyService"></button><p class="hint" data-t="serviceHint"></p>
-      </section>
-      <section id="view-report" class="view" hidden aria-labelledby="report-heading"><span class="eyebrow" id="report-month"></span><h1 id="report-heading" data-t="report"></h1><p id="no-report" data-t="noReport"></p><div data-help-anchor="accounts"></div><div data-help-anchor="idle"></div><dl id="ledger"></dl><div data-help-anchor="capacity"></div><details id="network-report"><summary data-t="networkReport"></summary><dl id="network-totals"></dl><h2 data-t="passengerInspector"></h2><label for="market-from" data-t="fromCity"></label><select id="market-from"></select><label for="market-to" data-t="toCity"></label><select id="market-to"></select><label for="market-class" data-t="travelerClass"></label><select id="market-class"><option value="business" data-t="businessTravel"></option><option value="leisure" data-t="leisureTravel"></option></select><div id="market-journeys"></div><dl id="market-values"></dl></details><p class="hint" data-t="reportHint"></p><p><span data-t="resolved"></span>: <span id="resolved"></span></p></section>
-      <section id="view-company" class="view" hidden aria-labelledby="company-heading"><h1 id="company-heading" data-t="company"></h1><button id="new-game" data-t="reset"></button><label for="appearance" data-t="appearance"></label><select id="appearance"><option value="system" data-t="appearance_system"></option><option value="light" data-t="appearance_light"></option><option value="dark" data-t="appearance_dark"></option></select><button id="guidance-settings" data-t="guidanceSettings"></button><button id="reset-learning" data-t="resetLearning"></button><h2 data-t="finance"></h2><p id="debt"></p>
-        <section id="company-funding" hidden aria-labelledby="company-funding-title"><h2 id="company-funding-title" data-t="fundingPlan"></h2><p id="company-funding-route"></p><dl id="company-funding-values"></dl><p id="company-funding-note" class="hint"></p><button id="review-funding-plan" data-t="reviewFundingPlan"></button><p id="shortfall-interest"></p><button id="borrow-shortfall" data-t="borrowShortfall"></button><p data-t="fundingLoanHelp"></p></section>
-        <p id="no-funding-plan" data-t="fundingChoosePlan" hidden></p><button id="choose-funding-plan" data-t="build" hidden></button><div data-help-anchor="finance"></div><label for="loan-amount" data-t="loanAmount"></label><input id="loan-amount" type="text" inputmode="decimal" autocomplete="off" aria-describedby="loan-preview"><p id="credit-available"></p><p id="loan-preview" role="status"></p><div class="service-actions"><button id="borrow" data-t="borrow"></button><button id="repay" data-t="repay"></button></div><p class="hint" data-t="loanTerms"></p><form id="company-form"><label for="company-name" data-t="companyName"></label><input id="company-name" autocomplete="organization" aria-describedby="name-hint"><p id="name-hint" data-t="nameHint"></p><button class="primary" id="rename" type="submit" data-t="applyName"></button></form><label class="motion"><input id="motion" type="checkbox"><span data-t="motion"></span></label><p data-t="soundless"></p><p data-t="terrainCredits"></p><a href="terrain-credits.txt" target="_blank" rel="noopener" data-t="terrain"></a><button id="export" data-t="download"></button></section>
-    </aside>
-  </main>
-  <dialog id="new-game-dialog" aria-labelledby="new-game-title" aria-describedby="new-game-warning new-game-start">
-    <h1 id="new-game-title" data-t="newGameTitle"></h1>
-    <p id="new-game-company"></p>
-    <p id="new-game-warning" data-t="newGameWarning"></p>
-    <p id="new-game-start" data-t="newGameStart"></p>
-    <p id="new-game-error" role="alert" hidden></p>
-    <div class="service-actions"><button id="cancel-new-game" data-t="cancel" autofocus></button><button id="confirm-new-game" class="primary" data-t="newGameConfirm"></button></div>
-  </dialog>
-  <footer><button id="idle-footer" class="idle-warning" hidden></button><p id="status" role="status" aria-live="polite"></p><div class="time-actions"><span id="campaign-ended" role="status" aria-live="polite" hidden><strong data-t="campaignEndTitle"></strong><span id="campaign-end-detail"></span></span><button id="campaign-new-game" data-t="campaignRestart" hidden></button><button id="advance" class="primary" data-t="advance"></button><button id="advance-year" data-t="advanceYear"></button></div></footer>
-</div>
-<script src="app.js"></script>
-</body></html>
+            <div data-help-anchor="idle"></div>
+            <label for="service-corridor" data-t="selectService"></label
+            ><select id="service-corridor"></select>
+            <p id="service-path"></p>
+            <label id="extension-choice" class="motion" hidden
+              ><input id="extend-starter" type="checkbox" /><span data-t="extendStarter"></span
+            ></label>
+            <p id="extension-price"></p>
+            <div data-help-anchor="through"></div>
+            <label for="frequency" data-t="frequency"></label
+            ><input id="frequency" type="number" inputmode="numeric" min="0" max="16" step="1" />
+            <section id="service-capacity" hidden aria-labelledby="capacity-title">
+              <h2 id="capacity-title" data-t="capacityTitle"></h2>
+              <dl id="capacity-values"></dl>
+            </section>
+            <label for="fare" data-t="fare"></label
+            ><input id="fare" type="number" inputmode="decimal" min="10" max="300" step="1" />
+            <div data-help-anchor="fares"></div>
+            <p id="fleet-count"></p>
+            <div class="service-actions">
+              <button id="lease-train" data-t="leaseTrain"></button
+              ><button id="return-train" data-t="returnTrain"></button>
+            </div>
+            <div data-help-anchor="fleet"></div>
+            <p id="service-draft-note" class="hint"></p>
+            <button id="restore-plan" data-t="restorePlan"></button>
+            <h2 data-t="forecast"></h2>
+            <p id="forecast-status" role="status"></p>
+            <dl id="forecast-values"></dl>
+            <div data-help-anchor="capacity"></div>
+            <div data-help-anchor="service-plan"></div>
+            <button id="apply-service" class="primary" data-t="applyService"></button>
+            <p class="hint" data-t="serviceHint"></p>
+          </section>
+          <section id="view-report" class="view" hidden aria-labelledby="report-heading">
+            <span class="eyebrow" id="report-month"></span>
+            <h1 id="report-heading" data-t="report"></h1>
+            <p id="no-report" data-t="noReport"></p>
+            <div data-help-anchor="accounts"></div>
+            <div data-help-anchor="idle"></div>
+            <dl id="ledger"></dl>
+            <div data-help-anchor="capacity"></div>
+            <details id="network-report">
+              <summary data-t="networkReport"></summary>
+              <dl id="network-totals"></dl>
+              <h2 data-t="passengerInspector"></h2>
+              <label for="market-from" data-t="fromCity"></label
+              ><select id="market-from"></select
+              ><label for="market-to" data-t="toCity"></label
+              ><select id="market-to"></select
+              ><label for="market-class" data-t="travelerClass"></label
+              ><select id="market-class">
+                <option value="business" data-t="businessTravel"></option>
+                <option value="leisure" data-t="leisureTravel"></option>
+              </select>
+              <div id="market-journeys"></div>
+              <dl id="market-values"></dl>
+            </details>
+            <p class="hint" data-t="reportHint"></p>
+            <p><span data-t="resolved"></span>: <span id="resolved"></span></p>
+          </section>
+          <section id="view-company" class="view" hidden aria-labelledby="company-heading">
+            <h1 id="company-heading" data-t="company"></h1>
+            <button id="new-game" data-t="reset"></button><label for="appearance" data-t="appearance"></label
+            ><select id="appearance">
+              <option value="system" data-t="appearance_system"></option>
+              <option value="light" data-t="appearance_light"></option>
+              <option value="dark" data-t="appearance_dark"></option></select
+            ><button id="guidance-settings" data-t="guidanceSettings"></button
+            ><button id="reset-learning" data-t="resetLearning"></button>
+            <h2 data-t="finance"></h2>
+            <p id="debt"></p>
+            <section id="company-funding" hidden aria-labelledby="company-funding-title">
+              <h2 id="company-funding-title" data-t="fundingPlan"></h2>
+              <p id="company-funding-route"></p>
+              <dl id="company-funding-values"></dl>
+              <p id="company-funding-note" class="hint"></p>
+              <button id="review-funding-plan" data-t="reviewFundingPlan"></button>
+              <p id="shortfall-interest"></p>
+              <button id="borrow-shortfall" data-t="borrowShortfall"></button>
+              <p data-t="fundingLoanHelp"></p>
+            </section>
+            <p id="no-funding-plan" data-t="fundingChoosePlan" hidden></p>
+            <button id="choose-funding-plan" data-t="build" hidden></button>
+            <div data-help-anchor="finance"></div>
+            <label for="loan-amount" data-t="loanAmount"></label
+            ><input
+              id="loan-amount"
+              type="text"
+              inputmode="decimal"
+              autocomplete="off"
+              aria-describedby="loan-preview"
+            />
+            <p id="credit-available"></p>
+            <p id="loan-preview" role="status"></p>
+            <div class="service-actions">
+              <button id="borrow" data-t="borrow"></button><button id="repay" data-t="repay"></button>
+            </div>
+            <p class="hint" data-t="loanTerms"></p>
+            <form id="company-form">
+              <label for="company-name" data-t="companyName"></label
+              ><input id="company-name" autocomplete="organization" aria-describedby="name-hint" />
+              <p id="name-hint" data-t="nameHint"></p>
+              <button class="primary" id="rename" type="submit" data-t="applyName"></button>
+            </form>
+            <label class="motion"><input id="motion" type="checkbox" /><span data-t="motion"></span></label>
+            <p data-t="soundless"></p>
+            <p data-t="terrainCredits"></p>
+            <a href="terrain-credits.txt" target="_blank" rel="noopener" data-t="terrain"></a
+            ><button id="export" data-t="download"></button>
+          </section>
+        </aside>
+      </main>
+      <dialog id="new-game-dialog" aria-labelledby="new-game-title" aria-describedby="new-game-warning new-game-start">
+        <h1 id="new-game-title" data-t="newGameTitle"></h1>
+        <p id="new-game-company"></p>
+        <p id="new-game-warning" data-t="newGameWarning"></p>
+        <p id="new-game-start" data-t="newGameStart"></p>
+        <p id="new-game-error" role="alert" hidden></p>
+        <div class="service-actions">
+          <button id="cancel-new-game" data-t="cancel" autofocus></button
+          ><button id="confirm-new-game" class="primary" data-t="newGameConfirm"></button>
+        </div>
+      </dialog>
+      <footer>
+        <button id="idle-footer" class="idle-warning" hidden></button>
+        <p id="status" role="status" aria-live="polite"></p>
+        <div class="time-actions">
+          <span id="campaign-ended" role="status" aria-live="polite" hidden
+            ><strong data-t="campaignEndTitle"></strong><span id="campaign-end-detail"></span></span
+          ><button id="campaign-new-game" data-t="campaignRestart" hidden></button
+          ><button id="advance" class="primary" data-t="advance"></button
+          ><button id="advance-year" data-t="advanceYear"></button>
+        </div>
+      </footer>
+    </div>
+    <script src="app.js"></script>
+  </body>
+</html>

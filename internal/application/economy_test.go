@@ -22,7 +22,10 @@ func TestEconomyV4MigrationPreservesHistoryAndCommitsAtomically(t *testing.T) {
 	store := &memoryStore{b: raw}
 	g := openPublic(t, store)
 	f := g.Snapshot()
-	if !bytes.Equal(raw, store.b) || !reflect.DeepEqual(prior.Reports, f.Reports) || prior.Company != f.Player || !reflect.DeepEqual(prior.Fleet, f.Fleet) || !reflect.DeepEqual(prior.Services, f.Services) || g.w.EconomySince() != 2 {
+	if !bytes.Equal(raw, store.b) || !reflect.DeepEqual(prior.Reports, f.Reports) || prior.Company != f.Player ||
+		!reflect.DeepEqual(prior.Fleet, f.Fleet) ||
+		!reflect.DeepEqual(prior.Services, f.Services) ||
+		g.w.EconomySince() != 2 {
 		t.Fatal("read migration changed existing accounts/plans")
 	}
 	if f.Reports[0].LeaseCosts != 80000000 || f.TrainFamily.LeaseMonthly != 12000000 {
@@ -30,7 +33,10 @@ func TestEconomyV4MigrationPreservesHistoryAndCommitsAtomically(t *testing.T) {
 	}
 	before := f.Checkpoint
 	store.fail = true
-	if _, e = g.Apply(gameapi.Command{Kind: gameapi.AdvanceMonth, Revision: f.Revision}); e == nil || g.Snapshot().Checkpoint != before || !bytes.Equal(store.b, raw) {
+	if _, e = g.Apply(
+		gameapi.Command{Kind: gameapi.AdvanceMonth, Revision: f.Revision},
+	); e == nil || g.Snapshot().Checkpoint != before ||
+		!bytes.Equal(store.b, raw) {
 		t.Fatal("failed migration mutated save")
 	}
 	store.fail = false
@@ -48,7 +54,11 @@ func TestEconomyV4MigrationPreservesHistoryAndCommitsAtomically(t *testing.T) {
 	if openPublic(t, store).Snapshot().Checkpoint != f.Checkpoint {
 		t.Fatal("mixed-rule save cannot continue")
 	}
-	for _, mutate := range []func(*connectorPayload){func(p *connectorPayload) { p.EconomySHA = "unknown" }, func(p *connectorPayload) { p.EconomySince = 0 }, func(p *connectorPayload) { p.EconomySince = 4 }} {
+	for _, mutate := range []func(*connectorPayload){
+		func(p *connectorPayload) { p.EconomySHA = "unknown" },
+		func(p *connectorPayload) { p.EconomySince = 0 },
+		func(p *connectorPayload) { p.EconomySince = 4 },
+	} {
 		bad := p
 		mutate(&bad)
 		env.Payload, _ = json.Marshal(bad)
@@ -75,7 +85,8 @@ func TestEconomyForecastBreakEvenAndSettlementReconcile(t *testing.T) {
 		if e != nil {
 			t.Fatal(e)
 		}
-		if g.Snapshot().Checkpoint != before || !f.BreakEvenAvailable || f.Costs != f.RunningCosts+f.AccessCosts+f.HandlingCosts+f.LeaseCosts+f.MaintenanceCosts {
+		if g.Snapshot().Checkpoint != before || !f.BreakEvenAvailable ||
+			f.Costs != f.RunningCosts+f.AccessCosts+f.HandlingCosts+f.LeaseCosts+f.MaintenanceCosts {
 			t.Fatal("forecast/expense breakdown invalid", f)
 		}
 		// New station markets and cross-border endpoints redistribute the finite demand budget.
@@ -83,12 +94,27 @@ func TestEconomyForecastBreakEvenAndSettlementReconcile(t *testing.T) {
 			t.Fatal("regional calibration drift", f)
 		}
 		if through {
-			publicCommand(t, g, gameapi.Command{Kind: gameapi.ExtendService, CorridorID: id, ReplaceServiceID: q.ReplaceServiceID, Frequency: q.Frequency, Fare: q.Fare, LeaseCount: f.AdditionalLeases})
+			publicCommand(
+				t,
+				g,
+				gameapi.Command{
+					Kind:             gameapi.ExtendService,
+					CorridorID:       id,
+					ReplaceServiceID: q.ReplaceServiceID,
+					Frequency:        q.Frequency,
+					Fare:             q.Fare,
+					LeaseCount:       f.AdditionalLeases,
+				},
+			)
 		} else {
 			for i := 0; i < f.AdditionalLeases; i++ {
 				publicCommand(t, g, gameapi.Command{Kind: gameapi.LeaseTrain, CorridorID: id})
 			}
-			publicCommand(t, g, gameapi.Command{Kind: gameapi.SetService, CorridorID: id, Frequency: q.Frequency, Fare: q.Fare})
+			publicCommand(
+				t,
+				g,
+				gameapi.Command{Kind: gameapi.SetService, CorridorID: id, Frequency: q.Frequency, Fare: q.Fare},
+			)
 		}
 		base := publicCommand(t, baseline, gameapi.Command{Kind: gameapi.AdvanceMonth})
 		next := publicCommand(t, g, gameapi.Command{Kind: gameapi.AdvanceMonth})

@@ -34,7 +34,13 @@ func (w World) RepresentativeDay(network gameapi.NetworkReport) []gameapi.DayTri
 			}
 			for departure := 0; departure < service.Delivered; departure++ {
 				at := departure * trainDayMinutes / service.Delivered
-				trip := gameapi.DayTrip{ID: departureID(service.ID, direction, departure), ServiceID: service.ID, Departure: at, Legs: []gameapi.DayLeg{}, Calls: []gameapi.DayCall{{CityID: cities[0], Arrival: at, Departure: at}}}
+				trip := gameapi.DayTrip{
+					ID:        departureID(service.ID, direction, departure),
+					ServiceID: service.ID,
+					Departure: at,
+					Legs:      []gameapi.DayLeg{},
+					Calls:     []gameapi.DayCall{{CityID: cities[0], Arrival: at, Departure: at}},
+				}
 				for i, id := range sections {
 					co, _ := w.catalog.find(id)
 					a, _ := w.alignment(co, "")
@@ -44,14 +50,28 @@ func (w World) RepresentativeDay(network gameapi.NetworkReport) []gameapi.DayTri
 							load = leg.Passengers * 1000 / leg.Capacity
 						}
 					}
-					trip.Legs = append(trip.Legs, gameapi.DayLeg{CorridorID: id, AlignmentID: a.ID, From: cities[i], To: cities[i+1], Start: at, End: at + a.Minutes, LoadPermille: load})
+					trip.Legs = append(
+						trip.Legs,
+						gameapi.DayLeg{
+							CorridorID:   id,
+							AlignmentID:  a.ID,
+							From:         cities[i],
+							To:           cities[i+1],
+							Start:        at,
+							End:          at + a.Minutes,
+							LoadPermille: load,
+						},
+					)
 					at += a.Minutes
 					if containsCity(route.Stops, cities[i+1]) {
 						arrival := at
 						if i < len(sections)-1 {
 							at += w.catalog.network.DwellMinutes
 						}
-						trip.Calls = append(trip.Calls, gameapi.DayCall{CityID: cities[i+1], Arrival: arrival, Departure: at})
+						trip.Calls = append(
+							trip.Calls,
+							gameapi.DayCall{CityID: cities[i+1], Arrival: arrival, Departure: at},
+						)
 					}
 				}
 				trip.Arrival = at

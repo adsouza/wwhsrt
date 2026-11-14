@@ -108,10 +108,23 @@ func (g *game) rounded(body, edge color.NRGBA) *uimage.NineSlice {
 	return im
 }
 func (g *game) label(value string, size float64, c color.Color, width int) *widget.Text {
-	return widget.NewText(widget.TextOpts.Text(value, g.face(size), c), widget.TextOpts.MaxWidth(float64(g.px(width))), widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{Stretch: true})))
+	return widget.NewText(
+		widget.TextOpts.Text(value, g.face(size), c),
+		widget.TextOpts.MaxWidth(float64(g.px(width))),
+		widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{Stretch: true})),
+	)
 }
 func (g *game) column(padding, spacing int, background color.Color) *widget.Container {
-	opts := []widget.ContainerOpt{widget.ContainerOpts.Layout(widget.NewRowLayout(widget.RowLayoutOpts.Direction(widget.DirectionVertical), widget.RowLayoutOpts.Spacing(g.px(spacing)), widget.RowLayoutOpts.Padding(widget.NewInsetsSimple(g.px(padding))))), widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{Stretch: true}))}
+	opts := []widget.ContainerOpt{
+		widget.ContainerOpts.Layout(
+			widget.NewRowLayout(
+				widget.RowLayoutOpts.Direction(widget.DirectionVertical),
+				widget.RowLayoutOpts.Spacing(g.px(spacing)),
+				widget.RowLayoutOpts.Padding(widget.NewInsetsSimple(g.px(padding))),
+			),
+		),
+		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{Stretch: true})),
+	}
 	if background != nil {
 		opts = append(opts, widget.ContainerOpts.BackgroundImage(uimage.NewNineSliceColor(background)))
 	}
@@ -122,12 +135,34 @@ func (g *game) button(id, label string, primary bool, fn func()) *widget.Button 
 	if primary {
 		idle, hover, fg = accent, accent, panel
 	}
-	b := widget.NewButton(widget.ButtonOpts.WidgetOpts(widget.WidgetOpts.MinSize(g.px(44), g.px(44))), widget.ButtonOpts.Image(&widget.ButtonImage{Idle: g.rounded(idle, border), Hover: g.rounded(hover, accent), Pressed: g.rounded(soft, accent), Disabled: g.rounded(bg, border)}), widget.ButtonOpts.Text(label, g.face(14), &widget.ButtonTextColor{Idle: fg, Disabled: muted}), widget.ButtonOpts.TextPadding(widget.NewInsetsSimple(g.px(10))), widget.ButtonOpts.ClickedHandler(func(*widget.ButtonClickedEventArgs) { fn() }))
+	b := widget.NewButton(
+		widget.ButtonOpts.WidgetOpts(widget.WidgetOpts.MinSize(g.px(44), g.px(44))),
+		widget.ButtonOpts.Image(
+			&widget.ButtonImage{
+				Idle:     g.rounded(idle, border),
+				Hover:    g.rounded(hover, accent),
+				Pressed:  g.rounded(soft, accent),
+				Disabled: g.rounded(bg, border),
+			},
+		),
+		widget.ButtonOpts.Text(label, g.face(14), &widget.ButtonTextColor{Idle: fg, Disabled: muted}),
+		widget.ButtonOpts.TextPadding(widget.NewInsetsSimple(g.px(10))),
+		widget.ButtonOpts.ClickedHandler(func(*widget.ButtonClickedEventArgs) { fn() }),
+	)
 	g.tracked[id] = b
 	return b
 }
 func (g *game) grid(cols int, stretch []bool) *widget.Container {
-	return widget.NewContainer(widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{Stretch: true})), widget.ContainerOpts.Layout(widget.NewGridLayout(widget.GridLayoutOpts.Columns(cols), widget.GridLayoutOpts.Stretch(stretch, nil), widget.GridLayoutOpts.Spacing(g.px(8), g.px(8)))))
+	return widget.NewContainer(
+		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{Stretch: true})),
+		widget.ContainerOpts.Layout(
+			widget.NewGridLayout(
+				widget.GridLayoutOpts.Columns(cols),
+				widget.GridLayoutOpts.Stretch(stretch, nil),
+				widget.GridLayoutOpts.Spacing(g.px(8), g.px(8)),
+			),
+		),
+	)
 }
 
 func (g *game) cashRow(label, value string, width int) *widget.Container {
@@ -147,14 +182,24 @@ func (g *game) field(id, title string, value string, delta int, width int) (*wid
 		g.applied = false
 	}
 	line.AddChild(g.button(id+"Minus", "−", false, func() { change(-delta) }))
-	input = widget.NewTextInput(widget.TextInputOpts.WidgetOpts(widget.WidgetOpts.MinSize(g.px(60), g.px(44))), widget.TextInputOpts.Image(&widget.TextInputImage{Idle: g.rounded(panel, border), Disabled: g.rounded(bg, border)}), widget.TextInputOpts.Face(g.face(16)), widget.TextInputOpts.Color(&widget.TextInputColor{Idle: ink, Caret: accent}), widget.TextInputOpts.Padding(widget.NewInsetsSimple(g.px(10))), widget.TextInputOpts.MobileInputMode(mobile.NUMERIC), widget.TextInputOpts.ChangedHandler(func(a *widget.TextInputChangedEventArgs) {
-		if id == "frequency" {
-			g.rawFrequency = a.InputText
-		} else {
-			g.rawFare = a.InputText
-		}
-		g.applied = false
-	}))
+	input = widget.NewTextInput(
+		widget.TextInputOpts.WidgetOpts(widget.WidgetOpts.MinSize(g.px(60), g.px(44))),
+		widget.TextInputOpts.Image(
+			&widget.TextInputImage{Idle: g.rounded(panel, border), Disabled: g.rounded(bg, border)},
+		),
+		widget.TextInputOpts.Face(g.face(16)),
+		widget.TextInputOpts.Color(&widget.TextInputColor{Idle: ink, Caret: accent}),
+		widget.TextInputOpts.Padding(widget.NewInsetsSimple(g.px(10))),
+		widget.TextInputOpts.MobileInputMode(mobile.NUMERIC),
+		widget.TextInputOpts.ChangedHandler(func(a *widget.TextInputChangedEventArgs) {
+			if id == "frequency" {
+				g.rawFrequency = a.InputText
+			} else {
+				g.rawFare = a.InputText
+			}
+			g.applied = false
+		}),
+	)
 	input.SetText(value)
 	g.tracked[id] = input
 	line.AddChild(input)
@@ -171,7 +216,10 @@ func (g *game) build() {
 	g.faces = map[float64]*text.Face{}
 	g.freqInput = nil
 	g.fareInput = nil
-	root := widget.NewContainer(widget.ContainerOpts.Layout(placedLayout{}), widget.ContainerOpts.BackgroundImage(uimage.NewNineSliceColor(bg)))
+	root := widget.NewContainer(
+		widget.ContainerOpts.Layout(placedLayout{}),
+		widget.ContainerOpts.BackgroundImage(uimage.NewNineSliceColor(bg)),
+	)
 	place := func(id string, c widget.PreferredSizeLocateableWidget, x, y, w, h int) {
 		c.GetWidget().LayoutData = image.Rect(g.px(x), g.px(y), g.px(x+w), g.px(y+h))
 		root.AddChild(c)
@@ -196,7 +244,9 @@ func (g *game) build() {
 		panes := g.grid(columns, []bool{true, true})
 		settings := g.column(0, 14, nil)
 		settings.AddChild(g.label("Lyon  →  Turin", 18, ink, width))
-		settings.AddChild(g.label("Nonstop · 1 h 08 min · 220 km\nPublic track · three 400-seat trainsets", 14, muted, width))
+		settings.AddChild(
+			g.label("Nonstop · 1 h 08 min · 220 km\nPublic track · three 400-seat trainsets", 14, muted, width),
+		)
 		freq, in := g.field("frequency", "Return trips per day", g.rawFrequency, 1, width)
 		g.freqInput = in
 		settings.AddChild(freq)
@@ -204,7 +254,14 @@ func (g *game) build() {
 		settings.AddChild(g.requirement)
 		if !g.hideHint {
 			hint := g.column(12, 8, warning)
-			hint.AddChild(g.label("One return trip means one departure each way. More trips can attract passengers and need more trains.", 14, warningInk, width-24))
+			hint.AddChild(
+				g.label(
+					"One return trip means one departure each way. More trips can attract passengers and need more trains.",
+					14,
+					warningInk,
+					width-24,
+				),
+			)
 			hint.AddChild(g.button("dismissHint", "Got it", false, func() { g.hideHint = true; g.dirty = true }))
 			settings.AddChild(hint)
 		}
@@ -224,7 +281,9 @@ func (g *game) build() {
 		preview.AddChild(g.passengers)
 		g.occupancy = g.label("", 14, muted, width-24)
 		preview.AddChild(g.occupancy)
-		preview.AddChild(g.label("Operating cash excludes construction, interest, and principal repayments.", 14, muted, width-24))
+		preview.AddChild(
+			g.label("Operating cash excludes construction, interest, and principal repayments.", 14, muted, width-24),
+		)
 		panes.AddChild(preview)
 		content.AddChild(panes)
 	} else {
@@ -238,24 +297,52 @@ func (g *game) build() {
 		cash.AddChild(g.label("−$9.94M", 28, ink, width))
 		if !g.hideHint {
 			hint := g.column(12, 8, warning)
-			hint.AddChild(g.label("Your trains earned cash, but the station upgrade used more. Investment is separate from operating costs.", 14, warningInk, width-24))
+			hint.AddChild(
+				g.label(
+					"Your trains earned cash, but the station upgrade used more. Investment is separate from operating costs.",
+					14,
+					warningInk,
+					width-24,
+				),
+			)
 			hint.AddChild(g.button("dismissHint", "Got it", false, func() { g.hideHint = true; g.dirty = true }))
 			cash.AddChild(hint)
 		}
 		cash.AddChild(g.label("Cash reconciliation", 18, ink, width))
-		for _, entry := range [][2]string{{"Opening cash", "$42.00M"}, {"Operating cash", "+$3.06M"}, {"Station upgrade", "−$12.00M"}, {"Interest + principal", "−$1.00M"}, {"Closing cash", "$32.06M"}} {
+		for _, entry := range [][2]string{
+			{"Opening cash", "$42.00M"},
+			{"Operating cash", "+$3.06M"},
+			{"Station upgrade", "−$12.00M"},
+			{"Interest + principal", "−$1.00M"},
+			{"Closing cash", "$32.06M"},
+		} {
 			cash.AddChild(g.cashRow(entry[0], entry[1], width))
 		}
 		panes.AddChild(cash)
 		service := g.column(12, 16, soft)
 		service.AddChild(g.label("Lyon–Turin Express", 18, ink, width-24))
 		service.AddChild(g.label("95,239 journeys", 26, ink, width-24))
-		service.AddChild(g.label("64% seat occupancy\n6 daily return trips\n$65 one-way fare\n31 operating days", 16, ink, width-24))
-		service.AddChild(g.label("Empty seats are a market signal. Compare fare and frequency in the service editor.", 14, muted, width-24))
+		service.AddChild(
+			g.label("64% seat occupancy\n6 daily return trips\n$65 one-way fare\n31 operating days", 16, ink, width-24),
+		)
+		service.AddChild(
+			g.label(
+				"Empty seats are a market signal. Compare fare and frequency in the service editor.",
+				14,
+				muted,
+				width-24,
+			),
+		)
 		panes.AddChild(service)
 		content.AddChild(panes)
 	}
-	g.scroll = widget.NewScrollContainer(widget.ScrollContainerOpts.Content(content), widget.ScrollContainerOpts.StretchContentWidth(), widget.ScrollContainerOpts.Image(&widget.ScrollContainerImage{Idle: uimage.NewNineSliceColor(panel), Mask: uimage.NewNineSliceColor(panel)}))
+	g.scroll = widget.NewScrollContainer(
+		widget.ScrollContainerOpts.Content(content),
+		widget.ScrollContainerOpts.StretchContentWidth(),
+		widget.ScrollContainerOpts.Image(
+			&widget.ScrollContainerImage{Idle: uimage.NewNineSliceColor(panel), Mask: uimage.NewNineSliceColor(panel)},
+		),
+	)
 	g.scroll.ScrollTop = oldScroll
 	viewH := max(96, g.h-64-86-64-24)
 	place("scroll", g.scroll, 16, 76, g.w-32, viewH)
@@ -277,8 +364,12 @@ func (g *game) build() {
 	footer.AddChild(g.apply)
 	place("footer", footer, 16, g.h-138, g.w-32, 64)
 	nav := g.grid(2, []bool{true, true})
-	nav.AddChild(g.button("servicesTab", "Services", false, func() { g.view = "Services"; g.scroll = nil; g.dirty = true }))
-	nav.AddChild(g.button("reportsTab", "Monthly report", false, func() { g.view = "Reports"; g.scroll = nil; g.dirty = true }))
+	nav.AddChild(
+		g.button("servicesTab", "Services", false, func() { g.view = "Services"; g.scroll = nil; g.dirty = true }),
+	)
+	nav.AddChild(
+		g.button("reportsTab", "Monthly report", false, func() { g.view = "Reports"; g.scroll = nil; g.dirty = true }),
+	)
 	place("navigation", nav, 16, g.h-62, g.w-32, 46)
 	g.ui = &ebitenui.UI{Container: root}
 	g.dirty = false
@@ -355,7 +446,8 @@ func (g *game) Update() error {
 	// the chord's printable "A" is not inserted into the number field.
 	var selectField *widget.TextInput
 	before := ""
-	if (ebiten.IsKeyPressed(ebiten.KeyMeta) || ebiten.IsKeyPressed(ebiten.KeyControl)) && inpututil.IsKeyJustPressed(ebiten.KeyA) {
+	if (ebiten.IsKeyPressed(ebiten.KeyMeta) || ebiten.IsKeyPressed(ebiten.KeyControl)) &&
+		inpututil.IsKeyJustPressed(ebiten.KeyA) {
 		for _, field := range []*widget.TextInput{g.freqInput, g.fareInput} {
 			if field != nil && field.IsFocused() {
 				selectField = field
@@ -429,7 +521,13 @@ func (g *game) snapshot() string {
 	items := map[string]any{}
 	for id, w := range g.tracked {
 		r := w.GetWidget().Rect
-		items[id] = map[string]any{"x": float64(r.Min.X) / g.scale, "y": float64(r.Min.Y) / g.scale, "w": float64(r.Dx()) / g.scale, "h": float64(r.Dy()) / g.scale, "disabled": w.GetWidget().Disabled}
+		items[id] = map[string]any{
+			"x":        float64(r.Min.X) / g.scale,
+			"y":        float64(r.Min.Y) / g.scale,
+			"w":        float64(r.Dx()) / g.scale,
+			"h":        float64(r.Dy()) / g.scale,
+			"disabled": w.GetWidget().Disabled,
+		}
 	}
 	focused := ""
 	if g.freqInput != nil && g.freqInput.IsFocused() {
@@ -442,7 +540,25 @@ func (g *game) snapshot() string {
 	if g.scroll != nil {
 		scroll = g.scroll.ScrollTop
 	}
-	b, _ := json.Marshal(map[string]any{"view": g.view, "width": g.w, "height": g.h, "scale": g.scale, "frequency": g.rawFrequency, "fare": g.rawFare, "valid": g.valid, "fleet": g.fleet, "applied": g.applied, "hintDismissed": g.hideHint, "operating": g.operating, "scroll": scroll, "focused": focused, "frames": g.frames, "widgets": items})
+	b, _ := json.Marshal(
+		map[string]any{
+			"view":          g.view,
+			"width":         g.w,
+			"height":        g.h,
+			"scale":         g.scale,
+			"frequency":     g.rawFrequency,
+			"fare":          g.rawFare,
+			"valid":         g.valid,
+			"fleet":         g.fleet,
+			"applied":       g.applied,
+			"hintDismissed": g.hideHint,
+			"operating":     g.operating,
+			"scroll":        scroll,
+			"focused":       focused,
+			"frames":        g.frames,
+			"widgets":       items,
+		},
+	)
 	return string(b)
 }
 func main() {
@@ -450,7 +566,18 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	g := &game{w: 1280, h: 800, scale: 1, dirty: true, view: "Services", rawFrequency: "6", rawFare: "65", font: source, faces: map[float64]*text.Face{}, images: map[string]*uimage.NineSlice{}}
+	g := &game{
+		w:            1280,
+		h:            800,
+		scale:        1,
+		dirty:        true,
+		view:         "Services",
+		rawFrequency: "6",
+		rawFare:      "65",
+		font:         source,
+		faces:        map[float64]*text.Face{},
+		images:       map[string]*uimage.NineSlice{},
+	}
 	installProbe(g)
 	ebiten.SetWindowSize(1280, 800)
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)

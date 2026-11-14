@@ -38,7 +38,10 @@ func newRelief() (*relief, error) {
 			for x := 0; x <= cols; x++ {
 				px, py := float64(x*16), float64(y*16)
 				t.world = append(t.world, terrain.ProjectedPixel(region, px, py))
-				t.vertices = append(t.vertices, ebiten.Vertex{SrcX: float32(px), SrcY: float32(py), ColorR: 1, ColorG: 1, ColorB: 1, ColorA: 1})
+				t.vertices = append(
+					t.vertices,
+					ebiten.Vertex{SrcX: float32(px), SrcY: float32(py), ColorR: 1, ColorG: 1, ColorB: 1, ColorA: 1},
+				)
 			}
 		}
 		for y := 0; y < rows; y++ {
@@ -92,7 +95,12 @@ func (t *relief) draw(dst *ebiten.Image, c mapview.Camera, s ui.State) {
 		if x1 < 0 || y1 < 0 || x0 > c.Width || y0 > c.Height {
 			continue
 		}
-		dst.DrawTriangles(tile.vertices, tile.indices, tile.image, &ebiten.DrawTrianglesOptions{Filter: ebiten.FilterLinear})
+		dst.DrawTriangles(
+			tile.vertices,
+			tile.indices,
+			tile.image,
+			&ebiten.DrawTrianglesOptions{Filter: ebiten.FilterLinear},
+		)
 		if c.Zoom >= 4 {
 			for _, line := range tile.contours {
 				var path vector.Path
@@ -185,7 +193,12 @@ func (t *relief) labels(m *Map, dst *ebiten.Image, c mapview.Camera, s ui.State,
 			}
 			value := ui.Text(locale, f.Key)
 			width := text.Advance(value, &text.GoTextFace{Source: m.Font, Size: 12})
-			for _, off := range []mapview.Point{{X: 10, Y: -8}, {X: -width - 10, Y: -8}, {X: -width / 2, Y: 10}, {X: -width / 2, Y: -25}} {
+			for _, off := range []mapview.Point{
+				{X: 10, Y: -8},
+				{X: -width - 10, Y: -8},
+				{X: -width / 2, Y: 10},
+				{X: -width / 2, Y: -25},
+			} {
 				r := labelRect{p.X + off.X, p.Y + off.Y, width, 18}
 				if r.x < 4 || r.x+r.w > c.Width-4 || r.y < 4 {
 					continue
@@ -210,10 +223,32 @@ func (t *relief) labels(m *Map, dst *ebiten.Image, c mapview.Camera, s ui.State,
 	if !legendVisible {
 		return
 	}
-	vector.FillRect(dst, float32(legend.x), float32(legend.y), float32(legend.w), float32(legend.h), pal.TerrainFill, true)
+	vector.FillRect(
+		dst,
+		float32(legend.x),
+		float32(legend.y),
+		float32(legend.w),
+		float32(legend.h),
+		pal.TerrainFill,
+		true,
+	)
 	m.Label(dst, ui.Text(locale, "terrainLegend"), legend.x+8, legend.y+4, 11, pal.Text)
-	for i, col := range []color.NRGBA{{231, 244, 204, 255}, {199, 211, 145, 255}, {183, 168, 133, 255}, {177, 157, 139, 255}, {234, 230, 216, 255}} {
-		vector.FillRect(dst, float32(legend.x+8)+float32(i)*24, float32(legend.y+24), 24, 7, terrainSwatch(col, dark), true)
+	for i, col := range []color.NRGBA{
+		{231, 244, 204, 255},
+		{199, 211, 145, 255},
+		{183, 168, 133, 255},
+		{177, 157, 139, 255},
+		{234, 230, 216, 255},
+	} {
+		vector.FillRect(
+			dst,
+			float32(legend.x+8)+float32(i)*24,
+			float32(legend.y+24),
+			24,
+			7,
+			terrainSwatch(col, dark),
+			true,
+		)
 	}
 	m.Label(dst, "0 m", legend.x+8, legend.y+33, 9, pal.Text)
 	m.Label(dst, "2000+ m", legend.x+93, legend.y+33, 9, pal.Text)

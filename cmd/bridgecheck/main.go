@@ -163,7 +163,10 @@ func best(w domain.World, id string) (gameapi.ForecastRequest, gameapi.Forecast)
 		fares[v] = true
 	}
 	for _, pct := range []int{80, 110, 150, 200} {
-		fares[max(gameapi.Money(1000), min(gameapi.Money(30000), gameapi.Money(400+r.KM*14)*gameapi.Money(pct)/100))] = true
+		fares[max(
+			gameapi.Money(1000),
+			min(gameapi.Money(30000), gameapi.Money(400+r.KM*14)*gameapi.Money(pct)/100),
+		)] = true
 	}
 	for _, source := range sources {
 		for _, n := range []int{1, 2, 4, 6} {
@@ -173,7 +176,8 @@ func best(w domain.World, id string) (gameapi.ForecastRequest, gameapi.Forecast)
 				if e != nil {
 					continue
 				}
-				if f.CompanyChange > score || (f.CompanyChange == score && (fare < q.Fare || fare == q.Fare && n < q.Frequency)) {
+				if f.CompanyChange > score ||
+					(f.CompanyChange == score && (fare < q.Fare || fare == q.Fare && n < q.Frequency)) {
 					score = f.CompanyChange
 					q = p
 					fc = f
@@ -189,12 +193,25 @@ func best(w domain.World, id string) (gameapi.ForecastRequest, gameapi.Forecast)
 
 func apply(w domain.World, q gameapi.ForecastRequest, fc gameapi.Forecast) domain.World {
 	if q.ReplaceServiceID != "" {
-		return change(w, gameapi.Command{Kind: gameapi.ExtendService, CorridorID: q.CorridorID, ReplaceServiceID: q.ReplaceServiceID, Frequency: q.Frequency, Fare: q.Fare, LeaseCount: fc.AdditionalLeases})
+		return change(
+			w,
+			gameapi.Command{
+				Kind:             gameapi.ExtendService,
+				CorridorID:       q.CorridorID,
+				ReplaceServiceID: q.ReplaceServiceID,
+				Frequency:        q.Frequency,
+				Fare:             q.Fare,
+				LeaseCount:       fc.AdditionalLeases,
+			},
+		)
 	}
 	for i := 0; i < fc.AdditionalLeases; i++ {
 		w = change(w, gameapi.Command{Kind: gameapi.LeaseTrain, CorridorID: q.CorridorID})
 	}
-	return change(w, gameapi.Command{Kind: gameapi.SetService, CorridorID: q.CorridorID, Frequency: q.Frequency, Fare: q.Fare})
+	return change(
+		w,
+		gameapi.Command{Kind: gameapi.SetService, CorridorID: q.CorridorID, Frequency: q.Frequency, Fare: q.Fare},
+	)
 }
 
 func mirror(w, plans domain.World) domain.World {
@@ -208,7 +225,10 @@ func mirror(w, plans domain.World) domain.World {
 		for i := 0; i < plans.FleetCount(s.CorridorID); i++ {
 			w = change(w, gameapi.Command{Kind: gameapi.LeaseTrain, CorridorID: s.CorridorID})
 		}
-		w = change(w, gameapi.Command{Kind: gameapi.SetService, CorridorID: s.CorridorID, Frequency: s.Frequency, Fare: s.Fare})
+		w = change(
+			w,
+			gameapi.Command{Kind: gameapi.SetService, CorridorID: s.CorridorID, Frequency: s.Frequency, Fare: s.Fare},
+		)
 	}
 	return w
 }
@@ -226,7 +246,17 @@ func main() {
 		ID     string
 		Routes []string
 	}
-	projects := []project{{"launch_72_tsuruga__maibara", []string{"connector_kanazawa__osaka_via_maibara", "connector_kanazawa__nagoya_via_maibara"}}, {"launch_73_valencia__camp_de_tarragona", []string{"connector_valencia__barcelona", "connector_valencia__perpignan"}}, {"launch_74_porto__vigo", []string{"connector_lisbon__pontevedra"}}}
+	projects := []project{
+		{
+			"launch_72_tsuruga__maibara",
+			[]string{"connector_kanazawa__osaka_via_maibara", "connector_kanazawa__nagoya_via_maibara"},
+		},
+		{
+			"launch_73_valencia__camp_de_tarragona",
+			[]string{"connector_valencia__barcelona", "connector_valencia__perpignan"},
+		},
+		{"launch_74_porto__vigo", []string{"connector_lisbon__pontevedra"}},
+	}
 	results := []map[string]any{}
 	for _, project := range projects {
 		fmt.Fprintln(os.Stderr, "checking shipped project", project.ID)
@@ -246,7 +276,12 @@ func main() {
 			seen := map[string]bool{}
 			for j := 0; j < len(r.Cities); j++ {
 				for k := j + 1; k < len(r.Cities); k++ {
-					f := publicRoute(c, string(r.Cities[j]), string(r.Cities[k]), fmt.Sprintf("validation_base_%d_%d_%d", i, j, k))
+					f := publicRoute(
+						c,
+						string(r.Cities[j]),
+						string(r.Cities[k]),
+						fmt.Sprintf("validation_base_%d_%d_%d", i, j, k),
+					)
 					if f.ID == "" || seen[f.ID] {
 						continue
 					}
@@ -298,7 +333,21 @@ func main() {
 			n = mirror(n, b)
 			q, fc := best(n, id)
 			n = apply(n, q, fc)
-			m := metrics{Replaces: q.ReplaceServiceID, BaselinePlans: b.Services(), BaselineFleet: b.Fleet(), NewPlans: n.Services(), NewFleet: n.Fleet(), Route: id, Frequency: q.Frequency, Fare: q.Fare, Cost: a.Cost, Grant: a.Grant, Debt: n.Debt(), Forecast: fc, MinimumIncrement: gameapi.Money(math.MaxInt64)}
+			m := metrics{
+				Replaces:         q.ReplaceServiceID,
+				BaselinePlans:    b.Services(),
+				BaselineFleet:    b.Fleet(),
+				NewPlans:         n.Services(),
+				NewFleet:         n.Fleet(),
+				Route:            id,
+				Frequency:        q.Frequency,
+				Fare:             q.Fare,
+				Cost:             a.Cost,
+				Grant:            a.Grant,
+				Debt:             n.Debt(),
+				Forecast:         fc,
+				MinimumIncrement: gameapi.Money(math.MaxInt64),
+			}
 			var total gameapi.Money
 			for month := 0; month < 12; month++ {
 				b = change(b, gameapi.Command{Kind: gameapi.AdvanceMonth})
@@ -317,10 +366,32 @@ func main() {
 				winner = m
 			}
 		}
-		results = append(results, map[string]any{"project": project.ID, "km": a.KM, "months": a.Months, "best": winner, "trials": trials})
-		fmt.Fprintln(os.Stderr, project.ID, "mean incremental cents", winner.AverageIncrement, "worst", winner.MinimumIncrement)
+		results = append(
+			results,
+			map[string]any{"project": project.ID, "km": a.KM, "months": a.Months, "best": winner, "trials": trials},
+		)
+		fmt.Fprintln(
+			os.Stderr,
+			project.ID,
+			"mean incremental cents",
+			winner.AverageIncrement,
+			"worst",
+			winner.MinimumIncrement,
+		)
 	}
-	output := map[string]any{"catalog_sha256": fmt.Sprintf("%x", sha256.Sum256(assets.PublicNetwork)), "economy_sha256": fmt.Sprintf("%x", sha256.Sum256(assets.Economy)), "method": "Actual shipped costs, durations, grant, financing and service patterns. Default starter operated during real construction months. Baseline existing public services optimized first among all service-stop pairs, mirrored into project world; add or extend one connector through service. Fixed first-post-opening fare/frequency chosen from bounded grid, then settle 12 months. Monthly cash deltas include maintenance and actual loan interest, exclude upfront capital/principal repayment and competition. A greedy portfolio screen, not an optimum or campaign NPV.", "projects": results}
+	output := map[string]any{
+		"catalog_sha256": fmt.Sprintf("%x", sha256.Sum256(assets.PublicNetwork)),
+		"economy_sha256": fmt.Sprintf("%x", sha256.Sum256(assets.Economy)),
+		"method": "Actual shipped costs, durations, grant, financing and service patterns. " +
+			"Default starter operated during real construction months. " +
+			"Baseline existing public services optimized first among all service-stop pairs, " +
+			"mirrored into project world; add or extend one connector through service. " +
+			"Fixed first-post-opening fare/frequency chosen from bounded grid, then settle 12 months. " +
+			"Monthly cash deltas include maintenance and actual loan interest, " +
+			"exclude upfront capital/principal repayment and competition. A greedy portfolio screen, " +
+			"not an optimum or campaign NPV.",
+		"projects": results,
+	}
 	b, e := json.MarshalIndent(output, "", "  ")
 	must(e)
 	if *outputPath != "" {

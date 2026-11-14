@@ -92,7 +92,12 @@ func JSONSchemaV1() ([]byte, error) {
 					properties[key] = p
 					required = append(required, key)
 				}
-				defs[name] = map[string]any{"type": "object", "additionalProperties": false, "properties": properties, "required": required}
+				defs[name] = map[string]any{
+					"type":                 "object",
+					"additionalProperties": false,
+					"properties":           properties,
+					"required":             required,
+				}
 			}
 			return map[string]any{"$ref": "#/$defs/" + name}
 		case reflect.Slice:

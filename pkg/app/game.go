@@ -39,7 +39,14 @@ func New(port gameapi.Game) (*Game, error) {
 	if e != nil {
 		return nil, e
 	}
-	g := &Game{Port: port, Frame: port.Snapshot(), Map: m, Camera: m.Camera(1, 1, false), dirty: true, State: ui.State{Locale: "en", View: "map", Motion: true}}
+	g := &Game{
+		Port:   port,
+		Frame:  port.Snapshot(),
+		Map:    m,
+		Camera: m.Camera(1, 1, false),
+		dirty:  true,
+		State:  ui.State{Locale: "en", View: "map", Motion: true},
+	}
 	g.host.init(g)
 	return g, nil
 }
@@ -161,7 +168,13 @@ func (g *Game) move(at mapview.Point) {
 func (g *Game) finish(at mapview.Point) {
 	if !g.moved {
 		if g.State.View == "map" || g.State.View == "build" {
-			if id := render.PickProspect(g.Camera, g.Frame, g.State, at); id != "" && ui.SelectProspect(&g.State, g.Frame, id) {
+			if id := render.PickProspect(
+				g.Camera,
+				g.Frame,
+				g.State,
+				at,
+			); id != "" &&
+				ui.SelectProspect(&g.State, g.Frame, id) {
 				g.dirty = true
 				g.host.layout(g)
 				g.host.changed(g)

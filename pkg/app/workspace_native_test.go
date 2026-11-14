@@ -33,7 +33,17 @@ func TestNativeWorkspacePrimaryPlanFitsAndPanesPreserveDrafts(t *testing.T) {
 		for _, dock := range []string{"top", "left"} {
 			for _, size := range [][2]int{{390, 844}, {1280, 850}, {1920, 1080}} {
 				t.Run(fmt.Sprintf("%s/%s/%v", locale, dock, size), func(t *testing.T) {
-					g := &Game{Port: p, Frame: p.Snapshot(), Map: m, width: size[0], height: size[1], State: ui.NewGameState(ui.State{Locale: locale, CommandDock: dock, PanelWidth: 520}, p.Snapshot())}
+					g := &Game{
+						Port:   p,
+						Frame:  p.Snapshot(),
+						Map:    m,
+						width:  size[0],
+						height: size[1],
+						State: ui.NewGameState(
+							ui.State{Locale: locale, CommandDock: dock, PanelWidth: 520},
+							p.Snapshot(),
+						),
+					}
 					g.State.View = "services"
 					g.State.Fare = 9500
 					g.host.layout(g)
@@ -84,7 +94,15 @@ func TestNativeMapCoordinatesAccountForDockOrigin(t *testing.T) {
 		t.Fatal(e)
 	}
 	for _, dock := range []string{"top", "left"} {
-		g := &Game{Port: p, Frame: p.Snapshot(), Map: m, width: 1280, height: 850, Camera: mapview.New(800, 700), State: ui.State{View: "map", CommandDock: dock}}
+		g := &Game{
+			Port:   p,
+			Frame:  p.Snapshot(),
+			Map:    m,
+			width:  1280,
+			height: 850,
+			Camera: mapview.New(800, 700),
+			State:  ui.State{View: "map", CommandDock: dock},
+		}
 		g.host.layout(g)
 		for _, city := range g.Frame.Cities {
 			if city.ID != "tokyo" {

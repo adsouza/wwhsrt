@@ -27,10 +27,12 @@ func TestLaunchV7UpgradeAndConventionalMoroccoWithdrawal(t *testing.T) {
 			store := &memoryStore{b: raw}
 			g := openPublic(t, store)
 			f := g.Snapshot()
-			if !bytes.Equal(raw, store.b) || !reflect.DeepEqual(old.Reports, f.Reports) || old.Company != f.Player || g.w.ConstructionSince() != old.Months {
+			if !bytes.Equal(raw, store.b) || !reflect.DeepEqual(old.Reports, f.Reports) || old.Company != f.Player ||
+				g.w.ConstructionSince() != old.Months {
 				t.Fatal("opening changed historical accounts")
 			}
-			if fixture == "launch-v7.json" && (!reflect.DeepEqual(old.Services, f.Services) || !reflect.DeepEqual(old.Fleet, f.Fleet)) {
+			if fixture == "launch-v7.json" &&
+				(!reflect.DeepEqual(old.Services, f.Services) || !reflect.DeepEqual(old.Fleet, f.Fleet)) {
 				t.Fatal("unrelated fleet/plan changed")
 			}
 			if fixture == "morocco-v7.json" {
@@ -50,21 +52,30 @@ func TestLaunchV7UpgradeAndConventionalMoroccoWithdrawal(t *testing.T) {
 			}
 			before := f.Checkpoint
 			store.fail = true
-			if _, e = g.Apply(gameapi.Command{Kind: gameapi.AdvanceMonth, Revision: f.Revision}); e == nil || g.Snapshot().Checkpoint != before || !bytes.Equal(store.b, raw) {
+			if _, e = g.Apply(
+				gameapi.Command{Kind: gameapi.AdvanceMonth, Revision: f.Revision},
+			); e == nil || g.Snapshot().Checkpoint != before ||
+				!bytes.Equal(store.b, raw) {
 				t.Fatal("failed upgrade changed state")
 			}
 			store.fail = false
 			f = publicCommand(t, g, gameapi.Command{Kind: gameapi.AdvanceMonth})
-			if !reflect.DeepEqual(f.Reports[:old.Months], old.Reports) || openPublic(t, store).Snapshot().Checkpoint != f.Checkpoint {
+			if !reflect.DeepEqual(f.Reports[:old.Months], old.Reports) ||
+				openPublic(t, store).Snapshot().Checkpoint != f.Checkpoint {
 				t.Fatal("historical/new interval cannot reload")
 			}
 			var next connectorPayload
 			json.Unmarshal(store.b, &env)
 			json.Unmarshal(env.Payload, &next)
-			if env.Version != 10 || next.LaunchPriorSHA != launchPriorSHA || next.ConstructionSince != old.Months || next.PublicSHA != hash(assets.PublicNetwork) {
+			if env.Version != 10 || next.LaunchPriorSHA != launchPriorSHA || next.ConstructionSince != old.Months ||
+				next.PublicSHA != hash(assets.PublicNetwork) {
 				t.Fatal("catalog identity not pinned")
 			}
-			for _, mutate := range []func(*connectorPayload){func(p *connectorPayload) { p.LaunchPriorSHA = "unknown" }, func(p *connectorPayload) { p.ConstructionSince = -1 }, func(p *connectorPayload) { p.ConstructionSince = p.Months + 1 }} {
+			for _, mutate := range []func(*connectorPayload){
+				func(p *connectorPayload) { p.LaunchPriorSHA = "unknown" },
+				func(p *connectorPayload) { p.ConstructionSince = -1 },
+				func(p *connectorPayload) { p.ConstructionSince = p.Months + 1 },
+			} {
 				bad := next
 				mutate(&bad)
 				env.Payload, _ = json.Marshal(bad)
@@ -78,7 +89,15 @@ func TestLaunchV7UpgradeAndConventionalMoroccoWithdrawal(t *testing.T) {
 	}
 }
 func TestLaunchIndependentRegionalProjectsOpenCarryRevenueAndReload(t *testing.T) {
-	for _, prefix := range []string{"launch_02_", "launch_17_", "launch_33_", "launch_39_", "launch_57_", "launch_71_", "hokkaido-extension"} {
+	for _, prefix := range []string{
+		"launch_02_",
+		"launch_17_",
+		"launch_33_",
+		"launch_39_",
+		"launch_57_",
+		"launch_71_",
+		"hokkaido-extension",
+	} {
 		t.Run(prefix, func(t *testing.T) {
 			store := &memoryStore{}
 			g := openPublic(t, store)
@@ -123,11 +142,16 @@ func TestLaunchIndependentRegionalProjectsOpenCarryRevenueAndReload(t *testing.T
 			for i := 0; i < fc.AdditionalLeases; i++ {
 				publicCommand(t, g, gameapi.Command{Kind: gameapi.LeaseTrain, CorridorID: serviceID})
 			}
-			publicCommand(t, g, gameapi.Command{Kind: gameapi.SetService, CorridorID: serviceID, Frequency: 1, Fare: 1000})
+			publicCommand(
+				t,
+				g,
+				gameapi.Command{Kind: gameapi.SetService, CorridorID: serviceID, Frequency: 1, Fare: 1000},
+			)
 			f = publicCommand(t, g, gameapi.Command{Kind: gameapi.AdvanceMonth})
 			carried := false
 			for _, j := range f.Network.Journeys {
-				if (j.From == co.FromCity && j.To == co.ToCity || j.To == co.FromCity && j.From == co.ToCity) && j.Passengers > 0 {
+				if (j.From == co.FromCity && j.To == co.ToCity || j.To == co.FromCity && j.From == co.ToCity) &&
+					j.Passengers > 0 {
 					carried = true
 				}
 			}
@@ -137,7 +161,8 @@ func TestLaunchIndependentRegionalProjectsOpenCarryRevenueAndReload(t *testing.T
 			if co.ID == "hokkaido-extension" {
 				end := false
 				for _, j := range f.Network.Journeys {
-					if (j.From == "tokyo" && j.To == "sapporo" || j.To == "tokyo" && j.From == "sapporo") && j.Passengers > 0 {
+					if (j.From == "tokyo" && j.To == "sapporo" || j.To == "tokyo" && j.From == "sapporo") &&
+						j.Passengers > 0 {
 						end = true
 					}
 				}

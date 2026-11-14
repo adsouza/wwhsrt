@@ -10,7 +10,16 @@ import (
 	"wwhsrt/pkg/ui"
 )
 
-func (h *host) buildCompany(g *Game, t func(string) string, label nativeLabel, button nativeButton, content *widget.Container, width int, previousName *nameInput, refocus bool) {
+func (h *host) buildCompany(
+	g *Game,
+	t func(string) string,
+	label nativeLabel,
+	button nativeButton,
+	content *widget.Container,
+	width int,
+	previousName *nameInput,
+	refocus bool,
+) {
 	label(t("company"), 20)
 	h.taskTabs(g, "company", []string{"finance", "identity", "settings"}, button)
 	switch ui.CompanyPane(g.State) {
@@ -62,7 +71,11 @@ func (h *host) buildCompany(g *Game, t func(string) string, label nativeLabel, b
 			key   string
 			value bool
 			run   func()
-		}{{"motion", g.State.Motion, func() { g.State.Motion = !g.State.Motion }}, {"terrain", !g.State.HideTerrain, func() { g.State.HideTerrain = !g.State.HideTerrain }}, {"guidanceSettings", !g.State.Help.Muted, func() { g.State.Help.Muted = !g.State.Help.Muted }}} {
+		}{
+			{"motion", g.State.Motion, func() { g.State.Motion = !g.State.Motion }},
+			{"terrain", !g.State.HideTerrain, func() { g.State.HideTerrain = !g.State.HideTerrain }},
+			{"guidanceSettings", !g.State.Help.Muted, func() { g.State.Help.Muted = !g.State.Help.Muted }},
+		} {
 			setting := setting
 			state := "motionOff"
 			if setting.value {
@@ -95,7 +108,21 @@ func (h *host) buildReport(g *Game, t func(string) string, label nativeLabel, bu
 		for _, row := range []struct {
 			k string
 			v gameapi.Money
-		}{{"opening", r.OpeningCash}, {"revenue", r.Revenue}, {"runningCosts", r.RunningCosts}, {"accessCosts", r.AccessCosts}, {"stationCosts", r.StationCosts}, {"leaseCosts", r.LeaseCosts}, {"maintenance", r.Maintenance}, {"interest", r.Interest}, {"construction", r.Construction}, {"grants", r.Grants}, {"borrowed", r.Borrowed}, {"repaid", r.Repaid}, {"closing", r.ClosingCash}} {
+		}{
+			{"opening", r.OpeningCash},
+			{"revenue", r.Revenue},
+			{"runningCosts", r.RunningCosts},
+			{"accessCosts", r.AccessCosts},
+			{"stationCosts", r.StationCosts},
+			{"leaseCosts", r.LeaseCosts},
+			{"maintenance", r.Maintenance},
+			{"interest", r.Interest},
+			{"construction", r.Construction},
+			{"grants", r.Grants},
+			{"borrowed", r.Borrowed},
+			{"repaid", r.Repaid},
+			{"closing", r.ClosingCash},
+		} {
 			label(t(row.k)+"\n"+ui.Cash(row.v), 15)
 		}
 		h.helpSlot(g, "accounts", label, button)

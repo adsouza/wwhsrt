@@ -134,7 +134,13 @@ func TestNativeNamePointerSelectionAndWordMovement(t *testing.T) {
 	e, _ := nameFixture(t, "Sunrise 晨曦 Rail")
 	x := func(s string) int { return 10 + int(text.Advance(s, e.face)+.5) }
 	now := time.Now()
-	e.GetWidget().MouseButtonPressedEvent.Fire(&widget.WidgetMouseButtonPressedEventArgs{Widget: e.GetWidget(), Button: ebiten.MouseButtonLeft, OffsetX: x("Sunrise ")})
+	e.GetWidget().MouseButtonPressedEvent.Fire(
+		&widget.WidgetMouseButtonPressedEventArgs{
+			Widget:  e.GetWidget(),
+			Button:  ebiten.MouseButtonLeft,
+			OffsetX: x("Sunrise "),
+		},
+	)
 	event.ExecuteDeferred()
 	if !e.IsFocused() || !e.field.IsFocused() || e.caret != len("Sunrise ") {
 		t.Fatal("widget press did not place caret/focus", e.caret)
@@ -200,7 +206,21 @@ func TestNativeNameDraftFocusAndCampaignIsolation(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	g := &Game{Port: port, Frame: port.Snapshot(), Map: &render.Map{Font: e.face.(*text.GoTextFace).Source}, width: 1200, height: 800, Camera: mapview.Camera{Width: 840, Height: 800}, State: ui.State{Locale: "en", View: "company", CompanyPane: "identity", DraftName: "晨曦 Rail", LoanAmount: "1000000"}}
+	g := &Game{
+		Port:   port,
+		Frame:  port.Snapshot(),
+		Map:    &render.Map{Font: e.face.(*text.GoTextFace).Source},
+		width:  1200,
+		height: 800,
+		Camera: mapview.Camera{Width: 840, Height: 800},
+		State: ui.State{
+			Locale:      "en",
+			View:        "company",
+			CompanyPane: "identity",
+			DraftName:   "晨曦 Rail",
+			LoanAmount:  "1000000",
+		},
+	}
 	old := preferencesPath
 	preferencesPath = filepath.Join(t.TempDir(), "ui.json")
 	t.Cleanup(func() { preferencesPath = old })
@@ -245,7 +265,13 @@ func TestNativeNameDraftFocusAndCampaignIsolation(t *testing.T) {
 	g.host.build(g)
 	event.ExecuteDeferred()
 	input = g.host.nameInput
-	input.GetWidget().MouseButtonPressedEvent.Fire(&widget.WidgetMouseButtonPressedEventArgs{Widget: input.GetWidget(), Button: ebiten.MouseButtonLeft, OffsetX: 10})
+	input.GetWidget().MouseButtonPressedEvent.Fire(
+		&widget.WidgetMouseButtonPressedEventArgs{
+			Widget:  input.GetWidget(),
+			Button:  ebiten.MouseButtonLeft,
+			OffsetX: 10,
+		},
+	)
 	event.ExecuteDeferred()
 	if !input.IsFocused() || g.host.loanInput != nil {
 		t.Fatal("identity pane did not restore its editor")

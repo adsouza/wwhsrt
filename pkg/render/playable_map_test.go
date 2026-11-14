@@ -48,7 +48,11 @@ func TestMapShowsEveryPlayablePublicCorridorAndNoExtraSourceFragments(t *testing
 	}
 	// These points lie on the formerly drawn western dead-end fragment. It is
 	// several km from the retained Harbin–Shenyang through corridor.
-	for _, p := range []gameapi.GeoPoint{{Lon: 124.271, Lat: 43.0289}, {Lon: 124.4899, Lat: 43.257}, {Lon: 125.1136, Lat: 43.746}} {
+	for _, p := range []gameapi.GeoPoint{
+		{Lon: 124.271, Lat: 43.0289},
+		{Lon: 124.4899, Lat: 43.257},
+		{Lon: 125.1136, Lat: 43.746},
+	} {
 		closest := math.Inf(1)
 		for _, path := range byID {
 			closest = min(closest, distanceToRail(p, path))

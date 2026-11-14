@@ -19,17 +19,26 @@ func TestConnectivityV6MigrationPreservesAccountsPlansFleetAndAtomicity(t *testi
 	}
 	var env envelope
 	var prior topologyPayload
-	if json.Unmarshal(raw, &env) != nil || json.Unmarshal(env.Payload, &prior) != nil || env.Version != 6 || len(prior.Fleet) == 0 || len(prior.Services) < 2 {
+	if json.Unmarshal(raw, &env) != nil || json.Unmarshal(env.Payload, &prior) != nil || env.Version != 6 ||
+		len(prior.Fleet) == 0 ||
+		len(prior.Services) < 2 {
 		t.Fatal("not a populated genuine v6 fixture")
 	}
 	store := &memoryStore{b: raw}
 	g := openPublic(t, store)
 	f := g.Snapshot()
-	if !bytes.Equal(raw, store.b) || !reflect.DeepEqual(f.Reports, prior.Reports) || !reflect.DeepEqual(f.Fleet, prior.Fleet) || !reflect.DeepEqual(f.Services, prior.Services) || f.Player != prior.Company || g.w.ConnectivitySince() != prior.Months {
+	if !bytes.Equal(raw, store.b) || !reflect.DeepEqual(f.Reports, prior.Reports) ||
+		!reflect.DeepEqual(f.Fleet, prior.Fleet) ||
+		!reflect.DeepEqual(f.Services, prior.Services) ||
+		f.Player != prior.Company ||
+		g.w.ConnectivitySince() != prior.Months {
 		t.Fatal("opening changed historical accounts or accepted plans")
 	}
 	store.fail = true
-	if _, e = g.Apply(gameapi.Command{Kind: gameapi.AdvanceMonth, Revision: f.Revision}); e == nil || g.Snapshot().Checkpoint != f.Checkpoint || !bytes.Equal(raw, store.b) {
+	if _, e = g.Apply(
+		gameapi.Command{Kind: gameapi.AdvanceMonth, Revision: f.Revision},
+	); e == nil || g.Snapshot().Checkpoint != f.Checkpoint ||
+		!bytes.Equal(raw, store.b) {
 		t.Fatal("failed migration changed state")
 	}
 	store.fail = false
@@ -40,7 +49,9 @@ func TestConnectivityV6MigrationPreservesAccountsPlansFleetAndAtomicity(t *testi
 	var next connectorPayload
 	json.Unmarshal(store.b, &env)
 	json.Unmarshal(env.Payload, &next)
-	if env.Version != 10 || next.Rules != "network-v10" || next.ConnectivitySince != prior.Months || next.PreviousRepairSHA != previousRepairSHA || next.PublicSHA != hash(assets.PublicNetwork) {
+	if env.Version != 10 || next.Rules != "network-v10" || next.ConnectivitySince != prior.Months ||
+		next.PreviousRepairSHA != previousRepairSHA ||
+		next.PublicSHA != hash(assets.PublicNetwork) {
 		t.Fatal("new topology identity/cutover missing")
 	}
 	restored := openPublic(t, store)
@@ -52,7 +63,13 @@ func TestConnectivityV6MigrationPreservesAccountsPlansFleetAndAtomicity(t *testi
 	if a.Checkpoint != b.Checkpoint || !reflect.DeepEqual(a.Reports, b.Reports) {
 		t.Fatal("reloaded continuation diverged")
 	}
-	for _, change := range []func(*connectorPayload){func(p *connectorPayload) { p.PreviousRepairSHA = "unknown" }, func(p *connectorPayload) { p.ConnectivitySince = -1 }, func(p *connectorPayload) { p.ConnectivitySince = p.Months + 1 }, func(p *connectorPayload) { p.ConnectivitySince = 0 }, func(p *connectorPayload) { p.PublicSHA = previousRepairSHA }} {
+	for _, change := range []func(*connectorPayload){
+		func(p *connectorPayload) { p.PreviousRepairSHA = "unknown" },
+		func(p *connectorPayload) { p.ConnectivitySince = -1 },
+		func(p *connectorPayload) { p.ConnectivitySince = p.Months + 1 },
+		func(p *connectorPayload) { p.ConnectivitySince = 0 },
+		func(p *connectorPayload) { p.PublicSHA = previousRepairSHA },
+	} {
 		bad := next
 		change(&bad)
 		env.Payload, _ = json.Marshal(bad)
@@ -102,14 +119,26 @@ func TestConnectivityRetainsV6ServiceAndFleetRequirements(t *testing.T) {
 	}
 	for _, r := range old.Network.Routes {
 		n, ok := routes[r.ID]
-		if !ok || !reflect.DeepEqual(n.Cities, r.Cities) || !reflect.DeepEqual(n.Sections, r.Sections) || !reflect.DeepEqual(n.Stops, r.Stops) {
+		if !ok || !reflect.DeepEqual(n.Cities, r.Cities) || !reflect.DeepEqual(n.Sections, r.Sections) ||
+			!reflect.DeepEqual(n.Stops, r.Stops) {
 			t.Fatal("accepted service changed", r.ID)
 		}
 	}
 }
 
 func TestConnectivityCompleteServicesCarryEndAndIntermediateRiders(t *testing.T) {
-	for _, id := range []string{"network_nec_all_stops", "network_uzbek_main_all_stops", "network_uzbek_branch_all_stops", "public_kenitra__tangier", "route_frankfurt_am_main__rhine_ruhr", "public_ankara__istanbul", "route_moscow__saint_petersburg", "public_lisbon__porto", "public_munich__vienna", "route_beijing__kunming"} {
+	for _, id := range []string{
+		"network_nec_all_stops",
+		"network_uzbek_main_all_stops",
+		"network_uzbek_branch_all_stops",
+		"public_kenitra__tangier",
+		"route_frankfurt_am_main__rhine_ruhr",
+		"public_ankara__istanbul",
+		"route_moscow__saint_petersburg",
+		"public_lisbon__porto",
+		"public_munich__vienna",
+		"route_beijing__kunming",
+	} {
 		t.Run(id, func(t *testing.T) {
 			store := &memoryStore{}
 			g := openPublic(t, store)
@@ -159,7 +188,8 @@ func TestConnectivityCompleteServicesCarryEndAndIntermediateRiders(t *testing.T)
 					t.Fatal("capacity exceeded")
 				}
 			}
-			if r.Revenue <= 0 || r.ClosingCash != r.OpeningCash+r.Revenue-r.Costs+r.Grants+r.Borrowed-r.Repaid-r.Construction {
+			if r.Revenue <= 0 ||
+				r.ClosingCash != r.OpeningCash+r.Revenue-r.Costs+r.Grants+r.Borrowed-r.Repaid-r.Construction {
 				t.Fatal("ledger does not reconcile")
 			}
 			if openPublic(t, store).Snapshot().Checkpoint != f.Checkpoint {
@@ -183,7 +213,8 @@ func TestConnectivityMixedTopologyHistoryRemainsIndependent(t *testing.T) {
 	}
 	store := &memoryStore{b: raw}
 	g := openPublic(t, store)
-	if g.w.TopologySince() != 2 || g.w.ConnectivitySince() != 3 || !bytes.Equal(raw, store.b) || !reflect.DeepEqual(g.Snapshot().Reports, prior.Reports) {
+	if g.w.TopologySince() != 2 || g.w.ConnectivitySince() != 3 || !bytes.Equal(raw, store.b) ||
+		!reflect.DeepEqual(g.Snapshot().Reports, prior.Reports) {
 		t.Fatal("historical boundaries collapsed")
 	}
 	f := publicCommand(t, g, gameapi.Command{Kind: gameapi.AdvanceMonth})

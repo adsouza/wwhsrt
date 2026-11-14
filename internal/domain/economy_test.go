@@ -85,7 +85,12 @@ func TestBreakEvenUsesActualFareMixAndRoundsUp(t *testing.T) {
 	}{
 		{"empty direct", gameapi.Forecast{Costs: 100000}, true, 106},
 		{"direct", gameapi.Forecast{Passengers: 10, Revenue: 10000, Costs: 100500, HandlingCosts: 500}, true, 106},
-		{"short rides on through", gameapi.Forecast{Passengers: 100, Revenue: 50000, Costs: 105000, HandlingCosts: 5000}, false, 223},
+		{
+			"short rides on through",
+			gameapi.Forecast{Passengers: 100, Revenue: 50000, Costs: 105000, HandlingCosts: 5000},
+			false,
+			223,
+		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			f := test.f
@@ -95,7 +100,10 @@ func TestBreakEvenUsesActualFareMixAndRoundsUp(t *testing.T) {
 			}
 		})
 	}
-	for _, f := range []gameapi.Forecast{{Passengers: 100, Revenue: 5000, HandlingCosts: 5000, Costs: 105000}, {Costs: 100000}} {
+	for _, f := range []gameapi.Forecast{
+		{Passengers: 100, Revenue: 5000, HandlingCosts: 5000, Costs: 105000},
+		{Costs: 100000},
+	} {
 		breakEven(&f, 1000, 1, false)
 		if f.BreakEvenAvailable {
 			t.Fatal("invented profitable margin or through passenger mix")
@@ -118,7 +126,8 @@ func TestEconomyDefaultsFollowDistanceDemandAndRemainBounded(t *testing.T) {
 		}
 		found[r.ID] = r
 	}
-	if found["public_kaohsiung__tainan"].SuggestedFare != 1000 || found["public_lyon__marseille"].SuggestedFare != 4446 {
+	if found["public_kaohsiung__tainan"].SuggestedFare != 1000 ||
+		found["public_lyon__marseille"].SuggestedFare != 4446 {
 		t.Fatal("distance fare regression")
 	}
 	if found["public_lyon__marseille"].SuggestedFrequency >= found["public_beijing__tianjin"].SuggestedFrequency {

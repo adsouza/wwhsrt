@@ -26,7 +26,16 @@ func (h *host) row(cols int, fn func()) {
 	for i := range stretch {
 		stretch[i] = true
 	}
-	group := widget.NewContainer(widget.ContainerOpts.Layout(widget.NewGridLayout(widget.GridLayoutOpts.Columns(cols), widget.GridLayoutOpts.Stretch(stretch, nil), widget.GridLayoutOpts.Spacing(8, 4))), widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{Stretch: true})))
+	group := widget.NewContainer(
+		widget.ContainerOpts.Layout(
+			widget.NewGridLayout(
+				widget.GridLayoutOpts.Columns(cols),
+				widget.GridLayoutOpts.Stretch(stretch, nil),
+				widget.GridLayoutOpts.Spacing(8, 4),
+			),
+		),
+		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{Stretch: true})),
+	)
 	parent.AddChild(group)
 	h.content = group
 	h.contentWidth = (width-32-8*(cols-1))/cols + 32
@@ -39,7 +48,10 @@ func (h *host) disclosure(g *Game, id, title string, button nativeButton) bool {
 	if ui.Disclosure(g.State, id) {
 		mark = "− "
 	}
-	b := button(mark+title, func() { ui.SetDisclosure(&g.State, id, !ui.Disclosure(g.State, id)); g.dirty = true; h.persist(g) })
+	b := button(
+		mark+title,
+		func() { ui.SetDisclosure(&g.State, id, !ui.Disclosure(g.State, id)); g.dirty = true; h.persist(g) },
+	)
 	if h.actions != nil {
 		h.actions["disclosure-"+id] = b
 	}
@@ -75,7 +87,13 @@ func (h *host) taskTabs(g *Game, task string, keys []string, button nativeButton
 			})
 			if key == current {
 				p := ui.PaletteFor(g.State)
-				b.SetImage(&widget.ButtonImage{Idle: uimage.NewBorderedNineSliceColor(p.Selected, p.Accent, 1), Hover: uimage.NewNineSliceColor(p.Hover), Pressed: uimage.NewNineSliceColor(p.Pressed)})
+				b.SetImage(
+					&widget.ButtonImage{
+						Idle:    uimage.NewBorderedNineSliceColor(p.Selected, p.Accent, 1),
+						Hover:   uimage.NewNineSliceColor(p.Hover),
+						Pressed: uimage.NewNineSliceColor(p.Pressed),
+					},
+				)
 			}
 		}
 	})
@@ -107,38 +125,86 @@ func (h *host) selectChoice(g *Game, selected string, options []choice, changed 
 			chosen = c
 		}
 	}
-	images := &widget.ButtonImage{Idle: uimage.NewNineSliceColor(p.Control), Hover: uimage.NewNineSliceColor(p.Selected), Pressed: uimage.NewNineSliceColor(p.Pressed), Disabled: uimage.NewNineSliceColor(p.Disabled)}
+	images := &widget.ButtonImage{
+		Idle:     uimage.NewNineSliceColor(p.Control),
+		Hover:    uimage.NewNineSliceColor(p.Selected),
+		Pressed:  uimage.NewNineSliceColor(p.Pressed),
+		Disabled: uimage.NewNineSliceColor(p.Disabled),
+	}
 	handle := 12
 	labels := func(e any) string {
 		return ui.WrapText(e.(choice).Name, float64(width-24), func(v string) float64 { return text.Advance(v, face) })
 	}
 	consumed := false
 	var combo *widget.ListComboButton
-	combo = widget.NewListComboButton(widget.ListComboButtonOpts.Entries(entries), widget.ListComboButtonOpts.InitialEntry(chosen), widget.ListComboButtonOpts.MaxContentHeight(240), widget.ListComboButtonOpts.WidgetOpts(widget.WidgetOpts.MinSize(44, 44), widget.WidgetOpts.LayoutData(widget.RowLayoutData{Stretch: true, MaxWidth: width})), widget.ListComboButtonOpts.ButtonParams(&widget.ButtonParams{Image: images, TextPadding: widget.NewInsetsSimple(8), TextColor: &widget.ButtonTextColor{Idle: p.Text, Disabled: p.Muted}, TextFace: &face, MinSize: &image.Point{X: 60, Y: 44}}), widget.ListComboButtonOpts.ListParams(&widget.ListParams{ScrollContainerImage: &widget.ScrollContainerImage{Idle: uimage.NewNineSliceColor(p.Surface), Mask: uimage.NewNineSliceColor(p.Surface)}, Slider: &widget.SliderParams{TrackImage: &widget.SliderTrackImage{Idle: uimage.NewNineSliceColor(p.Border)}, HandleImage: images, MinHandleSize: &handle, TrackPadding: widget.NewInsetsSimple(2)}, EntryFace: &face, EntryColor: &widget.ListEntryColor{Selected: p.Text, Unselected: p.Text, SelectedBackground: p.Selected, SelectedFocusedBackground: p.Hover, FocusedBackground: p.Selected}, EntryTextPadding: widget.NewInsetsSimple(8), MinSize: &image.Point{X: 60, Y: 44}}), widget.ListComboButtonOpts.EntryLabelFunc(labels, labels), widget.ListComboButtonOpts.EntrySelectedHandler(func(a *widget.ListComboButtonEntrySelectedEventArgs) {
-		if consumed || combo == nil || a.Entry == nil {
-			return
-		}
-		current := combo.SelectedEntry()
-		// Initializing a ListComboButton queues its first-entry event before
-		// SetSelectedEntry applies our controlled value. Old rebuild events
-		// also outlive their widget. Neither may overwrite a current draft.
-		if current == nil || current.(choice).ID != a.Entry.(choice).ID {
-			return
-		}
-		active := false
-		for _, c := range h.combos {
-			if c == combo {
-				active = true
-				break
+	combo = widget.NewListComboButton(
+		widget.ListComboButtonOpts.Entries(entries),
+		widget.ListComboButtonOpts.InitialEntry(chosen),
+		widget.ListComboButtonOpts.MaxContentHeight(240),
+		widget.ListComboButtonOpts.WidgetOpts(
+			widget.WidgetOpts.MinSize(44, 44),
+			widget.WidgetOpts.LayoutData(widget.RowLayoutData{Stretch: true, MaxWidth: width}),
+		),
+		widget.ListComboButtonOpts.ButtonParams(
+			&widget.ButtonParams{
+				Image:       images,
+				TextPadding: widget.NewInsetsSimple(8),
+				TextColor:   &widget.ButtonTextColor{Idle: p.Text, Disabled: p.Muted},
+				TextFace:    &face,
+				MinSize:     &image.Point{X: 60, Y: 44},
+			},
+		),
+		widget.ListComboButtonOpts.ListParams(
+			&widget.ListParams{
+				ScrollContainerImage: &widget.ScrollContainerImage{
+					Idle: uimage.NewNineSliceColor(p.Surface),
+					Mask: uimage.NewNineSliceColor(p.Surface),
+				},
+				Slider: &widget.SliderParams{
+					TrackImage:    &widget.SliderTrackImage{Idle: uimage.NewNineSliceColor(p.Border)},
+					HandleImage:   images,
+					MinHandleSize: &handle,
+					TrackPadding:  widget.NewInsetsSimple(2),
+				},
+				EntryFace: &face,
+				EntryColor: &widget.ListEntryColor{
+					Selected:                  p.Text,
+					Unselected:                p.Text,
+					SelectedBackground:        p.Selected,
+					SelectedFocusedBackground: p.Hover,
+					FocusedBackground:         p.Selected,
+				},
+				EntryTextPadding: widget.NewInsetsSimple(8),
+				MinSize:          &image.Point{X: 60, Y: 44},
+			},
+		),
+		widget.ListComboButtonOpts.EntryLabelFunc(labels, labels),
+		widget.ListComboButtonOpts.EntrySelectedHandler(func(a *widget.ListComboButtonEntrySelectedEventArgs) {
+			if consumed || combo == nil || a.Entry == nil {
+				return
 			}
-		}
-		if active && a.Entry.(choice).ID != "" && a.Entry.(choice).ID != selected {
-			// All callers rebuild after accepting a controlled draft change.
-			// Ignore the old state's remaining events before that next frame.
-			consumed = true
-			changed(a.Entry.(choice).ID)
-		}
-	}))
+			current := combo.SelectedEntry()
+			// Initializing a ListComboButton queues its first-entry event before
+			// SetSelectedEntry applies our controlled value. Old rebuild events
+			// also outlive their widget. Neither may overwrite a current draft.
+			if current == nil || current.(choice).ID != a.Entry.(choice).ID {
+				return
+			}
+			active := false
+			for _, c := range h.combos {
+				if c == combo {
+					active = true
+					break
+				}
+			}
+			if active && a.Entry.(choice).ID != "" && a.Entry.(choice).ID != selected {
+				// All callers rebuild after accepting a controlled draft change.
+				// Ignore the old state's remaining events before that next frame.
+				consumed = true
+				changed(a.Entry.(choice).ID)
+			}
+		}),
+	)
 	h.content.AddChild(combo)
 	h.combos = append(h.combos, combo)
 }
@@ -146,13 +212,30 @@ func (h *host) fixedButton(g *Game, title string, r image.Rectangle, run func())
 	p := ui.PaletteFor(g.State)
 	var face text.Face = &text.GoTextFace{Source: g.Map.Font, Size: 13}
 	title = ui.WrapText(title, float64(max(20, r.Dx()-12)), func(v string) float64 { return text.Advance(v, face) })
-	return widget.NewButton(widget.ButtonOpts.WidgetOpts(widget.WidgetOpts.MinSize(44, 44), widget.WidgetOpts.LayoutData(r)), widget.ButtonOpts.Image(&widget.ButtonImage{Idle: uimage.NewNineSliceColor(p.Control), Hover: uimage.NewNineSliceColor(p.Selected), Pressed: uimage.NewNineSliceColor(p.Pressed), Disabled: uimage.NewNineSliceColor(p.Disabled)}), widget.ButtonOpts.Text(title, &face, &widget.ButtonTextColor{Idle: p.Text, Disabled: p.Muted}), widget.ButtonOpts.TextPadding(widget.NewInsetsSimple(4)), widget.ButtonOpts.ClickedHandler(func(*widget.ButtonClickedEventArgs) { run() }))
+	return widget.NewButton(
+		widget.ButtonOpts.WidgetOpts(widget.WidgetOpts.MinSize(44, 44), widget.WidgetOpts.LayoutData(r)),
+		widget.ButtonOpts.Image(
+			&widget.ButtonImage{
+				Idle:     uimage.NewNineSliceColor(p.Control),
+				Hover:    uimage.NewNineSliceColor(p.Selected),
+				Pressed:  uimage.NewNineSliceColor(p.Pressed),
+				Disabled: uimage.NewNineSliceColor(p.Disabled),
+			},
+		),
+		widget.ButtonOpts.Text(title, &face, &widget.ButtonTextColor{Idle: p.Text, Disabled: p.Muted}),
+		widget.ButtonOpts.TextPadding(widget.NewInsetsSimple(4)),
+		widget.ButtonOpts.ClickedHandler(func(*widget.ButtonClickedEventArgs) { run() }),
+	)
 }
 func (h *host) addCommandDock(g *Game, root *widget.Container) {
 	l := h.workspace
 	p := ui.PaletteFor(g.State)
 	t := func(k string) string { return ui.Text(g.State.Locale, k) }
-	header := widget.NewContainer(widget.ContainerOpts.Layout(placed{}), widget.ContainerOpts.BackgroundImage(uimage.NewNineSliceColor(p.Surface)), widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(l.Header)))
+	header := widget.NewContainer(
+		widget.ContainerOpts.Layout(placed{}),
+		widget.ContainerOpts.BackgroundImage(uimage.NewNineSliceColor(p.Surface)),
+		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(l.Header)),
+	)
 	var face text.Face = &text.GoTextFace{Source: g.Map.Font, Size: 14}
 	value := fmt.Sprintf("%04d-%02d  ·  %s", g.Frame.Month.Year, g.Frame.Month.Month, ui.Cash(g.Frame.Player.Cash))
 	if g.width >= 800 {
@@ -167,7 +250,11 @@ func (h *host) addCommandDock(g *Game, root *widget.Container) {
 		statWidth = max(40, g.width-154)
 	}
 	value = ui.WrapText(value, float64(statWidth), func(v string) float64 { return text.Advance(v, face) })
-	stat := widget.NewText(widget.TextOpts.Text(value, &face, p.Text), widget.TextOpts.MaxWidth(float64(statWidth)), widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(image.Rect(12, 8, 12+statWidth, 46))))
+	stat := widget.NewText(
+		widget.TextOpts.Text(value, &face, p.Text),
+		widget.TextOpts.MaxWidth(float64(statWidth)),
+		widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(image.Rect(12, 8, 12+statWidth, 46))),
+	)
 	header.AddChild(stat)
 	language := "EN"
 	if g.State.Locale == "zh-Hans" {
@@ -182,14 +269,29 @@ func (h *host) addCommandDock(g *Game, root *widget.Container) {
 		h.workspaceChanged(g)
 	}))
 	if len(g.Frame.IdleLines) > 0 {
-		h.idleAction = h.fixedButton(g, t("idleShort")+" · "+fmt.Sprint(len(g.Frame.IdleLines)), image.Rect(g.width-136, 2, g.width-58, 46), func() { h.reviewIdleLine(g, "") })
-		h.idleAction.SetImage(&widget.ButtonImage{Idle: uimage.NewNineSliceColor(p.Warning), Hover: uimage.NewNineSliceColor(p.WarningHover), Pressed: uimage.NewNineSliceColor(p.Warning)})
+		h.idleAction = h.fixedButton(
+			g,
+			t("idleShort")+" · "+fmt.Sprint(len(g.Frame.IdleLines)),
+			image.Rect(g.width-136, 2, g.width-58, 46),
+			func() { h.reviewIdleLine(g, "") },
+		)
+		h.idleAction.SetImage(
+			&widget.ButtonImage{
+				Idle:    uimage.NewNineSliceColor(p.Warning),
+				Hover:   uimage.NewNineSliceColor(p.WarningHover),
+				Pressed: uimage.NewNineSliceColor(p.Warning),
+			},
+		)
 		header.AddChild(h.idleAction)
 	} else {
 		h.idleAction = nil
 	}
 	root.AddChild(header)
-	dock := widget.NewContainer(widget.ContainerOpts.Layout(placed{}), widget.ContainerOpts.BackgroundImage(uimage.NewNineSliceColor(p.Surface)), widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(l.Dock)))
+	dock := widget.NewContainer(
+		widget.ContainerOpts.Layout(placed{}),
+		widget.ContainerOpts.BackgroundImage(uimage.NewNineSliceColor(p.Surface)),
+		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(l.Dock)),
+	)
 	keys := []string{"map", "build", "services", "report", "company", "fieldNotes"}
 	cols := 6
 	if l.DockLeft {
@@ -216,14 +318,23 @@ func (h *host) addCommandDock(g *Game, root *widget.Container) {
 			}
 		})
 		if key == g.State.View && !g.State.Help.Open || key == "fieldNotes" && g.State.Help.Open {
-			b.SetImage(&widget.ButtonImage{Idle: uimage.NewBorderedNineSliceColor(p.Selected, p.Accent, 1), Hover: uimage.NewNineSliceColor(p.Selected), Pressed: uimage.NewNineSliceColor(p.Pressed)})
+			b.SetImage(
+				&widget.ButtonImage{
+					Idle:    uimage.NewBorderedNineSliceColor(p.Selected, p.Accent, 1),
+					Hover:   uimage.NewNineSliceColor(p.Selected),
+					Pressed: uimage.NewNineSliceColor(p.Pressed),
+				},
+			)
 		}
 		dock.AddChild(b)
 	}
 	root.AddChild(dock)
 	h.addMapTools(g, root)
 	if !l.Divider.Empty() {
-		bar := widget.NewContainer(widget.ContainerOpts.BackgroundImage(uimage.NewNineSliceColor(p.Border)), widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(l.Divider)))
+		bar := widget.NewContainer(
+			widget.ContainerOpts.BackgroundImage(uimage.NewNineSliceColor(p.Border)),
+			widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(l.Divider)),
+		)
 		root.AddChild(bar)
 	}
 }
@@ -301,18 +412,60 @@ func (h *host) stepper(g *Game, id, title, value string, minus, plus func()) {
 	p := ui.PaletteFor(g.State)
 	var face text.Face = &text.GoTextFace{Source: g.Map.Font, Size: 13}
 	width := h.contentWidth - 32
-	col := widget.NewContainer(widget.ContainerOpts.Layout(widget.NewRowLayout(widget.RowLayoutOpts.Direction(widget.DirectionVertical), widget.RowLayoutOpts.Spacing(4))), widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{Stretch: true, MaxWidth: width})))
+	col := widget.NewContainer(
+		widget.ContainerOpts.Layout(
+			widget.NewRowLayout(
+				widget.RowLayoutOpts.Direction(widget.DirectionVertical),
+				widget.RowLayoutOpts.Spacing(4),
+			),
+		),
+		widget.ContainerOpts.WidgetOpts(
+			widget.WidgetOpts.LayoutData(widget.RowLayoutData{Stretch: true, MaxWidth: width}),
+		),
+	)
 	caption := ui.WrapText(title, float64(width), func(v string) float64 { return text.Advance(v, face) })
-	col.AddChild(widget.NewText(widget.TextOpts.Text(caption, &face, p.Muted), widget.TextOpts.MaxWidth(float64(width))))
-	row := widget.NewContainer(widget.ContainerOpts.Layout(widget.NewGridLayout(widget.GridLayoutOpts.Columns(3), widget.GridLayoutOpts.Stretch([]bool{false, true, false}, nil), widget.GridLayoutOpts.Spacing(2, 0))), widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{Stretch: true})))
+	col.AddChild(
+		widget.NewText(widget.TextOpts.Text(caption, &face, p.Muted), widget.TextOpts.MaxWidth(float64(width))),
+	)
+	row := widget.NewContainer(
+		widget.ContainerOpts.Layout(
+			widget.NewGridLayout(
+				widget.GridLayoutOpts.Columns(3),
+				widget.GridLayoutOpts.Stretch([]bool{false, true, false}, nil),
+				widget.GridLayoutOpts.Spacing(2, 0),
+			),
+		),
+		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{Stretch: true})),
+	)
 	for i, run := range []func(){minus, plus} {
 		key := []string{"−", "+"}[i]
 		run := run
-		b := widget.NewButton(widget.ButtonOpts.WidgetOpts(widget.WidgetOpts.MinSize(44, 44)), widget.ButtonOpts.Image(&widget.ButtonImage{Idle: uimage.NewNineSliceColor(p.Control), Hover: uimage.NewNineSliceColor(p.Selected), Pressed: uimage.NewNineSliceColor(p.Pressed)}), widget.ButtonOpts.Text(key, &face, &widget.ButtonTextColor{Idle: p.Text}), widget.ButtonOpts.ClickedHandler(func(*widget.ButtonClickedEventArgs) { run() }))
+		b := widget.NewButton(
+			widget.ButtonOpts.WidgetOpts(widget.WidgetOpts.MinSize(44, 44)),
+			widget.ButtonOpts.Image(
+				&widget.ButtonImage{
+					Idle:    uimage.NewNineSliceColor(p.Control),
+					Hover:   uimage.NewNineSliceColor(p.Selected),
+					Pressed: uimage.NewNineSliceColor(p.Pressed),
+				},
+			),
+			widget.ButtonOpts.Text(key, &face, &widget.ButtonTextColor{Idle: p.Text}),
+			widget.ButtonOpts.ClickedHandler(func(*widget.ButtonClickedEventArgs) { run() }),
+		)
 		if i == 0 {
 			row.AddChild(b)
-			valueFace := text.Face(&text.GoTextFace{Source: g.Map.Font, Size: 13 * min(1, float64(max(24, width-92))/max(1, text.Advance(value, face)))})
-			row.AddChild(widget.NewText(widget.TextOpts.Text(value, &valueFace, p.Text), widget.TextOpts.Position(widget.TextPositionCenter, widget.TextPositionCenter)))
+			valueFace := text.Face(
+				&text.GoTextFace{
+					Source: g.Map.Font,
+					Size:   13 * min(1, float64(max(24, width-92))/max(1, text.Advance(value, face))),
+				},
+			)
+			row.AddChild(
+				widget.NewText(
+					widget.TextOpts.Text(value, &valueFace, p.Text),
+					widget.TextOpts.Position(widget.TextPositionCenter, widget.TextPositionCenter),
+				),
+			)
 		} else {
 			row.AddChild(b)
 		}

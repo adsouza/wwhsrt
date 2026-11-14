@@ -15,7 +15,10 @@ func Project(lat, lon float64) Point {
 	t := math.Asin(math.Sqrt(3) / 2 * math.Sin(p))
 	t2 := t * t
 	t6 := t2 * t2 * t2
-	return Point{2 * math.Sqrt(3) * lambda * math.Cos(t) / (3 * (a1 + 3*a2*t2 + t6*(7*a3+9*a4*t2))), t * (a1 + a2*t2 + t6*(a3+a4*t2))}
+	return Point{
+		2 * math.Sqrt(3) * lambda * math.Cos(t) / (3 * (a1 + 3*a2*t2 + t6*(7*a3+9*a4*t2))),
+		t * (a1 + a2*t2 + t6*(a3+a4*t2)),
+	}
 }
 
 type Camera struct {
@@ -35,7 +38,16 @@ func Fit(w, h float64, points []Point) Camera {
 	return c
 }
 func New(w, h float64) Camera {
-	return Fit(w, h, []Point{Project(22.3193, 114.1694), Project(41.8057, 123.4315), Project(30.5728, 104.0668), Project(35.685, 139.7514)})
+	return Fit(
+		w,
+		h,
+		[]Point{
+			Project(22.3193, 114.1694),
+			Project(41.8057, 123.4315),
+			Project(30.5728, 104.0668),
+			Project(35.685, 139.7514),
+		},
+	)
 }
 func (c Camera) scale() float64 {
 	a, b := c.Min, c.Max

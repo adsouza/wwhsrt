@@ -50,7 +50,15 @@ type marketRequest struct {
 
 func (w World) simulate(plans []gameapi.Service, month int) gameapi.NetworkReport {
 	w.months = month
-	result := gameapi.NetworkReport{Available: true, Month: Calendar(month), Markets: []gameapi.MarketRun{}, Journeys: []gameapi.JourneyFlow{}, Services: []gameapi.NetworkService{}, Sections: []gameapi.SectionUsage{}, Stations: []gameapi.StationActivity{}}
+	result := gameapi.NetworkReport{
+		Available: true,
+		Month:     Calendar(month),
+		Markets:   []gameapi.MarketRun{},
+		Journeys:  []gameapi.JourneyFlow{},
+		Services:  []gameapi.NetworkService{},
+		Sections:  []gameapi.SectionUsage{},
+		Stations:  []gameapi.StationActivity{},
+	}
 	d := days(result.Month)
 	delivered := w.schedule(plans)
 	graph := w.rides(plans, delivered)
@@ -61,7 +69,10 @@ func (w World) simulate(plans []gameapi.Service, month int) gameapi.NetworkRepor
 	stations := map[gameapi.CityID]*gameapi.StationActivity{}
 	for _, station := range w.Stations() {
 		if station.Open {
-			stations[station.CityID] = &gameapi.StationActivity{CityID: station.CityID, Capacity: w.catalog.network.StationCalls}
+			stations[station.CityID] = &gameapi.StationActivity{
+				CityID:   station.CityID,
+				Capacity: w.catalog.network.StationCalls,
+			}
 		}
 	}
 	for _, plan := range sortedServices(plans) {
@@ -91,7 +102,14 @@ func (w World) simulate(plans []gameapi.Service, month int) gameapi.NetworkRepor
 				if direction < 0 {
 					from, to = to, from
 				}
-				leg := gameapi.LegLoad{CorridorID: id, From: from, To: to, KM: a.KM, Minutes: a.Minutes, Capacity: f * trainSeats * d}
+				leg := gameapi.LegLoad{
+					CorridorID: id,
+					From:       from,
+					To:         to,
+					KM:         a.KM,
+					Minutes:    a.Minutes,
+					Capacity:   f * trainSeats * d,
+				}
 				key := legKey(route.ID, from, to)
 				remaining[key] = leg.Capacity
 				legIndex[key] = [2]int{len(result.Services), len(s.Legs)}
@@ -148,11 +166,20 @@ func (w World) simulate(plans []gameapi.Service, month int) gameapi.NetworkRepor
 					continue
 				}
 				offers := w.outside(from, to, class)
-				m := gameapi.MarketRun{From: from.ID, To: to.ID, Class: class, Demand: demands[i], Offers: append([]gameapi.ModeOffer{}, offers...)}
+				m := gameapi.MarketRun{
+					From:   from.ID,
+					To:     to.ID,
+					Class:  class,
+					Demand: demands[i],
+					Offers: append([]gameapi.ModeOffer{}, offers...),
+				}
 				if len(choices) > 0 {
 					it := choices[0]
 					m.RailFare, m.RailMinutes = it.fare, it.minutes
-					offers = append(offers, gameapi.ModeOffer{Mode: "rail", Fare: it.fare, Minutes: it.minutes, Generalized: it.cost})
+					offers = append(
+						offers,
+						gameapi.ModeOffer{Mode: "rail", Fare: it.fare, Minutes: it.minutes, Generalized: it.cost},
+					)
 					m.Offers = append([]gameapi.ModeOffer{}, offers...)
 				}
 				counts := shares(m.Demand, offerWeights(offers))
@@ -175,8 +202,18 @@ func (w World) simulate(plans []gameapi.Service, month int) gameapi.NetworkRepor
 				result.Demand += m.Demand
 				result.Requested += m.Requested
 				if m.Requested > 0 {
-					requests = append(requests, marketRequest{market: index, choices: choices, wanted: m.Requested, alternateChoice: -1})
-					primary = append(primary, capacityRequest{id: requestID(from.ID, to.ID, class), need: m.Requested, legs: itineraryLegs(choices[0])})
+					requests = append(
+						requests,
+						marketRequest{market: index, choices: choices, wanted: m.Requested, alternateChoice: -1},
+					)
+					primary = append(
+						primary,
+						capacityRequest{
+							id:   requestID(from.ID, to.ID, class),
+							need: m.Requested,
+							legs: itineraryLegs(choices[0]),
+						},
+					)
 				}
 			}
 		}
@@ -201,7 +238,10 @@ func (w World) simulate(plans []gameapi.Service, month int) gameapi.NetworkRepor
 			}
 			if possible {
 				r.alternateChoice = choice
-				alternates = append(alternates, capacityRequest{id: primary[i].id, need: r.wanted - r.primary, legs: legs})
+				alternates = append(
+					alternates,
+					capacityRequest{id: primary[i].id, need: r.wanted - r.primary, legs: legs},
+				)
 				altIndex = append(altIndex, i)
 				break
 			}
@@ -215,7 +255,17 @@ func (w World) simulate(plans []gameapi.Service, month int) gameapi.NetworkRepor
 		if count == 0 {
 			return
 		}
-		flow := gameapi.JourneyFlow{From: m.From, To: m.To, Class: m.Class, Passengers: count, Fare: it.fare, Minutes: it.minutes, Services: []string{}, Transfers: []gameapi.CityID{}, Alternate: alternate}
+		flow := gameapi.JourneyFlow{
+			From:       m.From,
+			To:         m.To,
+			Class:      m.Class,
+			Passengers: count,
+			Fare:       it.fare,
+			Minutes:    it.minutes,
+			Services:   []string{},
+			Transfers:  []gameapi.CityID{},
+			Alternate:  alternate,
+		}
 		for i, r := range it.rides {
 			flow.Services = append(flow.Services, r.service)
 			s := &result.Services[serviceIndex[r.service]]
@@ -287,7 +337,13 @@ func (w World) simulate(plans []gameapi.Service, month int) gameapi.NetworkRepor
 func (w World) NetworkSince() int { return w.networkSince }
 func (w World) NetworkReport() gameapi.NetworkReport {
 	if len(w.reports) == 0 || len(w.reports) <= w.networkSince {
-		return gameapi.NetworkReport{Markets: []gameapi.MarketRun{}, Journeys: []gameapi.JourneyFlow{}, Services: []gameapi.NetworkService{}, Sections: []gameapi.SectionUsage{}, Stations: []gameapi.StationActivity{}}
+		return gameapi.NetworkReport{
+			Markets:  []gameapi.MarketRun{},
+			Journeys: []gameapi.JourneyFlow{},
+			Services: []gameapi.NetworkService{},
+			Sections: []gameapi.SectionUsage{},
+			Stations: []gameapi.StationActivity{},
+		}
 	}
 	plans := []gameapi.Service{}
 	for _, run := range w.reports[len(w.reports)-1].Services {
@@ -310,7 +366,13 @@ func (w World) networkForecast(q gameapi.ForecastRequest) (gameapi.Forecast, err
 	if q.Frequency < 0 || q.Frequency > MaxFrequency || q.Fare < MinFare || q.Fare > MaxFare {
 		return gameapi.Forecast{}, errCode("invalid_service")
 	}
-	result := gameapi.Forecast{FleetNeeded: required(q.Frequency, r.Minutes), FleetAvailable: w.FleetCount(r.ID), Open: r.Open, KM: r.KM, Minutes: r.Minutes}
+	result := gameapi.Forecast{
+		FleetNeeded:    required(q.Frequency, r.Minutes),
+		FleetAvailable: w.FleetCount(r.ID),
+		Open:           r.Open,
+		KM:             r.KM,
+		Minutes:        r.Minutes,
+	}
 	base := w.simulate(w.services, w.months)
 	plans := append([]gameapi.Service{}, w.services...)
 	if q.ReplaceServiceID != "" {
@@ -340,7 +402,16 @@ func (w World) networkForecast(q gameapi.ForecastRequest) (gameapi.Forecast, err
 		if !found {
 			return result, errCode("no_route")
 		}
-		hypothesis.projects = append(w.Projects(), gameapi.Project{CorridorID: co.ID, AlignmentID: a.ID, Owner: w.company.ID, Started: w.months, Ready: w.months})
+		hypothesis.projects = append(
+			w.Projects(),
+			gameapi.Project{
+				CorridorID:  co.ID,
+				AlignmentID: a.ID,
+				Owner:       w.company.ID,
+				Started:     w.months,
+				Ready:       w.months,
+			},
+		)
 		r, _ = hypothesis.route(r.ID)
 		result.KM, result.Minutes = r.KM, r.Minutes
 		result.FleetNeeded = required(q.Frequency, r.Minutes)
@@ -399,7 +470,9 @@ func (w World) networkForecast(q gameapi.ForecastRequest) (gameapi.Forecast, err
 	result.CompanyRevenue = next.Revenue
 	additional := max(0, result.FleetNeeded-result.FleetAvailable)
 	result.AdditionalLeases = additional
-	result.CompanyChange = next.Revenue - base.Revenue - (nextVariable - baseVariable) - gameapi.Money(additional)*w.leaseMonthly()
+	result.CompanyChange = next.Revenue - base.Revenue - (nextVariable - baseVariable) - gameapi.Money(
+		additional,
+	)*w.leaseMonthly()
 	if !result.Open {
 		for _, id := range r.Sections {
 			co, _ := w.catalog.find(id)

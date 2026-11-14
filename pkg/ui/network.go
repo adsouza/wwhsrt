@@ -15,7 +15,13 @@ func ServiceRoute(f gameapi.Frame, id string) (gameapi.Route, bool) {
 	// Older fixture frames can still inspect a direct service.
 	for _, c := range f.Corridors {
 		if c.ID == id {
-			return gameapi.Route{ID: id, Sections: []string{id}, Cities: []gameapi.CityID{c.FromCity, c.ToCity}, Stops: []gameapi.CityID{c.FromCity, c.ToCity}, Open: Open(f, id)}, true
+			return gameapi.Route{
+				ID:       id,
+				Sections: []string{id},
+				Cities:   []gameapi.CityID{c.FromCity, c.ToCity},
+				Stops:    []gameapi.CityID{c.FromCity, c.ToCity},
+				Open:     Open(f, id),
+			}, true
 		}
 	}
 	return gameapi.Route{}, false
@@ -29,7 +35,16 @@ func RouteName(r gameapi.Route, locale string) string {
 		suffix = " · " + Text(locale, "trackKind_"+r.InfrastructureKind)
 	}
 	if len(r.Cities) > 4 {
-		return Text(locale, string(r.Cities[0])) + " → " + Text(locale, string(r.Cities[len(r.Cities)-1])) + " · " + fmt.Sprintf(Text(locale, "routeStopCount"), len(r.Stops)) + suffix
+		return Text(
+			locale,
+			string(r.Cities[0]),
+		) + " → " + Text(
+			locale,
+			string(r.Cities[len(r.Cities)-1]),
+		) + " · " + fmt.Sprintf(
+			Text(locale, "routeStopCount"),
+			len(r.Stops),
+		) + suffix
 	}
 	parts := []string{}
 	for _, id := range r.Cities {
@@ -57,7 +72,13 @@ func NetworkDetails(f gameapi.Frame, locale string) []Detail {
 	if !n.Available {
 		return []Detail{{Text(locale, "networkReport"), Text(locale, "noNetworkReport")}}
 	}
-	rows := []Detail{{Text(locale, "companyJourneys"), fmt.Sprint(n.Carried)}, {Text(locale, "transferCount"), fmt.Sprint(n.Transfers)}, {Text(locale, "railRequested"), fmt.Sprint(n.Requested)}, {Text(locale, "alternateServed"), fmt.Sprint(n.AlternateServed)}, {Text(locale, "railRejected"), fmt.Sprint(n.Rejected)}}
+	rows := []Detail{
+		{Text(locale, "companyJourneys"), fmt.Sprint(n.Carried)},
+		{Text(locale, "transferCount"), fmt.Sprint(n.Transfers)},
+		{Text(locale, "railRequested"), fmt.Sprint(n.Requested)},
+		{Text(locale, "alternateServed"), fmt.Sprint(n.AlternateServed)},
+		{Text(locale, "railRejected"), fmt.Sprint(n.Rejected)},
+	}
 	load := int64(0)
 	if n.SeatKM > 0 {
 		load = n.PassengerKM * 1000 / n.SeatKM
@@ -70,10 +91,38 @@ func NetworkDetails(f gameapi.Frame, locale string) []Detail {
 				coName = Text(locale, string(co.FromCity)) + " – " + Text(locale, string(co.ToCity))
 			}
 		}
-		rows = append(rows, Detail{coName, fmt.Sprintf("%s %d / %d · %s %d", Text(locale, "pathsDelivered"), section.Delivered, section.Capacity, Text(locale, "pathsRequested"), section.Requested)})
+		rows = append(
+			rows,
+			Detail{
+				coName,
+				fmt.Sprintf(
+					"%s %d / %d · %s %d",
+					Text(locale, "pathsDelivered"),
+					section.Delivered,
+					section.Capacity,
+					Text(locale, "pathsRequested"),
+					section.Requested,
+				),
+			},
+		)
 	}
 	for _, station := range n.Stations {
-		rows = append(rows, Detail{Text(locale, string(station.CityID)), fmt.Sprintf("%s %d/%d · %s %d · %s %d", Text(locale, "stationCalls"), station.Calls, station.Capacity, Text(locale, "boardings"), station.Boardings, Text(locale, "transferCount"), station.Transfers)})
+		rows = append(
+			rows,
+			Detail{
+				Text(locale, string(station.CityID)),
+				fmt.Sprintf(
+					"%s %d/%d · %s %d · %s %d",
+					Text(locale, "stationCalls"),
+					station.Calls,
+					station.Capacity,
+					Text(locale, "boardings"),
+					station.Boardings,
+					Text(locale, "transferCount"),
+					station.Transfers,
+				),
+			},
+		)
 	}
 	return rows
 }

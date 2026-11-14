@@ -37,7 +37,11 @@ func TestCapacityExplanationMatchesRejectionAndFreedSpace(t *testing.T) {
 		t.Fatal(f, err)
 	}
 	c := e.CapacityUsage[0]
-	if c.CorridorID != "tsuruga-osaka" || c.Requested != 13 || c.Capacity != 12 || c.DraftUse != 1 || c.OtherRequested != 12 || c.MaxFrequency != 0 || c.Excess != 1 || len(c.Services) != 4 {
+	if c.CorridorID != "tsuruga-osaka" || c.Requested != 13 || c.Capacity != 12 || c.DraftUse != 1 ||
+		c.OtherRequested != 12 ||
+		c.MaxFrequency != 0 ||
+		c.Excess != 1 ||
+		len(c.Services) != 4 {
 		t.Fatal(c)
 	}
 	total := 0
@@ -54,7 +58,15 @@ func TestCapacityExplanationMatchesRejectionAndFreedSpace(t *testing.T) {
 	if total != 13 || draft != 1 {
 		t.Fatal(c)
 	}
-	_, err = g.Apply(gameapi.Command{Kind: gameapi.SetService, Revision: g.Snapshot().Revision, CorridorID: q.CorridorID, Frequency: q.Frequency, Fare: q.Fare})
+	_, err = g.Apply(
+		gameapi.Command{
+			Kind:       gameapi.SetService,
+			Revision:   g.Snapshot().Revision,
+			CorridorID: q.CorridorID,
+			Frequency:  q.Frequency,
+			Fare:       q.Fare,
+		},
+	)
 	if !errors.As(err, &e) || e.Code != "track_capacity" || e.CapacityUsage[0].Requested != 13 {
 		t.Fatal(err)
 	}

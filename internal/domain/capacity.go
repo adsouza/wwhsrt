@@ -19,7 +19,15 @@ func (w World) ownedCapacityUsage(plans []gameapi.Service, draftID string) ([]ga
 				draftSections[id] = true
 			}
 			if s.Frequency > 0 {
-				sections[id] = append(sections[id], gameapi.CapacityService{ServiceID: s.CorridorID, Frequency: s.Frequency, Usage: s.Frequency, Draft: s.CorridorID == draftID})
+				sections[id] = append(
+					sections[id],
+					gameapi.CapacityService{
+						ServiceID: s.CorridorID,
+						Frequency: s.Frequency,
+						Usage:     s.Frequency,
+						Draft:     s.CorridorID == draftID,
+					},
+				)
 			}
 		}
 		for _, city := range r.Stops {
@@ -27,7 +35,15 @@ func (w World) ownedCapacityUsage(plans []gameapi.Service, draftID string) ([]ga
 				draftStations[city] = true
 			}
 			if s.Frequency > 0 {
-				stations[city] = append(stations[city], gameapi.CapacityService{ServiceID: s.CorridorID, Frequency: s.Frequency, Usage: s.Frequency * 2, Draft: s.CorridorID == draftID})
+				stations[city] = append(
+					stations[city],
+					gameapi.CapacityService{
+						ServiceID: s.CorridorID,
+						Frequency: s.Frequency,
+						Usage:     s.Frequency * 2,
+						Draft:     s.CorridorID == draftID,
+					},
+				)
 			}
 		}
 	}
@@ -47,12 +63,30 @@ func (w World) ownedCapacityUsage(plans []gameapi.Service, draftID string) ([]ga
 	// Preserve validation priority and deterministic order: sections, then stations.
 	for _, co := range w.catalog.corridors {
 		if !co.Existing && (len(sections[co.ID]) > 0 || draftSections[co.ID]) {
-			finish(gameapi.CapacityUsage{Kind: "track", CorridorID: co.ID, Capacity: w.sectionLimit(co.ID), Draft: draftSections[co.ID], Services: sections[co.ID]}, 1)
+			finish(
+				gameapi.CapacityUsage{
+					Kind:       "track",
+					CorridorID: co.ID,
+					Capacity:   w.sectionLimit(co.ID),
+					Draft:      draftSections[co.ID],
+					Services:   sections[co.ID],
+				},
+				1,
+			)
 		}
 	}
 	for _, station := range w.Stations() {
 		if !station.Public && (len(stations[station.CityID]) > 0 || draftStations[station.CityID]) {
-			finish(gameapi.CapacityUsage{Kind: "station", CityID: station.CityID, Capacity: w.catalog.network.StationCalls, Draft: draftStations[station.CityID], Services: stations[station.CityID]}, 2)
+			finish(
+				gameapi.CapacityUsage{
+					Kind:     "station",
+					CityID:   station.CityID,
+					Capacity: w.catalog.network.StationCalls,
+					Draft:    draftStations[station.CityID],
+					Services: stations[station.CityID],
+				},
+				2,
+			)
 		}
 	}
 	return out, nil

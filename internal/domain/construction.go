@@ -6,7 +6,19 @@ func constructionEstimate(a gameapi.Alignment) (gameapi.ConstructionEstimate, er
 	intervals := a.CostIntervals
 	if len(intervals) == 0 {
 		// Frozen legacy Japanese works preserve their original quotes and rounding.
-		intervals = []gameapi.ConstructionInterval{{Country: "Japan", ProfileID: "japan", BasePerKM: 2_000_000_000, SurfaceKM: a.SurfaceKM, HillKM: a.HillKM, ViaductKM: a.ViaductKM, TunnelKM: a.TunnelKM, HillFactorPercent: 150, TunnelFactor: 5}}
+		intervals = []gameapi.ConstructionInterval{
+			{
+				Country:           "Japan",
+				ProfileID:         "japan",
+				BasePerKM:         2_000_000_000,
+				SurfaceKM:         a.SurfaceKM,
+				HillKM:            a.HillKM,
+				ViaductKM:         a.ViaductKM,
+				TunnelKM:          a.TunnelKM,
+				HillFactorPercent: 150,
+				TunnelFactor:      5,
+			},
+		}
 	}
 	var e gameapi.ConstructionEstimate
 	surface, hills, bridges, tunnels := 0, 0, 0, 0
@@ -14,7 +26,16 @@ func constructionEstimate(a gameapi.Alignment) (gameapi.ConstructionEstimate, er
 		return e, errCode("invalid_scenario")
 	}
 	for _, p := range intervals {
-		if p.Country == "" || p.ProfileID == "" || p.BasePerKM < 300_000_000 || p.BasePerKM > 10_000_000_000 || p.SurfaceKM < 0 || p.HillKM < 0 || p.ViaductKM < 0 || p.TunnelKM < 0 || p.SurfaceKM+p.HillKM+p.ViaductKM+p.TunnelKM > 6000 || p.HillFactorPercent < 100 || p.HillFactorPercent > 400 || p.TunnelFactor < 5 || p.TunnelFactor > 12 {
+		if p.Country == "" || p.ProfileID == "" || p.BasePerKM < 300_000_000 || p.BasePerKM > 10_000_000_000 ||
+			p.SurfaceKM < 0 ||
+			p.HillKM < 0 ||
+			p.ViaductKM < 0 ||
+			p.TunnelKM < 0 ||
+			p.SurfaceKM+p.HillKM+p.ViaductKM+p.TunnelKM > 6000 ||
+			p.HillFactorPercent < 100 ||
+			p.HillFactorPercent > 400 ||
+			p.TunnelFactor < 5 ||
+			p.TunnelFactor > 12 {
 			return e, errCode("invalid_scenario")
 		}
 		surface += p.SurfaceKM

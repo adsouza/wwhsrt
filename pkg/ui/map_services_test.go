@@ -7,11 +7,31 @@ import (
 )
 
 func TestMapServiceSelectionOffersOpenDirectAndThroughRoutes(t *testing.T) {
-	f := gameapi.Frame{Corridors: []gameapi.Corridor{{ID: "ab", Existing: true}, {ID: "bc", Existing: true}, {ID: "future"}},
-		Routes:   []gameapi.Route{{ID: "through", Sections: []string{"ab", "bc"}, Open: true}, {ID: "ab", Sections: []string{"ab"}, Open: true}, {ID: "bc", Sections: []string{"bc"}, Open: true}, {ID: "closed", Sections: []string{"ab", "future"}}},
-		Services: []gameapi.Service{{CorridorID: "ab", Frequency: 6, Fare: 8000}}}
-	s := State{View: "build", Expanded: true, FromCity: "x", ToCity: "y", AlignmentID: "valley", ServiceCorridor: "unrelated", ServiceQuery: "unrelated search"}
-	if !SelectMapService(&s, f, []string{"ab"}) || s.View != "services" || s.ServicePane != "plan" || s.Expanded || !s.ReviewMap || s.ServiceCorridor != "ab" || s.Frequency != 6 || s.Fare != 8000 || s.ServiceQuery != "" {
+	f := gameapi.Frame{
+		Corridors: []gameapi.Corridor{{ID: "ab", Existing: true}, {ID: "bc", Existing: true}, {ID: "future"}},
+		Routes: []gameapi.Route{
+			{ID: "through", Sections: []string{"ab", "bc"}, Open: true},
+			{ID: "ab", Sections: []string{"ab"}, Open: true},
+			{ID: "bc", Sections: []string{"bc"}, Open: true},
+			{ID: "closed", Sections: []string{"ab", "future"}},
+		},
+		Services: []gameapi.Service{{CorridorID: "ab", Frequency: 6, Fare: 8000}},
+	}
+	s := State{
+		View:            "build",
+		Expanded:        true,
+		FromCity:        "x",
+		ToCity:          "y",
+		AlignmentID:     "valley",
+		ServiceCorridor: "unrelated",
+		ServiceQuery:    "unrelated search",
+	}
+	if !SelectMapService(&s, f, []string{"ab"}) || s.View != "services" || s.ServicePane != "plan" || s.Expanded ||
+		!s.ReviewMap ||
+		s.ServiceCorridor != "ab" ||
+		s.Frequency != 6 ||
+		s.Fare != 8000 ||
+		s.ServiceQuery != "" {
 		t.Fatal(s)
 	}
 	if s.FromCity != "x" || s.ToCity != "y" || s.AlignmentID != "valley" {
@@ -23,7 +43,8 @@ func TestMapServiceSelectionOffersOpenDirectAndThroughRoutes(t *testing.T) {
 	}
 	DraftService(&s, f, "through")
 	s.Frequency, s.Fare = 9, 12345
-	if !SelectMapService(&s, f, []string{"bc"}) || s.ServiceCorridor != "through" || s.Frequency != 9 || s.Fare != 12345 {
+	if !SelectMapService(&s, f, []string{"bc"}) || s.ServiceCorridor != "through" || s.Frequency != 9 ||
+		s.Fare != 12345 {
 		t.Fatal("reclick lost through-service draft", s)
 	}
 	for _, ids := range [][]string{{"future"}, {"missing"}, nil} {

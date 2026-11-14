@@ -136,7 +136,9 @@ func (m *Map) drawScene(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s 
 	}
 	// Track styles reflect authoritative infrastructure and construction state.
 	for _, co := range f.Corridors {
-		if f.PublicNetwork && co.Existing && !draftSections[co.ID] && !(s.View == "build" && (co.FromCity == s.FromCity && co.ToCity == s.ToCity || co.FromCity == s.ToCity && co.ToCity == s.FromCity)) {
+		if f.PublicNetwork && co.Existing && !draftSections[co.ID] &&
+			!(s.View == "build" && (co.FromCity == s.FromCity && co.ToCity == s.ToCity ||
+				co.FromCity == s.ToCity && co.ToCity == s.FromCity)) {
 			continue
 		}
 		var chosen *gameapi.Alignment
@@ -265,7 +267,12 @@ func (m *Map) drawScene(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s 
 		}
 		label := ui.Text(s.Locale, string(city.ID))
 		width := text.Advance(label, &text.GoTextFace{Source: m.Font, Size: 15})
-		for _, offset := range []mapview.Point{{X: 12, Y: -10}, {X: -width - 12, Y: -10}, {X: -width / 2, Y: 14}, {X: -width / 2, Y: -30}} {
+		for _, offset := range []mapview.Point{
+			{X: 12, Y: -10},
+			{X: -width - 12, Y: -10},
+			{X: -width / 2, Y: 14},
+			{X: -width / 2, Y: -30},
+		} {
 			r := labelRect{math.Max(4, math.Min(c.Width-width-4, p.X+offset.X)), math.Max(4, p.Y+offset.Y), width, 22}
 			collision := false
 			for _, o := range occupied {
@@ -339,13 +346,32 @@ func routePoint(c mapview.Camera, path []gameapi.GeoPoint, u float64) mapview.Po
 	a, b := c.Screen(mapview.Project(path[i].Lat, path[i].Lon)), c.Screen(mapview.Project(path[i+1].Lat, path[i+1].Lon))
 	return mapview.Point{X: a.X + (b.X-a.X)*v, Y: a.Y + (b.Y-a.Y)*v}
 }
-func (m *Map) route(dst *ebiten.Image, c mapview.Camera, path []gameapi.GeoPoint, stroke, outline color.Color, dashed bool) {
+
+func (m *Map) route(
+	dst *ebiten.Image,
+	c mapview.Camera,
+	path []gameapi.GeoPoint,
+	stroke, outline color.Color,
+	dashed bool,
+) {
 	m.routeWidth(dst, c, path, stroke, outline, dashed, 5, 3)
 }
-func (m *Map) routeWidth(dst *ebiten.Image, c mapview.Camera, points []gameapi.GeoPoint, stroke, outline color.Color, dashed bool, outerWidth, innerWidth float32) {
+
+func (m *Map) routeWidth(
+	dst *ebiten.Image,
+	c mapview.Camera,
+	points []gameapi.GeoPoint,
+	stroke, outline color.Color,
+	dashed bool,
+	outerWidth, innerWidth float32,
+) {
 	var path vector.Path
 	for i := 0; i < len(points)-1; i++ {
-		a, b, ok := screenSegment(c, c.Screen(mapview.Project(points[i].Lat, points[i].Lon)), c.Screen(mapview.Project(points[i+1].Lat, points[i+1].Lon)))
+		a, b, ok := screenSegment(
+			c,
+			c.Screen(mapview.Project(points[i].Lat, points[i].Lon)),
+			c.Screen(mapview.Project(points[i+1].Lat, points[i+1].Lon)),
+		)
 		if !ok {
 			continue
 		}

@@ -35,7 +35,39 @@ var catalogs = sync.OnceValue(func() map[string]map[string]string {
 			for _, locale := range []string{"en", "zh-Hans"} {
 				if result[locale][string(city.ID)] == "" {
 					name := city.Name
-					name = strings.NewReplacer("Ł", "L", "ł", "l", "š", "s", "ą", "a", "ł", "l", "ś", "s", "ę", "e", "ź", "z", "ż", "z", "ğ", "g", "ş", "s", "İ", "I", "ı", "i", "қ", "к", "ө", "о").Replace(name)
+					name = strings.NewReplacer(
+						"Ł",
+						"L",
+						"ł",
+						"l",
+						"š",
+						"s",
+						"ą",
+						"a",
+						"ł",
+						"l",
+						"ś",
+						"s",
+						"ę",
+						"e",
+						"ź",
+						"z",
+						"ż",
+						"z",
+						"ğ",
+						"g",
+						"ş",
+						"s",
+						"İ",
+						"I",
+						"ı",
+						"i",
+						"қ",
+						"к",
+						"ө",
+						"о",
+					).
+						Replace(name)
 					result[locale][string(city.ID)] = name
 				}
 			}
@@ -149,8 +181,23 @@ type State struct {
 // NewGameState clears company-specific drafts and completed actions, retaining
 // device preferences and explicitly dismissed learning concepts. It runs only after the new save commits.
 func NewGameState(s State, f gameapi.Frame) State {
-	next := State{Region: s.Region, PanelWidth: s.PanelWidth, CommandDock: s.CommandDock, Locale: s.Locale, Portrait: s.Portrait, Motion: s.Motion, HideTerrain: s.HideTerrain, Appearance: s.Appearance, Dark: s.Dark,
-		View: "map", DraftName: f.Player.Name, FromCity: "tsuruga", ToCity: "osaka", Choosing: "from", LoanAmount: "1000000.00"}
+	next := State{
+		Region:      s.Region,
+		PanelWidth:  s.PanelWidth,
+		CommandDock: s.CommandDock,
+		Locale:      s.Locale,
+		Portrait:    s.Portrait,
+		Motion:      s.Motion,
+		HideTerrain: s.HideTerrain,
+		Appearance:  s.Appearance,
+		Dark:        s.Dark,
+		View:        "map",
+		DraftName:   f.Player.Name,
+		FromCity:    "tsuruga",
+		ToCity:      "osaka",
+		Choosing:    "from",
+		LoanAmount:  "1000000.00",
+	}
 	DraftService(&next, f, "tokyo-nagoya")
 	if s.Help.Version > 0 {
 		next.Help = cloneHelp(s.Help)
@@ -387,8 +434,17 @@ func FundingBreakdown(f gameapi.Frame, s State) (ConstructionFunding, bool) {
 	}
 	for _, a := range co.Alignments {
 		if a.ID == id {
-			q := ConstructionFunding{CorridorID: co.ID, FromCity: co.FromCity, ToCity: co.ToCity, AlignmentID: a.ID,
-				Cost: a.Cost, Grant: a.Grant, Contribution: a.Cost - a.Grant, CashAvailable: max(0, f.Player.Cash), CashDeficit: max(0, -f.Player.Cash)}
+			q := ConstructionFunding{
+				CorridorID:    co.ID,
+				FromCity:      co.FromCity,
+				ToCity:        co.ToCity,
+				AlignmentID:   a.ID,
+				Cost:          a.Cost,
+				Grant:         a.Grant,
+				Contribution:  a.Cost - a.Grant,
+				CashAvailable: max(0, f.Player.Cash),
+				CashDeficit:   max(0, -f.Player.Cash),
+			}
 			q.Shortfall = max(0, q.Contribution-q.CashAvailable+q.CashDeficit)
 			return q, true
 		}

@@ -37,7 +37,14 @@ func (h *host) helpModel(g *Game) ui.HelpModel {
 	var forecast *gameapi.Forecast
 	issue := h.message
 	if g.State.View == "services" || g.State.Help.Open {
-		f, e := g.Port.Forecast(gameapi.ForecastRequest{CorridorID: g.State.ServiceCorridor, Frequency: g.State.Frequency, Fare: g.State.Fare, ReplaceServiceID: g.State.ReplaceServiceID})
+		f, e := g.Port.Forecast(
+			gameapi.ForecastRequest{
+				CorridorID:       g.State.ServiceCorridor,
+				Frequency:        g.State.Frequency,
+				Fare:             g.State.Fare,
+				ReplaceServiceID: g.State.ReplaceServiceID,
+			},
+		)
 		if e == nil || g.State.Help.Topic == "capacity" {
 			forecast = &f
 		}
@@ -88,11 +95,17 @@ func (h *host) helpSlot(g *Game, anchor string, label nativeLabel, button native
 		if anchor == "expanded-endpoint" {
 			if m.Cue.Concept == slot.Topic.ID {
 				label(t(slot.Topic.SummaryKey), 14)
-				button(t("dismissConcept"), func() { h.helpEvent(g, ui.HelpEvent{Kind: "dismiss", Concept: slot.Topic.ID}) })
+				button(
+					t("dismissConcept"),
+					func() { h.helpEvent(g, ui.HelpEvent{Kind: "dismiss", Concept: slot.Topic.ID}) },
+				)
 				h.helpCue = slot.Topic.ID
 				h.helpCueAnchor = anchor
 			}
-			b := button(t("fieldNotes"), func() { h.helpEvent(g, ui.HelpEvent{Kind: "open", Concept: slot.Topic.ID, Anchor: anchor}) })
+			b := button(
+				t("fieldNotes"),
+				func() { h.helpEvent(g, ui.HelpEvent{Kind: "open", Concept: slot.Topic.ID, Anchor: anchor}) },
+			)
 			h.helpAnchors[anchor] = b
 			continue
 		}
@@ -108,7 +121,10 @@ func (h *host) helpSlot(g *Game, anchor string, label nativeLabel, button native
 			label(t(slot.Topic.SummaryKey), 13)
 			h.row(2, func() {
 				b = button(t("explainShort"), toggle)
-				button(t("dismissShort"), func() { h.helpEvent(g, ui.HelpEvent{Kind: "dismiss", Concept: slot.Topic.ID}) })
+				button(
+					t("dismissShort"),
+					func() { h.helpEvent(g, ui.HelpEvent{Kind: "dismiss", Concept: slot.Topic.ID}) },
+				)
 			})
 			h.helpCue = slot.Topic.ID
 			h.helpCueAnchor = anchor
@@ -122,7 +138,10 @@ func (h *host) helpSlot(g *Game, anchor string, label nativeLabel, button native
 			for _, row := range slot.Facts {
 				label(row.Label+"\n"+row.Value, 14)
 			}
-			button(t("fieldNotes"), func() { h.helpEvent(g, ui.HelpEvent{Kind: "open", Concept: slot.Topic.ID, Anchor: anchor}) })
+			button(
+				t("fieldNotes"),
+				func() { h.helpEvent(g, ui.HelpEvent{Kind: "open", Concept: slot.Topic.ID, Anchor: anchor}) },
+			)
 		}
 	}
 }

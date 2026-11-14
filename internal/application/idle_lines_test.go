@@ -23,7 +23,8 @@ func TestIdleLineWarningTracksOpeningFleetAndAcceptedServices(t *testing.T) {
 		t.Fatal("newly opened line must warn immediately", f.IdleLines)
 	}
 	warning := f.IdleLines[0]
-	if warning.CorridorID != "hokkaido-extension" || !warning.NeedsTrains || warning.Maintenance != 383927500 || warning.Leases != 0 {
+	if warning.CorridorID != "hokkaido-extension" || !warning.NeedsTrains || warning.Maintenance != 383927500 ||
+		warning.Leases != 0 {
 		t.Fatal("wrong line or costs", warning)
 	}
 	before := f.Checkpoint
@@ -40,7 +41,9 @@ func TestIdleLineWarningTracksOpeningFleetAndAcceptedServices(t *testing.T) {
 		t.Fatal("leasing alone must retain warning with idle lease cost", f.IdleLines)
 	}
 	before = f.Checkpoint
-	if _, err := g.Forecast(gameapi.ForecastRequest{CorridorID: warning.CorridorID, Frequency: 4, Fare: 9000}); err != nil {
+	if _, err := g.Forecast(
+		gameapi.ForecastRequest{CorridorID: warning.CorridorID, Frequency: 4, Fare: 9000},
+	); err != nil {
 		t.Fatal(err)
 	}
 	if len(g.Snapshot().IdleLines) != 1 || g.Snapshot().Checkpoint != before {
@@ -64,7 +67,8 @@ func TestIdleLineWarningTracksOpeningFleetAndAcceptedServices(t *testing.T) {
 func TestIdlePublicFleetWarnsWithoutFlaggingUnusedPublicLines(t *testing.T) {
 	g := openTest(t, nil)
 	f := act(t, g, gameapi.Command{Kind: gameapi.SetService, CorridorID: "tokyo-nagoya", Frequency: 0, Fare: 9000})
-	if len(f.IdleLines) != 1 || f.IdleLines[0].CorridorID != "tokyo-nagoya" || f.IdleLines[0].Maintenance != 0 || f.IdleLines[0].Leases != 80000000 {
+	if len(f.IdleLines) != 1 || f.IdleLines[0].CorridorID != "tokyo-nagoya" || f.IdleLines[0].Maintenance != 0 ||
+		f.IdleLines[0].Leases != 80000000 {
 		t.Fatal("suspended public service should disclose idle fleet rent", f.IdleLines)
 	}
 	act(t, g, gameapi.Command{Kind: gameapi.ReturnTrain, CorridorID: "tokyo-nagoya"})

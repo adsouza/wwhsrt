@@ -11,14 +11,19 @@ func (w World) validNetworkReport(report gameapi.Report, month int) bool {
 		if !ok || !route.Open {
 			return false
 		}
-		plans = append(plans, gameapi.Service{CorridorID: run.CorridorID, Frequency: run.RequestedFrequency, Fare: run.Fare})
+		plans = append(
+			plans,
+			gameapi.Service{CorridorID: run.CorridorID, Frequency: run.RequestedFrequency, Fare: run.Fare},
+		)
 		needed += required(run.RequestedFrequency, route.Minutes)
 	}
-	if w.validateOwnedCapacity(plans) != nil || report.LeaseCosts%w.leaseMonthly() != 0 || report.LeaseCosts < gameapi.Money(needed)*w.leaseMonthly() {
+	if w.validateOwnedCapacity(plans) != nil || report.LeaseCosts%w.leaseMonthly() != 0 ||
+		report.LeaseCosts < gameapi.Money(needed)*w.leaseMonthly() {
 		return false
 	}
 	network := w.simulate(plans, month)
-	if network.Revenue != report.Revenue || network.Carried != report.Passengers || len(network.Services) != len(report.Services) {
+	if network.Revenue != report.Revenue || network.Carried != report.Passengers ||
+		len(network.Services) != len(report.Services) {
 		return false
 	}
 	var running, access, handling gameapi.Money
@@ -74,13 +79,16 @@ func (w *World) extendService(c gameapi.Command) error {
 			return err
 		}
 	}
-	return w.change(gameapi.Command{Kind: gameapi.SetService, CorridorID: target.ID, Frequency: c.Frequency, Fare: c.Fare})
+	return w.change(
+		gameapi.Command{Kind: gameapi.SetService, CorridorID: target.ID, Frequency: c.Frequency, Fare: c.Fare},
+	)
 }
 
 func (w World) validExtension(targetID, sourceID string) bool {
 	target, ok := w.route(targetID)
 	source, found := w.route(sourceID)
-	if !ok || !found || !source.Open || !target.Open || target.ID == source.ID || len(target.Sections) <= len(source.Sections) {
+	if !ok || !found || !source.Open || !target.Open || target.ID == source.ID ||
+		len(target.Sections) <= len(source.Sections) {
 		return false
 	}
 	for _, section := range source.Sections {

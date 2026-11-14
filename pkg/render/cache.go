@@ -15,7 +15,22 @@ type sceneKey struct {
 }
 
 func mapSceneKey(c mapview.Camera, f gameapi.Frame, s ui.State) sceneKey {
-	return sceneKey{Camera: c, Checkpoint: f.Checkpoint, Locale: s.Locale, View: s.View, Region: s.Region, SourceStation: s.SourceStation, Service: s.ServiceCorridor, Alignment: s.AlignmentID, Selected: s.Selected, From: s.FromCity, To: s.ToCity, Dark: ui.IsDark(s), HideTerrain: s.HideTerrain, Portrait: s.Portrait}
+	return sceneKey{
+		Camera:        c,
+		Checkpoint:    f.Checkpoint,
+		Locale:        s.Locale,
+		View:          s.View,
+		Region:        s.Region,
+		SourceStation: s.SourceStation,
+		Service:       s.ServiceCorridor,
+		Alignment:     s.AlignmentID,
+		Selected:      s.Selected,
+		From:          s.FromCity,
+		To:            s.ToCity,
+		Dark:          ui.IsDark(s),
+		HideTerrain:   s.HideTerrain,
+		Portrait:      s.Portrait,
+	}
 }
 
 // The scene is immutable between state/camera changes. Representative trains

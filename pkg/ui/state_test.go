@@ -7,9 +7,48 @@ import (
 )
 
 func TestNewGameClearsDraftsAndRetainsDevicePreferences(t *testing.T) {
-	s := State{Locale: "zh-Hans", Portrait: true, Motion: false, HideTerrain: true, Appearance: "dark", Dark: true, View: "services", Expanded: true, Selected: "sapporo", Query: "old", DraftName: "Old", HintDismissed: true, FromCity: "osaka", ToCity: "sapporo", AlignmentID: "valley", ServiceCorridor: "old", Frequency: 0, Fare: 12000, LoanAmount: "987654321"}
-	f := gameapi.Frame{Player: gameapi.Company{Name: "Sunrise Rail"}, Services: []gameapi.Service{{CorridorID: "tokyo-nagoya", Frequency: 6, Fare: 9000}}}
-	want := State{Locale: "zh-Hans", Portrait: true, Motion: false, HideTerrain: true, Appearance: "dark", Dark: true, View: "map", DraftName: "Sunrise Rail", FromCity: "tsuruga", ToCity: "osaka", Choosing: "from", ServiceCorridor: "tokyo-nagoya", Frequency: 6, Fare: 9000, LoanAmount: "1000000.00"}
+	s := State{
+		Locale:          "zh-Hans",
+		Portrait:        true,
+		Motion:          false,
+		HideTerrain:     true,
+		Appearance:      "dark",
+		Dark:            true,
+		View:            "services",
+		Expanded:        true,
+		Selected:        "sapporo",
+		Query:           "old",
+		DraftName:       "Old",
+		HintDismissed:   true,
+		FromCity:        "osaka",
+		ToCity:          "sapporo",
+		AlignmentID:     "valley",
+		ServiceCorridor: "old",
+		Frequency:       0,
+		Fare:            12000,
+		LoanAmount:      "987654321",
+	}
+	f := gameapi.Frame{
+		Player:   gameapi.Company{Name: "Sunrise Rail"},
+		Services: []gameapi.Service{{CorridorID: "tokyo-nagoya", Frequency: 6, Fare: 9000}},
+	}
+	want := State{
+		Locale:          "zh-Hans",
+		Portrait:        true,
+		Motion:          false,
+		HideTerrain:     true,
+		Appearance:      "dark",
+		Dark:            true,
+		View:            "map",
+		DraftName:       "Sunrise Rail",
+		FromCity:        "tsuruga",
+		ToCity:          "osaka",
+		Choosing:        "from",
+		ServiceCorridor: "tokyo-nagoya",
+		Frequency:       6,
+		Fare:            9000,
+		LoanAmount:      "1000000.00",
+	}
 	if got := NewGameState(s, f); !reflect.DeepEqual(got, want) {
 		t.Fatal("new game retained company drafts or lost preferences", got)
 	}
@@ -40,20 +79,51 @@ func TestChineseCatalogAndAliases(t *testing.T) {
 }
 
 func TestLoanAmountParsingIsExact(t *testing.T) {
-	for text, want := range map[string]gameapi.Money{"1063340000": 106_334_000_000, "1,063,340,000.11": 106_334_000_011, "0.01": 1, " 123.45 ": 12345, "123.": 12300} {
+	for text, want := range map[string]gameapi.Money{
+		"1063340000":       106_334_000_000,
+		"1,063,340,000.11": 106_334_000_011,
+		"0.01":             1,
+		" 123.45 ":         12345,
+		"123.":             12300,
+	} {
 		got, ok := ParseDollars(text)
 		if !ok || got != want {
 			t.Errorf("%q: got %d %v", text, got, ok)
 		}
 	}
-	for _, text := range []string{"", "-1", "+1", "1e9", "1,2", "12,34,567", "1.234", "NaN", "92233720368547758.08", "123abc", ".12"} {
+	for _, text := range []string{
+		"",
+		"-1",
+		"+1",
+		"1e9",
+		"1,2",
+		"12,34,567",
+		"1.234",
+		"NaN",
+		"92233720368547758.08",
+		"123abc",
+		".12",
+	} {
 		if _, ok := ParseDollars(text); ok {
 			t.Errorf("accepted invalid amount %q", text)
 		}
 	}
 }
 func TestFundingShortfallUsesChosenAlignmentAndCurrentCash(t *testing.T) {
-	f := gameapi.Frame{Player: gameapi.Company{Cash: 10000}, Corridors: []gameapi.Corridor{{ID: "a-b", FromCity: "a", ToCity: "b", Alignments: []gameapi.Alignment{{ID: "fast", Cost: 100000, Grant: 60000}, {ID: "cheap", Cost: 80000, Grant: 60000}}}}}
+	f := gameapi.Frame{
+		Player: gameapi.Company{Cash: 10000},
+		Corridors: []gameapi.Corridor{
+			{
+				ID:       "a-b",
+				FromCity: "a",
+				ToCity:   "b",
+				Alignments: []gameapi.Alignment{
+					{ID: "fast", Cost: 100000, Grant: 60000},
+					{ID: "cheap", Cost: 80000, Grant: 60000},
+				},
+			},
+		},
+	}
 	s := State{FromCity: "b", ToCity: "a", AlignmentID: "cheap"}
 	if n := FundingShortfall(f, s); n != 10000 {
 		t.Fatal(n)

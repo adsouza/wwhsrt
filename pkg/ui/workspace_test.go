@@ -19,7 +19,8 @@ func TestWorkspaceLayoutAdaptsWithoutLosingPreferences(t *testing.T) {
 						t.Fatal("workspace escapes window", size, dock, width, l)
 					}
 				}
-				if l.Inspector.Overlaps(l.Dock) || l.Inspector.Overlaps(l.Footer) || l.Map.Overlaps(l.Inspector) || l.Map.Overlaps(l.Dock) {
+				if l.Inspector.Overlaps(l.Dock) || l.Inspector.Overlaps(l.Footer) || l.Map.Overlaps(l.Inspector) ||
+					l.Map.Overlaps(l.Dock) {
 					t.Fatal("overlapping panels", l)
 				}
 				if !l.Compact && l.Map.Dx() < 320 {

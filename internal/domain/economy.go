@@ -79,7 +79,10 @@ func (w World) suggest(r *gameapi.Route) {
 	if !w.rebalanced() {
 		return
 	}
-	r.SuggestedFare = min(MaxFare, max(MinFare, gameapi.Money(int(w.catalog.economy.FareBase)+r.KM*int(w.catalog.economy.FarePerKM))))
+	r.SuggestedFare = min(
+		MaxFare,
+		max(MinFare, gameapi.Money(int(w.catalog.economy.FareBase)+r.KM*int(w.catalog.economy.FarePerKM))),
+	)
 	diff := make([]int64, len(r.Cities)+1)
 	for i, a := range r.Cities {
 		if !containsCity(r.Stops, a) {
@@ -101,7 +104,11 @@ func (w World) suggest(r *gameapi.Route) {
 			if totalA == 0 || totalB == 0 {
 				continue
 			}
-			trips := (int64(w.catalog.economyTrips(ca.DailyTrips))*w.catalog.economyWeight(ca, cb)/totalA + int64(w.catalog.economyTrips(cb.DailyTrips))*w.catalog.economyWeight(cb, ca)/totalB) * 2 / 5
+			trips := (int64(
+				w.catalog.economyTrips(ca.DailyTrips),
+			)*w.catalog.economyWeight(ca, cb)/totalA + int64(
+				w.catalog.economyTrips(cb.DailyTrips),
+			)*w.catalog.economyWeight(cb, ca)/totalB) * 2 / 5
 			diff[i] += trips
 			diff[j] -= trips
 		}
@@ -141,7 +148,26 @@ func breakEven(f *gameapi.Forecast, fare gameapi.Money, frequency int, direct bo
 }
 
 func (c Catalog) WithEconomy(e gameapi.EconomyRules) (Catalog, error) {
-	if !c.network.Sparse || e.ID != "regional-balance-v1" || e.LeaseMonthly < 1 || e.LeaseMonthly > LeaseMonthly || e.RunningPerKM < 1 || e.RunningPerKM > 10000 || e.PublicAccessPerKM < 0 || e.PublicAccessPerKM > 10000 || e.TripScale < 1 || e.TripScale > 64 || e.CatchmentBonusCap < 0 || e.CatchmentBonusCap > 100000 || e.DailyTripCap < 1000 || e.DailyTripCap > 1000000 || e.GravityPaddingKM < 1 || e.GravityPaddingKM > 1000 || e.DomesticWeight < 1 || e.DomesticWeight > 16 || e.WaitNumerator < 1 || e.WaitNumerator > 960 || e.FareBase < 0 || e.FarePerKM < 1 || e.FarePerKM > 100 {
+	if !c.network.Sparse || e.ID != "regional-balance-v1" || e.LeaseMonthly < 1 || e.LeaseMonthly > LeaseMonthly ||
+		e.RunningPerKM < 1 ||
+		e.RunningPerKM > 10000 ||
+		e.PublicAccessPerKM < 0 ||
+		e.PublicAccessPerKM > 10000 ||
+		e.TripScale < 1 ||
+		e.TripScale > 64 ||
+		e.CatchmentBonusCap < 0 ||
+		e.CatchmentBonusCap > 100000 ||
+		e.DailyTripCap < 1000 ||
+		e.DailyTripCap > 1000000 ||
+		e.GravityPaddingKM < 1 ||
+		e.GravityPaddingKM > 1000 ||
+		e.DomesticWeight < 1 ||
+		e.DomesticWeight > 16 ||
+		e.WaitNumerator < 1 ||
+		e.WaitNumerator > 960 ||
+		e.FareBase < 0 ||
+		e.FarePerKM < 1 ||
+		e.FarePerKM > 100 {
 		return c, errCode("invalid_scenario")
 	}
 	c.economy = e

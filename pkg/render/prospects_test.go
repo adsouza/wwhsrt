@@ -16,7 +16,11 @@ func TestProspectPickingFollowsAlignmentAndCurrentAvailability(t *testing.T) {
 			{ID: "valley", Path: []gameapi.GeoPoint{{Lat: 31, Lon: 101}, {Lat: 36, Lon: 102}, {Lat: 39, Lon: 109}}},
 			{ID: "tunnel", Path: []gameapi.GeoPoint{{Lat: 31, Lon: 101}, {Lat: 39, Lon: 109}}},
 		}},
-		{ID: "existing", Existing: true, Alignments: []gameapi.Alignment{{Path: []gameapi.GeoPoint{{Lat: 32, Lon: 109}, {Lat: 38, Lon: 109}}}}},
+		{
+			ID:         "existing",
+			Existing:   true,
+			Alignments: []gameapi.Alignment{{Path: []gameapi.GeoPoint{{Lat: 32, Lon: 109}, {Lat: 38, Lon: 109}}}},
+		},
 	}}
 	s := ui.State{View: "map"}
 	mid := func(a, b gameapi.GeoPoint) mapview.Point {

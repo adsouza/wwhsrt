@@ -76,13 +76,30 @@ func (h *host) buildNewGame(g *Game) {
 	w, height := min(440, g.width-24), min(540, g.height-24)
 	x, y := (g.width-w)/2, (g.height-height)/2
 	bounds := image.Rect(x, y, x+w, y+height)
-	root := widget.NewContainer(widget.ContainerOpts.Layout(placed{}), widget.ContainerOpts.BackgroundImage(uimage.NewNineSliceColor(color.NRGBA{20, 50, 82, 180})))
-	panel := widget.NewContainer(widget.ContainerOpts.Layout(placed{}), widget.ContainerOpts.BackgroundImage(uimage.NewNineSliceColor(p.Control)), widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(bounds)))
+	root := widget.NewContainer(
+		widget.ContainerOpts.Layout(placed{}),
+		widget.ContainerOpts.BackgroundImage(uimage.NewNineSliceColor(color.NRGBA{20, 50, 82, 180})),
+	)
+	panel := widget.NewContainer(
+		widget.ContainerOpts.Layout(placed{}),
+		widget.ContainerOpts.BackgroundImage(uimage.NewNineSliceColor(p.Control)),
+		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(bounds)),
+	)
 	root.AddChild(panel)
-	content := widget.NewContainer(widget.ContainerOpts.Layout(widget.NewRowLayout(widget.RowLayoutOpts.Direction(widget.DirectionVertical), widget.RowLayoutOpts.Padding(widget.NewInsetsSimple(16)), widget.RowLayoutOpts.Spacing(12))))
+	content := widget.NewContainer(
+		widget.ContainerOpts.Layout(
+			widget.NewRowLayout(
+				widget.RowLayoutOpts.Direction(widget.DirectionVertical),
+				widget.RowLayoutOpts.Padding(widget.NewInsetsSimple(16)),
+				widget.RowLayoutOpts.Spacing(12),
+			),
+		),
+	)
 	label := func(s string, size float64) {
 		wrapped := ui.WrapText(s, float64(w-52), func(v string) float64 { return text.Advance(v, *face(size)) })
-		content.AddChild(widget.NewText(widget.TextOpts.Text(wrapped, face(size), p.Text), widget.TextOpts.MaxWidth(float64(w-52))))
+		content.AddChild(
+			widget.NewText(widget.TextOpts.Text(wrapped, face(size), p.Text), widget.TextOpts.MaxWidth(float64(w-52))),
+		)
 	}
 	label(t("newGameTitle"), 22)
 	if h.message != "" {
@@ -92,7 +109,17 @@ func (h *host) buildNewGame(g *Game) {
 	label(t("newGameWarning"), 15)
 	label(t("newGameStart"), 15)
 	r := image.Rect(x, y, x+w-20, y+height-124)
-	scroll := widget.NewScrollContainer(widget.ScrollContainerOpts.Content(content), widget.ScrollContainerOpts.StretchContentWidth(), widget.ScrollContainerOpts.Image(&widget.ScrollContainerImage{Idle: uimage.NewNineSliceColor(p.Control), Mask: uimage.NewNineSliceColor(color.White)}), widget.ScrollContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(r)))
+	scroll := widget.NewScrollContainer(
+		widget.ScrollContainerOpts.Content(content),
+		widget.ScrollContainerOpts.StretchContentWidth(),
+		widget.ScrollContainerOpts.Image(
+			&widget.ScrollContainerImage{
+				Idle: uimage.NewNineSliceColor(p.Control),
+				Mask: uimage.NewNineSliceColor(color.White),
+			},
+		),
+		widget.ScrollContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(r)),
+	)
 	scroll.SetLocation(r)
 	if h.scroll != nil {
 		scroll.ScrollTop = h.scroll.ScrollTop
@@ -100,7 +127,16 @@ func (h *host) buildNewGame(g *Game) {
 	h.scroll = scroll
 	root.AddChild(scroll)
 	h.configureSidebarScroll(g, root)
-	buttons := widget.NewContainer(widget.ContainerOpts.Layout(widget.NewRowLayout(widget.RowLayoutOpts.Direction(widget.DirectionVertical), widget.RowLayoutOpts.Padding(widget.NewInsetsSimple(12)), widget.RowLayoutOpts.Spacing(8))), widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(image.Rect(x, y+height-124, x+w, y+height))))
+	buttons := widget.NewContainer(
+		widget.ContainerOpts.Layout(
+			widget.NewRowLayout(
+				widget.RowLayoutOpts.Direction(widget.DirectionVertical),
+				widget.RowLayoutOpts.Padding(widget.NewInsetsSimple(12)),
+				widget.RowLayoutOpts.Spacing(8),
+			),
+		),
+		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(image.Rect(x, y+height-124, x+w, y+height))),
+	)
 	for _, action := range []struct {
 		key string
 		run func()
@@ -109,7 +145,21 @@ func (h *host) buildNewGame(g *Game) {
 		{"newGameConfirm", func() { h.send(g, gameapi.NewGame) }},
 	} {
 		fn := action.run
-		b := widget.NewButton(widget.ButtonOpts.WidgetOpts(widget.WidgetOpts.MinSize(44, 46), widget.WidgetOpts.LayoutData(widget.RowLayoutData{Stretch: true})), widget.ButtonOpts.Image(&widget.ButtonImage{Idle: uimage.NewNineSliceColor(p.Selected), Hover: uimage.NewNineSliceColor(p.Hover), Pressed: uimage.NewNineSliceColor(p.Pressed)}), widget.ButtonOpts.Text(t(action.key), face(15), &widget.ButtonTextColor{Idle: p.Text}), widget.ButtonOpts.ClickedHandler(func(*widget.ButtonClickedEventArgs) { fn() }))
+		b := widget.NewButton(
+			widget.ButtonOpts.WidgetOpts(
+				widget.WidgetOpts.MinSize(44, 46),
+				widget.WidgetOpts.LayoutData(widget.RowLayoutData{Stretch: true}),
+			),
+			widget.ButtonOpts.Image(
+				&widget.ButtonImage{
+					Idle:    uimage.NewNineSliceColor(p.Selected),
+					Hover:   uimage.NewNineSliceColor(p.Hover),
+					Pressed: uimage.NewNineSliceColor(p.Pressed),
+				},
+			),
+			widget.ButtonOpts.Text(t(action.key), face(15), &widget.ButtonTextColor{Idle: p.Text}),
+			widget.ButtonOpts.ClickedHandler(func(*widget.ButtonClickedEventArgs) { fn() }),
+		)
 		b.GetWidget().Disabled = h.busy
 		buttons.AddChild(b)
 	}
