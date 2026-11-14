@@ -529,5 +529,10 @@
   "trackKind_new_hsr": "new HSR",
   "authoredAlignmentNote": "Strategic engineering estimate; detailed design and land acquisition are outside this estimate.",
   "retiredService": "Earlier service (retired from this catalog)",
-  "trackKind_dedicated_hsr": "dedicated HSR"
+  "trackKind_dedicated_hsr": "dedicated HSR",
+  "routeChoicesMore": "Showing %d of %d routes. Zoom in or search to narrow the list.",
+  "routeChoicesNone": "No route fits in this map view. Zoom out or search by name.",
+  "routeChoicesMoreRegion": "Showing %d of %d routes. Choose a smaller region or search to narrow the list.",
+  "routeChoicesNoneRegion": "No route fits in this region. Choose another region or search by name.",
+  "routeChoicesMoreSearch": "Showing %d of %d matching routes. Add a word to the search to narrow the list."
 }

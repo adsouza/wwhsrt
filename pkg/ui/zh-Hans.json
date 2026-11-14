@@ -533,5 +533,10 @@
   "trackKind_new_hsr": "新建高速铁路",
   "authoredAlignmentNote": "战略级工程估算；详细工程和土地取得另行评估。",
   "retiredService": "旧版服务（已退出当前目录）",
-  "trackKind_dedicated_hsr": "专用高速铁路"
+  "trackKind_dedicated_hsr": "专用高速铁路",
+  "routeChoicesMore": "显示 %d / %d 条线路。放大地图或搜索可缩小范围。",
+  "routeChoicesNone": "当前地图视野内没有完整线路。请缩小地图或按名称搜索。",
+  "routeChoicesMoreRegion": "显示 %d / %d 条线路。选择更小的区域或搜索可缩小范围。",
+  "routeChoicesNoneRegion": "该区域内没有完整线路。请选择其他区域或按名称搜索。",
+  "routeChoicesMoreSearch": "显示 %d / %d 条匹配线路。添加搜索词可缩小范围。"
 }
