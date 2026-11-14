@@ -5,7 +5,6 @@ package app
 import (
 	"fmt"
 	"github.com/ebitenui/ebitenui/widget"
-	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"wwhsrt/pkg/gameapi"
 	"wwhsrt/pkg/ui"
 )
@@ -25,8 +24,9 @@ func (h *host) buildCompany(
 	switch ui.CompanyPane(g.State) {
 	case "identity":
 		label(t("companyName"), 16)
-		var face text.Face = &text.GoTextFace{Source: g.Map.Font, Size: 16}
+		face := h.face(g, 16)
 		h.nameInput = newNameInput(&h.field, g.State.DraftName, face, ui.PaletteFor(g.State))
+		h.nameInput.tall(h.text.Px(44))
 		if previousName != nil && previousName.observed.value == h.field.Text() {
 			h.nameInput.undo, h.nameInput.redo = previousName.undo, previousName.redo
 			h.nameInput.anchor, h.nameInput.caret = previousName.anchor, previousName.caret

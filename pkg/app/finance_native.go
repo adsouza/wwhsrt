@@ -5,7 +5,6 @@ package app
 import (
 	uimage "github.com/ebitenui/ebitenui/image"
 	"github.com/ebitenui/ebitenui/widget"
-	"github.com/hajimehoshi/ebiten/v2/text/v2"
 
 	"wwhsrt/pkg/gameapi"
 
@@ -24,7 +23,7 @@ func (h *host) financeForm(
 	remaining := g.Frame.DebtLimit - g.Frame.Debt
 	label(t("creditAvailable")+"\n"+ui.Cash(remaining), 15)
 	label(t("loanAmount"), 16)
-	var face text.Face = &text.GoTextFace{Source: g.Map.Font, Size: 16}
+	face := h.face(g, 16)
 	note := widget.NewText(widget.TextOpts.Text("", &face, p.Text), widget.TextOpts.MaxWidth(float64(width)))
 	var borrow *widget.Button
 	update := func() {

@@ -106,7 +106,7 @@ func (h *host) selectChoice(g *Game, selected string, options []choice, changed 
 		return
 	}
 	p := ui.PaletteFor(g.State)
-	var face text.Face = &text.GoTextFace{Source: g.Map.Font, Size: 14}
+	face := h.face(g, 14)
 	width := max(60, h.contentWidth-32)
 	entries := []any{}
 	var chosen any
@@ -211,7 +211,7 @@ func (h *host) selectChoice(g *Game, selected string, options []choice, changed 
 }
 func (h *host) fixedButton(g *Game, title string, r image.Rectangle, run func()) *widget.Button {
 	p := ui.PaletteFor(g.State)
-	var face text.Face = &text.GoTextFace{Source: g.Map.Font, Size: 13}
+	face := h.face(g, 13)
 	title = ui.WrapText(title, float64(max(20, r.Dx()-12)), func(v string) float64 { return text.Advance(v, face) })
 	return widget.NewButton(
 		widget.ButtonOpts.WidgetOpts(widget.WidgetOpts.MinSize(44, 44), widget.WidgetOpts.LayoutData(r)),
@@ -237,7 +237,7 @@ func (h *host) addCommandDock(g *Game, root *widget.Container) {
 		widget.ContainerOpts.BackgroundImage(uimage.NewNineSliceColor(p.Surface)),
 		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(l.Header)),
 	)
-	var face text.Face = &text.GoTextFace{Source: g.Map.Font, Size: 14}
+	face := h.face(g, 14)
 	value := fmt.Sprintf("%04d-%02d  ·  %s", g.Frame.Month.Year, g.Frame.Month.Month, ui.Cash(g.Frame.Player.Cash))
 	if g.width >= 800 {
 		name := g.Frame.Player.Name
@@ -418,7 +418,7 @@ func (h *host) stepper(g *Game, id, title, value string, minus, plus func()) {
 		return
 	}
 	p := ui.PaletteFor(g.State)
-	var face text.Face = &text.GoTextFace{Source: g.Map.Font, Size: 13}
+	face := h.face(g, 13)
 	width := h.contentWidth - 32
 	col := widget.NewContainer(
 		widget.ContainerOpts.Layout(
@@ -462,12 +462,10 @@ func (h *host) stepper(g *Game, id, title, value string, minus, plus func()) {
 		)
 		if i == 0 {
 			row.AddChild(b)
-			valueFace := text.Face(
-				&text.GoTextFace{
-					Source: g.Map.Font,
-					Size:   13 * min(1, float64(max(24, width-92))/max(1, text.Advance(value, face))),
-				},
-			)
+			// The value shrinks to fit its box, so it alone may go below the floor.
+			shrunk := h.face(g, 13).(*text.GoTextFace)
+			shrunk.Size *= min(1, float64(max(24, width-92))/max(1, text.Advance(value, face)))
+			valueFace := text.Face(shrunk)
 			row.AddChild(
 				widget.NewText(
 					widget.TextOpts.Text(value, &valueFace, p.Text),

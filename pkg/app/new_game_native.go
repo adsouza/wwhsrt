@@ -72,7 +72,7 @@ func (h *host) cancelNewGame(g *Game) {
 func (h *host) buildNewGame(g *Game) {
 	p := ui.PaletteFor(g.State)
 	t := func(k string) string { return ui.Text(g.State.Locale, k) }
-	face := func(n float64) *text.Face { var f text.Face = &text.GoTextFace{Source: g.Map.Font, Size: n}; return &f }
+	face := func(n float64) *text.Face { f := h.face(g, n); return &f }
 	w, height := min(440, g.width-24), min(540, g.height-24)
 	x, y := (g.width-w)/2, (g.height-height)/2
 	bounds := image.Rect(x, y, x+w, y+height)

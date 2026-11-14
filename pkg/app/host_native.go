@@ -56,6 +56,7 @@ func StartupError(e error) {
 }
 
 type host struct {
+	text          ui.TextScale // the ladder and step for this window; every font and chrome size asks it
 	nameCache     *nameInput
 	mapControls   []image.Rectangle
 	combos        []*widget.ListComboButton
@@ -173,8 +174,15 @@ func (h *host) persist(g *Game) {
 	}
 }
 func (h *host) changed(g *Game) { h.persist(g) }
+
+// face is the only place the native panels make a font: base is the size at the call site, and the
+// window's ladder and text step decide what is drawn.
+func (h *host) face(g *Game, base float64) text.Face {
+	return &text.GoTextFace{Source: g.Map.Font, Size: h.text.Size(base)}
+}
 func (h *host) layout(g *Game) {
 	h.workspace = ui.Workspace(g.width, g.height, g.State)
+	h.text = ui.NativeText(g.width, g.height, g.State)
 	r := h.workspace.Map
 	g.mapOrigin = mapview.Point{X: float64(r.Min.X), Y: float64(r.Min.Y)}
 	g.Camera.Resize(float64(max(1, r.Dx())), float64(max(1, r.Dy())))
@@ -460,13 +468,14 @@ func (h *host) build(g *Game) {
 	h.primaryAction = nil
 	h.trainDescription = nil
 	h.replaySlider = nil
+	h.text = ui.NativeText(g.width, g.height, g.State)
 	p := ui.PaletteFor(g.State)
 	if h.confirmNewGame {
 		h.buildNewGame(g)
 		return
 	}
 	t := func(k string) string { return ui.Text(g.State.Locale, k) }
-	face := func(n float64) *text.Face { var f text.Face = &text.GoTextFace{Source: g.Map.Font, Size: n}; return &f }
+	face := func(n float64) *text.Face { f := h.face(g, n); return &f }
 	root := widget.NewContainer(widget.ContainerOpts.Layout(placed{}))
 	h.workspace = ui.Workspace(g.width, g.height, g.State)
 	r := h.workspace.Inspector

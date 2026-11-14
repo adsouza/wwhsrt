@@ -93,7 +93,7 @@ func (h *host) replayControls(g *Game, label nativeLabel, button nativeButton, c
 		g.dirty = true
 		h.persist(g)
 	})
-	var face text.Face = &text.GoTextFace{Source: g.Map.Font, Size: 13}
+	face := h.face(g, 13)
 	h.trainDescription = widget.NewText(
 		widget.TextOpts.Text("", &face, p.Text),
 		widget.TextOpts.MaxWidth(float64(min(360, g.width)-60)),
@@ -103,7 +103,7 @@ func (h *host) replayControls(g *Game, label nativeLabel, button nativeButton, c
 }
 func (h *host) updateTrainDescription(g *Game) {
 	width := float64(min(360, g.width) - 60)
-	face := &text.GoTextFace{Source: g.Map.Font, Size: 13}
+	face := h.face(g, 13)
 	h.trainDescription.Label = ui.WrapText(
 		ui.ReplayClock(g.replayTime())+" · "+render.TrainDescription(g.Camera, g.Frame, g.State, g.replayTime()),
 		width,

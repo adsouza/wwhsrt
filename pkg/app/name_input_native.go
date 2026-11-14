@@ -4,6 +4,7 @@ package app
 
 import (
 	"image"
+	"math"
 	"runtime"
 	"strings"
 	"time"
@@ -29,6 +30,7 @@ type nameInput struct {
 	w                 *widget.Widget
 	field             *textinput.Field
 	face              text.Face
+	minHeight         int
 	palette           ui.Palette
 	focused, dragging bool
 	anchor, caret     int // UTF-8 byte offsets, always on grapheme boundaries
@@ -79,9 +81,20 @@ func newNameInput(field *textinput.Field, value string, face text.Face, palette 
 	return e
 }
 
-func (e *nameInput) GetWidget() *widget.Widget                          { return e.w }
-func (e *nameInput) Validate()                                          {}
-func (e *nameInput) PreferredSize() (int, int)                          { return 60, 44 }
+func (e *nameInput) GetWidget() *widget.Widget { return e.w }
+func (e *nameInput) Validate()                 {}
+func (e *nameInput) PreferredSize() (int, int) {
+	return 60, max(44, e.minHeight, e.line()+16)
+}
+
+// line is the height of one line of the field's font, which the caret and selection share.
+func (e *nameInput) line() int {
+	m := e.face.Metrics()
+	return int(math.Ceil(m.HAscent + m.HDescent))
+}
+
+// tall sets the least height the field may have, for a text step that scales the controls around it.
+func (e *nameInput) tall(px int) *nameInput                             { e.minHeight = px; return e }
 func (e *nameInput) SetLocation(r image.Rectangle)                      { e.w.SetLocation(r) }
 func (e *nameInput) TabOrder() int                                      { return 0 }
 func (e *nameInput) GetFocus(d widget.FocusDirection) widget.Focuser    { return e.focusMap[d] }
@@ -379,7 +392,7 @@ func (e *nameInput) updateInput() error {
 	}
 	r := e.textRect()
 	caret := r.Min.X + int(e.caretAdvance()-e.offset)
-	handled, err := e.field.HandleInputWithBounds(image.Rect(caret, r.Min.Y, caret+1, r.Min.Y+24))
+	handled, err := e.field.HandleInputWithBounds(image.Rect(caret, r.Min.Y, caret+1, r.Min.Y+e.line()))
 	if err != nil {
 		return err
 	}
@@ -482,7 +495,7 @@ func (e *nameInput) Render(screen *ebiten.Image) {
 	s := e.field.Text()
 	if e.focused && a != b && e.field.UncommittedTextLengthInBytes() == 0 {
 		left, right := text.Advance(s[:a], e.face), text.Advance(s[:b], e.face)
-		vector.FillRect(canvas, float32(x+left), float32(y), float32(right-left), 24, p.Action, false)
+		vector.FillRect(canvas, float32(x+left), float32(y), float32(right-left), float32(e.line()), p.Action, false)
 	}
 	op := &text.DrawOptions{}
 	op.GeoM.Translate(x, y)
@@ -498,13 +511,13 @@ func (e *nameInput) Render(screen *ebiten.Image) {
 		}
 	}
 	if e.focused && (time.Now().UnixMilli()/500)%2 == 0 {
-		vector.FillRect(canvas, float32(x+caret), float32(y), 1, 24, p.Text, false)
+		vector.FillRect(canvas, float32(x+caret), float32(y), 1, float32(e.line()), p.Text, false)
 	}
 	if e.field.UncommittedTextLengthInBytes() > 0 {
 		left := text.Advance(s[:a], e.face)
 		rendered := e.field.TextForRendering()
 		right := text.Advance(rendered[:a+e.field.UncommittedTextLengthInBytes()], e.face)
-		vector.FillRect(canvas, float32(x+left), float32(y+23), float32(right-left), 1, p.Accent, false)
+		vector.FillRect(canvas, float32(x+left), float32(y+float64(e.line())-1), float32(right-left), 1, p.Accent, false)
 	}
 }
 

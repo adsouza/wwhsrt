@@ -4,7 +4,6 @@ package app
 
 import (
 	"github.com/ebitenui/ebitenui/widget"
-	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"image"
 	"wwhsrt/pkg/gameapi"
 	"wwhsrt/pkg/ui"
@@ -150,8 +149,9 @@ func (h *host) buildReference(g *Game, label nativeLabel, button nativeButton, c
 	button(t("returnTask"), func() { h.helpEvent(g, ui.HelpEvent{Kind: "close"}) })
 	label(t("fieldNotes"), 22)
 	label(t("searchHelp"), 16)
-	var face text.Face = &text.GoTextFace{Source: g.Map.Font, Size: 16}
+	face := h.face(g, 16)
 	h.helpSearch = newNameInput(&h.helpSearchField, g.State.Help.Query, face, ui.PaletteFor(g.State))
+	h.helpSearch.tall(h.text.Px(44))
 	content.AddChild(h.helpSearch)
 	m := h.helpModel(g)
 	if len(m.Results) == 0 {

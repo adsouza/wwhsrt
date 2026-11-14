@@ -6,7 +6,6 @@ import (
 	"fmt"
 	uimage "github.com/ebitenui/ebitenui/image"
 	"github.com/ebitenui/ebitenui/widget"
-	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"strings"
 	"wwhsrt/pkg/gameapi"
 	"wwhsrt/pkg/ui"
@@ -227,9 +226,9 @@ func (h *host) buildServices(g *Game, t func(string) string, label nativeLabel, 
 		h.routeSearch = newNameInput(
 			&h.routeSearchField,
 			g.State.ServiceQuery,
-			&text.GoTextFace{Source: g.Map.Font, Size: 14},
+			h.face(g, 14),
 			ui.PaletteFor(g.State),
-		)
+		).tall(h.text.Px(44))
 		h.content.AddChild(h.routeSearch)
 		if !mapShown {
 			h.serviceRegionPicker(g, label)
