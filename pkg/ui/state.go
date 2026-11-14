@@ -165,6 +165,7 @@ type State struct {
 	LoanAmount         string         `json:"loan_amount"`
 	HideTerrain        bool           `json:"hide_terrain"`
 	Appearance         string         `json:"appearance"`
+	TextSize           int            `json:"text_size"`
 	Dark               bool           `json:"dark"`
 	FleetDetails       bool           `json:"fleet_details"`
 	ReplaceServiceID   string         `json:"replace_service_id"`
@@ -190,6 +191,7 @@ func NewGameState(s State, f gameapi.Frame) State {
 		Motion:      s.Motion,
 		HideTerrain: s.HideTerrain,
 		Appearance:  s.Appearance,
+		TextSize:    s.TextSize,
 		Dark:        s.Dark,
 		View:        "map",
 		DraftName:   f.Player.Name,
