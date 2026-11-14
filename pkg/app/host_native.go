@@ -56,20 +56,22 @@ func StartupError(e error) {
 }
 
 type host struct {
-	text          ui.TextScale // the ladder and step for this window; every font and chrome size asks it
-	nameCache     *nameInput
-	mapControls   []image.Rectangle
-	combos        []*widget.ListComboButton
-	comboChoices  [][]choice // what each dropdown in combos was given, in order
-	menuInput     bool
-	actions       map[string]*widget.Button
-	primaryAction *widget.Button
-	workspace     ui.WorkspaceLayout
-	content       *widget.Container
-	contentWidth  int
-	mapImage      *ebiten.Image
-	resizing      bool
-	idleAction    *widget.Button
+	text         ui.TextScale // the ladder and step for this window; every font and chrome size asks it
+	nameCache    *nameInput
+	mapControls  []image.Rectangle
+	combos       []*widget.ListComboButton
+	comboChoices [][]choice // what each dropdown in combos was given, in order
+	// comboListHeight is the tallest a dropdown's open list may be.
+	comboListHeight int
+	menuInput       bool
+	actions         map[string]*widget.Button
+	primaryAction   *widget.Button
+	workspace       ui.WorkspaceLayout
+	content         *widget.Container
+	contentWidth    int
+	mapImage        *ebiten.Image
+	resizing        bool
+	idleAction      *widget.Button
 
 	routeBoxCache    map[string]ui.Box
 	routeBoxRevision uint64

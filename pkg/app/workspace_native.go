@@ -136,12 +136,13 @@ func (h *host) selectChoice(g *Game, selected string, options []choice, changed 
 	labels := func(e any) string {
 		return ui.WrapText(e.(choice).Name, float64(width-24), func(v string) float64 { return text.Advance(v, face) })
 	}
+	h.comboListHeight = h.px(240)
 	consumed := false
 	var combo *widget.ListComboButton
 	combo = widget.NewListComboButton(
 		widget.ListComboButtonOpts.Entries(entries),
 		widget.ListComboButtonOpts.InitialEntry(chosen),
-		widget.ListComboButtonOpts.MaxContentHeight(240),
+		widget.ListComboButtonOpts.MaxContentHeight(h.comboListHeight),
 		widget.ListComboButtonOpts.WidgetOpts(
 			widget.WidgetOpts.MinSize(h.px(44), h.px(44)),
 			widget.WidgetOpts.LayoutData(widget.RowLayoutData{Stretch: true, MaxWidth: width}),

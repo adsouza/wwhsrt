@@ -8,6 +8,7 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"math"
 	"os"
 	"path/filepath"
 	"strings"
@@ -98,13 +99,19 @@ func TestNativeTextFieldGrowsWithItsFont(t *testing.T) {
 		if got := faceSize(t, field.face); got != want.Size {
 			t.Fatalf("chosen %d%%: the field's font is %v px, want %v", chosen, got, want.Size)
 		}
+		// Text is drawn inside the field's inset and clipped to it, so the room that matters is what the
+		// inset leaves, not the field's height.
 		metrics := want.Metrics()
-		line := int(metrics.HAscent + metrics.HDescent + 0.5)
-		if _, height := field.PreferredSize(); height < line+16 {
-			t.Fatalf("chosen %d%%: the field is %d px tall for a %d px line", chosen, height, line)
+		line := int(math.Ceil(metrics.HAscent + metrics.HDescent))
+		_, height := field.PreferredSize()
+		if room := height - 2*field.inset(); room < line {
+			t.Fatalf("chosen %d%%: %d px of room inside a %d px field clips a %d px line", chosen, room, height, line)
+		}
+		if want := ui.NativeText(3840, 2160, g.State).Px(10); field.inset() != want {
+			t.Fatalf("chosen %d%%: the field's inset is %d px, want %d", chosen, field.inset(), want)
 		}
 		boundary := len("晨曦国")
-		x := 10 + int(text.Advance(name[:boundary], want)+text.Advance(name[:boundary+3], want))/2 - 2
+		x := field.inset() + int(text.Advance(name[:boundary], want)+text.Advance(name[:boundary+3], want))/2 - 2
 		field.pointerDown(x, false, time.Now())
 		if field.caret != boundary {
 			t.Fatalf("chosen %d%%: a click just left of rune 4's middle puts the caret at %d, want %d (%s)",
@@ -204,6 +211,29 @@ func TestTextSizeStringsAreTranslated(t *testing.T) {
 		en, zh := ui.Text("en", key), ui.Text("zh-Hans", key)
 		if en == key || zh == key || en == zh {
 			t.Errorf("%s needs English and Chinese text, got %q and %q", key, en, zh)
+		}
+	}
+}
+
+// A dropdown's list is capped in height. The cap must grow with the text, or a larger step shows fewer
+// rows: 240 px holds about six rows at 100% and three at 200%.
+func TestNativeDropdownListShowsAsManyRowsAtEveryStep(t *testing.T) {
+	rows := func(chosen int) int {
+		g := chromeGame(t, 3840, 2160, ui.State{View: "map", TextSize: chosen})
+		if len(g.host.combos) == 0 {
+			t.Fatal("the map view has a city dropdown")
+		}
+		metrics := g.host.face(g, 14).Metrics()
+		entry := int(math.Ceil(metrics.HAscent+metrics.HDescent)) + 2*g.host.px(8)
+		return g.host.comboListHeight / entry
+	}
+	base := rows(0)
+	if base < 5 {
+		t.Fatal("the list holds at least five rows at 100%, got", base)
+	}
+	for _, chosen := range []int{125, 150, 200} {
+		if got := rows(chosen); got != base {
+			t.Errorf("at %d%% the list holds %d rows, but %d at 100%%", chosen, got, base)
 		}
 	}
 }

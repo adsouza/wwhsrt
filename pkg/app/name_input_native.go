@@ -83,8 +83,10 @@ func newNameInput(field *textinput.Field, value string, face text.Face, palette 
 
 func (e *nameInput) GetWidget() *widget.Widget { return e.w }
 func (e *nameInput) Validate()                 {}
+
+// PreferredSize leaves a full line of room inside the inset, because text is clipped to that area.
 func (e *nameInput) PreferredSize() (int, int) {
-	return 60, max(44, e.minHeight, e.line()+16)
+	return 60, max(44, e.minHeight, e.line()+2*e.inset())
 }
 
 // line is the height of one line of the field's font, which the caret and selection share.
