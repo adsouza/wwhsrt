@@ -212,7 +212,9 @@ func (h *host) selectChoice(g *Game, selected string, options []choice, changed 
 func (h *host) fixedButton(g *Game, title string, r image.Rectangle, run func()) *widget.Button {
 	p := ui.PaletteFor(g.State)
 	face := h.face(g, 13)
-	title = ui.WrapText(title, float64(max(20, r.Dx()-12)), func(v string) float64 { return text.Advance(v, face) })
+	// The label wraps to the button's inner width, so a two-line label fits a 44 px button.
+	pad := widget.Insets{Left: 4, Right: 4, Top: 3, Bottom: 3}
+	title = ui.WrapText(title, float64(max(20, r.Dx()-8)), func(v string) float64 { return text.Advance(v, face) })
 	return widget.NewButton(
 		widget.ButtonOpts.WidgetOpts(widget.WidgetOpts.MinSize(44, 44), widget.WidgetOpts.LayoutData(r)),
 		widget.ButtonOpts.Image(
@@ -224,7 +226,7 @@ func (h *host) fixedButton(g *Game, title string, r image.Rectangle, run func())
 			},
 		),
 		widget.ButtonOpts.Text(title, &face, &widget.ButtonTextColor{Idle: p.Text, Disabled: p.Muted}),
-		widget.ButtonOpts.TextPadding(widget.NewInsetsSimple(4)),
+		widget.ButtonOpts.TextPadding(&pad),
 		widget.ButtonOpts.ClickedHandler(func(*widget.ButtonClickedEventArgs) { run() }),
 	)
 }
@@ -348,39 +350,85 @@ func (h *host) addMapTools(g *Game, root *widget.Container) {
 	if !g.State.Expanded {
 		keys = append(keys, "showMap")
 	}
+	// Fewer columns give wider buttons and so fewer lines per label. Take the arrangement that covers
+	// the least of the map, preferring more columns when two cover the same.
 	available := l.Map.Dx() - 16
-	bw := min(104, max(44, available/len(keys)-4))
-	cols := max(1, min(len(keys), available/(bw+4)))
-	rows := (len(keys) + cols - 1) / cols
-	for i, key := range keys {
-		key := key
-		x := l.Map.Min.X + 8 + (i%cols)*(bw+4)
-		y := l.Map.Max.Y - 48*rows - 4 + (i/cols)*48
-		r := image.Rect(x, y, x+bw, y+44)
-		b := h.fixedButton(g, ui.Text(g.State.Locale, key), r, func() {
-			switch key {
-			case "fit":
-				if g.State.Region != "" && g.State.Region != "east-asia" {
-					g.Camera = mapview.RegionCamera(g.Camera.Width, g.Camera.Height, g.State.Region, g.State.Portrait)
-				} else {
-					g.Camera = g.Map.Camera(g.Camera.Width, g.Camera.Height, g.State.Portrait)
-				}
-			case "focusRoute":
-				g.focusSelected()
-			case "zoomIn":
-				g.Camera.ZoomAt(1.3, mapview.Point{X: g.Camera.Width / 2, Y: g.Camera.Height / 2})
-			case "zoomOut":
-				g.Camera.ZoomAt(1/1.3, mapview.Point{X: g.Camera.Width / 2, Y: g.Camera.Height / 2})
-			case "showMap":
-				g.State.Expanded = true
-				h.layout(g)
-			}
-			// Every map tool moves the view, which the Services route list follows.
-			g.dirty = true
-			h.persist(g)
-		})
-		h.mapControls = append(h.mapControls, r)
+	var buttons []*widget.Button
+	var rects []image.Rectangle
+	least := -1
+	for cols := len(keys); cols >= 1; cols-- {
+		bw := min(132, max(44, available/cols-4))
+		if cols > 1 && cols*(bw+4) > available+4 {
+			continue
+		}
+		bs, rs, covered := h.mapToolRows(g, keys, cols, bw)
+		if least < 0 || covered < least {
+			least, buttons, rects = covered, bs, rs
+		}
+	}
+	for i, b := range buttons {
+		h.mapControls = append(h.mapControls, rects[i])
 		root.AddChild(b)
+	}
+}
+
+// mapToolRows places the map tools in rows of cols buttons above the map's bottom edge. Each row is as
+// tall as its tallest label, and the result reports how much of the map's height the rows cover.
+func (h *host) mapToolRows(g *Game, keys []string, cols, bw int) ([]*widget.Button, []image.Rectangle, int) {
+	l := h.workspace
+	buttons := make([]*widget.Button, len(keys))
+	rects := make([]image.Rectangle, len(keys))
+	rows := (len(keys) + cols - 1) / cols
+	heights := make([]int, rows)
+	for i, key := range keys {
+		buttons[i] = h.fixedButton(g, ui.Text(g.State.Locale, key), image.Rect(0, 0, bw, 44), h.mapTool(g, key))
+		heights[i/cols] = max(heights[i/cols], 44, buttonHeight(buttons[i]))
+	}
+	covered := 4 * (rows - 1)
+	for _, height := range heights {
+		covered += height
+	}
+	y := l.Map.Max.Y - 8 - covered
+	for i := range keys {
+		if i > 0 && i%cols == 0 {
+			y += heights[i/cols-1] + 4
+		}
+		x := l.Map.Min.X + 8 + (i%cols)*(bw+4)
+		rects[i] = image.Rect(x, y, x+bw, y+heights[i/cols])
+		buttons[i].GetWidget().LayoutData = rects[i]
+	}
+	return buttons, rects, covered
+}
+
+// buttonHeight is the height a hand-placed button needs for its wrapped label.
+func buttonHeight(b *widget.Button) int {
+	b.Validate()
+	_, height := b.PreferredSize()
+	return height
+}
+
+func (h *host) mapTool(g *Game, key string) func() {
+	return func() {
+		switch key {
+		case "fit":
+			if g.State.Region != "" && g.State.Region != "east-asia" {
+				g.Camera = mapview.RegionCamera(g.Camera.Width, g.Camera.Height, g.State.Region, g.State.Portrait)
+			} else {
+				g.Camera = g.Map.Camera(g.Camera.Width, g.Camera.Height, g.State.Portrait)
+			}
+		case "focusRoute":
+			g.focusSelected()
+		case "zoomIn":
+			g.Camera.ZoomAt(1.3, mapview.Point{X: g.Camera.Width / 2, Y: g.Camera.Height / 2})
+		case "zoomOut":
+			g.Camera.ZoomAt(1/1.3, mapview.Point{X: g.Camera.Width / 2, Y: g.Camera.Height / 2})
+		case "showMap":
+			g.State.Expanded = true
+			h.layout(g)
+		}
+		// Every map tool moves the view, which the Services route list follows.
+		g.dirty = true
+		h.persist(g)
 	}
 }
 
