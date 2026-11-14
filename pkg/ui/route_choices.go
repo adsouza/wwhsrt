@@ -104,6 +104,8 @@ func RouteChoiceHint(locale string, c RouteChoices, mapShown bool) string {
 		return Text(locale, "routeChoicesNone")
 	case c.InView && c.Matching == 0:
 		return Text(locale, "routeChoicesNoneRegion")
+	case c.Matching == 0:
+		return Text(locale, "routeChoicesNoneSearch")
 	}
 	return ""
 }

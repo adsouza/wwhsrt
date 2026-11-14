@@ -7,6 +7,7 @@ import (
 	uimage "github.com/ebitenui/ebitenui/image"
 	"github.com/ebitenui/ebitenui/widget"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
+	"strings"
 	"wwhsrt/pkg/gameapi"
 	"wwhsrt/pkg/ui"
 )
@@ -207,6 +208,11 @@ func (h *host) buildPlanner(g *Game, t func(string) string, label nativeLabel, b
 func (h *host) buildServices(g *Game, t func(string) string, label nativeLabel, button nativeButton) {
 	label(t("services"), 20)
 	h.taskTabs(g, "services", []string{"plan", "fleet", "analysis"}, button)
+	// A query narrows the list whether or not its field is on screen, so the
+	// disclosure stays open while one is active.
+	if strings.TrimSpace(g.State.ServiceQuery) != "" && !ui.Disclosure(g.State, "route-search") {
+		ui.SetDisclosure(&g.State, "route-search", true)
+	}
 	choices, mapShown := h.serviceRouteChoices(g)
 	hint := ui.RouteChoiceHint(g.State.Locale, choices, mapShown)
 	capped := choices.Matching > ui.RouteChoiceLimit

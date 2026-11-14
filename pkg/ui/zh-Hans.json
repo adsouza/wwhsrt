@@ -540,5 +540,6 @@
   "routeChoicesNoneRegion": "该区域内没有完整线路。请选择其他区域或按名称搜索。",
   "routeChoicesMoreSearch": "显示 %d / %d 条匹配线路。添加搜索词可缩小范围。",
   "chooseRouteCapped": "线路 · 显示 %d / %d",
-  "narrowRoutes": "缩小线路范围"
+  "narrowRoutes": "缩小线路范围",
+  "routeChoicesNoneSearch": "没有匹配的线路。请修改或清除搜索。"
 }

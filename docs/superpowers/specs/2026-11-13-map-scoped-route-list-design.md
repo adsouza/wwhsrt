@@ -1,6 +1,8 @@
 # Map-scoped route list (native Services panel)
 
-Status: awaiting approval. Size: a small change.
+Status: approved 2026-11-13 and implemented. Section 8 and the hint wording were
+revised during implementation and review; those revisions await confirmation.
+Size: a small change.
 
 ## Intent
 
@@ -65,10 +67,13 @@ to narrow it: the list offers the routes you are looking at.
    span and capped at 25.
    - It is the same region setting as the Map panel's picker, so choosing a
      region here also moves the map for when it is shown again.
-   - Changed during implementation: the region's frame is the map's view of
-     the region at a standard window shape, not the bounding box of the
-     region's defining points. Japan and Korea are defined by two corner
-     points, and the projection narrows that box until it excludes Tokyo.
+   - Changed during implementation and review: the region's frame is what the
+     Map panel would show for that region in the current window, not the
+     bounding box of the region's defining points. Japan and Korea are defined
+     by two corner points, and the projection narrows that box until it
+     excludes Tokyo; a tall stand-in shape likewise clipped Seoul and Busan.
+     On a 390x844 phone the regions hold: China 2,407 routes, Africa 266,
+     Japan 224, North America East 92, Korea 18.
    - Changed during implementation: the ordinary phone plan must fit one
      screen (an existing requirement), so the Region dropdown and the
      "showing N of M" advice sit inside the route-search disclosure, titled
@@ -78,6 +83,10 @@ to narrow it: the list offers the routes you are looking at.
      fitting them, plus the current region.
    - A capped search or track tap gets its own wording ("add a word to the
      search"), since neither zooming nor changing region narrows it.
+   - Added in review: while a search query is active its disclosure stays
+     open, so a hidden query cannot silently switch map scoping off; a search
+     that matches nothing says so; and the list does not rebuild while a
+     dropdown is open.
 
 ## Approaches considered
 

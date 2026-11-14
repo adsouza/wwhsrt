@@ -359,3 +359,117 @@ func TestNativeMapToolButtonsRefreshTheRouteListAtOnce(t *testing.T) {
 		}
 	}
 }
+
+// Review fix: on a phone the region list must match what the Map panel shows
+// for that region, not a tall stand-in shape that clips cities near the edge.
+func TestRegionFrameMatchesTheMapPanelOnAPhone(t *testing.T) {
+	g := servicesGame(t, 390, 844, "korea")
+	panel := ui.Workspace(390, 844, ui.State{View: "map"}).Map
+	want := viewBox(mapview.RegionCamera(float64(panel.Dx()), float64(panel.Dy()), "korea", true))
+	frame := g.regionFrame("korea", true)
+	if panel.Empty() || frame != want {
+		t.Fatal("the frame must be the Map panel's view of the region", panel, frame, want)
+	}
+	boxes, found := g.host.boxesFor(g.Frame), false
+	for _, r := range g.Frame.Routes {
+		ends := string(r.Cities[0]) + ">" + string(r.Cities[len(r.Cities)-1])
+		if r.Open && (ends == "seoul>busan" || ends == "busan>seoul") {
+			found = true
+			if !frame.Contains(boxes[r.ID]) {
+				t.Fatal("Korea's frame must cover Seoul–Busan", r.ID, frame, boxes[r.ID])
+			}
+		}
+	}
+	listsSeoul := false
+	for _, r := range g.host.routeChoices.Routes {
+		for _, city := range r.Cities {
+			listsSeoul = listsSeoul || city == "seoul"
+		}
+	}
+	if !found || !listsSeoul {
+		t.Fatal("the Korea list must reach Seoul", found, listedRouteIDs(g))
+	}
+}
+
+// Review fix: an active search must stay visible, and an empty result must explain itself.
+func TestNativeActiveRouteSearchStaysVisibleAndExplainsNoMatch(t *testing.T) {
+	g := servicesGame(t, 1280, 850, "")
+	if g.host.routeSearch != nil {
+		t.Fatal("the search field starts behind its disclosure")
+	}
+	g.State.ServiceQuery = "shanghai"
+	g.host.build(g)
+	if g.host.routeSearch == nil || !ui.Disclosure(g.State, "route-search") || g.host.routeChoices.InView {
+		t.Fatal("a query that is narrowing the list must keep its search field on screen")
+	}
+	g.State.ServiceQuery = "no-such-place-zzz"
+	g.host.build(g)
+	if ids := listedRouteIDs(g); len(ids) != 1 || !panelShows(g, ui.Text("en", "routeChoicesNoneSearch")) {
+		t.Fatal("a search with no match must explain itself", ids)
+	}
+}
+
+// Review fix: assert on what the dropdowns are actually given.
+func TestNativeServiceDropdownsHoldOnlyTheChosenEntries(t *testing.T) {
+	g := servicesGame(t, 1280, 850, "")
+	if len(g.host.comboChoices) != 1 {
+		t.Fatal("desktop Services has one dropdown", len(g.host.comboChoices))
+	}
+	routes := g.host.comboChoices[0]
+	if len(routes) < 2 || len(routes) > ui.RouteChoiceLimit+1 {
+		t.Fatal("the route dropdown must stay short", len(routes))
+	}
+	for i, id := range listedRouteIDs(g) {
+		if routes[i].ID != id {
+			t.Fatal("the dropdown must list exactly the chosen routes in order", i, routes[i].ID, id)
+		}
+	}
+	g = servicesGame(t, 390, 844, "japan")
+	ui.SetDisclosure(&g.State, "route-search", true)
+	g.host.build(g)
+	offered := map[string]bool{}
+	for _, c := range g.host.comboChoices[0] {
+		offered[c.ID] = true
+	}
+	if !offered["japan"] || !offered["china"] || offered["south-asia"] || offered["south-america"] {
+		t.Fatal("the region dropdown offers the current region and regions with routes only", offered)
+	}
+}
+
+// Review fix: the game loop, not just the helper, must rebuild after the view settles.
+func TestNativeUpdateRebuildsTheRouteListAfterTheViewSettles(t *testing.T) {
+	g := servicesGame(t, 1280, 850, "")
+	g.host.update(g) // a new host's first update adopts the system appearance and rebuilds
+	g.Camera.ZoomAt(4, mapview.Point{X: g.Camera.Width / 2, Y: g.Camera.Height / 2})
+	for i := 0; i < routeViewSettleTicks-1; i++ {
+		g.host.update(g)
+	}
+	if g.host.routeView == viewBox(g.Camera) {
+		t.Fatal("the list rebuilt before the view settled")
+	}
+	g.host.update(g)
+	if g.host.routeView != viewBox(g.Camera) || g.dirty {
+		t.Fatal("the settled view must rebuild the list once")
+	}
+}
+
+// Review fix: an open dropdown must not be rebuilt out from under the player.
+func TestNativeRouteListWaitsWhileADropdownIsOpen(t *testing.T) {
+	g := servicesGame(t, 1280, 850, "")
+	g.Camera.ZoomAt(2, mapview.Point{X: g.Camera.Width / 2, Y: g.Camera.Height / 2})
+	g.host.menuInput = true
+	for i := 0; i < 60; i++ {
+		if g.host.routeListStale(g) {
+			t.Fatal("never refresh while a dropdown is open")
+		}
+	}
+	g.host.menuInput = false
+	for i := 1; i < routeViewSettleTicks; i++ {
+		if g.host.routeListStale(g) {
+			t.Fatal("the wait restarts when the dropdown closes", i)
+		}
+	}
+	if !g.host.routeListStale(g) {
+		t.Fatal("the list must refresh after the dropdown closes")
+	}
+}

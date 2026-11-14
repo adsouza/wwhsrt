@@ -207,6 +207,7 @@ func (h *host) selectChoice(g *Game, selected string, options []choice, changed 
 	)
 	h.content.AddChild(combo)
 	h.combos = append(h.combos, combo)
+	h.comboChoices = append(h.comboChoices, options)
 }
 func (h *host) fixedButton(g *Game, title string, r image.Rectangle, run func()) *widget.Button {
 	p := ui.PaletteFor(g.State)

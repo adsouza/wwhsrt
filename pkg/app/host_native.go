@@ -59,6 +59,7 @@ type host struct {
 	nameCache     *nameInput
 	mapControls   []image.Rectangle
 	combos        []*widget.ListComboButton
+	comboChoices  [][]choice // what each dropdown in combos was given, in order
 	menuInput     bool
 	actions       map[string]*widget.Button
 	primaryAction *widget.Button
@@ -455,6 +456,7 @@ func (h *host) build(g *Game) {
 	h.actions = map[string]*widget.Button{}
 	h.mapControls = nil
 	h.combos = nil
+	h.comboChoices = nil
 	h.primaryAction = nil
 	h.trainDescription = nil
 	h.replaySlider = nil

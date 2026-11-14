@@ -70,14 +70,16 @@ func viewBox(c mapview.Camera) ui.Box {
 	return growBox(box, c.World(mapview.Point{X: c.Width, Y: c.Height}), false)
 }
 
-// regionFrame is the area the map shows when it frames a region, at a
-// standard window shape so the hidden map's real size does not matter. A
-// region is defined by a few points, and the projection can make their own
-// bounding box far narrower than the region looks on screen.
+// regionFrame is what the Map panel would show for a region in this window.
+// A region is defined by a few points, and both the projection and the map's
+// shape decide how much around them is visible, so the frame is taken from a
+// camera of the Map panel's own size rather than from the points themselves.
 func (g *Game) regionFrame(id string, portrait bool) ui.Box {
-	width, height := 1200.0, 800.0
-	if portrait {
-		width, height = 600, 900
+	panel := ui.Workspace(g.width, g.height, ui.State{View: "map", CommandDock: g.State.CommandDock}).Map
+	width, height := float64(panel.Dx()), float64(panel.Dy())
+	if width < 100 || height < 100 {
+		// No usable Map panel in this window: fall back to a phone's.
+		width, height = 390, 281
 	}
 	if id != "" && id != "east-asia" {
 		return viewBox(mapview.RegionCamera(width, height, id, portrait))
@@ -162,8 +164,9 @@ const routeViewSettleTicks = 12
 // different map view and the camera has since held still. Rebuilding on every
 // frame of a drag or wheel spin would move the list under the pointer.
 func (h *host) routeListStale(g *Game) bool {
+	// An open dropdown would be rebuilt out from under the player.
 	if g.State.View != "services" || g.State.Help.Open || h.workspace.Map.Empty() || !h.routeViewUsed ||
-		g.drag || g.touching || g.pinch > 0 {
+		g.drag || g.touching || g.pinch > 0 || h.menuInput {
 		h.routeStableTicks = 0
 		return false
 	}

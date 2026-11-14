@@ -536,5 +536,6 @@
   "routeChoicesNoneRegion": "No route fits in this region. Choose another region or search by name.",
   "routeChoicesMoreSearch": "Showing %d of %d matching routes. Add a word to the search to narrow the list.",
   "chooseRouteCapped": "Route · showing %d of %d",
-  "narrowRoutes": "Narrow the route list"
+  "narrowRoutes": "Narrow the route list",
+  "routeChoicesNoneSearch": "No route matches. Change or clear the search."
 }

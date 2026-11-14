@@ -148,7 +148,14 @@ func TestRouteChoiceHint(t *testing.T) {
 			t.Fatal(got)
 		}
 	}
-	for _, quiet := range []RouteChoices{{Matching: 3, InView: true}, {Matching: 25}, {Matching: 0}} {
+	// A search or track tap that matches nothing must say so on either layout.
+	for _, mapShown := range []bool{true, false} {
+		got := RouteChoiceHint("en", RouteChoices{Matching: 0}, mapShown)
+		if got != "No route matches. Change or clear the search." {
+			t.Fatal(got)
+		}
+	}
+	for _, quiet := range []RouteChoices{{Matching: 3, InView: true}, {Matching: 25}, {Matching: 1}} {
 		if got := RouteChoiceHint("en", quiet, true); got != "" {
 			t.Fatal("no hint expected", quiet, got)
 		}
@@ -156,7 +163,7 @@ func TestRouteChoiceHint(t *testing.T) {
 	seen := map[string]bool{}
 	for _, key := range []string{
 		"routeChoicesMore", "routeChoicesNone", "routeChoicesMoreRegion", "routeChoicesNoneRegion",
-		"routeChoicesMoreSearch",
+		"routeChoicesMoreSearch", "routeChoicesNoneSearch",
 	} {
 		zh := Text("zh-Hans", key)
 		if zh == key || zh == Text("en", key) || seen[zh] {
