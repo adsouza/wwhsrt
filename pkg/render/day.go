@@ -139,7 +139,8 @@ func (m *Map) drawDay(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s ui
 		)
 	}
 	if s.Watching {
-		vector.FillRect(dst, float32(c.Width-78), 12, 66, 28, p.Surface, true)
-		m.Label(dst, ui.ReplayClock(minute), c.Width-72, 16, 16, p.Text)
+		box := labelRect{c.Width - m.by(16, 78), m.by(16, 12), m.by(16, 66), m.by(16, 28)}
+		vector.FillRect(dst, float32(box.x), float32(box.y), float32(box.w), float32(box.h), p.Surface, true)
+		m.Label(dst, ui.ReplayClock(minute), c.Width-m.by(16, 72), m.by(16, 16), 16, p.Text)
 	}
 }

@@ -177,6 +177,14 @@ func (h *host) changed(g *Game) { h.persist(g) }
 
 // face is the only place the native panels make a font: base is the size at the call site, and the
 // window's ladder and text step decide what is drawn.
+// setText works out the window's text scale and hands it to the map, whose labels follow the panels'.
+func (h *host) setText(g *Game) {
+	h.text = ui.NativeText(g.width, g.height, g.State)
+	if g.Map != nil {
+		g.Map.Text = h.text
+	}
+}
+
 // px scales a layout length with the text step, so chrome keeps its proportions around larger text.
 func (h *host) px(n int) int { return h.text.Px(n) }
 
@@ -188,7 +196,7 @@ func (h *host) face(g *Game, base float64) text.Face {
 }
 func (h *host) layout(g *Game) {
 	h.workspace = ui.Workspace(g.width, g.height, g.State)
-	h.text = ui.NativeText(g.width, g.height, g.State)
+	h.setText(g)
 	r := h.workspace.Map
 	g.mapOrigin = mapview.Point{X: float64(r.Min.X), Y: float64(r.Min.Y)}
 	g.Camera.Resize(float64(max(1, r.Dx())), float64(max(1, r.Dy())))
@@ -474,7 +482,7 @@ func (h *host) build(g *Game) {
 	h.primaryAction = nil
 	h.trainDescription = nil
 	h.replaySlider = nil
-	h.text = ui.NativeText(g.width, g.height, g.State)
+	h.setText(g)
 	p := ui.PaletteFor(g.State)
 	if h.confirmNewGame {
 		h.buildNewGame(g)

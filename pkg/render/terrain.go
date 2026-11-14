@@ -160,16 +160,48 @@ func (t *relief) draw(dst *ebiten.Image, c mapview.Camera, s ui.State) {
 		}
 	}
 }
+
+// terrainLegendLayout places the terrain key: a title, five swatches and three captions under them.
+type terrainLegendLayout struct {
+	box                      labelRect // y is chosen by the caller
+	swatchY, swatchW, labelY float64
+	labels                   [3]struct {
+		x    float64 // from the box's left edge
+		text string
+	}
+}
+
+func (m *Map) terrainLegend(c mapview.Camera, locale string) terrainLegendLayout {
+	l := terrainLegendLayout{swatchY: m.by(11, 24), swatchW: m.by(9, 24)}
+	l.labelY = l.swatchY + m.by(9, 9)
+	left, width := m.by(9, 8), m.by(9, 245)
+	l.labels[0].x, l.labels[0].text = left, "0 m"
+	l.labels[1].x, l.labels[1].text = m.by(9, 93), "2000+ m"
+	l.labels[2].x, l.labels[2].text = m.by(9, 138), "Mapzen / USGS"
+	if m.Text != (ui.TextScale{}) {
+		// The browser keeps its fixed positions; scaled captions are placed by their measured widths.
+		face := m.face(9)
+		low, high := text.Advance(l.labels[0].text, face), text.Advance(l.labels[1].text, face)
+		l.labels[1].x = math.Max(left+low+m.by(9, 10), left+5*l.swatchW-high)
+		l.labels[2].x = l.labels[1].x + high + m.by(9, 10)
+		title := m.by(11, 8) + text.Advance(ui.Text(locale, "terrainLegend"), m.face(11))
+		width = math.Max(width, math.Max(title, l.labels[2].x+text.Advance(l.labels[2].text, face))+left)
+	}
+	l.box = labelRect{m.by(11, 12), 0, math.Min(width, c.Width-24), l.labelY + m.by(9, 19)}
+	return l
+}
+
 func (t *relief) labels(m *Map, dst *ebiten.Image, c mapview.Camera, s ui.State, occupied []labelRect) {
 	pal := ui.PaletteFor(s)
 	dark := ui.IsDark(s)
 	locale := s.Locale
 	// City labels and endpoint picking always have priority over terrain text.
-	legend := labelRect{12, 56, math.Min(245, c.Width-24), 52}
+	layout := m.terrainLegend(c, locale)
+	legend, top := layout.box, m.legendTop()
 	legendVisible := false
-	for _, y := range []float64{56, c.Height - 225, 116} {
+	for _, y := range []float64{top, c.Height - m.by(11, 173) - legend.h, top + m.by(11, 60)} {
 		legend.y = y
-		if y < 56 || y+legend.h > c.Height-150 {
+		if y < top || y+legend.h > c.Height-m.by(11, 150) {
 			continue
 		}
 		collision := false
@@ -192,14 +224,14 @@ func (t *relief) labels(m *Map, dst *ebiten.Image, c mapview.Camera, s ui.State,
 				continue
 			}
 			value := ui.Text(locale, f.Key)
-			width := text.Advance(value, &text.GoTextFace{Source: m.Font, Size: 12})
+			width := text.Advance(value, m.face(12))
 			for _, off := range []mapview.Point{
-				{X: 10, Y: -8},
-				{X: -width - 10, Y: -8},
-				{X: -width / 2, Y: 10},
-				{X: -width / 2, Y: -25},
+				{X: m.by(12, 10), Y: m.by(12, -8)},
+				{X: -width - m.by(12, 10), Y: m.by(12, -8)},
+				{X: -width / 2, Y: m.by(12, 10)},
+				{X: -width / 2, Y: m.by(12, -25)},
 			} {
-				r := labelRect{p.X + off.X, p.Y + off.Y, width, 18}
+				r := labelRect{p.X + off.X, p.Y + off.Y, width, m.by(12, 18)}
 				if r.x < 4 || r.x+r.w > c.Width-4 || r.y < 4 {
 					continue
 				}
@@ -214,7 +246,7 @@ func (t *relief) labels(m *Map, dst *ebiten.Image, c mapview.Camera, s ui.State,
 					continue
 				}
 				occupied = append(occupied, r)
-				vector.FillRect(dst, float32(r.x-2), float32(r.y-1), float32(r.w+4), 18, pal.TerrainFill, true)
+				vector.FillRect(dst, float32(r.x-2), float32(r.y-1), float32(r.w+4), float32(r.h), pal.TerrainFill, true)
 				m.Label(dst, value, r.x, r.y, 12, pal.TerrainText)
 				break
 			}
@@ -232,7 +264,7 @@ func (t *relief) labels(m *Map, dst *ebiten.Image, c mapview.Camera, s ui.State,
 		pal.TerrainFill,
 		true,
 	)
-	m.Label(dst, ui.Text(locale, "terrainLegend"), legend.x+8, legend.y+4, 11, pal.Text)
+	m.Label(dst, ui.Text(locale, "terrainLegend"), legend.x+m.by(11, 8), legend.y+m.by(11, 4), 11, pal.Text)
 	for i, col := range []color.NRGBA{
 		{231, 244, 204, 255},
 		{199, 211, 145, 255},
@@ -242,17 +274,17 @@ func (t *relief) labels(m *Map, dst *ebiten.Image, c mapview.Camera, s ui.State,
 	} {
 		vector.FillRect(
 			dst,
-			float32(legend.x+8)+float32(i)*24,
-			float32(legend.y+24),
-			24,
-			7,
+			float32(legend.x+m.by(9, 8))+float32(i)*float32(layout.swatchW),
+			float32(legend.y+layout.swatchY),
+			float32(layout.swatchW),
+			float32(m.by(9, 7)),
 			terrainSwatch(col, dark),
 			true,
 		)
 	}
-	m.Label(dst, "0 m", legend.x+8, legend.y+33, 9, pal.Text)
-	m.Label(dst, "2000+ m", legend.x+93, legend.y+33, 9, pal.Text)
-	m.Label(dst, "Mapzen / USGS", legend.x+138, legend.y+33, 9, pal.Text)
+	for _, label := range layout.labels {
+		m.Label(dst, label.text, legend.x+label.x, legend.y+layout.labelY, 9, pal.Text)
+	}
 }
 
 func terrainSwatch(c color.NRGBA, dark bool) color.NRGBA {

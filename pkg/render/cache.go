@@ -12,6 +12,7 @@ type sceneKey struct {
 	Checkpoint, Locale, View, Region, SourceStation, Service, Alignment string
 	Selected, From, To                                                  gameapi.CityID
 	Dark, HideTerrain, Portrait                                         bool
+	Text                                                                ui.TextScale
 }
 
 func mapSceneKey(c mapview.Camera, f gameapi.Frame, s ui.State) sceneKey {
@@ -33,10 +34,17 @@ func mapSceneKey(c mapview.Camera, f gameapi.Frame, s ui.State) sceneKey {
 	}
 }
 
+// sceneKeyFor adds what the map itself holds: the text scale decides every label's size and position.
+func (m *Map) sceneKeyFor(c mapview.Camera, f gameapi.Frame, s ui.State) sceneKey {
+	key := mapSceneKey(c, f, s)
+	key.Text = m.Text
+	return key
+}
+
 // The scene is immutable between state/camera changes. Representative trains
 // are drawn separately so animation never rerasterizes thousands of stations.
 func (m *Map) Draw(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s ui.State, minute float64) {
-	key := mapSceneKey(c, f, s)
+	key := m.sceneKeyFor(c, f, s)
 	if m.scene == nil || m.sceneKey != key || f.Checkpoint == "" {
 		if m.scene != nil {
 			m.scene.Deallocate()

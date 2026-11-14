@@ -18,7 +18,10 @@ import (
 )
 
 type Map struct {
-	Font     *text.GoTextFaceSource
+	Font *text.GoTextFaceSource
+	// Text is the host's text scale. Its zero value draws the sizes written in this package, which is
+	// what the browser client uses.
+	Text     ui.TextScale
 	rings    [][][2]float64
 	anchors  map[string][][2]float64
 	terrain  *relief
@@ -68,11 +71,63 @@ func (m *Map) Camera(w, h float64, portrait bool) mapview.Camera {
 	}
 	return mapview.Fit(w, h, points)
 }
+
+// face is the only place the map makes a font, so drawn and measured sizes cannot differ.
+func (m *Map) face(base float64) *text.GoTextFace {
+	return &text.GoTextFace{Source: m.Font, Size: m.Text.Size(base)}
+}
+
+// by scales a length written beside text of size base by however much that text has grown.
+func (m *Map) by(base, v float64) float64 { return v * (m.Text.Size(base) / base) }
+
 func (m *Map) Label(dst *ebiten.Image, s string, x, y, size float64, c color.Color) {
 	op := &text.DrawOptions{}
 	op.GeoM.Translate(x, y)
 	op.ColorScale.ScaleWithColor(c)
-	text.Draw(dst, s, &text.GoTextFace{Source: m.Font, Size: size}, op)
+	text.Draw(dst, s, m.face(size), op)
+}
+
+// legendRow is one row of the legend under the map's title: the prospect key or an idle-line key.
+type legendRow struct {
+	key, label  string
+	size, textX float64
+	box         labelRect
+}
+
+// legendTop is where the rows under the title and the station legend begin.
+func (m *Map) legendTop() float64 { return m.by(20, 18) + m.by(20, 22) + m.by(11, 16) }
+
+func (m *Map) legendRows(c mapview.Camera, s ui.State, idleLine, idleFleet bool) []legendRow {
+	rows := []legendRow{}
+	y := m.legendTop()
+	if s.View == "map" || s.View == "build" {
+		label := ui.Text(s.Locale, "prospectLegend")
+		width := text.Advance(label, m.face(11)) + m.by(11, 48)
+		box := labelRect{m.by(11, 12), y, math.Min(width, c.Width-24), m.by(11, 22)}
+		rows = append(rows, legendRow{key: "prospect", label: label, size: 11, textX: m.by(11, 54), box: box})
+		y += box.h
+	}
+	first, width := len(rows), m.by(12, 285)
+	for _, legend := range []struct {
+		show bool
+		key  string
+	}{{idleLine, "idleHighlightLegend"}, {idleFleet, "idleFleetHighlightLegend"}} {
+		if !legend.show {
+			continue
+		}
+		label := ui.Text(s.Locale, legend.key)
+		if m.Text != (ui.TextScale{}) {
+			// The browser keeps its fixed 285 px box; a scaled box holds its text.
+			width = math.Max(width, m.by(12, 52)+text.Advance(label, m.face(12))+m.by(12, 8))
+		}
+		box := labelRect{m.by(12, 12), y, 0, m.by(12, 24)}
+		rows = append(rows, legendRow{key: legend.key, label: label, size: 12, textX: m.by(12, 52), box: box})
+		y += box.h
+	}
+	for i := first; i < len(rows); i++ {
+		rows[i].box.w = math.Min(width, c.Width-24)
+	}
+	return rows
 }
 func CityPoint(c mapview.Camera, city gameapi.City) mapview.Point {
 	lat, lon := city.Lat, city.Lon
@@ -213,19 +268,19 @@ func (m *Map) drawScene(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s 
 	}
 	sort.SliceStable(cities, func(i, j int) bool { return rank(cities[i].ID) < rank(cities[j].ID) })
 	occupied := []labelRect{}
-	if s.View == "map" || s.View == "build" {
-		width := text.Advance(ui.Text(s.Locale, "prospectLegend"), &text.GoTextFace{Source: m.Font, Size: 11}) + 48
-		occupied = append(occupied, labelRect{12, 56, math.Min(width, c.Width-24), 22})
+	// City labels keep clear of the legend. Both blocks are reserved from the top, as they always were.
+	legend := m.legendRows(c, s, hasIdleLine, hasIdleFleet)
+	idleRows, idleWidth := 0, math.Min(m.by(12, 285), c.Width-24)
+	for _, row := range legend {
+		if row.key == "prospect" {
+			occupied = append(occupied, labelRect{row.box.x, m.legendTop(), row.box.w, row.box.h})
+		} else {
+			idleRows++
+			idleWidth = row.box.w
+		}
 	}
 	if len(idle) > 0 {
-		rows := 0
-		if hasIdleLine {
-			rows++
-		}
-		if hasIdleFleet {
-			rows++
-		}
-		occupied = append(occupied, labelRect{12, 56, math.Min(285, c.Width-24), float64(rows * 24)})
+		occupied = append(occupied, labelRect{m.by(12, 12), m.legendTop(), idleWidth, float64(idleRows) * m.by(12, 24)})
 	}
 	for _, city := range cities {
 		p := CityPoint(c, city)
@@ -261,23 +316,24 @@ func (m *Map) drawScene(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s 
 				tag = "B"
 			}
 			if tag != "" {
-				vector.FillCircle(dst, float32(p.X), float32(p.Y), 12, pal.Accent, true)
+				vector.FillCircle(dst, float32(p.X), float32(p.Y), float32(m.by(13, 12)), pal.Accent, true)
 				tagInk := pal.OnAction
 				if ui.IsDark(s) {
 					tagInk = pal.Outline
 				}
-				m.Label(dst, tag, p.X-4, p.Y-9, 13, tagInk)
+				m.Label(dst, tag, p.X-m.by(13, 4), p.Y-m.by(13, 9), 13, tagInk)
 			}
 		}
 		label := ui.Text(s.Locale, string(city.ID))
-		width := text.Advance(label, &text.GoTextFace{Source: m.Font, Size: 15})
+		width := text.Advance(label, m.face(15))
 		for _, offset := range []mapview.Point{
-			{X: 12, Y: -10},
-			{X: -width - 12, Y: -10},
-			{X: -width / 2, Y: 14},
-			{X: -width / 2, Y: -30},
+			{X: m.by(15, 12), Y: m.by(15, -10)},
+			{X: -width - m.by(15, 12), Y: m.by(15, -10)},
+			{X: -width / 2, Y: m.by(15, 14)},
+			{X: -width / 2, Y: m.by(15, -30)},
 		} {
-			r := labelRect{math.Max(4, math.Min(c.Width-width-4, p.X+offset.X)), math.Max(4, p.Y+offset.Y), width, 22}
+			x, y := math.Max(4, math.Min(c.Width-width-4, p.X+offset.X)), math.Max(4, p.Y+offset.Y)
+			r := labelRect{x, y, width, m.by(15, 22)}
 			collision := false
 			for _, o := range occupied {
 				if r.x < o.x+o.w+4 && r.x+r.w+4 > o.x && r.y < o.y+o.h+4 && r.y+r.h+4 > o.y {
@@ -306,38 +362,32 @@ func (m *Map) drawScene(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s 
 			}
 		}
 	}
-	m.Label(dst, title, 20, 18, 20, pal.Text)
+	m.Label(dst, title, m.by(20, 20), m.by(20, 18), 20, pal.Text)
 	if stop := m.PublicStop(s.SourceStation); stop != nil {
 		p := c.Screen(mapview.Project(stop.Lat, stop.Lon))
 		vector.StrokeCircle(dst, float32(p.X), float32(p.Y), 9, 2, pal.Accent, true)
-		m.Label(dst, stop.Name, 12, c.Height-28, 14, pal.Text)
+		m.Label(dst, stop.Name, m.by(14, 12), c.Height-m.by(14, 28), 14, pal.Text)
 	}
-	m.Label(dst, ui.Text(s.Locale, "stationLegend"), 20, 40, 11, pal.Muted)
-	y := float32(56)
-	if s.View == "map" || s.View == "build" {
-		vector.FillCircle(dst, 24, y+9, 2.5, pal.Action, true)
-		vector.FillCircle(dst, 34, y+9, 2.5, pal.Action, true)
-		vector.FillCircle(dst, 44, y+9, 2.5, pal.Action, true)
-		m.Label(dst, ui.Text(s.Locale, "prospectLegend"), 54, float64(y), 11, pal.Text)
-		y += 22
-	}
-	for _, legend := range []struct {
-		show, fleet bool
-		key         string
-	}{{hasIdleLine, false, "idleHighlightLegend"}, {hasIdleFleet, true, "idleFleetHighlightLegend"}} {
-		if !legend.show {
+	m.Label(dst, ui.Text(s.Locale, "stationLegend"), m.by(11, 20), m.by(20, 18)+m.by(20, 22), 11, pal.Muted)
+	for _, row := range legend {
+		y := float32(row.box.y)
+		if row.key == "prospect" {
+			for _, x := range []float64{24, 34, 44} {
+				vector.FillCircle(dst, float32(m.by(11, x)), y+float32(m.by(11, 9)), float32(m.by(11, 2.5)), pal.Action, true)
+			}
+			m.Label(dst, row.label, row.textX, row.box.y, row.size, pal.Text)
 			continue
 		}
-		vector.FillRect(dst, 12, y, float32(math.Min(285, c.Width-24)), 24, pal.Warning, true)
-		if legend.fleet {
-			for x := float32(20); x < 43; x += 10 {
-				vector.StrokeLine(dst, x, y+12, x+5, y+12, 5, pal.WarningText, true)
+		vector.FillRect(dst, float32(row.box.x), y, float32(row.box.w), float32(row.box.h), pal.Warning, true)
+		mid, thick := y+float32(m.by(12, 12)), float32(m.by(12, 5))
+		if row.key == "idleFleetHighlightLegend" {
+			for x := 20.0; x < 43; x += 10 {
+				vector.StrokeLine(dst, float32(m.by(12, x)), mid, float32(m.by(12, x+5)), mid, thick, pal.WarningText, true)
 			}
 		} else {
-			vector.StrokeLine(dst, 20, y+12, 43, y+12, 5, pal.WarningText, true)
+			vector.StrokeLine(dst, float32(m.by(12, 20)), mid, float32(m.by(12, 43)), mid, thick, pal.WarningText, true)
 		}
-		m.Label(dst, ui.Text(s.Locale, legend.key), 52, float64(y+4), 12, pal.WarningText)
-		y += 24
+		m.Label(dst, row.label, row.textX, row.box.y+m.by(12, 4), row.size, pal.WarningText)
 	}
 
 }

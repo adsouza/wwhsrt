@@ -19,8 +19,7 @@ import (
 
 // Every font is made in one place per package so that no call site can skip the ladder or the step.
 func TestNativeFontsComeFromTheScale(t *testing.T) {
-	// TODO(task 6): add "../render", whose single helper is (*Map).face.
-	for _, dir := range []string{"."} {
+	for _, dir := range []string{".", "../render"} {
 		files, err := filepath.Glob(filepath.Join(dir, "*.go"))
 		if err != nil {
 			t.Fatal(err)
