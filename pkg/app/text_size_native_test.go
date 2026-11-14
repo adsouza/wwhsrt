@@ -173,7 +173,8 @@ func TestNativeTextSizeExplainsAFallback(t *testing.T) {
 
 func TestNativeTextSizeSurvivesRestartAndBadValues(t *testing.T) {
 	world := newChromeWorld(t)
-	for stored, want := range map[int]int{150: 150, 200: 200, -5: 100, 1: 100, 137: 100, 100000: 100, 0: 100} {
+	// A file from before the setting existed has no key; it loads unset, which means 100%.
+	for stored, want := range map[int]int{150: 150, 200: 200, -5: 100, 1: 100, 137: 100, 100000: 100, 0: 0} {
 		state := ui.NewGameState(ui.State{Locale: "en", TextSize: stored}, world.frame)
 		raw, _ := json.Marshal(nativePreferences{State: state})
 		if stored == 0 {
@@ -187,7 +188,7 @@ func TestNativeTextSizeSurvivesRestartAndBadValues(t *testing.T) {
 		}
 		g := &Game{Port: world.port, Frame: world.frame}
 		g.host.init(g)
-		if g.State.TextSize != want {
+		if g.State.TextSize != want || ui.TextStep(g.State.TextSize) != max(want, 100) {
 			t.Fatalf("stored %d must load as %d, got %d", stored, want, g.State.TextSize)
 		}
 		g.host.persist(g)

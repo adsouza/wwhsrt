@@ -138,7 +138,10 @@ func (h *host) init(g *Game) {
 	}
 	ui.NormalizeHelp(&g.State)
 	g.State.Locale = ui.Locale(g.State.Locale)
-	g.State.TextSize = ui.TextStep(g.State.TextSize)
+	if g.State.TextSize != 0 {
+		// Unset stays unset, so preference files written before the setting existed load unchanged.
+		g.State.TextSize = ui.TextStep(g.State.TextSize)
+	}
 	g.State.ReplayMinute = max(0, min(1439, g.State.ReplayMinute))
 	if g.State.FromCity == "" {
 		g.State.FromCity = "tsuruga"
