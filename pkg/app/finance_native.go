@@ -42,7 +42,7 @@ func (h *host) financeForm(
 	}
 	input := widget.NewTextInput(
 		widget.TextInputOpts.WidgetOpts(
-			widget.WidgetOpts.MinSize(60, 44),
+			widget.WidgetOpts.MinSize(h.px(60), h.px(44)),
 			widget.WidgetOpts.LayoutData(widget.RowLayoutData{Stretch: true}),
 		),
 		widget.TextInputOpts.Image(
@@ -53,7 +53,7 @@ func (h *host) financeForm(
 		),
 		widget.TextInputOpts.Face(&face),
 		widget.TextInputOpts.Color(&widget.TextInputColor{Idle: p.Text, Disabled: p.Muted, Caret: p.Accent}),
-		widget.TextInputOpts.Padding(widget.NewInsetsSimple(10)),
+		widget.TextInputOpts.Padding(widget.NewInsetsSimple(h.px(10))),
 		widget.TextInputOpts.ChangedHandler(
 			func(a *widget.TextInputChangedEventArgs) { g.State.LoanAmount = a.InputText; h.persist(g); update() },
 		),

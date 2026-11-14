@@ -177,6 +177,12 @@ func (h *host) changed(g *Game) { h.persist(g) }
 
 // face is the only place the native panels make a font: base is the size at the call site, and the
 // window's ladder and text step decide what is drawn.
+// px scales a layout length with the text step, so chrome keeps its proportions around larger text.
+func (h *host) px(n int) int { return h.text.Px(n) }
+
+// logicalWidth is the window's width in 100% units: the width whose layout this window is showing.
+func (h *host) logicalWidth(g *Game) int { return g.width * 100 / max(100, h.workspace.Step) }
+
 func (h *host) face(g *Game, base float64) text.Face {
 	return &text.GoTextFace{Source: g.Map.Font, Size: h.text.Size(base)}
 }
@@ -486,16 +492,16 @@ func (h *host) build(g *Game) {
 		w = g.width
 		height = g.height
 	}
-	contentWidth := max(60, w-20)
-	spacing := 8
+	contentWidth := max(h.px(60), w-h.px(20))
+	spacing := h.px(8)
 	if g.State.View == "services" && ui.ServicePane(g.State) == "plan" {
-		spacing = 6
+		spacing = h.px(6)
 	}
 	content := widget.NewContainer(
 		widget.ContainerOpts.Layout(
 			widget.NewRowLayout(
 				widget.RowLayoutOpts.Direction(widget.DirectionVertical),
-				widget.RowLayoutOpts.Padding(&widget.Insets{Left: 16, Right: 16, Top: 12, Bottom: 12}),
+				widget.RowLayoutOpts.Padding(&widget.Insets{Left: h.px(16), Right: h.px(16), Top: h.px(12), Bottom: h.px(12)}),
 				widget.RowLayoutOpts.Spacing(spacing),
 			),
 		),
@@ -508,16 +514,16 @@ func (h *host) build(g *Game) {
 	label := func(value string, size float64) {
 		h.content.AddChild(
 			widget.NewText(
-				widget.TextOpts.Text(wrap(value, size, h.contentWidth-32), face(size), p.Text),
-				widget.TextOpts.MaxWidth(float64(h.contentWidth-32)),
+				widget.TextOpts.Text(wrap(value, size, h.contentWidth-h.px(32)), face(size), p.Text),
+				widget.TextOpts.MaxWidth(float64(h.contentWidth-h.px(32))),
 			),
 		)
 	}
 	button := func(title string, fn func()) *widget.Button {
 		b := widget.NewButton(
 			widget.ButtonOpts.WidgetOpts(
-				widget.WidgetOpts.MinSize(44, 44),
-				widget.WidgetOpts.LayoutData(widget.RowLayoutData{Stretch: true, MaxWidth: h.contentWidth - 32}),
+				widget.WidgetOpts.MinSize(h.px(44), h.px(44)),
+				widget.WidgetOpts.LayoutData(widget.RowLayoutData{Stretch: true, MaxWidth: h.contentWidth - h.px(32)}),
 			),
 			widget.ButtonOpts.Image(
 				&widget.ButtonImage{
@@ -528,11 +534,11 @@ func (h *host) build(g *Game) {
 				},
 			),
 			widget.ButtonOpts.Text(
-				wrap(title, 14, h.contentWidth-56),
+				wrap(title, 14, h.contentWidth-h.px(56)),
 				face(14),
 				&widget.ButtonTextColor{Idle: p.Text, Disabled: p.Muted},
 			),
-			widget.ButtonOpts.TextPadding(widget.NewInsetsSimple(10)),
+			widget.ButtonOpts.TextPadding(widget.NewInsetsSimple(h.px(10))),
 			widget.ButtonOpts.ClickedHandler(func(*widget.ButtonClickedEventArgs) { fn() }),
 		)
 		h.content.AddChild(b)
@@ -588,7 +594,7 @@ func (h *host) build(g *Game) {
 	} else if g.State.View == "report" {
 		h.buildReport(g, t, label, button)
 	} else {
-		h.buildCompany(g, t, label, button, content, contentWidth-32, previousName, refocusName)
+		h.buildCompany(g, t, label, button, content, contentWidth-h.px(32), previousName, refocusName)
 	}
 	oldScroll := 0.0
 	if h.scroll != nil && h.lastView == g.State.View {
@@ -621,48 +627,51 @@ func (h *host) build(g *Game) {
 		status = t(h.message)
 	}
 	fw, fh := h.workspace.Footer.Dx(), h.workspace.Footer.Dy()
-	statusWidth := max(40, fw-290)
+	statusWidth := max(h.px(40), fw-h.px(290))
 	if ui.CampaignFinished(g.Frame) && !h.workspace.Compact {
-		statusWidth = fw - 354
+		statusWidth = fw - h.px(354)
 	}
-	statusRect := image.Rect(12, 12, statusWidth, fh-4)
+	statusRect := image.Rect(h.px(12), h.px(12), statusWidth, fh-h.px(4))
 	if h.workspace.Compact {
-		statusWidth = fw - 24
-		statusRect = image.Rect(12, 0, fw-12, 32)
+		statusWidth = fw - h.px(24)
+		statusRect = image.Rect(h.px(12), 0, fw-h.px(12), h.px(32))
 	}
 	h.statusLabel = widget.NewText(
-		widget.TextOpts.Text(wrap(status, 12, statusWidth-12), face(12), p.Text),
-		widget.TextOpts.MaxWidth(float64(statusWidth-12)),
+		widget.TextOpts.Text(wrap(status, 12, statusWidth-h.px(12)), face(12), p.Text),
+		widget.TextOpts.MaxWidth(float64(statusWidth-h.px(12))),
 		widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(statusRect)),
 	)
 	footer.AddChild(h.statusLabel)
-	start, bw, by := fw-276, 132, 8
+	start, bw, by := fw-h.px(276), h.px(132), h.px(8)
 	if h.workspace.Compact {
-		start = 8
-		bw = (fw - 24) / 2
-		by = 36
+		start = h.px(8)
+		bw = (fw - h.px(24)) / 2
+		by = h.px(36)
 	}
 	if ui.CampaignFinished(g.Frame) {
 		if !h.workspace.Compact {
-			start = fw - 340
+			start = fw - h.px(340)
 		}
-		endWidth := fw - 132 - start
+		endWidth := fw - h.px(132) - start
 		notice := t("campaignEndTitle") + "\n" + ui.CampaignEndDetail(g.State.Locale, g.Frame)
 		footer.AddChild(
 			widget.NewText(
 				widget.TextOpts.Text(wrap(notice, 12, endWidth), face(12), p.Text),
 				widget.TextOpts.MaxWidth(float64(endWidth)),
-				widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(image.Rect(start, by, start+endWidth, by+44))),
+				widget.TextOpts.WidgetOpts(
+					widget.WidgetOpts.LayoutData(image.Rect(start, by, start+endWidth, by+h.px(44))),
+				),
 			),
 		)
-		b := h.fixedButton(g, t("campaignRestart"), image.Rect(fw-124, by, fw-8, by+44), func() { h.openNewGame(g) })
+		restart := image.Rect(fw-h.px(124), by, fw-h.px(8), by+h.px(44))
+		b := h.fixedButton(g, t("campaignRestart"), restart, func() { h.openNewGame(g) })
 		b.GetWidget().Disabled = h.busy
 		h.actions["campaign-new-game"] = b
 		footer.AddChild(b)
 	} else {
 		for i, key := range []string{"advance", "advanceYear"} {
 			key := key
-			b := h.fixedButton(g, t(key), image.Rect(start+i*(bw+8), by, start+i*(bw+8)+bw, by+44), func() {
+			b := h.fixedButton(g, t(key), image.Rect(start+i*(bw+h.px(8)), by, start+i*(bw+h.px(8))+bw, by+h.px(44)), func() {
 				kind := gameapi.AdvanceMonth
 				if key == "advanceYear" {
 					kind = gameapi.AdvanceYear
@@ -684,7 +693,7 @@ func (h *host) build(g *Game) {
 		root = widget.NewContainer(widget.ContainerOpts.Layout(placed{}))
 		b := widget.NewButton(
 			widget.ButtonOpts.WidgetOpts(
-				widget.WidgetOpts.LayoutData(image.Rect(max(0, g.width-280), 12, g.width-12, 60)),
+				widget.WidgetOpts.LayoutData(image.Rect(max(0, g.width-h.px(280)), h.px(12), g.width-h.px(12), h.px(60))),
 			),
 			widget.ButtonOpts.Image(
 				&widget.ButtonImage{
@@ -703,15 +712,15 @@ func (h *host) build(g *Game) {
 			),
 		)
 		root.AddChild(b)
-		h.mapControls = append(h.mapControls, image.Rect(max(0, g.width-280), 12, g.width-12, 60))
+		h.mapControls = append(h.mapControls, image.Rect(max(0, g.width-h.px(280)), h.px(12), g.width-h.px(12), h.px(60)))
 		if g.State.View == "build" {
-			contentWidth = g.width - 20
+			contentWidth = g.width - h.px(20)
 			content = widget.NewContainer(
 				widget.ContainerOpts.Layout(
 					widget.NewRowLayout(
 						widget.RowLayoutOpts.Direction(widget.DirectionVertical),
-						widget.RowLayoutOpts.Padding(widget.NewInsetsSimple(10)),
-						widget.RowLayoutOpts.Spacing(4),
+						widget.RowLayoutOpts.Padding(widget.NewInsetsSimple(h.px(10))),
+						widget.RowLayoutOpts.Spacing(h.px(4)),
 					),
 				),
 				widget.ContainerOpts.BackgroundImage(uimage.NewNineSliceColor(p.Surface)),

@@ -30,7 +30,7 @@ type nameInput struct {
 	w                 *widget.Widget
 	field             *textinput.Field
 	face              text.Face
-	minHeight         int
+	minHeight, pad    int
 	palette           ui.Palette
 	focused, dragging bool
 	anchor, caret     int // UTF-8 byte offsets, always on grapheme boundaries
@@ -93,8 +93,16 @@ func (e *nameInput) line() int {
 	return int(math.Ceil(m.HAscent + m.HDescent))
 }
 
-// tall sets the least height the field may have, for a text step that scales the controls around it.
-func (e *nameInput) tall(px int) *nameInput                             { e.minHeight = px; return e }
+// fit scales the field's least height and inner padding with the text step, like the controls around it.
+func (e *nameInput) fit(t ui.TextScale) { e.minHeight, e.pad = t.Px(44), t.Px(10) }
+
+// inset is the padding between the field's border and its text.
+func (e *nameInput) inset() int {
+	if e.pad == 0 {
+		return 10
+	}
+	return e.pad
+}
 func (e *nameInput) SetLocation(r image.Rectangle)                      { e.w.SetLocation(r) }
 func (e *nameInput) TabOrder() int                                      { return 0 }
 func (e *nameInput) GetFocus(d widget.FocusDirection) widget.Focuser    { return e.focusMap[d] }
@@ -314,7 +322,7 @@ func (e *nameInput) command(key string, extend, word, edge bool) error {
 
 func (e *nameInput) indexAt(x float64) int {
 	s := e.field.Text()
-	x += e.offset - 10
+	x += e.offset - float64(e.inset())
 	previous := 0.0
 	for _, p := range nameBoundaries(s)[1:] {
 		next := text.Advance(s[:p], e.face)
@@ -384,7 +392,7 @@ func (e *nameInput) updateInput() error {
 			if x < 10 {
 				e.offset = max(0, e.offset-8)
 			}
-			if x > e.w.Rect.Dx()-10 {
+			if x > e.w.Rect.Dx()-e.inset() {
 				e.offset += 8
 			}
 			e.selectTo(e.indexAt(float64(x)), true)
@@ -453,7 +461,7 @@ func (e *nameInput) updateInput() error {
 	}
 	return nil
 }
-func (e *nameInput) textRect() image.Rectangle { r := e.w.Rect.Inset(10); return r }
+func (e *nameInput) textRect() image.Rectangle { r := e.w.Rect.Inset(e.inset()); return r }
 func (e *nameInput) caretAdvance() float64 {
 	s := e.field.TextForRendering()
 	a, _ := e.field.Selection()

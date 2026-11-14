@@ -10,6 +10,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"image"
+	"strings"
 	"unicode/utf8"
 	"wwhsrt/pkg/mapview"
 	"wwhsrt/pkg/ui"
@@ -31,7 +32,7 @@ func (h *host) row(cols int, fn func()) {
 			widget.NewGridLayout(
 				widget.GridLayoutOpts.Columns(cols),
 				widget.GridLayoutOpts.Stretch(stretch, nil),
-				widget.GridLayoutOpts.Spacing(8, 4),
+				widget.GridLayoutOpts.Spacing(h.px(8), h.px(4)),
 			),
 		),
 		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{Stretch: true})),
@@ -107,7 +108,7 @@ func (h *host) selectChoice(g *Game, selected string, options []choice, changed 
 	}
 	p := ui.PaletteFor(g.State)
 	face := h.face(g, 14)
-	width := max(60, h.contentWidth-32)
+	width := max(h.px(60), h.contentWidth-h.px(32))
 	entries := []any{}
 	var chosen any
 	if selected == "" {
@@ -131,7 +132,7 @@ func (h *host) selectChoice(g *Game, selected string, options []choice, changed 
 		Pressed:  uimage.NewNineSliceColor(p.Pressed),
 		Disabled: uimage.NewNineSliceColor(p.Disabled),
 	}
-	handle := 12
+	handle := h.px(12)
 	labels := func(e any) string {
 		return ui.WrapText(e.(choice).Name, float64(width-24), func(v string) float64 { return text.Advance(v, face) })
 	}
@@ -142,13 +143,13 @@ func (h *host) selectChoice(g *Game, selected string, options []choice, changed 
 		widget.ListComboButtonOpts.InitialEntry(chosen),
 		widget.ListComboButtonOpts.MaxContentHeight(240),
 		widget.ListComboButtonOpts.WidgetOpts(
-			widget.WidgetOpts.MinSize(44, 44),
+			widget.WidgetOpts.MinSize(h.px(44), h.px(44)),
 			widget.WidgetOpts.LayoutData(widget.RowLayoutData{Stretch: true, MaxWidth: width}),
 		),
 		widget.ListComboButtonOpts.ButtonParams(
 			&widget.ButtonParams{
 				Image:       images,
-				TextPadding: widget.NewInsetsSimple(8),
+				TextPadding: widget.NewInsetsSimple(h.px(8)),
 				TextColor:   &widget.ButtonTextColor{Idle: p.Text, Disabled: p.Muted},
 				TextFace:    &face,
 				MinSize:     &image.Point{X: 60, Y: 44},
@@ -164,7 +165,7 @@ func (h *host) selectChoice(g *Game, selected string, options []choice, changed 
 					TrackImage:    &widget.SliderTrackImage{Idle: uimage.NewNineSliceColor(p.Border)},
 					HandleImage:   images,
 					MinHandleSize: &handle,
-					TrackPadding:  widget.NewInsetsSimple(2),
+					TrackPadding:  widget.NewInsetsSimple(h.px(2)),
 				},
 				EntryFace: &face,
 				EntryColor: &widget.ListEntryColor{
@@ -174,7 +175,7 @@ func (h *host) selectChoice(g *Game, selected string, options []choice, changed 
 					SelectedFocusedBackground: p.Hover,
 					FocusedBackground:         p.Selected,
 				},
-				EntryTextPadding: widget.NewInsetsSimple(8),
+				EntryTextPadding: widget.NewInsetsSimple(h.px(8)),
 				MinSize:          &image.Point{X: 60, Y: 44},
 			},
 		),
@@ -213,10 +214,11 @@ func (h *host) fixedButton(g *Game, title string, r image.Rectangle, run func())
 	p := ui.PaletteFor(g.State)
 	face := h.face(g, 13)
 	// The label wraps to the button's inner width, so a two-line label fits a 44 px button.
-	pad := widget.Insets{Left: 4, Right: 4, Top: 3, Bottom: 3}
-	title = ui.WrapText(title, float64(max(20, r.Dx()-8)), func(v string) float64 { return text.Advance(v, face) })
+	pad := widget.Insets{Left: h.px(4), Right: h.px(4), Top: h.px(3), Bottom: h.px(3)}
+	inner := float64(max(h.px(20), r.Dx()-h.px(8)))
+	title = ui.WrapText(title, inner, func(v string) float64 { return text.Advance(v, face) })
 	return widget.NewButton(
-		widget.ButtonOpts.WidgetOpts(widget.WidgetOpts.MinSize(44, 44), widget.WidgetOpts.LayoutData(r)),
+		widget.ButtonOpts.WidgetOpts(widget.WidgetOpts.MinSize(h.px(44), h.px(44)), widget.WidgetOpts.LayoutData(r)),
 		widget.ButtonOpts.Image(
 			&widget.ButtonImage{
 				Idle:     uimage.NewNineSliceColor(p.Control),
@@ -241,29 +243,29 @@ func (h *host) addCommandDock(g *Game, root *widget.Container) {
 	)
 	face := h.face(g, 14)
 	value := fmt.Sprintf("%04d-%02d  ·  %s", g.Frame.Month.Year, g.Frame.Month.Month, ui.Cash(g.Frame.Player.Cash))
-	if g.width >= 800 {
+	if h.logicalWidth(g) >= 800 {
 		name := g.Frame.Player.Name
 		if utf8.RuneCountInString(name) > 22 {
 			name = string([]rune(name)[:21]) + "…"
 		}
 		value = name + "   ·   " + value
 	}
-	statWidth := max(40, g.width-80)
+	statWidth := max(h.px(40), g.width-h.px(80))
 	if len(g.Frame.IdleLines) > 0 {
-		statWidth = max(40, g.width-154)
+		statWidth = max(h.px(40), g.width-h.px(154))
 	}
 	value = ui.WrapText(value, float64(statWidth), func(v string) float64 { return text.Advance(v, face) })
 	stat := widget.NewText(
 		widget.TextOpts.Text(value, &face, p.Text),
 		widget.TextOpts.MaxWidth(float64(statWidth)),
-		widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(image.Rect(12, 8, 12+statWidth, 46))),
+		widget.TextOpts.WidgetOpts(widget.WidgetOpts.LayoutData(image.Rect(h.px(12), h.px(8), h.px(12)+statWidth, h.px(46)))),
 	)
 	header.AddChild(stat)
 	language := "EN"
 	if g.State.Locale == "zh-Hans" {
 		language = "简"
 	}
-	header.AddChild(h.fixedButton(g, language, image.Rect(g.width-52, 2, g.width-8, 46), func() {
+	header.AddChild(h.fixedButton(g, language, image.Rect(g.width-h.px(52), h.px(2), g.width-h.px(8), h.px(46)), func() {
 		if g.State.Locale == "en" {
 			g.State.Locale = "zh-Hans"
 		} else {
@@ -275,7 +277,7 @@ func (h *host) addCommandDock(g *Game, root *widget.Container) {
 		h.idleAction = h.fixedButton(
 			g,
 			t("idleShort")+" · "+fmt.Sprint(len(g.Frame.IdleLines)),
-			image.Rect(g.width-136, 2, g.width-58, 46),
+			image.Rect(g.width-h.px(136), h.px(2), g.width-h.px(58), h.px(46)),
 			func() { h.reviewIdleLine(g, "") },
 		)
 		h.idleAction.SetImage(
@@ -299,15 +301,15 @@ func (h *host) addCommandDock(g *Game, root *widget.Container) {
 	cols := 6
 	if l.DockLeft {
 		cols = 1
-	} else if l.Compact && g.width < 390 {
+	} else if l.Compact && h.logicalWidth(g) < 390 {
 		cols = 3
 	}
-	cell := (l.Dock.Dx() - 16 - (cols-1)*4) / cols
+	cell := (l.Dock.Dx() - h.px(16) - (cols-1)*h.px(4)) / cols
 	for i, key := range keys {
 		key := key
-		x := 8 + (i%cols)*(cell+4)
-		y := 4 + (i/cols)*46
-		r := image.Rect(x, y, x+cell, y+44)
+		x := h.px(8) + (i%cols)*(cell+h.px(4))
+		y := h.px(4) + (i/cols)*h.px(46)
+		r := image.Rect(x, y, x+cell, y+h.px(44))
 		labelKey := key
 		if key == "map" {
 			labelKey = "explore"
@@ -352,20 +354,34 @@ func (h *host) addMapTools(g *Game, root *widget.Container) {
 	}
 	// Fewer columns give wider buttons and so fewer lines per label. Take the arrangement that covers
 	// the least of the map, preferring more columns when two cover the same.
-	available := l.Map.Dx() - 16
-	var buttons []*widget.Button
-	var rects []image.Rectangle
-	least := -1
+	available := l.Map.Dx() - h.px(16)
+	face := h.face(g, 13)
+	metrics := face.Metrics()
+	line := metrics.HAscent + metrics.HDescent
+	least, bestCols, bestWidth := -1.0, 1, h.px(44)
 	for cols := len(keys); cols >= 1; cols-- {
-		bw := min(132, max(44, available/cols-4))
-		if cols > 1 && cols*(bw+4) > available+4 {
+		bw := min(h.px(132), max(h.px(44), available/cols-h.px(4)))
+		if cols > 1 && cols*(bw+h.px(4)) > available+h.px(4) {
 			continue
 		}
-		bs, rs, covered := h.mapToolRows(g, keys, cols, bw)
+		// Estimate from line counts; the buttons themselves are built once, for the arrangement chosen.
+		inner := float64(max(h.px(20), bw-h.px(8)))
+		covered, row := 0.0, 0.0
+		for i, key := range keys {
+			wrapped := ui.WrapText(ui.Text(g.State.Locale, key), inner, func(v string) float64 {
+				return text.Advance(v, face)
+			})
+			row = max(row, float64(h.px(44)), float64(strings.Count(wrapped, "\n")+1)*line+float64(h.px(6)))
+			if i%cols == cols-1 || i == len(keys)-1 {
+				covered += row + float64(h.px(4))
+				row = 0
+			}
+		}
 		if least < 0 || covered < least {
-			least, buttons, rects = covered, bs, rs
+			least, bestCols, bestWidth = covered, cols, bw
 		}
 	}
+	buttons, rects := h.mapToolRows(g, keys, bestCols, bestWidth)
 	for i, b := range buttons {
 		h.mapControls = append(h.mapControls, rects[i])
 		root.AddChild(b)
@@ -373,31 +389,31 @@ func (h *host) addMapTools(g *Game, root *widget.Container) {
 }
 
 // mapToolRows places the map tools in rows of cols buttons above the map's bottom edge. Each row is as
-// tall as its tallest label, and the result reports how much of the map's height the rows cover.
-func (h *host) mapToolRows(g *Game, keys []string, cols, bw int) ([]*widget.Button, []image.Rectangle, int) {
+// tall as its tallest label.
+func (h *host) mapToolRows(g *Game, keys []string, cols, bw int) ([]*widget.Button, []image.Rectangle) {
 	l := h.workspace
 	buttons := make([]*widget.Button, len(keys))
 	rects := make([]image.Rectangle, len(keys))
 	rows := (len(keys) + cols - 1) / cols
 	heights := make([]int, rows)
 	for i, key := range keys {
-		buttons[i] = h.fixedButton(g, ui.Text(g.State.Locale, key), image.Rect(0, 0, bw, 44), h.mapTool(g, key))
-		heights[i/cols] = max(heights[i/cols], 44, buttonHeight(buttons[i]))
+		buttons[i] = h.fixedButton(g, ui.Text(g.State.Locale, key), image.Rect(0, 0, bw, h.px(44)), h.mapTool(g, key))
+		heights[i/cols] = max(heights[i/cols], h.px(44), buttonHeight(buttons[i]))
 	}
-	covered := 4 * (rows - 1)
+	covered := h.px(4) * (rows - 1)
 	for _, height := range heights {
 		covered += height
 	}
-	y := l.Map.Max.Y - 8 - covered
+	y := l.Map.Max.Y - h.px(8) - covered
 	for i := range keys {
 		if i > 0 && i%cols == 0 {
-			y += heights[i/cols-1] + 4
+			y += heights[i/cols-1] + h.px(4)
 		}
-		x := l.Map.Min.X + 8 + (i%cols)*(bw+4)
+		x := l.Map.Min.X + h.px(8) + (i%cols)*(bw+h.px(4))
 		rects[i] = image.Rect(x, y, x+bw, y+heights[i/cols])
 		buttons[i].GetWidget().LayoutData = rects[i]
 	}
-	return buttons, rects, covered
+	return buttons, rects
 }
 
 // buttonHeight is the height a hand-placed button needs for its wrapped label.
@@ -467,12 +483,12 @@ func (h *host) stepper(g *Game, id, title, value string, minus, plus func()) {
 	}
 	p := ui.PaletteFor(g.State)
 	face := h.face(g, 13)
-	width := h.contentWidth - 32
+	width := h.contentWidth - h.px(32)
 	col := widget.NewContainer(
 		widget.ContainerOpts.Layout(
 			widget.NewRowLayout(
 				widget.RowLayoutOpts.Direction(widget.DirectionVertical),
-				widget.RowLayoutOpts.Spacing(4),
+				widget.RowLayoutOpts.Spacing(h.px(4)),
 			),
 		),
 		widget.ContainerOpts.WidgetOpts(
@@ -488,7 +504,7 @@ func (h *host) stepper(g *Game, id, title, value string, minus, plus func()) {
 			widget.NewGridLayout(
 				widget.GridLayoutOpts.Columns(3),
 				widget.GridLayoutOpts.Stretch([]bool{false, true, false}, nil),
-				widget.GridLayoutOpts.Spacing(2, 0),
+				widget.GridLayoutOpts.Spacing(h.px(2), h.px(0)),
 			),
 		),
 		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(widget.RowLayoutData{Stretch: true})),
@@ -497,7 +513,7 @@ func (h *host) stepper(g *Game, id, title, value string, minus, plus func()) {
 		key := []string{"−", "+"}[i]
 		run := run
 		b := widget.NewButton(
-			widget.ButtonOpts.WidgetOpts(widget.WidgetOpts.MinSize(44, 44)),
+			widget.ButtonOpts.WidgetOpts(widget.WidgetOpts.MinSize(h.px(44), h.px(44))),
 			widget.ButtonOpts.Image(
 				&widget.ButtonImage{
 					Idle:    uimage.NewNineSliceColor(p.Control),

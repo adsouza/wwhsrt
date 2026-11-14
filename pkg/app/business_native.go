@@ -151,7 +151,7 @@ func (h *host) buildReference(g *Game, label nativeLabel, button nativeButton, c
 	label(t("searchHelp"), 16)
 	face := h.face(g, 16)
 	h.helpSearch = newNameInput(&h.helpSearchField, g.State.Help.Query, face, ui.PaletteFor(g.State))
-	h.helpSearch.tall(h.text.Px(44))
+	h.helpSearch.fit(h.text)
 	content.AddChild(h.helpSearch)
 	m := h.helpModel(g)
 	if len(m.Results) == 0 {

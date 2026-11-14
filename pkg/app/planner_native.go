@@ -228,7 +228,8 @@ func (h *host) buildServices(g *Game, t func(string) string, label nativeLabel, 
 			g.State.ServiceQuery,
 			h.face(g, 14),
 			ui.PaletteFor(g.State),
-		).tall(h.text.Px(44))
+		)
+		h.routeSearch.fit(h.text)
 		h.content.AddChild(h.routeSearch)
 		if !mapShown {
 			h.serviceRegionPicker(g, label)

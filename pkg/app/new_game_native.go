@@ -73,7 +73,7 @@ func (h *host) buildNewGame(g *Game) {
 	p := ui.PaletteFor(g.State)
 	t := func(k string) string { return ui.Text(g.State.Locale, k) }
 	face := func(n float64) *text.Face { f := h.face(g, n); return &f }
-	w, height := min(440, g.width-24), min(540, g.height-24)
+	w, height := min(h.px(440), g.width-h.px(24)), min(h.px(540), g.height-h.px(24))
 	x, y := (g.width-w)/2, (g.height-height)/2
 	bounds := image.Rect(x, y, x+w, y+height)
 	root := widget.NewContainer(
@@ -90,15 +90,15 @@ func (h *host) buildNewGame(g *Game) {
 		widget.ContainerOpts.Layout(
 			widget.NewRowLayout(
 				widget.RowLayoutOpts.Direction(widget.DirectionVertical),
-				widget.RowLayoutOpts.Padding(widget.NewInsetsSimple(16)),
-				widget.RowLayoutOpts.Spacing(12),
+				widget.RowLayoutOpts.Padding(widget.NewInsetsSimple(h.px(16))),
+				widget.RowLayoutOpts.Spacing(h.px(12)),
 			),
 		),
 	)
 	label := func(s string, size float64) {
-		wrapped := ui.WrapText(s, float64(w-52), func(v string) float64 { return text.Advance(v, *face(size)) })
+		wrapped := ui.WrapText(s, float64(w-h.px(52)), func(v string) float64 { return text.Advance(v, *face(size)) })
 		content.AddChild(
-			widget.NewText(widget.TextOpts.Text(wrapped, face(size), p.Text), widget.TextOpts.MaxWidth(float64(w-52))),
+			widget.NewText(widget.TextOpts.Text(wrapped, face(size), p.Text), widget.TextOpts.MaxWidth(float64(w-h.px(52)))),
 		)
 	}
 	label(t("newGameTitle"), 22)
@@ -108,7 +108,7 @@ func (h *host) buildNewGame(g *Game) {
 	label(fmt.Sprintf("%s · %04d-%02d", g.Frame.Player.Name, g.Frame.Month.Year, g.Frame.Month.Month), 15)
 	label(t("newGameWarning"), 15)
 	label(t("newGameStart"), 15)
-	r := image.Rect(x, y, x+w-20, y+height-124)
+	r := image.Rect(x, y, x+w-h.px(20), y+height-h.px(124))
 	scroll := widget.NewScrollContainer(
 		widget.ScrollContainerOpts.Content(content),
 		widget.ScrollContainerOpts.StretchContentWidth(),
@@ -131,11 +131,11 @@ func (h *host) buildNewGame(g *Game) {
 		widget.ContainerOpts.Layout(
 			widget.NewRowLayout(
 				widget.RowLayoutOpts.Direction(widget.DirectionVertical),
-				widget.RowLayoutOpts.Padding(widget.NewInsetsSimple(12)),
-				widget.RowLayoutOpts.Spacing(8),
+				widget.RowLayoutOpts.Padding(widget.NewInsetsSimple(h.px(12))),
+				widget.RowLayoutOpts.Spacing(h.px(8)),
 			),
 		),
-		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(image.Rect(x, y+height-124, x+w, y+height))),
+		widget.ContainerOpts.WidgetOpts(widget.WidgetOpts.LayoutData(image.Rect(x, y+height-h.px(124), x+w, y+height))),
 	)
 	for _, action := range []struct {
 		key string
@@ -147,7 +147,7 @@ func (h *host) buildNewGame(g *Game) {
 		fn := action.run
 		b := widget.NewButton(
 			widget.ButtonOpts.WidgetOpts(
-				widget.WidgetOpts.MinSize(44, 46),
+				widget.WidgetOpts.MinSize(h.px(44), h.px(46)),
 				widget.WidgetOpts.LayoutData(widget.RowLayoutData{Stretch: true}),
 			),
 			widget.ButtonOpts.Image(

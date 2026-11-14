@@ -21,12 +21,12 @@ func (h *host) configureSidebarScroll(g *Game, root *widget.Container) {
 	scroll := h.scroll
 	r := scroll.ViewRect()
 	_, height := scroll.PreferredSize()
-	barRect := image.Rect(r.Max.X+3, r.Min.Y+4, r.Max.X+17, r.Max.Y-4)
+	barRect := image.Rect(r.Max.X+h.px(3), r.Min.Y+h.px(4), r.Max.X+h.px(17), r.Max.Y-h.px(4))
 	bar := widget.NewSlider(
 		widget.SliderOpts.WidgetOpts(widget.WidgetOpts.LayoutData(barRect)),
 		widget.SliderOpts.Direction(widget.DirectionVertical),
 		widget.SliderOpts.MinMax(0, sidebarScrollSteps),
-		widget.SliderOpts.FixedHandleSize(max(44, r.Dy()*r.Dy()/max(1, height))),
+		widget.SliderOpts.FixedHandleSize(max(h.px(44), r.Dy()*r.Dy()/max(1, height))),
 		widget.SliderOpts.PageSizeFunc(func() int {
 			_, ch := scroll.PreferredSize()
 			return max(1, int(float64(sidebarScrollSteps)*float64(r.Dy())*.9/float64(max(1, ch-r.Dy()))))
@@ -48,7 +48,7 @@ func (h *host) configureSidebarScroll(g *Game, root *widget.Container) {
 	// Keep fractional trackpad deltas and scroll a fixed pixel distance per notch.
 	scroll.GetWidget().ScrolledEvent.AddHandler(func(args interface{}) {
 		if a, ok := args.(*widget.WidgetScrolledEventArgs); ok && h.scroll == scroll && !g.dirty && !g.State.Expanded {
-			h.scrollSidebar(-a.Y * 48)
+			h.scrollSidebar(-a.Y * float64(h.px(48)))
 		}
 	})
 	h.scrollbar = bar

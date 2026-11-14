@@ -26,7 +26,7 @@ func (h *host) buildCompany(
 		label(t("companyName"), 16)
 		face := h.face(g, 16)
 		h.nameInput = newNameInput(&h.field, g.State.DraftName, face, ui.PaletteFor(g.State))
-		h.nameInput.tall(h.text.Px(44))
+		h.nameInput.fit(h.text)
 		if previousName != nil && previousName.observed.value == h.field.Text() {
 			h.nameInput.undo, h.nameInput.redo = previousName.undo, previousName.redo
 			h.nameInput.anchor, h.nameInput.caret = previousName.anchor, previousName.caret

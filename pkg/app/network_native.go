@@ -33,7 +33,7 @@ func (h *host) replayControls(g *Game, label nativeLabel, button nativeButton, c
 	var play *widget.Button
 	slider := widget.NewSlider(
 		widget.SliderOpts.WidgetOpts(
-			widget.WidgetOpts.MinSize(60, 44),
+			widget.WidgetOpts.MinSize(h.px(60), h.px(44)),
 			widget.WidgetOpts.LayoutData(widget.RowLayoutData{Stretch: true}),
 		),
 		widget.SliderOpts.Direction(widget.DirectionHorizontal),
@@ -96,13 +96,13 @@ func (h *host) replayControls(g *Game, label nativeLabel, button nativeButton, c
 	face := h.face(g, 13)
 	h.trainDescription = widget.NewText(
 		widget.TextOpts.Text("", &face, p.Text),
-		widget.TextOpts.MaxWidth(float64(min(360, g.width)-60)),
+		widget.TextOpts.MaxWidth(float64(min(h.px(360), g.width)-h.px(60))),
 	)
 	content.AddChild(h.trainDescription)
 	h.updateTrainDescription(g)
 }
 func (h *host) updateTrainDescription(g *Game) {
-	width := float64(min(360, g.width) - 60)
+	width := float64(min(h.px(360), g.width) - h.px(60))
 	face := h.face(g, 13)
 	h.trainDescription.Label = ui.WrapText(
 		ui.ReplayClock(g.replayTime())+" · "+render.TrainDescription(g.Camera, g.Frame, g.State, g.replayTime()),
