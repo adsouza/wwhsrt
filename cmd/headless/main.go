@@ -1,3 +1,5 @@
+//go:build !js
+
 // Headless drives the same application port without initializing graphics/audio.
 package main
 

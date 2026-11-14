@@ -112,7 +112,11 @@ window.railStorageCommit=value=>new Promise((resolve,reject)=>{
   tx.objectStore('snapshots').put(value,'campaign');
   tx.oncomplete=()=>resolve(true);tx.onabort=()=>reject(tx.error);tx.onerror=()=>{};
 });
-async function call(kind,body={}) {return JSON.parse(await bridge(kind,JSON.stringify(body)));}
+// The host sends the frame only when its revision changes. Snapshot-shaped
+// replies (the ones carrying a camera) reuse the last frame received.
+let lastFrame;
+function withFrame(s){if(s&&typeof s==='object'&&'camera'in s){if(s.frame)lastFrame=s.frame;else if(lastFrame)s.frame=lastFrame;}return s;}
+async function call(kind,body={}) {return withFrame(JSON.parse(await bridge(kind,JSON.stringify(body))));}
 async function syncUI() {if(bridge){const s=await call('ui',{...prefs,viewport_width:innerWidth,viewport_height:innerHeight,portrait:innerHeight>innerWidth,dark:prefs.appearance==='dark'||prefs.appearance==='system'&&systemAppearance.matches});texts=s.texts;selectOptions($('region-select'),(s.regions||[]).map(r=>[r.id,prefs.locale==='zh-Hans'?r.chinese:r.name]),prefs.region||'east-asia');acceptHelp(s.state.help);applyWorkspace(s.workspace);applyAppearance(s.palette);return s;}}
 function render() {
   if(!frame)return;
@@ -202,7 +206,7 @@ function placeMapTools(){const expanded=document.body.classList.contains('expand
 $('expand').onclick=()=>{const expanded=document.body.classList.toggle('expanded');prefs.expanded=expanded;placeMapTools();$('expand').setAttribute('aria-pressed',String(expanded));$('expand').textContent=label(expanded?'exitFullScreen':'fullScreen');savePreferences();syncUI().then(renderGuidance);renderReplay();};
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.body.classList.contains('expanded'))$('expand').click();});
 $('export').onclick=async()=>{const s=await call('export');const url=URL.createObjectURL(new Blob([s.save],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='wwhsrt-development-snapshot.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
-window.railMapChanged=s=>{const snapshot=JSON.parse(s),sameService=snapshot.state.service_corridor===prefs.service_corridor;Object.assign(prefs,{view:snapshot.state.view,build_pane:snapshot.state.build_pane,service_corridor:snapshot.state.service_corridor,service_pane:snapshot.state.service_pane,service_query:snapshot.state.service_query,service_map_sections:snapshot.state.service_map_sections||[],frequency:sameService?prefs.frequency:snapshot.state.frequency,fare:sameService?prefs.fare:snapshot.state.fare,replace_service_id:sameService?prefs.replace_service_id:snapshot.state.replace_service_id,review_map:snapshot.state.review_map,expanded:snapshot.state.expanded,selected_train:snapshot.state.selected_train,source_station:snapshot.state.source_station,selected:snapshot.state.selected,from_city:snapshot.state.from_city,to_city:snapshot.state.to_city,choosing:snapshot.state.choosing,alignment_id:snapshot.state.alignment_id});savePreferences();document.body.classList.toggle('expanded',!!prefs.expanded);$('expand').setAttribute('aria-pressed',String(!!prefs.expanded));render();syncUI();};
+window.railMapChanged=s=>{const snapshot=withFrame(JSON.parse(s)),sameService=snapshot.state.service_corridor===prefs.service_corridor;Object.assign(prefs,{view:snapshot.state.view,build_pane:snapshot.state.build_pane,service_corridor:snapshot.state.service_corridor,service_pane:snapshot.state.service_pane,service_query:snapshot.state.service_query,service_map_sections:snapshot.state.service_map_sections||[],frequency:sameService?prefs.frequency:snapshot.state.frequency,fare:sameService?prefs.fare:snapshot.state.fare,replace_service_id:sameService?prefs.replace_service_id:snapshot.state.replace_service_id,review_map:snapshot.state.review_map,expanded:snapshot.state.expanded,selected_train:snapshot.state.selected_train,source_station:snapshot.state.source_station,selected:snapshot.state.selected,from_city:snapshot.state.from_city,to_city:snapshot.state.to_city,choosing:snapshot.state.choosing,alignment_id:snapshot.state.alignment_id});savePreferences();document.body.classList.toggle('expanded',!!prefs.expanded);$('expand').setAttribute('aria-pressed',String(!!prefs.expanded));render();syncUI();};
 window.railReady=()=>startGame().catch(()=>startupError('startupFailed'));
 async function startGame(){
   // Give Ebitengine a visible, nonzero viewport before waiting for its first
@@ -319,7 +323,7 @@ function queueForecast(){
   $('service-issue').hidden=!result.error;$('service-issue').textContent=result.error?label(result.error)+' '+(result.capacity_summary||[]).map(r=>r.label+' · '+r.value).join(' · '):'';
   $('extension-price').textContent=prefs.replace_service_id&&!result.error?label('moveFleet')+': '+f.fleet_available+' · '+label('additionalLeases')+': '+f.additional_leases+' · '+label('trainLeaseTotal')+': '+money(Math.max(f.fleet_needed,f.fleet_available)*frame.train_family.lease_monthly):'';
   $('apply-service').textContent=label(prefs.replace_service_id?'applyExtension':'applyService')+(prefs.replace_service_id&&f.additional_leases>0?' · +'+money(f.additional_leases*frame.train_family.lease_monthly)+label('monthlyUnit'):'');
-  $('apply-service').disabled=busy||!!result.error||!f.open||(prefs.replace_service_id?(frame.fleet.length+f.additional_leases>32||f.additional_leases>0&&frame.player.cash<0):f.fleet_needed>f.fleet_available);
+  $('apply-service').disabled=busy||!!result.error||!f.open||(prefs.replace_service_id?(f.additional_leases>0&&frame.player.cash<0):f.fleet_needed>f.fleet_available);
  },120);
 }
 $('browse-prospects').onclick=()=>{if(!document.body.classList.contains('expanded'))$('expand').click();scrollTo(0,0);};

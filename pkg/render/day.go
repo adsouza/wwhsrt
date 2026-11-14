@@ -118,12 +118,12 @@ func (m *Map) drawDay(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s ui
 		if train.ID == s.SelectedTrain {
 			vector.StrokeCircle(dst, float32(at.X), float32(at.Y), 17, 2, p.Draft, true)
 		}
-		vector.DrawFilledRect(dst, float32(at.X-13), float32(at.Y-7), 26, 14, p.Action, true)
-		vector.DrawFilledRect(dst, float32(at.X-10), float32(at.Y-4), 20, 5, p.Surface, true)
-		vector.DrawFilledRect(dst, float32(at.X-10), float32(at.Y-4), 20*float32(train.LoadPermille)/1000, 5, p.Construction, true)
+		vector.FillRect(dst, float32(at.X-13), float32(at.Y-7), 26, 14, p.Action, true)
+		vector.FillRect(dst, float32(at.X-10), float32(at.Y-4), 20, 5, p.Surface, true)
+		vector.FillRect(dst, float32(at.X-10), float32(at.Y-4), 20*float32(train.LoadPermille)/1000, 5, p.Construction, true)
 	}
 	if s.Watching {
-		vector.DrawFilledRect(dst, float32(c.Width-78), 12, 66, 28, p.Surface, true)
+		vector.FillRect(dst, float32(c.Width-78), 12, 66, 28, p.Surface, true)
 		m.Label(dst, ui.ReplayClock(minute), c.Width-72, 16, 16, p.Text)
 	}
 }

@@ -421,7 +421,7 @@ func (e *nameInput) Render(screen *ebiten.Image) {
 	if e.focused {
 		border = p.Accent
 	}
-	vector.DrawFilledRect(screen, float32(r.Min.X), float32(r.Min.Y), float32(r.Dx()), float32(r.Dy()), bg, false)
+	vector.FillRect(screen, float32(r.Min.X), float32(r.Min.Y), float32(r.Dx()), float32(r.Dy()), bg, false)
 	vector.StrokeRect(screen, float32(r.Min.X)+.5, float32(r.Min.Y)+.5, float32(r.Dx()-1), float32(r.Dy()-1), 1, border, false)
 	r = e.textRect()
 	if r.Empty() {
@@ -437,7 +437,7 @@ func (e *nameInput) Render(screen *ebiten.Image) {
 	s := e.field.Text()
 	if e.focused && a != b && e.field.UncommittedTextLengthInBytes() == 0 {
 		left, right := text.Advance(s[:a], e.face), text.Advance(s[:b], e.face)
-		vector.DrawFilledRect(canvas, float32(x+left), float32(y), float32(right-left), 24, p.Action, false)
+		vector.FillRect(canvas, float32(x+left), float32(y), float32(right-left), 24, p.Action, false)
 	}
 	op := &text.DrawOptions{}
 	op.GeoM.Translate(x, y)
@@ -453,13 +453,13 @@ func (e *nameInput) Render(screen *ebiten.Image) {
 		}
 	}
 	if e.focused && (time.Now().UnixMilli()/500)%2 == 0 {
-		vector.DrawFilledRect(canvas, float32(x+caret), float32(y), 1, 24, p.Text, false)
+		vector.FillRect(canvas, float32(x+caret), float32(y), 1, 24, p.Text, false)
 	}
 	if e.field.UncommittedTextLengthInBytes() > 0 {
 		left := text.Advance(s[:a], e.face)
 		rendered := e.field.TextForRendering()
 		right := text.Advance(rendered[:a+e.field.UncommittedTextLengthInBytes()], e.face)
-		vector.DrawFilledRect(canvas, float32(x+left), float32(y+23), float32(right-left), 1, p.Accent, false)
+		vector.FillRect(canvas, float32(x+left), float32(y+23), float32(right-left), 1, p.Accent, false)
 	}
 }
 

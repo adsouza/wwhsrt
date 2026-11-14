@@ -90,14 +90,6 @@ func (h *host) updateTrainDescription(g *Game) {
 	face := &text.GoTextFace{Source: g.Map.Font, Size: 13}
 	h.trainDescription.Label = ui.WrapText(ui.ReplayClock(g.replayTime())+" · "+render.TrainDescription(g.Camera, g.Frame, g.State, g.replayTime()), width, func(s string) float64 { return text.Advance(s, face) })
 }
-func nextMarketCity(f gameapi.Frame, current gameapi.CityID) gameapi.CityID {
-	for i, c := range f.Cities {
-		if c.ID == current {
-			return f.Cities[(i+1)%len(f.Cities)].ID
-		}
-	}
-	return f.Cities[0].ID
-}
 func (h *host) networkMarkets(g *Game, label nativeLabel) {
 	t := func(key string) string { return ui.Text(g.State.Locale, key) }
 	from, to, class := g.State.MarketFrom, g.State.MarketTo, g.State.MarketClass

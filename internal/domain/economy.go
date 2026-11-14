@@ -79,7 +79,7 @@ func (w World) suggest(r *gameapi.Route) {
 	if !w.rebalanced() {
 		return
 	}
-	r.SuggestedFare = gameapi.Money(min(30000, max(1000, int(w.catalog.economy.FareBase)+r.KM*int(w.catalog.economy.FarePerKM))))
+	r.SuggestedFare = min(MaxFare, max(MinFare, gameapi.Money(int(w.catalog.economy.FareBase)+r.KM*int(w.catalog.economy.FarePerKM))))
 	diff := make([]int64, len(r.Cities)+1)
 	for i, a := range r.Cities {
 		if !containsCity(r.Stops, a) {

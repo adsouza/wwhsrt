@@ -125,7 +125,8 @@ func (c Catalog) WithPrior(prior Catalog) Catalog { c.prior = &prior; return c }
 func (w World) CatalogSince() int                 { return w.catalogSince }
 func (w World) Expanded() bool                    { return w.catalog.network.Sparse }
 func (w World) UpgradeCatalog(c Catalog) (World, error) {
-	return Restore(c, w.revision, w.months, w.company, w.reports, w.projects, w.services, w.fleet, w.debt, w.pending, w.nextTrain, w.networkSince, w.months, w.months, 0, 0, 0, regionalCutover(c, w.months), connectorCutover(c, w.months))
+	at := Cutovers{Network: w.networkSince, Catalog: w.months, Economy: w.months, Regional: regionalCutover(c, w.months), Connector: connectorCutover(c, w.months)}
+	return Restore(c, w.revision, w.months, w.company, w.reports, w.projects, w.services, w.fleet, w.debt, w.pending, w.nextTrain, at)
 }
 func (w World) route(id string) (gameapi.Route, bool) {
 	var route gameapi.Route
@@ -230,12 +231,18 @@ func (w World) UpgradeTopology(c Catalog) (World, error) {
 	if c.connectivityPrior != nil {
 		since = w.months
 	}
-	return Restore(c, w.revision, w.months, w.company, w.reports, w.projects, w.services, w.fleet, w.debt, w.pending, w.nextTrain, w.networkSince, w.catalogSince, w.economySince, w.months, since, since, regionalCutover(c, w.months), connectorCutover(c, w.months))
+	at := w.cutovers()
+	at.Topology, at.Connectivity, at.Construction = w.months, since, since
+	at.Regional, at.Connector = regionalCutover(c, w.months), connectorCutover(c, w.months)
+	return Restore(c, w.revision, w.months, w.company, w.reports, w.projects, w.services, w.fleet, w.debt, w.pending, w.nextTrain, at)
 }
 func (c Catalog) WithConnectivityPrior(prior Catalog) Catalog { c.connectivityPrior = &prior; return c }
 func (w World) ConnectivitySince() int                        { return w.connectivitySince }
 func (w World) UpgradeConnectivity(c Catalog) (World, error) {
-	return Restore(c, w.revision, w.months, w.company, w.reports, w.projects, w.services, w.fleet, w.debt, w.pending, w.nextTrain, w.networkSince, w.catalogSince, w.economySince, w.topologySince, w.months, w.months, regionalCutover(c, w.months), connectorCutover(c, w.months))
+	at := w.cutovers()
+	at.Connectivity, at.Construction = w.months, w.months
+	at.Regional, at.Connector = regionalCutover(c, w.months), connectorCutover(c, w.months)
+	return Restore(c, w.revision, w.months, w.company, w.reports, w.projects, w.services, w.fleet, w.debt, w.pending, w.nextTrain, at)
 }
 func (w World) atMonth(month int) World {
 	if w.catalog.connectorPrior != nil && month < w.connectorSince {
@@ -281,7 +288,10 @@ func (w World) UpgradeConstruction(c Catalog) (World, error) {
 			fleet = append(fleet, f)
 		}
 	}
-	return Restore(c, w.revision, w.months, w.company, w.reports, w.projects, plans, fleet, w.debt, w.pending, w.nextTrain, w.networkSince, w.catalogSince, w.economySince, w.topologySince, w.connectivitySince, w.months, regionalCutover(c, w.months), connectorCutover(c, w.months))
+	at := w.cutovers()
+	at.Construction = w.months
+	at.Regional, at.Connector = regionalCutover(c, w.months), connectorCutover(c, w.months)
+	return Restore(c, w.revision, w.months, w.company, w.reports, w.projects, plans, fleet, w.debt, w.pending, w.nextTrain, at)
 }
 
 func (c Catalog) WithRegionalPrior(prior Catalog) Catalog { c.regionalPrior = &prior; return c }
@@ -296,7 +306,9 @@ func regionalCutover(c Catalog, month int) int {
 // New markets affect demand, so retain the exact pre-expansion catalog for past
 // months. Existing company assets/plans and completed financial reports survive.
 func (w World) UpgradeRegional(c Catalog) (World, error) {
-	return Restore(c, w.revision, w.months, w.company, w.reports, w.projects, w.services, w.fleet, w.debt, w.pending, w.nextTrain, w.networkSince, w.catalogSince, w.economySince, w.topologySince, w.connectivitySince, w.constructionSince, w.months, connectorCutover(c, w.months))
+	at := w.cutovers()
+	at.Regional, at.Connector = w.months, connectorCutover(c, w.months)
+	return Restore(c, w.revision, w.months, w.company, w.reports, w.projects, w.services, w.fleet, w.debt, w.pending, w.nextTrain, at)
 }
 
 // Connector additions introduce junction markets and capacity decompositions.
@@ -310,5 +322,7 @@ func connectorCutover(c Catalog, month int) int {
 	return 0
 }
 func (w World) UpgradeConnectors(c Catalog) (World, error) {
-	return Restore(c, w.revision, w.months, w.company, w.reports, w.projects, w.services, w.fleet, w.debt, w.pending, w.nextTrain, w.networkSince, w.catalogSince, w.economySince, w.topologySince, w.connectivitySince, w.constructionSince, w.regionalSince, w.months)
+	at := w.cutovers()
+	at.Connector = w.months
+	return Restore(c, w.revision, w.months, w.company, w.reports, w.projects, w.services, w.fleet, w.debt, w.pending, w.nextTrain, at)
 }

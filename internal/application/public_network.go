@@ -19,7 +19,7 @@ type importedNetwork struct {
 	Network   gameapi.NetworkRules `json:"network"`
 }
 
-var publicSHA = hash(assets.PublicNetwork)
+var publicSHA = assets.PublicNetworkSHA256()
 var publicOnce sync.Once
 var imported importedNetwork
 var importedCatalog domain.Catalog
@@ -112,75 +112,39 @@ func publicHistoryCatalog() (domain.Catalog, error) {
 			c, e = c.WithEconomy(economy)
 			return c.WithPrior(prior), e
 		}
-		previousPublicCatalog, e = makeCatalog(assets.PublicNetworkV1)
-		if e != nil {
+		// Archived catalogs are pinned by digest before they are parsed.
+		archived := func(compressed []byte, sha string) (domain.Catalog, error) {
+			reader, e := gzip.NewReader(bytes.NewReader(compressed))
+			if e != nil {
+				return domain.Catalog{}, e
+			}
+			data, e := io.ReadAll(io.LimitReader(reader, 16*1024*1024+1))
+			reader.Close()
+			if e != nil || hash(data) != sha {
+				return domain.Catalog{}, &gameapi.Error{Code: "invalid_scenario"}
+			}
+			return makeCatalog(data)
+		}
+		if previousPublicCatalog, e = makeCatalog(assets.PublicNetworkV1); e != nil {
 			historyError = e
 			return
 		}
-		reader, e := gzip.NewReader(bytes.NewReader(assets.PublicNetworkV2Compressed))
-		if e != nil {
-			historyError = e
-			return
-		}
-		data, e := io.ReadAll(io.LimitReader(reader, 16*1024*1024+1))
-		reader.Close()
-		if e != nil || hash(data) != previousRepairSHA {
-			historyError = &gameapi.Error{Code: "invalid_scenario"}
-			return
-		}
-		previousRepairCatalog, e = makeCatalog(data)
-		if e != nil {
+		if previousRepairCatalog, e = archived(assets.PublicNetworkV2Compressed, previousRepairSHA); e != nil {
 			historyError = e
 			return
 		}
 		previousRepairCatalog = previousRepairCatalog.WithPrevious(previousPublicCatalog)
-		reader, e = gzip.NewReader(bytes.NewReader(assets.PublicNetworkV3Compressed))
-		if e != nil {
-			historyError = e
-			return
-		}
-		data, e = io.ReadAll(io.LimitReader(reader, 16*1024*1024+1))
-		reader.Close()
-		if e != nil || hash(data) != launchPriorSHA {
-			historyError = &gameapi.Error{Code: "invalid_scenario"}
-			return
-		}
-		priorLaunchCatalog, e = makeCatalog(data)
-		if e != nil {
+		if priorLaunchCatalog, e = archived(assets.PublicNetworkV3Compressed, launchPriorSHA); e != nil {
 			historyError = e
 			return
 		}
 		priorLaunchCatalog = priorLaunchCatalog.WithPrevious(previousPublicCatalog).WithConnectivityPrior(previousRepairCatalog)
-		reader, e = gzip.NewReader(bytes.NewReader(assets.PublicNetworkV4Compressed))
-		if e != nil {
-			historyError = e
-			return
-		}
-		data, e = io.ReadAll(io.LimitReader(reader, 16*1024*1024+1))
-		reader.Close()
-		if e != nil || hash(data) != regionalPriorSHA {
-			historyError = &gameapi.Error{Code: "invalid_scenario"}
-			return
-		}
-		priorRegionalCatalog, e = makeCatalog(data)
-		if e != nil {
+		if priorRegionalCatalog, e = archived(assets.PublicNetworkV4Compressed, regionalPriorSHA); e != nil {
 			historyError = e
 			return
 		}
 		priorRegionalCatalog = priorRegionalCatalog.WithPrevious(previousPublicCatalog).WithConnectivityPrior(previousRepairCatalog).WithConstructionPrior(priorLaunchCatalog)
-		reader, e = gzip.NewReader(bytes.NewReader(assets.PublicNetworkV5Compressed))
-		if e != nil {
-			historyError = e
-			return
-		}
-		data, e = io.ReadAll(io.LimitReader(reader, 16*1024*1024+1))
-		reader.Close()
-		if e != nil || hash(data) != connectorPriorSHA {
-			historyError = &gameapi.Error{Code: "invalid_scenario"}
-			return
-		}
-		priorConnectorCatalog, e = makeCatalog(data)
-		if e != nil {
+		if priorConnectorCatalog, e = archived(assets.PublicNetworkV5Compressed, connectorPriorSHA); e != nil {
 			historyError = e
 			return
 		}
@@ -217,21 +181,21 @@ func decodeExpanded(b []byte, c domain.Catalog) (domain.World, error) {
 	connectorSince := 0
 	if env.Version == 10 {
 		var modern connectorPayload
-		if strict(env.Payload, &modern) != nil || !complete(env.Payload, reflect.TypeOf(modern)) || modern.ConnectorPriorSHA != connectorPriorSHA || modern.RegionalPriorSHA != regionalPriorSHA || modern.LaunchPriorSHA != launchPriorSHA || modern.EconomySHA != hash(assets.Economy) || modern.PriorPublicSHA != hash(assets.PublicNetworkV1) || modern.PreviousRepairSHA != previousRepairSHA || modern.Rules != "network-v10" {
+		if strict(env.Payload, &modern) != nil || !complete(env.Payload, reflect.TypeOf(modern)) || modern.ConnectorPriorSHA != connectorPriorSHA || modern.RegionalPriorSHA != regionalPriorSHA || modern.LaunchPriorSHA != launchPriorSHA || modern.EconomySHA != economySHA || modern.PriorPublicSHA != publicV1SHA || modern.PreviousRepairSHA != previousRepairSHA || modern.Rules != "network-v10" {
 			return bad()
 		}
 		p = modern.expandedPayload
 		economySince, topologySince, connectivitySince, constructionSince, regionalSince, connectorSince = modern.EconomySince, modern.TopologySince, modern.ConnectivitySince, modern.ConstructionSince, modern.RegionalSince, modern.ConnectorSince
 	} else if env.Version == 9 {
 		var modern regionalPayload
-		if strict(env.Payload, &modern) != nil || !complete(env.Payload, reflect.TypeOf(modern)) || modern.RegionalPriorSHA != regionalPriorSHA || modern.LaunchPriorSHA != launchPriorSHA || modern.EconomySHA != hash(assets.Economy) || modern.PriorPublicSHA != hash(assets.PublicNetworkV1) || modern.PreviousRepairSHA != previousRepairSHA || modern.Rules != "network-v9" {
+		if strict(env.Payload, &modern) != nil || !complete(env.Payload, reflect.TypeOf(modern)) || modern.RegionalPriorSHA != regionalPriorSHA || modern.LaunchPriorSHA != launchPriorSHA || modern.EconomySHA != economySHA || modern.PriorPublicSHA != publicV1SHA || modern.PreviousRepairSHA != previousRepairSHA || modern.Rules != "network-v9" {
 			return bad()
 		}
 		p = modern.expandedPayload
 		economySince, topologySince, connectivitySince, constructionSince, regionalSince = modern.EconomySince, modern.TopologySince, modern.ConnectivitySince, modern.ConstructionSince, modern.RegionalSince
 	} else if env.Version == 8 {
 		var modern constructionPayload
-		if strict(env.Payload, &modern) != nil || !complete(env.Payload, reflect.TypeOf(modern)) || modern.LaunchPriorSHA != launchPriorSHA || modern.EconomySHA != hash(assets.Economy) || modern.PriorPublicSHA != hash(assets.PublicNetworkV1) || modern.PreviousRepairSHA != previousRepairSHA || modern.Rules != "network-v8" {
+		if strict(env.Payload, &modern) != nil || !complete(env.Payload, reflect.TypeOf(modern)) || modern.LaunchPriorSHA != launchPriorSHA || modern.EconomySHA != economySHA || modern.PriorPublicSHA != publicV1SHA || modern.PreviousRepairSHA != previousRepairSHA || modern.Rules != "network-v8" {
 			return bad()
 		}
 		p = modern.expandedPayload
@@ -241,7 +205,7 @@ func decodeExpanded(b []byte, c domain.Catalog) (domain.World, error) {
 		constructionSince = modern.ConstructionSince
 	} else if env.Version == 7 {
 		var modern connectivityPayload
-		if strict(env.Payload, &modern) != nil || !complete(env.Payload, reflect.TypeOf(modern)) || modern.EconomySHA != hash(assets.Economy) || modern.PriorPublicSHA != hash(assets.PublicNetworkV1) || modern.PreviousRepairSHA != previousRepairSHA || modern.Rules != "network-v7" {
+		if strict(env.Payload, &modern) != nil || !complete(env.Payload, reflect.TypeOf(modern)) || modern.EconomySHA != economySHA || modern.PriorPublicSHA != publicV1SHA || modern.PreviousRepairSHA != previousRepairSHA || modern.Rules != "network-v7" {
 			return bad()
 		}
 		p = modern.expandedPayload
@@ -250,7 +214,7 @@ func decodeExpanded(b []byte, c domain.Catalog) (domain.World, error) {
 		connectivitySince = modern.ConnectivitySince
 	} else if env.Version == 6 {
 		var modern topologyPayload
-		if strict(env.Payload, &modern) != nil || !complete(env.Payload, reflect.TypeOf(modern)) || modern.EconomySHA != hash(assets.Economy) || modern.PriorPublicSHA != hash(assets.PublicNetworkV1) || modern.Rules != "network-v6" {
+		if strict(env.Payload, &modern) != nil || !complete(env.Payload, reflect.TypeOf(modern)) || modern.EconomySHA != economySHA || modern.PriorPublicSHA != publicV1SHA || modern.Rules != "network-v6" {
 			return bad()
 		}
 		p = modern.expandedPayload
@@ -258,7 +222,7 @@ func decodeExpanded(b []byte, c domain.Catalog) (domain.World, error) {
 		topologySince = modern.TopologySince
 	} else if env.Version == 5 {
 		var modern balancedPayload
-		if strict(env.Payload, &modern) != nil || !complete(env.Payload, reflect.TypeOf(modern)) || modern.EconomySHA != hash(assets.Economy) || modern.Rules != "network-v5" {
+		if strict(env.Payload, &modern) != nil || !complete(env.Payload, reflect.TypeOf(modern)) || modern.EconomySHA != economySHA || modern.Rules != "network-v5" {
 			return bad()
 		}
 		p = modern.expandedPayload
@@ -283,9 +247,9 @@ func decodeExpanded(b []byte, c domain.Catalog) (domain.World, error) {
 		expectedPublic = previousRepairSHA
 	}
 	if env.Version < 6 {
-		expectedPublic = hash(assets.PublicNetworkV1)
+		expectedPublic = publicV1SHA
 	}
-	if p.PublicSHA != expectedPublic || p.ScenarioSHA != hash(assets.Scenario) || p.BusinessSHA != hash(assets.Business) || p.NetworkSHA != hash(assets.Network) {
+	if p.PublicSHA != expectedPublic || p.ScenarioSHA != scenarioSHA || p.BusinessSHA != businessSHA || p.NetworkSHA != networkSHA {
 		return bad()
 	}
 	if env.Version < 10 || topologySince > 0 || connectivitySince > 0 || constructionSince > 0 || regionalSince > 0 || connectorSince > 0 {
@@ -295,29 +259,31 @@ func decodeExpanded(b []byte, c domain.Catalog) (domain.World, error) {
 			return bad()
 		}
 	}
+	// Epochs a save predates stay zero, which Restore reads as "not yet cut over".
+	at := domain.Cutovers{Network: p.NetworkSince, Catalog: p.CatalogSince, Economy: economySince, Topology: topologySince, Connectivity: connectivitySince, Construction: constructionSince, Regional: regionalSince, Connector: connectorSince}
 	if env.Version == 9 {
-		w, e := domain.Restore(priorConnectorCatalog, p.Revision, p.Months, p.Company, p.Reports, p.Projects, p.Services, p.Fleet, p.Debt, p.Pending, p.NextTrain, p.NetworkSince, p.CatalogSince, economySince, topologySince, connectivitySince, constructionSince, regionalSince)
+		w, e := domain.Restore(priorConnectorCatalog, p.Revision, p.Months, p.Company, p.Reports, p.Projects, p.Services, p.Fleet, p.Debt, p.Pending, p.NextTrain, at)
 		if e != nil {
 			return bad()
 		}
 		return w.UpgradeConnectors(c)
 	}
 	if env.Version == 8 {
-		w, e := domain.Restore(priorRegionalCatalog, p.Revision, p.Months, p.Company, p.Reports, p.Projects, p.Services, p.Fleet, p.Debt, p.Pending, p.NextTrain, p.NetworkSince, p.CatalogSince, economySince, topologySince, connectivitySince, constructionSince)
+		w, e := domain.Restore(priorRegionalCatalog, p.Revision, p.Months, p.Company, p.Reports, p.Projects, p.Services, p.Fleet, p.Debt, p.Pending, p.NextTrain, at)
 		if e != nil {
 			return bad()
 		}
 		return w.UpgradeRegional(c)
 	}
 	if env.Version == 7 {
-		w, e := domain.Restore(priorLaunchCatalog, p.Revision, p.Months, p.Company, p.Reports, p.Projects, p.Services, p.Fleet, p.Debt, p.Pending, p.NextTrain, p.NetworkSince, p.CatalogSince, economySince, topologySince, connectivitySince)
+		w, e := domain.Restore(priorLaunchCatalog, p.Revision, p.Months, p.Company, p.Reports, p.Projects, p.Services, p.Fleet, p.Debt, p.Pending, p.NextTrain, at)
 		if e != nil {
 			return bad()
 		}
 		return w.UpgradeConstruction(c)
 	}
 	if env.Version == 6 {
-		w, e := domain.Restore(previousRepairCatalog, p.Revision, p.Months, p.Company, p.Reports, p.Projects, p.Services, p.Fleet, p.Debt, p.Pending, p.NextTrain, p.NetworkSince, p.CatalogSince, economySince, topologySince)
+		w, e := domain.Restore(previousRepairCatalog, p.Revision, p.Months, p.Company, p.Reports, p.Projects, p.Services, p.Fleet, p.Debt, p.Pending, p.NextTrain, at)
 		if e != nil {
 			return bad()
 		}
@@ -331,13 +297,13 @@ func decodeExpanded(b []byte, c domain.Catalog) (domain.World, error) {
 		}
 		pc := previousPublicCatalog
 
-		w, e := domain.Restore(pc, p.Revision, p.Months, p.Company, p.Reports, p.Projects, p.Services, p.Fleet, p.Debt, p.Pending, p.NextTrain, p.NetworkSince, p.CatalogSince, economySince)
+		w, e := domain.Restore(pc, p.Revision, p.Months, p.Company, p.Reports, p.Projects, p.Services, p.Fleet, p.Debt, p.Pending, p.NextTrain, at)
 		if e != nil {
 			return bad()
 		}
 		return w.UpgradeTopology(c)
 	}
-	return domain.Restore(c, p.Revision, p.Months, p.Company, p.Reports, p.Projects, p.Services, p.Fleet, p.Debt, p.Pending, p.NextTrain, p.NetworkSince, p.CatalogSince, economySince, topologySince, connectivitySince, constructionSince, regionalSince, connectorSince)
+	return domain.Restore(c, p.Revision, p.Months, p.Company, p.Reports, p.Projects, p.Services, p.Fleet, p.Debt, p.Pending, p.NextTrain, at)
 }
 
 func (g *Game) InspectMarket(from, to gameapi.CityID, class string) (gameapi.MarketRun, error) {

@@ -165,6 +165,17 @@ func catalog() (domain.Catalog, error) {
 }
 
 func hash(b []byte) string { s := sha256.Sum256(b); return hex.EncodeToString(s[:]) }
+
+// Embedded assets never change at run time, so each digest is computed once
+// rather than on every encode and frame.
+var (
+	scenarioSHA = hash(assets.Scenario)
+	businessSHA = hash(assets.Business)
+	networkSHA  = hash(assets.Network)
+	economySHA  = hash(assets.Economy)
+	publicV1SHA = hash(assets.PublicNetworkV1)
+)
+
 func strict(b []byte, v any) error {
 	if !utf8.Valid(b) {
 		return &gameapi.Error{Code: "invalid_save"}
@@ -291,17 +302,17 @@ func openMode(store Store, log *slog.Logger, expanded bool) (*Game, error) {
 	if expanded {
 		rules = "network-v10"
 	}
-	log.Info("world.opened", "world_id", "first-business", "revision", g.w.Revision(), "scenario_sha256", hash(assets.Scenario), "network_sha256", hash(assets.Network), "rules_version", rules, "public_network_sha256", publicSHA, "network_since", g.w.NetworkSince())
+	log.Info("world.opened", "world_id", "first-business", "revision", g.w.Revision(), "scenario_sha256", scenarioSHA, "network_sha256", networkSHA, "rules_version", rules, "public_network_sha256", publicSHA, "network_since", g.w.NetworkSince())
 	return g, nil
 }
 func data(w domain.World) payload {
-	return payload{NetworkSHA: hash(assets.Network), NetworkSince: w.NetworkSince(), ScenarioSHA: hash(assets.Scenario), BusinessSHA: hash(assets.Business), Rules: "network-v3", Revision: w.Revision(), Months: w.Months(), Company: w.Company(), Reports: w.Reports(), Projects: w.Projects(), Services: w.Services(), Fleet: w.Fleet(), Debt: w.Debt(), Pending: w.Pending(), NextTrain: w.NextTrain()}
+	return payload{NetworkSHA: networkSHA, NetworkSince: w.NetworkSince(), ScenarioSHA: scenarioSHA, BusinessSHA: businessSHA, Rules: "network-v3", Revision: w.Revision(), Months: w.Months(), Company: w.Company(), Reports: w.Reports(), Projects: w.Projects(), Services: w.Services(), Fleet: w.Fleet(), Debt: w.Debt(), Pending: w.Pending(), NextTrain: w.NextTrain()}
 }
 func stateData(w domain.World) any {
 	p := data(w)
 	if w.Expanded() {
 		p.Rules = "network-v10"
-		return connectorPayload{regionalPayload{constructionPayload{connectivityPayload{topologyPayload{balancedPayload{expandedPayload{p, publicSHA, w.CatalogSince()}, hash(assets.Economy), w.EconomySince()}, w.TopologySince(), hash(assets.PublicNetworkV1)}, w.ConnectivitySince(), previousRepairSHA}, w.ConstructionSince(), launchPriorSHA}, w.RegionalSince(), regionalPriorSHA}, w.ConnectorSince(), connectorPriorSHA}
+		return connectorPayload{regionalPayload{constructionPayload{connectivityPayload{topologyPayload{balancedPayload{expandedPayload{p, publicSHA, w.CatalogSince()}, economySHA, w.EconomySince()}, w.TopologySince(), publicV1SHA}, w.ConnectivitySince(), previousRepairSHA}, w.ConstructionSince(), launchPriorSHA}, w.RegionalSince(), regionalPriorSHA}, w.ConnectorSince(), connectorPriorSHA}
 	}
 	return p
 }
@@ -327,24 +338,24 @@ func decode(b []byte) (domain.World, error) {
 	}
 	if env.Version == 2 {
 		var old legacyPayload
-		if strict(env.Payload, &old) != nil || !complete(env.Payload, reflect.TypeOf(old)) || old.ScenarioSHA != hash(assets.Scenario) || old.BusinessSHA != hash(assets.Business) || old.Rules != "first-business-v2" {
+		if strict(env.Payload, &old) != nil || !complete(env.Payload, reflect.TypeOf(old)) || old.ScenarioSHA != scenarioSHA || old.BusinessSHA != businessSHA || old.Rules != "first-business-v2" {
 			return bad()
 		}
 		c, e := catalog()
 		if e != nil {
 			return bad()
 		}
-		return domain.Restore(c, old.Revision, old.Months, old.Company, old.Reports, old.Projects, old.Services, old.Fleet, old.Debt, old.Pending, old.NextTrain)
+		return domain.Restore(c, old.Revision, old.Months, old.Company, old.Reports, old.Projects, old.Services, old.Fleet, old.Debt, old.Pending, old.NextTrain, domain.Cutovers{Network: old.Months, Economy: old.Months})
 	}
 	var p payload
-	if strict(env.Payload, &p) != nil || !complete(env.Payload, reflect.TypeOf(p)) || p.ScenarioSHA != hash(assets.Scenario) || p.BusinessSHA != hash(assets.Business) || p.Rules != "network-v3" || p.NetworkSHA != hash(assets.Network) {
+	if strict(env.Payload, &p) != nil || !complete(env.Payload, reflect.TypeOf(p)) || p.ScenarioSHA != scenarioSHA || p.BusinessSHA != businessSHA || p.Rules != "network-v3" || p.NetworkSHA != networkSHA {
 		return bad()
 	}
 	c, e := catalog()
 	if e != nil {
 		return bad()
 	}
-	return domain.Restore(c, p.Revision, p.Months, p.Company, p.Reports, p.Projects, p.Services, p.Fleet, p.Debt, p.Pending, p.NextTrain, p.NetworkSince)
+	return domain.Restore(c, p.Revision, p.Months, p.Company, p.Reports, p.Projects, p.Services, p.Fleet, p.Debt, p.Pending, p.NextTrain, domain.Cutovers{Network: p.NetworkSince, Economy: p.Months})
 }
 func (g *Game) frame() gameapi.Frame {
 	p, _ := json.Marshal(stateData(g.w))

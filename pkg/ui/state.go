@@ -2,12 +2,14 @@
 package ui
 
 import (
+	"bytes"
 	_ "embed"
 	"encoding/json"
 	"math"
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"wwhsrt/assets"
 	"wwhsrt/pkg/gameapi"
 )
@@ -17,7 +19,9 @@ var english []byte
 
 //go:embed zh-Hans.json
 var chinese []byte
-var catalogs = func() map[string]map[string]string {
+
+// Built on first use so importing the package costs nothing at start-up.
+var catalogs = sync.OnceValue(func() map[string]map[string]string {
 	result := map[string]map[string]string{}
 	for locale, b := range map[string][]byte{"en": english, "zh-Hans": chinese} {
 		var c map[string]string
@@ -26,9 +30,8 @@ var catalogs = func() map[string]map[string]string {
 		}
 		result[locale] = c
 	}
-	var source struct{ Cities []gameapi.City }
-	if json.Unmarshal(assets.PublicNetwork, &source) == nil {
-		for _, city := range source.Cities {
+	{
+		for _, city := range publicCities() {
 			for _, locale := range []string{"en", "zh-Hans"} {
 				if result[locale][string(city.ID)] == "" {
 					name := city.Name
@@ -39,7 +42,34 @@ var catalogs = func() map[string]map[string]string {
 		}
 	}
 	return result
-}()
+})
+
+// publicCities decodes only the "cities" member of the public catalog and
+// stops there, instead of scanning megabytes of corridor geometry again.
+func publicCities() []gameapi.City {
+	d := json.NewDecoder(bytes.NewReader(assets.PublicNetwork))
+	if t, err := d.Token(); err != nil || t != json.Delim('{') {
+		return nil
+	}
+	for d.More() {
+		key, err := d.Token()
+		if err != nil {
+			return nil
+		}
+		if key == "cities" {
+			var cities []gameapi.City
+			if d.Decode(&cities) != nil {
+				return nil
+			}
+			return cities
+		}
+		var skipped json.RawMessage
+		if d.Decode(&skipped) != nil {
+			return nil
+		}
+	}
+	return nil
+}
 
 func Locale(s string) string {
 	s = strings.ToLower(s)
@@ -49,17 +79,17 @@ func Locale(s string) string {
 	return "en"
 }
 func Text(locale, key string) string {
-	if s := catalogs[Locale(locale)][key]; s != "" {
+	if s := catalogs()[Locale(locale)][key]; s != "" {
 		return s
 	}
-	if s := catalogs["en"][key]; s != "" {
+	if s := catalogs()["en"][key]; s != "" {
 		return s
 	}
 	return key
 }
 func Catalog(locale string) map[string]string {
 	out := map[string]string{}
-	for k := range catalogs["en"] {
+	for k := range catalogs()["en"] {
 		out[k] = Text(locale, k)
 	}
 	return out

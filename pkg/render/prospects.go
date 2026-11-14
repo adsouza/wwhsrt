@@ -79,8 +79,8 @@ func (m *Map) drawProspects(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame
 				for d := start; d < visible; d += 12 {
 					u := d / visible
 					x, y := float32(left.X+(right.X-left.X)*u), float32(left.Y+(right.Y-left.Y)*u)
-					vector.DrawFilledCircle(dst, x, y, 3.5, p.Surface, true)
-					vector.DrawFilledCircle(dst, x, y, 2.5, p.Action, true)
+					vector.FillCircle(dst, x, y, 3.5, p.Surface, true)
+					vector.FillCircle(dst, x, y, 2.5, p.Action, true)
 				}
 			}
 			total += length

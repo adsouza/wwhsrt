@@ -49,7 +49,7 @@ func TestNativeReplayPlaySurvivesSliderRenderAndRebuild(t *testing.T) {
 		}
 		// Native panel rebuild after clicking Play: the first real slider render
 		// must not emit a seek that pauses the newly started replay.
-		slider, buttons = build()
+		slider, _ = build()
 		slider.Validate()
 		slider.SetLocation(image.Rect(0, 0, 300, 44))
 		slider.Render(ebiten.NewImage(320, 60))

@@ -55,7 +55,6 @@ func TestNativeHelpLayersFitAndPreserveTask(t *testing.T) {
 					g.host.layout(g)
 					g.host.build(g)
 					g.host.setSidebarScroll(.5)
-					expectedScroll := g.host.scroll.ScrollTop
 					// Activate the actual disclosure widget. It only changes presentation.
 					anchor := g.host.helpAnchors["fares"]
 					if anchor == nil {
@@ -69,7 +68,6 @@ func TestNativeHelpLayersFitAndPreserveTask(t *testing.T) {
 					if explain == nil {
 						ui.ApplyHelpEvent(&g.State, ui.HelpEvent{Kind: "expand", Concept: "fares_demand", Anchor: "fares"})
 						g.host.build(g)
-						explain = g.host.helpAnchors["fares"]
 					} else {
 						explain.ClickedEvent.Fire(&widget.ButtonClickedEventArgs{Button: explain})
 						event.ExecuteDeferred()
@@ -79,7 +77,7 @@ func TestNativeHelpLayersFitAndPreserveTask(t *testing.T) {
 					}
 					g.host.setSidebarScroll(.5)
 					g.host.helpEvent(g, ui.HelpEvent{Kind: "open", Concept: "fares_demand", Anchor: "fares"})
-					expectedScroll = g.State.Help.ReturnScroll
+					expectedScroll := g.State.Help.ReturnScroll
 					g.host.build(g)
 					if !g.host.blocksMap() || g.host.helpSearch == nil {
 						t.Fatal("reference not active")

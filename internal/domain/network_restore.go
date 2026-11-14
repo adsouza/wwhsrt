@@ -14,7 +14,7 @@ func (w World) validNetworkReport(report gameapi.Report, month int) bool {
 		plans = append(plans, gameapi.Service{CorridorID: run.CorridorID, Frequency: run.RequestedFrequency, Fare: run.Fare})
 		needed += required(run.RequestedFrequency, route.Minutes)
 	}
-	if w.validateOwnedCapacity(plans) != nil || report.LeaseCosts%w.leaseMonthly() != 0 || report.LeaseCosts < gameapi.Money(needed)*w.leaseMonthly() || report.LeaseCosts > 32*w.leaseMonthly() {
+	if w.validateOwnedCapacity(plans) != nil || report.LeaseCosts%w.leaseMonthly() != 0 || report.LeaseCosts < gameapi.Money(needed)*w.leaseMonthly() {
 		return false
 	}
 	network := w.simulate(plans, month)
@@ -45,7 +45,7 @@ func (w World) validNetworkReport(report gameapi.Report, month int) bool {
 // Extend is one atomic replacement: source trains move once, only the explicitly
 // priced additional leases are ordered, and failure preserves both services.
 func (w *World) extendService(c gameapi.Command) error {
-	if c.Frequency < 0 || c.Frequency > 16 || c.Fare < 1000 || c.Fare > 30000 || c.LeaseCount < 0 || c.LeaseCount > 32 {
+	if c.Frequency < 0 || c.Frequency > MaxFrequency || c.Fare < MinFare || c.Fare > MaxFare || c.LeaseCount < 0 {
 		return errCode("invalid_service")
 	}
 	if !w.validExtension(c.CorridorID, c.ReplaceServiceID) {
@@ -56,8 +56,8 @@ func (w *World) extendService(c gameapi.Command) error {
 	if c.LeaseCount != max(0, required(c.Frequency, target.Minutes)-available) {
 		return errCode("fleet_shortage")
 	}
-	if len(w.fleet)+c.LeaseCount > 32 || c.LeaseCount > 0 && w.company.Cash < 0 {
-		return errCode("fleet_limit")
+	if c.LeaseCount > 0 && w.company.Cash < 0 {
+		return errCode("insufficient_cash")
 	}
 	for i := range w.services {
 		if w.services[i].CorridorID == c.ReplaceServiceID {

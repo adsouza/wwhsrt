@@ -98,9 +98,6 @@ func (w World) rides(plans []gameapi.Service, delivered map[string]int) map[game
 	}
 	return out
 }
-func (w World) itineraries(from, to gameapi.CityID, class string, graph map[gameapi.CityID][]ride) []itinerary {
-	return w.itinerariesFrom(from, class, graph)[to]
-}
 
 // Enumerate once per origin/class rather than once per possible destination.
 // Keep exactly the same three best acyclic, at-most-three-service itineraries.

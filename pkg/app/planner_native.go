@@ -354,7 +354,7 @@ func (h *host) buildServices(g *Game, t func(string) string, label nativeLabel, 
 	apply := func() {
 		b := button(title, func() { h.send(g, kind) })
 		h.primaryAction = b
-		b.GetWidget().Disabled = h.busy || e != nil || !f.Open || g.State.ReplaceServiceID == "" && f.FleetNeeded > f.FleetAvailable || g.State.ReplaceServiceID != "" && (len(g.Frame.Fleet)+f.AdditionalLeases > 32 || f.AdditionalLeases > 0 && g.Frame.Player.Cash < 0)
+		b.GetWidget().Disabled = h.busy || e != nil || !f.Open || g.State.ReplaceServiceID == "" && f.FleetNeeded > f.FleetAvailable || g.State.ReplaceServiceID != "" && f.AdditionalLeases > 0 && g.Frame.Player.Cash < 0
 	}
 	if ui.ServiceDirty(g.State, g.Frame) {
 		h.row(2, func() {

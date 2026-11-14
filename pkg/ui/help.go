@@ -267,7 +267,7 @@ func helpSlots(s State) [][2]string {
 		}
 		return nil
 	}
-	slots := [][2]string{}
+	var slots [][2]string
 	switch s.View {
 	case "build":
 		if BuildPane(s) == "costs" {

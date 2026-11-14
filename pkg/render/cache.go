@@ -24,7 +24,7 @@ func (m *Map) Draw(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s ui.St
 	key := mapSceneKey(c, f, s)
 	if m.scene == nil || m.sceneKey != key || f.Checkpoint == "" {
 		if m.scene != nil {
-			m.scene.Dispose()
+			m.scene.Deallocate()
 		}
 		m.scene = ebiten.NewImage(max(1, int(c.Width)), max(1, int(c.Height)))
 		m.sceneKey = key

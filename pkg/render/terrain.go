@@ -147,7 +147,7 @@ func (t *relief) draw(dst *ebiten.Image, c mapview.Camera, s ui.State) {
 			vector.FillPath(dst, &path, nil, op)
 			vector.StrokeLine(dst, float32(p.X-2), float32(p.Y-2), float32(p.X+2), float32(p.Y-2), 2, color.White, true)
 		} else if f.Kind == "lake" {
-			vector.DrawFilledCircle(dst, float32(p.X), float32(p.Y), 4.5, pal.Water, true)
+			vector.FillCircle(dst, float32(p.X), float32(p.Y), 4.5, pal.Water, true)
 			vector.StrokeCircle(dst, float32(p.X), float32(p.Y), 4.5, 1, pal.Coast, true)
 		}
 	}
@@ -201,7 +201,7 @@ func (t *relief) labels(m *Map, dst *ebiten.Image, c mapview.Camera, s ui.State,
 					continue
 				}
 				occupied = append(occupied, r)
-				vector.DrawFilledRect(dst, float32(r.x-2), float32(r.y-1), float32(r.w+4), 18, pal.TerrainFill, true)
+				vector.FillRect(dst, float32(r.x-2), float32(r.y-1), float32(r.w+4), 18, pal.TerrainFill, true)
 				m.Label(dst, value, r.x, r.y, 12, pal.TerrainText)
 				break
 			}
@@ -210,10 +210,10 @@ func (t *relief) labels(m *Map, dst *ebiten.Image, c mapview.Camera, s ui.State,
 	if !legendVisible {
 		return
 	}
-	vector.DrawFilledRect(dst, float32(legend.x), float32(legend.y), float32(legend.w), float32(legend.h), pal.TerrainFill, true)
+	vector.FillRect(dst, float32(legend.x), float32(legend.y), float32(legend.w), float32(legend.h), pal.TerrainFill, true)
 	m.Label(dst, ui.Text(locale, "terrainLegend"), legend.x+8, legend.y+4, 11, pal.Text)
 	for i, col := range []color.NRGBA{{231, 244, 204, 255}, {199, 211, 145, 255}, {183, 168, 133, 255}, {177, 157, 139, 255}, {234, 230, 216, 255}} {
-		vector.DrawFilledRect(dst, float32(legend.x+8)+float32(i)*24, float32(legend.y+24), 24, 7, terrainSwatch(col, dark), true)
+		vector.FillRect(dst, float32(legend.x+8)+float32(i)*24, float32(legend.y+24), 24, 7, terrainSwatch(col, dark), true)
 	}
 	m.Label(dst, "0 m", legend.x+8, legend.y+33, 9, pal.Text)
 	m.Label(dst, "2000+ m", legend.x+93, legend.y+33, 9, pal.Text)

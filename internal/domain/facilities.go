@@ -12,6 +12,13 @@ const runningPerKM gameapi.Money = 1200
 const publicAccessPerKM gameapi.Money = 500
 const stationPerJourney gameapi.Money = 50
 
+// Service limits shared by command validation, forecasts and save restoration.
+// Change them here only. Fleet size is deliberately unlimited: a lease needs
+// only nonnegative cash, and each train then costs its monthly lease.
+const MaxFrequency = 16
+const MinFare gameapi.Money = 1000
+const MaxFare gameapi.Money = 30000
+
 // This slice has one train family, so every persisted lease has this family.
 func TrainFamily() gameapi.TrainFamily {
 	return gameapi.TrainFamily{ID: "swift-400", NameKey: "swift400", Seats: trainSeats, LeaseMonthly: LeaseMonthly, RunningPerKM: runningPerKM, PublicAccessPerKM: publicAccessPerKM, StationPerJourney: stationPerJourney, DailyMinutes: trainDayMinutes, RoundTripTurnaround: roundTripTurnaround}

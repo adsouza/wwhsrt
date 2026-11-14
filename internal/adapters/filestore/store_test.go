@@ -1,3 +1,5 @@
+//go:build !js
+
 package filestore
 
 import (
@@ -36,7 +38,18 @@ func TestCommitReloadAndExclusiveOwner(t *testing.T) {
 		t.Fatal(e)
 	}
 	unlock()
-	if e = os.WriteFile(path, make([]byte, 1024*1024+1), 0600); e != nil {
+	// A save larger than the old 1 MiB cap must round-trip.
+	large := make([]byte, 1024*1024+1)
+	if e = s.Commit(large); e != nil {
+		t.Fatal(e)
+	}
+	if b, e = s.Load(); e != nil || len(b) != len(large) {
+		t.Fatal("committed snapshot could not be read back")
+	}
+	if e = s.Commit(make([]byte, MaxSnapshot+1)); e == nil {
+		t.Fatal("unbounded snapshot committed")
+	}
+	if e = os.WriteFile(path, make([]byte, MaxSnapshot+1), 0600); e != nil {
 		t.Fatal(e)
 	}
 	if _, e = s.Load(); e == nil {

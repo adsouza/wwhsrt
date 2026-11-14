@@ -230,22 +230,22 @@ func (m *Map) drawScene(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s 
 			vector.StrokeCircle(dst, float32(p.X), float32(p.Y), 10, 3, pal.WarningText, true)
 		}
 		if city.ID == s.Selected {
-			vector.DrawFilledCircle(dst, float32(p.X), float32(p.Y), 13, pal.Surface, true)
+			vector.FillCircle(dst, float32(p.X), float32(p.Y), 13, pal.Surface, true)
 			vector.StrokeCircle(dst, float32(p.X), float32(p.Y), 13, 3, pal.Accent, true)
 		}
 		station, hasStation := ui.StationAt(f, city.ID)
 		if !hasStation {
 			vector.StrokeCircle(dst, float32(p.X), float32(p.Y), 4.5, 1.5, pal.Muted, true)
 		} else if !station.Open {
-			vector.DrawFilledRect(dst, float32(p.X-5), float32(p.Y-5), 10, 10, pal.Construction, true)
+			vector.FillRect(dst, float32(p.X-5), float32(p.Y-5), 10, 10, pal.Construction, true)
 		} else {
 			ink := pal.Accent
 			if station.Public {
 				ink = pal.Existing
 			}
-			vector.DrawFilledCircle(dst, float32(p.X), float32(p.Y), 6, ink, true)
+			vector.FillCircle(dst, float32(p.X), float32(p.Y), 6, ink, true)
 		}
-		vector.DrawFilledCircle(dst, float32(p.X), float32(p.Y), 3.5, pal.Surface, true)
+		vector.FillCircle(dst, float32(p.X), float32(p.Y), 3.5, pal.Surface, true)
 		if s.View == "build" {
 			tag := ""
 			if city.ID == s.FromCity {
@@ -255,7 +255,7 @@ func (m *Map) drawScene(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s 
 				tag = "B"
 			}
 			if tag != "" {
-				vector.DrawFilledCircle(dst, float32(p.X), float32(p.Y), 12, pal.Accent, true)
+				vector.FillCircle(dst, float32(p.X), float32(p.Y), 12, pal.Accent, true)
 				tagInk := pal.OnAction
 				if ui.IsDark(s) {
 					tagInk = pal.Outline
@@ -304,9 +304,9 @@ func (m *Map) drawScene(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s 
 	m.Label(dst, ui.Text(s.Locale, "stationLegend"), 20, 40, 11, pal.Muted)
 	y := float32(56)
 	if s.View == "map" || s.View == "build" {
-		vector.DrawFilledCircle(dst, 24, y+9, 2.5, pal.Action, true)
-		vector.DrawFilledCircle(dst, 34, y+9, 2.5, pal.Action, true)
-		vector.DrawFilledCircle(dst, 44, y+9, 2.5, pal.Action, true)
+		vector.FillCircle(dst, 24, y+9, 2.5, pal.Action, true)
+		vector.FillCircle(dst, 34, y+9, 2.5, pal.Action, true)
+		vector.FillCircle(dst, 44, y+9, 2.5, pal.Action, true)
 		m.Label(dst, ui.Text(s.Locale, "prospectLegend"), 54, float64(y), 11, pal.Text)
 		y += 22
 	}
@@ -317,7 +317,7 @@ func (m *Map) drawScene(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s 
 		if !legend.show {
 			continue
 		}
-		vector.DrawFilledRect(dst, 12, y, float32(math.Min(285, c.Width-24)), 24, pal.Warning, true)
+		vector.FillRect(dst, 12, y, float32(math.Min(285, c.Width-24)), 24, pal.Warning, true)
 		if legend.fleet {
 			for x := float32(20); x < 43; x += 10 {
 				vector.StrokeLine(dst, x, y+12, x+5, y+12, 5, pal.WarningText, true)

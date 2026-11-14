@@ -307,7 +307,7 @@ func (w World) networkForecast(q gameapi.ForecastRequest) (gameapi.Forecast, err
 	if !ok {
 		return gameapi.Forecast{}, errCode("no_route")
 	}
-	if q.Frequency < 0 || q.Frequency > 16 || q.Fare < 1000 || q.Fare > 30000 {
+	if q.Frequency < 0 || q.Frequency > MaxFrequency || q.Fare < MinFare || q.Fare > MaxFare {
 		return gameapi.Forecast{}, errCode("invalid_service")
 	}
 	result := gameapi.Forecast{FleetNeeded: required(q.Frequency, r.Minutes), FleetAvailable: w.FleetCount(r.ID), Open: r.Open, KM: r.KM, Minutes: r.Minutes}

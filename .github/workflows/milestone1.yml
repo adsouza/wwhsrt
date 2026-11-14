@@ -19,6 +19,13 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y xvfb xauth libgl1 libgl1-mesa-dri libx11-6 libxcursor1 libxext6 libxi6 libxinerama1 libxrandr2 libxrender1
+      - name: Vet native and browser targets
+        run: |
+          go vet ./...
+          GOOS=js GOARCH=wasm go vet ./...
+        env:
+          GOMEMLIMIT: 768MiB
+          GOMAXPROCS: '2'
       - run: xvfb-run -a go test -p 1 ./...
         env:
           GOMEMLIMIT: 768MiB

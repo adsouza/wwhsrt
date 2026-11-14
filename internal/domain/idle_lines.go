@@ -6,6 +6,7 @@ import "wwhsrt/pkg/gameapi"
 // service pattern. Through-running on a line clears its no-service warning.
 func (w World) IdleLines() []gameapi.IdleLine {
 	result := []gameapi.IdleLine{}
+	routes := w.Routes()
 	for _, co := range w.catalog.corridors {
 		owned := false
 		for _, p := range w.projects {
@@ -17,7 +18,7 @@ func (w World) IdleLines() []gameapi.IdleLine {
 			continue
 		}
 		active, fleet := false, 0
-		for _, route := range w.Routes() {
+		for _, route := range routes {
 			covers := false
 			for _, id := range route.Sections {
 				if id == co.ID {
@@ -41,7 +42,7 @@ func (w World) IdleLines() []gameapi.IdleLine {
 		a, _ := w.alignment(co, "")
 		result = append(result, gameapi.IdleLine{CorridorID: co.ID, FromCity: co.FromCity, ToCity: co.ToCity, NeedsTrains: fleet == 0, Maintenance: a.Cost / maintenanceDivisor})
 	}
-	for _, route := range w.Routes() {
+	for _, route := range routes {
 		count := w.FleetCount(route.ID)
 		if count == 0 {
 			continue

@@ -62,6 +62,8 @@ type host struct {
 	bridge                        js.Func
 	helpLoaded                    bool
 	viewportWidth, viewportHeight int
+	sentFrame                     bool
+	sentRevision                  uint64
 }
 
 func (h *host) init(g *Game) {
@@ -85,15 +87,24 @@ func (h *host) init(g *Game) {
 	go h.run(g)
 	js.Global().Get("parent").Call("railReady")
 }
-func (h *host) snapshot(g *Game) map[string]any {
+
+// The frame carries the whole static catalog (megabytes of geometry and
+// routes). It is sent when its revision changes or when full is set; the page
+// keeps the last frame it received and reuses it for camera and UI replies.
+func (h *host) snapshot(g *Game, full bool) map[string]any {
 	points := map[string]mapview.Point{}
 	for _, city := range g.Frame.Cities {
 		points[string(city.ID)] = render.CityPoint(g.Camera, city)
 	}
-	return map[string]any{"source_station": g.Map.PublicStop(g.State.SourceStation), "regions": mapview.VisibleRegions(g.State.Portrait), "workspace": ui.Workspace(h.viewportWidth, h.viewportHeight, g.State), "frame": g.Frame, "state": g.State, "texts": ui.Catalog(g.State.Locale), "camera": g.Camera, "points": points, "palette": ui.PaletteFor(g.State)}
+	v := map[string]any{"source_station": g.Map.PublicStop(g.State.SourceStation), "regions": mapview.VisibleRegions(g.State.Portrait), "workspace": ui.Workspace(h.viewportWidth, h.viewportHeight, g.State), "state": g.State, "texts": ui.Catalog(g.State.Locale), "camera": g.Camera, "points": points, "palette": ui.PaletteFor(g.State)}
+	if full || !h.sentFrame || h.sentRevision != g.Frame.Revision {
+		v["frame"] = g.Frame
+		h.sentFrame, h.sentRevision = true, g.Frame.Revision
+	}
+	return v
 }
-func (h *host) reply(g *Game, r request, err error) {
-	v := h.snapshot(g)
+func (h *host) reply(g *Game, r request, err error, full bool) {
+	v := h.snapshot(g, full)
 	if err != nil {
 		v["error"] = err.Error()
 		if capacity, ok := err.(*gameapi.Error); ok {
@@ -126,7 +137,7 @@ func (h *host) run(g *Game) {
 			if e == nil && c.Kind == gameapi.NewGame {
 				g.newGamePresentation()
 			}
-			h.reply(g, r, e)
+			h.reply(g, r, e, true)
 			g.mu.Unlock()
 			continue
 		}
@@ -209,7 +220,7 @@ func (h *host) run(g *Game) {
 				}
 				g.State = s
 			}
-			h.reply(g, r, nil)
+			h.reply(g, r, nil, false)
 		case "market":
 			var q struct {
 				From, To gameapi.CityID
@@ -238,7 +249,7 @@ func (h *host) run(g *Game) {
 			} else {
 				g.Camera = mapview.RegionCamera(g.Camera.Width, g.Camera.Height, q.ID, g.State.Portrait)
 			}
-			h.reply(g, r, nil)
+			h.reply(g, r, nil, false)
 		case "replay":
 			b, _ := json.Marshal(map[string]any{"minute": g.replayTime(), "description": render.TrainDescription(g.Camera, g.Frame, g.State, g.replayTime())})
 			r.resolve.Invoke(string(b))
@@ -248,26 +259,26 @@ func (h *host) run(g *Game) {
 			} else {
 				g.Camera = g.Map.Camera(g.Camera.Width, g.Camera.Height, g.State.Portrait)
 			}
-			h.reply(g, r, nil)
+			h.reply(g, r, nil, false)
 		case "focus_idle":
 			var q struct {
 				CorridorID string `json:"corridor_id"`
 			}
 			_ = json.Unmarshal([]byte(r.body), &q)
 			g.focusIdle(q.CorridorID)
-			h.reply(g, r, nil)
+			h.reply(g, r, nil, false)
 		case "focus_route":
 			g.focusSelected()
-			h.reply(g, r, nil)
+			h.reply(g, r, nil, false)
 		case "zoom_in":
 			g.Camera.ZoomAt(1.3, mapview.Point{X: g.Camera.Width / 2, Y: g.Camera.Height / 2})
-			h.reply(g, r, nil)
+			h.reply(g, r, nil, false)
 		case "zoom_out":
 			g.Camera.ZoomAt(1/1.3, mapview.Point{X: g.Camera.Width / 2, Y: g.Camera.Height / 2})
-			h.reply(g, r, nil)
+			h.reply(g, r, nil, false)
 		case "export":
 			b, e := g.Port.Export()
-			v := h.snapshot(g)
+			v := h.snapshot(g, true)
 			v["save"] = string(b)
 			if e != nil {
 				v["error"] = e.Error()
@@ -275,9 +286,9 @@ func (h *host) run(g *Game) {
 			out, _ := json.Marshal(v)
 			r.resolve.Invoke(string(out))
 		case "snapshot":
-			h.reply(g, r, nil)
+			h.reply(g, r, nil, true)
 		default:
-			h.reply(g, r, &gameapi.Error{Code: "unknown_command"})
+			h.reply(g, r, &gameapi.Error{Code: "unknown_command"}, false)
 		}
 		g.mu.Unlock()
 	}
@@ -285,7 +296,7 @@ func (h *host) run(g *Game) {
 func (h *host) update(g *Game)  {}
 func (h *host) blocksMap() bool { return false }
 func (h *host) changed(g *Game) {
-	b, _ := json.Marshal(h.snapshot(g))
+	b, _ := json.Marshal(h.snapshot(g, false))
 	js.Global().Get("parent").Call("railMapChanged", string(b))
 }
 func (h *host) persist(g *Game) {} // Campaign commits use IndexedDB; camera is presentation only.

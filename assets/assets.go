@@ -1,7 +1,12 @@
 // Package assets bundles all runtime data for offline use.
 package assets
 
-import "embed"
+import (
+	"crypto/sha256"
+	"embed"
+	"encoding/hex"
+	"sync"
+)
 
 //go:embed scenario/scenario.json
 var Scenario []byte
@@ -20,6 +25,13 @@ var Network []byte
 
 //go:embed scenario/public-network.json
 var PublicNetwork []byte
+
+// PublicNetworkSHA256 is the lowercase hex digest of PublicNetwork, computed
+// once for every package that pins data to the catalog.
+var PublicNetworkSHA256 = sync.OnceValue(func() string {
+	sum := sha256.Sum256(PublicNetwork)
+	return hex.EncodeToString(sum[:])
+})
 
 //go:embed scenario/public-network-v1.json
 var PublicNetworkV1 []byte

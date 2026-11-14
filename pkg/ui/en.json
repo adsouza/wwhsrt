@@ -103,7 +103,6 @@
   "invalid_service": "Use 0–16 return trips/day and a USD 10–300 one-way fare.",
   "fleet_shortage": "Lease enough trains on this corridor or reduce frequency.",
   "fleet_in_use": "Reduce frequency before returning this train.",
-  "fleet_limit": "The fleet limit is 32 trains, and new leases need nonnegative cash.",
   "loan_limit": "The development loan limit is USD 5B.",
   "cash_limit": "This action exceeds the development cash limit.",
   "build_line": "Construction committed and saved.",

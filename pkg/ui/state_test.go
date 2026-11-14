@@ -16,13 +16,13 @@ func TestNewGameClearsDraftsAndRetainsDevicePreferences(t *testing.T) {
 }
 
 func TestChineseCatalogAndAliases(t *testing.T) {
-	for key := range catalogs["en"] {
-		if catalogs["zh-Hans"][key] == "" {
+	for key := range catalogs()["en"] {
+		if catalogs()["zh-Hans"][key] == "" {
 			t.Errorf("missing Chinese message %s", key)
 		}
 	}
-	for key := range catalogs["zh-Hans"] {
-		if catalogs["en"][key] == "" {
+	for key := range catalogs()["zh-Hans"] {
+		if catalogs()["en"][key] == "" {
 			t.Errorf("missing English message %s", key)
 		}
 	}

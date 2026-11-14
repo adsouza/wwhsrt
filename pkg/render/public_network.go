@@ -1,7 +1,6 @@
 package render
 
 import (
-	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -50,7 +49,7 @@ func newPublicLayer() (*publicLayer, error) {
 	if err := json.Unmarshal(assets.PlayableRailMap, &scene); err != nil {
 		return nil, err
 	}
-	if scene.SourceSHA != fmt.Sprintf("%x", sha256.Sum256(assets.PublicNetwork)) || len(scene.Lines) != len(scene.CorridorIDs) {
+	if scene.SourceSHA != assets.PublicNetworkSHA256() || len(scene.Lines) != len(scene.CorridorIDs) {
 		return nil, fmt.Errorf("playable rail map does not match its catalog")
 	}
 	allowed := map[string]bool{}
@@ -87,7 +86,7 @@ func (p *publicLayer) drawLand(dst *ebiten.Image, c mapview.Camera, s ui.State) 
 		return
 	}
 	if p.landImage != nil {
-		p.landImage.Dispose()
+		p.landImage.Deallocate()
 	}
 	p.landImage = ebiten.NewImage(max(1, int(c.Width)), max(1, int(c.Height)))
 	p.landCamera = c
@@ -120,7 +119,7 @@ func (p *publicLayer) draw(dst *ebiten.Image, c mapview.Camera, s ui.State) {
 	pal := ui.PaletteFor(s)
 	if p.image == nil || p.camera != c || p.color != pal.Existing {
 		if p.image != nil {
-			p.image.Dispose()
+			p.image.Deallocate()
 		}
 		p.image = ebiten.NewImage(max(1, int(c.Width)), max(1, int(c.Height)))
 		p.camera = c

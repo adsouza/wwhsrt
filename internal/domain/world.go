@@ -261,7 +261,7 @@ func (w World) legacyForecast(q gameapi.ForecastRequest) (gameapi.Forecast, erro
 	if !ok {
 		return gameapi.Forecast{}, errCode("no_route")
 	}
-	if q.Frequency < 0 || q.Frequency > 16 || q.Fare < 1000 || q.Fare > 30000 {
+	if q.Frequency < 0 || q.Frequency > MaxFrequency || q.Fare < MinFare || q.Fare > MaxFare {
 		return gameapi.Forecast{}, errCode("invalid_service")
 	}
 	result := gameapi.Forecast{FleetNeeded: required(q.Frequency, a.Minutes), FleetAvailable: w.FleetCount(c.ID), Open: w.operational(c)}
@@ -375,8 +375,8 @@ func (w *World) change(c gameapi.Command) error {
 		if !route.Open {
 			return errCode("line_not_open")
 		}
-		if len(w.fleet) >= 32 || w.company.Cash < 0 {
-			return errCode("fleet_limit")
+		if w.company.Cash < 0 {
+			return errCode("insufficient_cash")
 		}
 		w.fleet = append(w.fleet, gameapi.FleetLease{ID: w.nextTrain, CorridorID: c.CorridorID})
 		w.nextTrain++
@@ -522,61 +522,56 @@ func ValidName(name string) bool {
 	return true
 }
 
+// Cutovers names the first month resolved under each rules or catalog epoch.
+// Months before an epoch's cutover replay against that epoch's archived
+// catalog. Named fields replace a positional list that compiled when transposed.
+type Cutovers struct {
+	Network, Catalog, Economy         int
+	Topology, Connectivity            int
+	Construction, Regional, Connector int
+}
+
+func (w World) cutovers() Cutovers {
+	return Cutovers{Network: w.networkSince, Catalog: w.catalogSince, Economy: w.economySince, Topology: w.topologySince, Connectivity: w.connectivitySince, Construction: w.constructionSince, Regional: w.regionalSince, Connector: w.connectorSince}
+}
+
 // Restore validates the development business snapshot without executing commands.
-func Restore(c Catalog, revision uint64, months int, company gameapi.Company, reports []gameapi.Report, projects []gameapi.Project, services []gameapi.Service, fleet []gameapi.FleetLease, debt gameapi.Money, pending gameapi.CashFlows, nextTrain uint64, networkSince ...int) (World, error) {
+func Restore(c Catalog, revision uint64, months int, company gameapi.Company, reports []gameapi.Report, projects []gameapi.Project, services []gameapi.Service, fleet []gameapi.FleetLease, debt gameapi.Money, pending gameapi.CashFlows, nextTrain uint64, at Cutovers) (World, error) {
 	fail := func() (World, error) { return World{}, errCode("invalid_save") }
-	if months < 0 || months > CampaignMonths || revision > MaxRevision || company.ID != "company-1" || !ValidName(company.Name) || company.Cash > moneyLimit || company.Cash < -moneyLimit || reports == nil || len(reports) != months || projects == nil || services == nil || fleet == nil || len(projects) > len(c.corridors) || len(services) > len(c.corridors)+len(c.network.Routes) || len(fleet) > 32 || debt < 0 || debt > DebtLimit || nextTrain < 3 || nextTrain > MaxRevision+3 {
+	if months < 0 || months > CampaignMonths || revision > MaxRevision || company.ID != "company-1" || !ValidName(company.Name) || company.Cash > moneyLimit || company.Cash < -moneyLimit || reports == nil || len(reports) != months || projects == nil || services == nil || fleet == nil || len(projects) > len(c.corridors) || len(services) > len(c.corridors)+len(c.network.Routes) || debt < 0 || debt > DebtLimit || nextTrain < 3 || nextTrain > MaxRevision+3 {
 		return fail()
 	}
 	w := World{catalog: c, revision: revision, months: months, company: company, reports: append([]gameapi.Report{}, reports...), projects: append([]gameapi.Project{}, projects...), services: append([]gameapi.Service{}, services...), fleet: append([]gameapi.FleetLease{}, fleet...), debt: debt, pending: pending, nextTrain: nextTrain}
-	since := months
-	if len(networkSince) > 0 {
-		since = networkSince[0]
-	}
+	since := at.Network
 	if since < 0 || since > months {
 		return fail()
 	}
 	w.networkSince = since
-	w.economySince = months
-	if len(networkSince) > 2 {
-		w.economySince = networkSince[2]
-	}
+	w.economySince = at.Economy
 	if w.economySince < 0 || w.economySince > months {
 		return fail()
 	}
-	if len(networkSince) > 1 {
-		w.catalogSince = networkSince[1]
-	}
+	w.catalogSince = at.Catalog
 	if w.catalogSince < 0 || w.catalogSince > months || w.economySince < w.catalogSince || (w.catalogSince > 0 && c.prior == nil) {
 		return fail()
 	}
-	if len(networkSince) > 3 {
-		w.topologySince = networkSince[3]
-	}
+	w.topologySince = at.Topology
 	if w.topologySince < 0 || w.topologySince > months || (w.topologySince > 0 && c.previous == nil) {
 		return fail()
 	}
-	if len(networkSince) > 4 {
-		w.connectivitySince = networkSince[4]
-	}
+	w.connectivitySince = at.Connectivity
 	if w.connectivitySince < 0 || w.connectivitySince > months || (w.connectivitySince > 0 && (c.connectivityPrior == nil || w.connectivitySince < w.topologySince)) {
 		return fail()
 	}
-	if len(networkSince) > 5 {
-		w.constructionSince = networkSince[5]
-	}
+	w.constructionSince = at.Construction
 	if w.constructionSince < 0 || w.constructionSince > months || (w.constructionSince > 0 && (c.constructionPrior == nil || w.constructionSince < w.connectivitySince)) {
 		return fail()
 	}
-	if len(networkSince) > 6 {
-		w.regionalSince = networkSince[6]
-	}
+	w.regionalSince = at.Regional
 	if w.regionalSince < 0 || w.regionalSince > months || (w.regionalSince > 0 && c.regionalPrior == nil) || (c.regionalPrior != nil && w.regionalSince < w.constructionSince) {
 		return fail()
 	}
-	if len(networkSince) > 7 {
-		w.connectorSince = networkSince[7]
-	}
+	w.connectorSince = at.Connector
 	if w.connectorSince < 0 || w.connectorSince > months || (w.connectorSince > 0 && c.connectorPrior == nil) || (c.connectorPrior != nil && w.connectorSince < w.regionalSince) {
 		return fail()
 	}
@@ -613,7 +608,7 @@ func Restore(c Catalog, revision uint64, months int, company gameapi.Company, re
 		passengers := 0
 		runs := map[string]bool{}
 		for _, run := range r.Services {
-			if runs[run.CorridorID] || run.Frequency < 0 || run.Frequency > 16 || run.Fare < 1000 || run.Fare > 30000 || run.Passengers < 0 || !validMoney(run.Revenue) {
+			if runs[run.CorridorID] || run.Frequency < 0 || run.Frequency > MaxFrequency || run.Fare < MinFare || run.Fare > MaxFare || run.Passengers < 0 || !validMoney(run.Revenue) {
 				return fail()
 			}
 			if i < since {
@@ -623,7 +618,7 @@ func Restore(c Catalog, revision uint64, months int, company gameapi.Company, re
 					return fail()
 				}
 			} else {
-				if run.RequestedFrequency < run.Frequency || run.RequestedFrequency > 16 {
+				if run.RequestedFrequency < run.Frequency || run.RequestedFrequency > MaxFrequency {
 					return fail()
 				}
 				route, ok := historical.route(run.CorridorID)
@@ -702,7 +697,7 @@ func Restore(c Catalog, revision uint64, months int, company gameapi.Company, re
 	seen = map[string]bool{}
 	for _, s := range services {
 		route, ok := w.route(s.CorridorID)
-		if !ok || seen[s.CorridorID] || !route.Open || s.Frequency < 0 || s.Frequency > 16 || s.Fare < 1000 || s.Fare > 30000 || w.FleetCount(s.CorridorID) < required(s.Frequency, route.Minutes) {
+		if !ok || seen[s.CorridorID] || !route.Open || s.Frequency < 0 || s.Frequency > MaxFrequency || s.Fare < MinFare || s.Fare > MaxFare || w.FleetCount(s.CorridorID) < required(s.Frequency, route.Minutes) {
 			return fail()
 		}
 		seen[s.CorridorID] = true

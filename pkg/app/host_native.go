@@ -356,7 +356,7 @@ func (h *host) draw(g *Game, screen *ebiten.Image) {
 	if !r.Empty() {
 		if h.mapImage == nil || h.mapImage.Bounds().Dx() != r.Dx() || h.mapImage.Bounds().Dy() != r.Dy() {
 			if h.mapImage != nil {
-				h.mapImage.Dispose()
+				h.mapImage.Deallocate()
 			}
 			h.mapImage = ebiten.NewImage(r.Dx(), r.Dy())
 		}
@@ -505,7 +505,6 @@ func (h *host) build(g *Game) {
 			choices = append(choices, choice{string(city.ID), t(string(city.ID))})
 		}
 		h.selectChoice(g, string(g.State.Selected), choices, func(id string) {
-			g.State.SourceStation = ""
 			g.State.SourceStation = ""
 			g.State.Selected = gameapi.CityID(id)
 			g.dirty = true

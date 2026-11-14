@@ -170,7 +170,7 @@ func best(w domain.World, id string) (gameapi.ForecastRequest, gameapi.Forecast)
 			for fare := range fares {
 				p := gameapi.ForecastRequest{CorridorID: id, Frequency: n, Fare: fare, ReplaceServiceID: source}
 				f, e := w.Forecast(p)
-				if e != nil || len(w.Fleet())+f.AdditionalLeases > 32 {
+				if e != nil {
 					continue
 				}
 				if f.CompanyChange > score || (f.CompanyChange == score && (fare < q.Fare || fare == q.Fare && n < q.Frequency)) {

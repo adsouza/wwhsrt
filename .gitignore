@@ -45,3 +45,6 @@ go.work.sum
 /node_modules/
 
 /web/terrain-credits.txt
+
+# Python bytecode cache
+__pycache__/
