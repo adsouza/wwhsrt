@@ -1,6 +1,7 @@
 # Text size (native app)
 
-Status: approved 2026-11-14.
+Status: approved 2026-11-14 and implemented. Item 7 of Behaviour was added in planning and awaits
+confirmation; the native hand check has not been done.
 Size: a small project (about 100 font-size sites, the fixed chrome sizes, one
 new setting, tests at each step).
 
