@@ -1,0 +1,206 @@
+"""The rules for worldwide terrain tiles: which tiles exist, how they are shaded, and what counts as land.
+
+Pure functions; tools/prepare-terrain.py does the reading, fetching and writing. Tiles are 256x256 on the
+Web Mercator grid. Longitude comes before latitude in every pair, as in basemap_rule.
+"""
+
+import math
+
+import numpy as np
+from PIL import Image, ImageDraw
+import shapely
+from shapely.geometry import MultiPolygon, Polygon, box
+
+import basemap_rule as rule
+
+# Elevation in metres and the colour at it. Unchanged from the Japan-only scale up to 1,800 m; above
+# that it keeps going, so a 2,600 m plateau and a 4,800 m peak are different tones.
+STOPS = [0, 150, 400, 800, 1200, 1800, 2600, 3600, 4800]
+COLORS = [
+    [231, 244, 204],
+    [218, 231, 174],
+    [199, 211, 145],
+    [189, 190, 135],
+    [183, 168, 133],
+    [177, 157, 139],
+    [166, 141, 128],
+    [196, 186, 180],
+    [244, 243, 240],
+]
+LOWLAND = tuple(COLORS[0])
+NEAR_KM = 60  # level-8 tiles reach this far either side of a line
+SAMPLE_KM = 5
+LEVELS = range(2, 9)
+COARSE = range(2, 6)  # levels that cover all land
+SOUTH_LIMIT = -60.0
+EDGE_KM = 2  # outline edges are followed along the map's straight line in steps no longer than this
+
+
+def _mercator_y(z, lat):
+    return (1 - math.asinh(math.tan(math.radians(lat))) / math.pi) / 2 * 2**z
+
+
+def pixel_exact(z, x, y, lon, lat):
+    """Where a place falls in tile z/x/y, in pixels from its north-west corner."""
+    return ((lon + 180) / 360 * 2**z - x) * 256, (_mercator_y(z, lat) - y) * 256
+
+
+def pixel(z, x, y, lon, lat):
+    """The pixel of tile z/x/y that holds a place, as (column, row)."""
+    col, row = pixel_exact(z, x, y, lon, lat)
+    return math.floor(col), math.floor(row)
+
+
+def tile_at(z, lon, lat):
+    n = 2**z
+    return min(n - 1, max(0, math.floor((lon + 180) / 360 * n))), min(n - 1, max(0, math.floor(_mercator_y(z, lat))))
+
+
+def unproject(x, y):
+    """Longitude and latitude of a point on the Equal Earth map: the reverse of basemap_rule.project."""
+    a1, a2, a3, a4 = 1.340264, -0.081106, 0.000893, 0.003796
+    t = y / a1
+    for _ in range(12):
+        t2 = t * t
+        t6 = t2 * t2 * t2
+        step = (t * (a1 + a2 * t2 + t6 * (a3 + a4 * t2)) - y) / (a1 + 3 * a2 * t2 + t6 * (7 * a3 + 9 * a4 * t2))
+        t -= step
+        if abs(step) < 1e-14:
+            break
+    t2 = t * t
+    t6 = t2 * t2 * t2
+    lon = x * 3 * (a1 + 3 * a2 * t2 + t6 * (7 * a3 + 9 * a4 * t2)) / (2 * math.sqrt(3) * math.cos(t))
+    return math.degrees(lon), math.degrees(math.asin(2 * math.sin(t) / math.sqrt(3)))
+
+
+def level8_tiles(lines):
+    """Every level-8 tile within NEAR_KM of a line, and the two Japan boxes."""
+    reach = (NEAR_KM + SAMPLE_KM / 2) / 111.2  # degrees of latitude; half a sample step covers between samples
+    tiles = set()
+    for path in lines:
+        for lon, lat in rule.sample(path, SAMPLE_KM):
+            wide = reach / max(0.01, math.cos(math.radians(lat)))
+            x0, y0 = tile_at(8, lon - wide, lat + reach)
+            x1, y1 = tile_at(8, lon + wide, lat - reach)
+            tiles.update((x, y) for x in range(x0, x1 + 1) for y in range(y0, y1 + 1))
+    for z, x0, y0, x1, y1 in rule.JAPAN_BOXES:
+        assert z == 8
+        tiles.update((x, y) for x in range(x0, x1 + 1) for y in range(y0, y1 + 1))
+    return tiles
+
+
+def parents(tiles):
+    return {(x >> 1, y >> 1) for x, y in tiles}
+
+
+def land_tiles(z, geometry):
+    """Tiles at level z that hold some of the geometry north of 60 S."""
+    north = geometry.intersection(box(-180, SOUTH_LIMIT, 180, 90))
+    if north.is_empty:
+        return set()
+    shapely.prepare(north)
+    found = set()
+    for x in range(2**z):
+        for y in range(2**z):
+            tile = box(*rule.tile_bounds(z, x, y, x, y))
+            if north.intersects(tile) and north.intersection(tile).area > 0:
+                found.add((x, y))
+    return found
+
+
+def tile_list(lines, geometry):
+    """The tiles of every level: all land at levels 2 to 5, near lines at 8, and the parents of those at 7 and 6."""
+    levels = {z: land_tiles(z, geometry) for z in COARSE}
+    levels[8] = level8_tiles(lines)
+    levels[7] = parents(levels[8])
+    levels[6] = parents(levels[7])
+    return levels
+
+
+def elevation(rgb):
+    """Metres from a Terrarium tile's red, green and blue."""
+    return rgb[..., 0] * 256 + rgb[..., 1] + rgb[..., 2] / 256 - 32768
+
+
+def shade(heights, z, y, halo):
+    """Colour and hillshade one tile of row y at level z.
+
+    heights is 258x258 with a pixel from each neighbour around it when halo is true, and the tile's own
+    256x256 otherwise (its edge pixels then stand in for the neighbours, which leaves a faint seam).
+    Ground distance per pixel is taken row by row, so shading does not step between rows of tiles.
+    """
+    if not halo:
+        heights = np.pad(heights, 1, mode="edge")
+    assert heights.shape == (258, 258), heights.shape
+    rows = y + (np.arange(256) + 0.5) / 256
+    lat = np.arctan(np.sinh(math.pi * (1 - 2 * rows / 2**z)))
+    metres = (np.cos(lat) * 2 * math.pi * 6378137 / (256 * 2**z))[:, None]
+    dx = (heights[1:-1, 2:] - heights[1:-1, :-2]) / (2 * metres)
+    dy = (heights[2:, 1:-1] - heights[:-2, 1:-1]) / (2 * metres)
+    own = heights[1:-1, 1:-1]
+    # Light from the northwest, relief exaggerated 2.5 times.
+    nx, ny = -dx * 2.5, dy * 2.5
+    light = np.clip(0.74 + 0.34 * ((nx * -0.5 + ny * 0.5 + 0.7071) / np.sqrt(nx * nx + ny * ny + 1)), 0.55, 1.10)
+    colors = np.array(COLORS, dtype=np.float64)
+    rgb = np.stack([np.interp(np.maximum(own, 0), STOPS, colors[:, i]) for i in range(3)], axis=-1)
+    return np.clip(rgb * light[:, :, None], 0, 255).astype(np.uint8)
+
+
+def densified(geometry, step_km=EDGE_KM):
+    """The geometry with every edge following the straight line the map draws between its ends.
+
+    The renderer joins an outline's projected points with straight lines. On a Mercator tile such a line
+    is a curve, so long edges are cut into short ones along it before the mask is drawn.
+    """
+
+    def ring(points):
+        out = [tuple(points[0][:2])]
+        for a, b in zip(points, points[1:]):
+            steps = math.ceil(rule.km_between(a, b) / step_km)
+            if steps > 1:
+                ax, ay = rule.project(a[0], a[1])
+                bx, by = rule.project(b[0], b[1])
+                out += [unproject(ax + (bx - ax) * i / steps, ay + (by - ay) * i / steps) for i in range(1, steps)]
+            out.append(tuple(b[:2]))
+        return out
+
+    return MultiPolygon(
+        [
+            Polygon(ring(list(p.exterior.coords)), [ring(list(hole.coords)) for hole in p.interiors])
+            for p in rule._polygons(geometry)
+        ]
+    )
+
+
+def land_mask(heights, geometry, z, x, y):
+    """Which pixels of tile z/x/y are land: above 1 m and inside the geometry (already densified)."""
+    west, south, east, north = rule.tile_bounds(z, x, y, x, y)
+    margin = (east - west) / 64
+    near = shapely.clip_by_rect(geometry, west - margin, max(-89.9, south - margin), east + margin, north + margin)
+    inside = np.zeros((256, 256), dtype=bool)
+
+    def filled(points):
+        image = Image.new("1", (256, 256), 0)
+        # A pixel is land when its centre is inside, so shift half a pixel.
+        ImageDraw.Draw(image).polygon(
+            [(c - 0.5, r - 0.5) for c, r in (pixel_exact(z, x, y, p[0], p[1]) for p in points)], fill=1
+        )
+        return np.array(image, dtype=bool)
+
+    for polygon in rule._polygons(near):
+        if polygon.is_empty:
+            continue
+        part = filled(polygon.exterior.coords)
+        for hole in polygon.interiors:
+            part &= ~filled(hole.coords)
+        inside |= part
+    return inside & (heights > 1)
+
+
+def kind(mask):
+    return "land" if mask.all() else "coast" if mask.any() else "sea"
+
+
+def datasets(imagery_sources):
+    """The elevation datasets a source tile's header cites: the part of each entry before its first slash."""
+    return {entry.strip().split("/")[0] for entry in imagery_sources.split(",") if entry.strip()}
