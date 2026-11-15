@@ -360,6 +360,36 @@ func TestBasemapSkipsOutlinesOffScreen(t *testing.T) {
 	}
 }
 
+// A continent's outline stroked as one closed sub-path took 5 GB of GPU memory at 3737x2029: Ebitengine
+// fans triangles from a sub-path's first point, so every coast segment made a triangle across the map.
+func TestCoastIsStrokedInShortRuns(t *testing.T) {
+	ring := []mapview.Point{}
+	for i := range 100 {
+		ring = append(ring, mapview.Point{X: float64(i), Y: float64(i * i % 7)})
+	}
+	closed := append(append([]mapview.Point{}, ring...), ring[0])
+	for name, outline := range map[string][]mapview.Point{"closed": closed, "left open by clipping": ring} {
+		runs := coastRuns([][]mapview.Point{outline})
+		segments := 0
+		for i, run := range runs {
+			if len(run) < 2 || len(run) > coastRun+1 {
+				t.Fatalf("%s: run %d has %d points; a run is 2 to %d", name, i, len(run), coastRun+1)
+			}
+			if i > 0 && run[0] != runs[i-1][len(runs[i-1])-1] {
+				t.Fatalf("%s: run %d does not start where run %d ended", name, i, i-1)
+			}
+			segments += len(run) - 1
+		}
+		if segments != 100 || runs[0][0] != ring[0] || runs[len(runs)-1][len(runs[len(runs)-1])-1] != ring[0] {
+			t.Fatalf("%s: %d segments in %d runs; the whole outline is 100 segments and returns to its start",
+				name, segments, len(runs))
+		}
+	}
+	if runs := coastRuns([][]mapview.Point{closed, closed}); len(runs) != 2*len(coastRuns([][]mapview.Point{closed})) {
+		t.Fatal("two outlines should give twice the runs of one")
+	}
+}
+
 // Which points are drawn depends on the zoom alone. If it also depended on where the camera is, the
 // coast would shimmer while the map is dragged.
 func TestBasemapDetailDoesNotChangeWhenPanned(t *testing.T) {

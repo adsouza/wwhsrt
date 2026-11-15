@@ -337,6 +337,13 @@ git commit -m "Draw the one basemap in every frame and retire the regional files
 
 ### Task 4: Skip what is off screen, and measure
 
+> **As executed (2026-11-15):** this task's code went into Task 2, because the basemap could not land
+> without it: at a quarter-pixel tolerance the World view drew 45,849 land vertices against the 22,000
+> guard. Detail is chosen by zoom from a rank computed once per point (`rankOutline`, `chosen`,
+> `visible` in `pkg/render/basemap.go`), with a one-pixel tolerance. The clip helper is `clipScreen`,
+> not `clipRing`. The measurement below then found a second cost, 5 GB of GPU memory from stroking a
+> continent's outline as one sub-path, fixed by `coastRuns` in `pkg/render/land.go`.
+
 **Files:**
 - Modify: `pkg/render/basemap.go`, `pkg/render/land.go`, `pkg/render/clip.go`, `pkg/render/clip_test.go`, `pkg/render/simplify_test.go`, `pkg/render/basemap_test.go`
 - Create (not committed): timing overlays in the session scratchpad
