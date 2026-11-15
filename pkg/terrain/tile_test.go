@@ -210,14 +210,20 @@ func TestSeaTilesCountAsCoverageAndDrawNothing(t *testing.T) {
 	if slices.Contains(wanted, sea) {
 		t.Error("a sea tile has nothing to load but is wanted")
 	}
-	// A whole sea branch draws nothing beneath it either.
+	// A coarse tile can be all sea while a finer one beneath it resolves an island. The sea tile draws
+	// nothing of its own, not even for quarters that have no tile, but the island's tile is still drawn.
 	s.Tiles[child] = Tile{Kind: Sea}
+	delete(s.Tiles, sea)
 	pieces, _ = s.Cover(7, all, all)
 	count := cells(t, pieces)
 	for x := 32; x < 34; x++ {
 		for y := 32; y < 34; y++ {
-			if count[[2]int{x, y}] != 0 {
-				t.Errorf("cell %d,%d under a sea tile is drawn", x, y)
+			want := 0
+			if x == 33 && y == 33 {
+				want = 1 // the level-7 land tile under the sea tile
+			}
+			if count[[2]int{x, y}] != want {
+				t.Errorf("cell %d,%d under a sea tile is drawn %d times, want %d", x, y, count[[2]int{x, y}], want)
 			}
 		}
 	}

@@ -29,7 +29,10 @@ COLORS = [
 ]
 LOWLAND = tuple(COLORS[0])
 JPEG_QUALITY = 80
-NEAR_KM = 60  # level-8 tiles reach this far either side of a line
+# How far either side of a line each fine level reaches, in km. Level 8 alone would end against
+# level 5, eight times coarser, along a hard edge; two wider rings make each step a halving.
+RINGS = {8: 60, 7: 180, 6: 400}
+NEAR_KM = RINGS[8]
 SAMPLE_KM = 5
 LEVELS = range(2, 9)
 COARSE = range(2, 6)  # levels that cover all land
@@ -113,16 +116,22 @@ def unproject(x, y):
     return math.degrees(lon), math.degrees(math.asin(2 * math.sin(t) / math.sqrt(3)))
 
 
-def level8_tiles(lines):
-    """Every level-8 tile within NEAR_KM of a line, and the two Japan boxes."""
-    reach = (NEAR_KM + SAMPLE_KM / 2) / 111.2  # degrees of latitude; half a sample step covers between samples
+def near_tiles(z, lines, km):
+    """Every tile of level z within km of a line."""
+    reach = (km + SAMPLE_KM / 2) / 111.2  # degrees of latitude; half a sample step covers between samples
     tiles = set()
     for path in lines:
         for lon, lat in rule.sample(path, SAMPLE_KM):
             wide = reach / max(0.01, math.cos(math.radians(lat)))
-            x0, y0 = tile_at(8, lon - wide, lat + reach)
-            x1, y1 = tile_at(8, lon + wide, lat - reach)
+            x0, y0 = tile_at(z, lon - wide, lat + reach)
+            x1, y1 = tile_at(z, lon + wide, lat - reach)
             tiles.update((x, y) for x in range(x0, x1 + 1) for y in range(y0, y1 + 1))
+    return tiles
+
+
+def level8_tiles(lines):
+    """Every level-8 tile within NEAR_KM of a line, and the two Japan boxes."""
+    tiles = near_tiles(8, lines, NEAR_KM)
     for z, x0, y0, x1, y1 in rule.JAPAN_BOXES:
         assert z == 8
         tiles.update((x, y) for x in range(x0, x1 + 1) for y in range(y0, y1 + 1))
@@ -149,11 +158,15 @@ def land_tiles(z, geometry):
 
 
 def tile_list(lines, geometry):
-    """The tiles of every level: all land at levels 2 to 5, near lines at 8, and the parents of those at 7 and 6."""
+    """The tiles of every level.
+
+    Levels 2 to 5 hold all land. Level 8 holds what is near a line. Levels 7 and 6 hold the parents of
+    the level above and a wider ring of their own (see RINGS), so detail falls away from a line in steps.
+    """
     levels = {z: land_tiles(z, geometry) for z in COARSE}
     levels[8] = level8_tiles(lines)
-    levels[7] = parents(levels[8])
-    levels[6] = parents(levels[7])
+    for z in (7, 6):
+        levels[z] = parents(levels[z + 1]) | near_tiles(z, lines, RINGS[z])
     return levels
 
 

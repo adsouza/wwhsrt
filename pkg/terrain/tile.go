@@ -44,6 +44,14 @@ func Corner(a Address, u, v float64) (lat, lon float64) {
 	return
 }
 
+// At is the tile of a level that holds a place. Places beyond the grid's edge belong to its last tile.
+func At(z int, lat, lon float64) Address {
+	n := math.Exp2(float64(z))
+	x := math.Floor((lon + 180) / 360 * n)
+	y := math.Floor((1 - math.Asinh(math.Tan(lat*math.Pi/180))/math.Pi) / 2 * n)
+	return Address{z, int(math.Max(0, math.Min(n-1, x))), int(math.Max(0, math.Min(n-1, y)))}
+}
+
 // LevelFor is the level to draw when one degree of longitude at the view's centre is pixelsPerDegree
 // wide: the coarsest level whose tiles are at most twice their stored width on screen. Tiles are then
 // drawn at one to two times their size, except that level 8 is enlarged without limit.
@@ -74,7 +82,7 @@ func (p Piece) Rect() (left, top, size float64) {
 //
 // Every area of land is drawn once. A tile at the level, or one with nothing finer beneath it, is drawn
 // whole. Where only some of a tile's quarters have finer tiles, the others are drawn as quarters of it,
-// unless the quarter is open sea (see CompleteLevel). A sea tile draws nothing. Each area comes from the tile that should supply it when that is ready and
+// unless the quarter is open sea (see CompleteLevel). A sea tile draws nothing of its own. Each area comes from the tile that should supply it when that is ready and
 // otherwise from the finest tile above it that is, so a view sharpens as tiles arrive; with none ready
 // the area is left to the plain land beneath.
 func (s *Set) Cover(level int, visible, ready func(Address) bool) (pieces []Piece, wanted []Address) {
@@ -97,9 +105,11 @@ func (s *Set) Cover(level int, visible, ready func(Address) bool) (pieces []Piec
 	}
 	var walk func(Address)
 	walk = func(t Address) {
-		if s.Tiles[t].Kind == Sea || !visible(t) {
+		if !visible(t) {
 			return
 		}
+		// A sea tile has nothing of its own to draw, but a finer tile beneath it may resolve an island.
+		land := s.Tiles[t].Kind != Sea
 		children, finer := t.Children(), false
 		for _, c := range children {
 			if _, ok := s.Tiles[c]; ok {
@@ -107,7 +117,9 @@ func (s *Set) Cover(level int, visible, ready func(Address) bool) (pieces []Piec
 			}
 		}
 		if t.Z >= level || !finer {
-			emit(t, t)
+			if land {
+				emit(t, t)
+			}
 			return
 		}
 		for _, c := range children {
@@ -116,7 +128,7 @@ func (s *Set) Cover(level int, visible, ready func(Address) bool) (pieces []Piec
 			}
 			if _, ok := s.Tiles[c]; ok {
 				walk(c)
-			} else if c.Z > CompleteLevel {
+			} else if land && c.Z > CompleteLevel {
 				emit(c, t)
 			}
 		}

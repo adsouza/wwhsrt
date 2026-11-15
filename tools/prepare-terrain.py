@@ -250,6 +250,18 @@ def decode(z, x, y, pins):
     return T.elevation(pixels).astype(np.float32)
 
 
+def remove_unlisted(out, entries):
+    """Delete tile files the entries do not name, and folders left empty."""
+    listed = set()
+    for z, x, y, *hashes in (entry[:3] + entry[4:] for entry in entries):
+        listed.update(out / str(z) / str(x) / f"{y}{suffix}" for suffix, _ in zip((".jpg", ".png"), hashes))
+    for file in sorted(out.rglob("*"), reverse=True):
+        if file.is_file() and file not in listed:
+            file.unlink()
+        elif file.is_dir() and not any(file.iterdir()):
+            file.rmdir()
+
+
 def write(levels, complete):
     pins, land = load_pins(), T.densified(drawn_land())
     tiles_out = OUT / "tiles"
@@ -264,12 +276,7 @@ def write(levels, complete):
             entries.append(entry)
             counts[(z, entry[3])] += 1
         print(f"level {z}: " + ", ".join(f"{counts[(z, k)]} {k}" for k in ("land", "coast", "sea")), flush=True)
-    listed = {tiles_out / str(e[0]) / str(e[1]) / f"{e[2]}{suffix}" for e in entries for suffix in (".jpg", ".png")}
-    for file in sorted(tiles_out.rglob("*"), reverse=True):
-        if file.is_file() and file not in listed:
-            file.unlink()
-        elif file.is_dir() and not any(file.iterdir()):
-            file.rmdir()
+    remove_unlisted(tiles_out, entries)
     manifest = {
         "schema_version": 2,
         "role": "Display context only; never pricing, feasibility or route generation.",

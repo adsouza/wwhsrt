@@ -47,6 +47,22 @@ def test_every_fine_tile_has_its_parents():
     assert all((x >> 1, y >> 1) in levels[6] for x, y in levels[7])
 
 
+def test_detail_falls_away_from_a_line_in_steps():
+    # Sharp relief must not end against relief eight times coarser. A short line near 1 E, 0.7 N:
+    # level 8 reaches 60 km from it, level 7 180 km and level 6 400 km, each a halving of detail.
+    levels = T.tile_list([[(1.0, 0.7), (1.2, 0.7)]], shapely.geometry.box(-20, -20, 20, 20))
+    assert T.RINGS == {8: 60, 7: 180, 6: 400}
+    assert {(x, y) for x, y in levels[8] if y == 127} == {(128, 127), (129, 127)}  # 60 km is 0.54 degrees
+    seven, six = T.parents(levels[8]), T.parents(T.parents(levels[8]))
+    assert (65, 63) in levels[7] and (65, 63) not in seven  # 180 km east of the line, beyond level 8's parents
+    assert (64, 64) in levels[7] and (64, 64) not in seven  # 180 km south
+    assert (66, 63) not in levels[7]  # starts at 5.6 E, more than 180 km away
+    assert (32, 32) in levels[6] and (33, 31) not in levels[6]  # 400 km is 3.6 degrees; 5.6 E is beyond it
+    assert seven <= levels[7] and six <= levels[6] and T.parents(levels[7]) <= levels[6]
+    # A tile is 2.8 degrees at level 7 and 5.6 at level 6, so each ring is at least one tile wide.
+    assert len(levels[7]) > len(seven) and len(levels[6]) >= len(six)
+
+
 def test_coarse_levels_cover_land_north_of_60_south_only():
     antarctica, europe = shapely.geometry.box(0, -80, 10, -70), shapely.geometry.box(0, 42, 10, 50)
     assert T.land_tiles(4, antarctica) == set()
@@ -255,6 +271,21 @@ def test_writing_twice_gives_the_same_bytes():
         first = tool().write_tile(tmp / "a", 8, 1, 2, hills(), half_land())
         second = tool().write_tile(tmp / "b", 8, 1, 2, hills(), half_land())
         assert first == second
+
+
+def test_files_the_list_no_longer_names_are_removed():
+    # A tile that was part sea and is now all land keeps its colour image and loses its mask; a tile
+    # that left the list loses both. The game checks that no unlisted file is embedded.
+    P = tool()
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = pathlib.Path(tmp)
+        was_coast = P.write_tile(tmp, 8, 1, 2, hills(), half_land())
+        P.write_tile(tmp, 8, 9, 9, hills(), half_land())
+        now_land = P.write_tile(tmp, 8, 1, 2, hills(), np.ones((256, 256), bool))
+        assert len(was_coast) == 6 and len(now_land) == 5 and (tmp / "8/1/2.png").exists()
+        P.remove_unlisted(tmp, [now_land, [8, 3, 3, "sea"]])
+        assert (tmp / "8/1/2.jpg").exists() and not (tmp / "8/1/2.png").exists()
+        assert not (tmp / "8/9").exists()
 
 
 def test_a_tile_borrows_edge_pixels_only_from_neighbours_it_has():
