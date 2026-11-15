@@ -53,6 +53,7 @@ func (m *Map) Draw(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s ui.St
 	}
 	dst.DrawImage(m.scene.view, nil)
 	m.drawDay(dst, c, f, s, minute)
+	m.drawIdleOverlay(dst, c, f, s)
 }
 
 // layer is one of the map's window-sized images, kept between redraws.

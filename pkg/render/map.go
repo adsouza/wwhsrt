@@ -31,6 +31,8 @@ type Map struct {
 	scene     layer
 	sceneKey  sceneKey
 	marks     markers
+	// idle holds the cached scene's idle highlights, which Draw repeats above the representative trains.
+	idle []ui.IdleHighlight
 }
 type labelRect struct{ x, y, w, h float64 }
 
@@ -230,23 +232,17 @@ func (m *Map) drawScene(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s 
 	if s.View == "services" {
 		idle = ui.IdleHighlights(f)
 	}
+	m.idle = idle
+	m.drawIdleLines(dst, c, idle, pal)
 	idleCities := map[gameapi.CityID]bool{}
 	hasIdleLine, hasIdleFleet := false, false
-	// Fleet overlays go first so a physical idle-line warning remains solid if
-	// its geometry is also covered by an idle through-service fleet.
-	for _, fleetOnly := range []bool{true, false} {
-		for _, line := range idle {
-			if line.FleetOnly != fleetOnly {
-				continue
-			}
-			m.routeWidth(dst, c, line.Path, pal.WarningText, pal.Warning, line.FleetOnly, 11, 5)
-			idleCities[line.FromCity] = true
-			idleCities[line.ToCity] = true
-			if fleetOnly {
-				hasIdleFleet = true
-			} else {
-				hasIdleLine = true
-			}
+	for _, line := range idle {
+		idleCities[line.FromCity] = true
+		idleCities[line.ToCity] = true
+		if line.FleetOnly {
+			hasIdleFleet = true
+		} else {
+			hasIdleLine = true
 		}
 	}
 	// Selected labels take precedence; remaining labels avoid collisions.
@@ -288,19 +284,7 @@ func (m *Map) drawScene(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s 
 			m.marks.disc(dst, float32(p.X), float32(p.Y), 13, pal.Surface)
 			m.marks.ring(dst, float32(p.X), float32(p.Y), 13, 3, pal.Accent)
 		}
-		station, hasStation := ui.StationAt(f, city.ID)
-		if !hasStation {
-			m.marks.ring(dst, float32(p.X), float32(p.Y), 4.5, 1.5, pal.Muted)
-		} else if !station.Open {
-			vector.FillRect(dst, float32(p.X-5), float32(p.Y-5), 10, 10, pal.Construction, true)
-		} else {
-			ink := pal.Accent
-			if station.Public {
-				ink = pal.Existing
-			}
-			m.marks.disc(dst, float32(p.X), float32(p.Y), 6, ink)
-		}
-		m.marks.disc(dst, float32(p.X), float32(p.Y), 3.5, pal.Surface)
+		m.stationMark(dst, f, city.ID, p, pal)
 		if s.View == "build" {
 			tag := ""
 			if city.ID == s.FromCity {
@@ -384,6 +368,57 @@ func (m *Map) drawScene(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s 
 		m.Label(dst, row.label, row.textX, row.box.y+m.by(12, 4), row.size, pal.WarningText)
 	}
 
+}
+
+// drawIdleLines strokes the idle-line warnings. Fleet overlays go first so a physical idle-line warning remains
+// solid if its geometry is also covered by an idle through-service fleet.
+func (m *Map) drawIdleLines(dst *ebiten.Image, c mapview.Camera, idle []ui.IdleHighlight, pal ui.Palette) {
+	for _, fleetOnly := range []bool{true, false} {
+		for _, line := range idle {
+			if line.FleetOnly == fleetOnly {
+				m.routeWidth(dst, c, line.Path, pal.WarningText, pal.Warning, line.FleetOnly, 11, 5)
+			}
+		}
+	}
+}
+
+// stationMark draws a city's station state: a hollow ring with no station, a square under construction, or an
+// open station disc in the public or company colour.
+func (m *Map) stationMark(dst *ebiten.Image, f gameapi.Frame, id gameapi.CityID, p mapview.Point, pal ui.Palette) {
+	station, hasStation := ui.StationAt(f, id)
+	if !hasStation {
+		m.marks.ring(dst, float32(p.X), float32(p.Y), 4.5, 1.5, pal.Muted)
+	} else if !station.Open {
+		vector.FillRect(dst, float32(p.X-5), float32(p.Y-5), 10, 10, pal.Construction, true)
+	} else {
+		ink := pal.Accent
+		if station.Public {
+			ink = pal.Existing
+		}
+		m.marks.disc(dst, float32(p.X), float32(p.Y), 6, ink)
+	}
+	m.marks.disc(dst, float32(p.X), float32(p.Y), 3.5, pal.Surface)
+}
+
+// drawIdleOverlay repeats the scene's idle warnings above the representative trains. An idle line runs no trains
+// of its own, so any train over it belongs to another service, and at a region-wide zoom one train can hide a
+// short idle line entirely. The endpoints' rings and stations go back on top of the repeated line.
+func (m *Map) drawIdleOverlay(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s ui.State) {
+	if len(m.idle) == 0 {
+		return
+	}
+	pal := ui.PaletteFor(s)
+	m.drawIdleLines(dst, c, m.idle, pal)
+	ends := map[gameapi.CityID]bool{}
+	for _, line := range m.idle {
+		ends[line.FromCity], ends[line.ToCity] = true, true
+	}
+	for _, city := range f.Cities {
+		if p := CityPoint(c, city); ends[city.ID] && p.X >= 0 && p.Y >= 0 && p.X <= c.Width && p.Y <= c.Height {
+			m.marks.ring(dst, float32(p.X), float32(p.Y), 10, 3, pal.WarningText)
+			m.stationMark(dst, f, city.ID, p, pal)
+		}
+	}
 }
 
 func routePoint(c mapview.Camera, path []gameapi.GeoPoint, u float64) mapview.Point {
