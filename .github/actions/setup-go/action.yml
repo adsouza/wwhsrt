@@ -1,0 +1,28 @@
+name: Set up Go
+description: >-
+  Install the pinned Go toolchain and restore a module and build cache owned by the calling job.
+  Each job (and each OS in a matrix) gets its own cache key, so a short job cannot save a cache
+  that lacks the packages a longer job compiles.
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-go@v7
+      with:
+        go-version: '1.27.1'
+        cache: false
+    - id: paths
+      shell: bash
+      run: |
+        echo "build=$(go env GOCACHE)" >> "$GITHUB_OUTPUT"
+        echo "mod=$(go env GOMODCACHE)" >> "$GITHUB_OUTPUT"
+        echo "version=$(go env GOVERSION)" >> "$GITHUB_OUTPUT"
+    # The key changes with dependencies or the workflow, so a cache is saved once and then
+    # restored without paying for another upload on every run.
+    - uses: actions/cache@v6
+      with:
+        path: |
+          ${{ steps.paths.outputs.build }}
+          ${{ steps.paths.outputs.mod }}
+        key: go-${{ runner.os }}-${{ runner.arch }}-${{ github.job }}-${{ steps.paths.outputs.version }}-${{ hashFiles('go.sum') }}-${{ hashFiles('.github/workflows/*.yml', '.github/actions/setup-go/action.yml') }}
+        restore-keys: |
+          go-${{ runner.os }}-${{ runner.arch }}-${{ github.job }}-${{ steps.paths.outputs.version }}-${{ hashFiles('go.sum') }}-

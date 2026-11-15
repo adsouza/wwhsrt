@@ -1,7 +1,12 @@
 #!/bin/sh
 set -eu
 cd "$(dirname "$0")/.."
-GOMEMLIMIT=768MiB GOMAXPROCS=2 GOOS=js GOARCH=wasm go build -p 1 -trimpath -o web/main.wasm ./cmd/wwhsrt
+# Local builds stay inside the memory budget in TESTING.md; CI sets WWHSRT_UNCAPPED=1 to use the whole runner.
+if [ "${WWHSRT_UNCAPPED:-}" = 1 ]; then
+  GOOS=js GOARCH=wasm go build -trimpath -o web/main.wasm ./cmd/wwhsrt
+else
+  GOMEMLIMIT=768MiB GOMAXPROCS=2 GOOS=js GOARCH=wasm go build -p 1 -trimpath -o web/main.wasm ./cmd/wwhsrt
+fi
 cp "$(go env GOROOT)/lib/wasm/wasm_exec.js" web/wasm_exec.js
 cp assets/fonts/rail-ui.ttf web/rail-ui.ttf
 cp assets/branding/favicon.svg web/favicon.svg

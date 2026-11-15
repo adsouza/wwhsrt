@@ -2,7 +2,12 @@
 set -eu
 cd "$(dirname "$0")/.."
 mkdir -p build
-GOMEMLIMIT=768MiB GOMAXPROCS=2 go build -p 1 -trimpath -o build/wwhsrt ./cmd/wwhsrt
+# Local builds stay inside the memory budget in TESTING.md; CI sets WWHSRT_UNCAPPED=1 to use the whole runner.
+if [ "${WWHSRT_UNCAPPED:-}" = 1 ]; then
+  go build -trimpath -o build/wwhsrt ./cmd/wwhsrt
+else
+  GOMEMLIMIT=768MiB GOMAXPROCS=2 go build -p 1 -trimpath -o build/wwhsrt ./cmd/wwhsrt
+fi
 if [ "$(go env GOOS)" = darwin ]; then
   bundle='build/World-wide High-speed Rail Tycoon.app'
   mkdir -p "$bundle/Contents/MacOS" "$bundle/Contents/Resources"
