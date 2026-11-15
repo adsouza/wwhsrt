@@ -1,8 +1,8 @@
 {
-  "date": "2026-11-12T16:30:16.184Z",
+  "date": "2026-11-15T15:31:47.569Z",
   "browser": "153.0.8010.12",
-  "wasm_sha256": "9fa2148ae46ddba11aed552d0a2035bf7d9d5c4816648a02ab09383843e4d75d",
-  "ui_sha256": "7ce71462c1c8eedb04819133c3e7016c975e3be882fcde623e747b2ff16b8287",
+  "wasm_sha256": "2b28570446c9150c8eef775a53eb726444a47749c7f25b561ffea423fbda16c1",
+  "ui_sha256": "6645f331acc2636dcf7ccbccba712713676773ac54b8551c18ec42f5a4c9cdbd",
   "checks": [
     "Single anchored cue; dismissing terrain exposes funding without global mute; Explain remains available with quote facts; reference search/back preserves draft and exact durable game bytes",
     "Reload retains per-concept dismissals; global mute hides only unsolicited cues; on-demand forecast explanations and service fare/frequency drafts survive help navigation",

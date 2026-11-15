@@ -1,16 +1,16 @@
 {
-  "date": "2026-11-12T13:46:31.560Z",
+  "date": "2026-11-15T15:31:20.580Z",
   "browser": "153.0.8010.12",
-  "wasm_sha256": "a995dbf72d8fff62a445271be2ee5ae3c97db0880c48ae8ee0ba795b45cbc1a6",
+  "wasm_sha256": "2b28570446c9150c8eef775a53eb726444a47749c7f25b561ffea423fbda16c1",
   "checks": [
-    "Twelve cities, three operational public stations, named 400-seat train family and actual costs; ordinary first-month control earns starter revenue; per-concept dismissal/settings and fleet detail disclosure leave checkpoint unchanged; stationless/public city inspection",
-    "Substantial barrier and priced terrain alternatives reconcile; one full-gap loan funds a standalone project; both initially stationless endpoints receive timed station works; ordinary guidance leads through construction, opening, local fleet lease, applied service and positive revenue; every report reconciles on a Chinese phone layout",
+    "Imported worldwide cities and operational public stations, named 400-seat train family and actual costs; ordinary first-month control earns starter revenue; per-concept dismissal/settings and fleet detail disclosure leave checkpoint unchanged; stationless/public city inspection",
+    "Substantial barrier and priced terrain alternatives reconcile; one full-gap loan funds a standalone project; the stationless endpoint receives timed station works and the public terminus is reused; ordinary guidance leads through construction, opening, local fleet lease, applied service and positive revenue; every report reconciles on a Chinese phone layout",
     "Station/fleet/business state resumes identically; exported browser save opens headlessly; cached offline continuation works; accepted commands replay to an identical native-headless/WASM checkpoint"
   ],
   "limitations": [
     "Phone/touch/IME are emulated; physical phones and native assistive technology remain unqualified.",
-    "This check covers the earlier business flow under network-v3 rules; network-specific scenarios are in check-milestone3.cjs."
+    "This check covers the earlier business flow under the expanded network-v5 rules; network-specific scenarios are in check-milestone3.cjs."
   ],
-  "checkpoint": "8b4d2a478b7fbcb19c8085bbb2dcc3b54a1b0c17c18644fc50bf1a23732aabbb",
+  "checkpoint": "af1d781731c7421e6e456d6b8e2e36f9e7e22fdb430f492a43bce76fbb61719a",
   "result": "passed"
 }

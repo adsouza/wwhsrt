@@ -1,8 +1,8 @@
 {
-  "date": "2026-11-13T01:03:36.359Z",
+  "date": "2026-11-15T15:33:13.088Z",
   "passed": true,
-  "wasm_sha256": "d59f34467de84a51d7f063f7916fc8707ce696cec6842335ccfb59b2092a879c",
-  "world_land_sha256": "bd178019874d9e692f2e1ba3e1ca0617d825a4e7e31615feb317554b446e74c4",
+  "wasm_sha256": "2b28570446c9150c8eef775a53eb726444a47749c7f25b561ffea423fbda16c1",
+  "world_land_sha256": "6f69e6232469bc5034a5d5fca25dfb71452c0838ccf969c40a4aa10de40676a9",
   "checks": [
     {
       "country": "Japan",
@@ -118,7 +118,7 @@
       "terrain": false,
       "checkedWater": 1,
       "correctWater": 1,
-      "shoreHits": 14,
+      "shoreHits": 13,
       "boundaryHits": 28,
       "samples": [
         {
@@ -145,7 +145,7 @@
       "terrain": true,
       "checkedWater": 1,
       "correctWater": 1,
-      "shoreHits": 14,
+      "shoreHits": 13,
       "boundaryHits": 28,
       "samples": [
         {
@@ -172,7 +172,7 @@
       "terrain": false,
       "checkedWater": 1,
       "correctWater": 1,
-      "shoreHits": 14,
+      "shoreHits": 13,
       "boundaryHits": 28,
       "samples": [
         {
@@ -199,7 +199,7 @@
       "terrain": true,
       "checkedWater": 1,
       "correctWater": 1,
-      "shoreHits": 14,
+      "shoreHits": 13,
       "boundaryHits": 28,
       "samples": [
         {

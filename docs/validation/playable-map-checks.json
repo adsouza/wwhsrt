@@ -1,11 +1,10 @@
 {
-  "date": "2026-11-13T00:31:32.808Z",
+  "date": "2026-11-15T15:32:12.006Z",
   "passed": true,
-  "wasm_sha256": "b9cfe9632d4ceacd294a3e24ab7db919be6c1da0f99b11efefc30dec883c7377",
-  "map_sha256": "8320e8a8ff270f6a82f5f855bb193325a594248bf0594e748dbad6a4f7966948",
+  "wasm_sha256": "2b28570446c9150c8eef775a53eb726444a47749c7f25b561ffea423fbda16c1",
+  "map_sha256": "a259eed97f36b7bbdf5f6480b2ae3f9971280763d3f39c494eb458a56cb3d94a",
   "pixels": {
     "keptRoute": [
-      true,
       true,
       true,
       true,

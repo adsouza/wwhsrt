@@ -1,8 +1,8 @@
 {
-  "date": "2026-11-12T16:22:44.700Z",
+  "date": "2026-11-15T15:31:22.986Z",
   "browser": "153.0.8010.12",
-  "wasm_sha256": "9fa2148ae46ddba11aed552d0a2035bf7d9d5c4816648a02ab09383843e4d75d",
-  "ui_sha256": "7ce71462c1c8eedb04819133c3e7016c975e3be882fcde623e747b2ff16b8287",
+  "wasm_sha256": "2b28570446c9150c8eef775a53eb726444a47749c7f25b561ffea423fbda16c1",
+  "ui_sha256": "6645f331acc2636dcf7ccbccba712713676773ac54b8551c18ec42f5a4c9cdbd",
   "checks": [
     "Review frames both idle built alignments, paints their actual map pixels in the warning colour and lists both names; the operating Tokyo–Nagoya line is not marked idle; review leaves checkpoint and durable bytes unchanged",
     "Each named idle row selects and focuses its line; Chinese 320px review reveals the map and highlights both lines without horizontal overflow",
@@ -14,22 +14,22 @@
   ],
   "initial_pixels": {
     "tsuruga-osaka": {
-      "hits": 63,
-      "inside": 81
+      "hits": 187,
+      "inside": 252
     },
     "hokkaido-extension": {
-      "hits": 116,
+      "hits": 115,
       "inside": 126
     },
     "tokyo-nagoya": {
       "hits": 0,
-      "inside": 18
+      "inside": 819
     }
   },
   "phone_pixels": {
     "tsuruga-osaka": {
-      "hits": 1,
-      "inside": 81
+      "hits": 32,
+      "inside": 252
     },
     "hokkaido-extension": {
       "hits": 11,
@@ -39,31 +39,31 @@
   "resolved_pixels": {
     "tsuruga-osaka": {
       "hits": 0,
-      "inside": 81
+      "inside": 252
     },
     "hokkaido-extension": {
-      "hits": 89,
-      "inside": 110
+      "hits": 103,
+      "inside": 126
     }
   },
   "shared_track_pixels": {
     "tokyo-nagoya": {
-      "hits": 9,
-      "inside": 18
+      "hits": 493,
+      "inside": 819
     },
     "hokkaido-extension": {
-      "hits": 116,
+      "hits": 115,
       "inside": 126
     }
   },
   "through_fleet_pixels": {
     "tokyo-nagoya": {
-      "hits": 9,
-      "inside": 18
+      "hits": 493,
+      "inside": 819
     },
     "nagoya-osaka": {
-      "hits": 133,
-      "inside": 144
+      "hits": 455,
+      "inside": 792
     }
   },
   "passed": true

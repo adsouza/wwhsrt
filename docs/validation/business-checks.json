@@ -1,7 +1,7 @@
 {
-  "date": "2026-11-12T12:52:59.323Z",
+  "date": "2026-11-15T15:31:20.876Z",
   "browser": "153.0.8010.12",
-  "wasm_sha256": "969447eb8d71d438051fbdf632e9be9d213a0be33ebc81253a9e907160e87fb9",
+  "wasm_sha256": "2b28570446c9150c8eef775a53eb726444a47749c7f25b561ffea423fbda16c1",
   "checks": [
     "Fresh company has an active starter service; map selection, AX names and keyboard advancement work; first month carries passengers, collects fares and posts costs",
     "Two-endpoint reverse-order planning and route focus; alternative engineering prices; single exact-shortfall loan, editable custom loans with cents and credit-limit validation, and 90% grant; committed lines disappear from opportunities immediately and stay absent after completion/reload while project progress remains visible; construction progress across 48 months; opening eligibility; persistent idle-line warnings with actual upkeep/idle-lease costs, 320px Chinese footer, service shortcut, accepted-service clearing and suspension reappearance; dedicated train lease; accepted service earns new-line revenue and pays upkeep; every report reconciles",
@@ -12,6 +12,6 @@
     "Synthetic desktop/touch/IME inputs; physical phones and native IME remain unqualified.",
     "Native canvas accessibility is still incomplete."
   ],
-  "checkpoint": "bcc3f1849f474e0045dc0aab4def730b169f2300fd6afd37e5e2210c9a4dd4b4",
+  "checkpoint": "99dbecb71a25483676d5c1b369e904ba5d495aa83342dfdec33e8db960471294",
   "result": "passed"
 }

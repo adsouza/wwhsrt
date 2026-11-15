@@ -1,8 +1,8 @@
 {
-  "date": "2026-11-12T02:25:42.940Z",
+  "date": "2026-11-15T15:31:21.361Z",
   "browser": "153.0.8010.12",
-  "wasm_sha256": "2296f716032e8b52b25c58d674c421d6a0dc943cd68c2eb3a54a946288cd9a1e",
-  "ui_sha256": "e57a79edd9417bb3df2ca3af3d4bf229a1c9dfc524ac79abbb5621d3a059f87c",
+  "wasm_sha256": "2b28570446c9150c8eef775a53eb726444a47749c7f25b561ffea423fbda16c1",
+  "ui_sha256": "bd27a43e77af9dcdc81b031423a0cafc1f812d5549104f571413b57ddc2660ff",
   "checks": [
     "System default follows live dark/light browser changes; explicit overrides take precedence; semantic UI uses shared Go palette; actual map pixels change; theme-only interactions preserve campaign checkpoint",
     "Dark services, idle-cost warning, terrain route planning, finance forms, populated report, confirmation and expanded map; all five views fit 320px Simplified Chinese; preference and company draft survive reload",

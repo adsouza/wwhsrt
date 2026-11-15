@@ -1,7 +1,7 @@
 {
-  "date": "2026-11-12T01:41:41.831Z",
+  "date": "2026-11-15T15:31:21.289Z",
   "browser": "153.0.8010.12",
-  "wasm_sha256": "16a05a3203a1570ec3606f560d5ae1088e0f5e074e669cb19649f543ec954383",
+  "wasm_sha256": "2b28570446c9150c8eef775a53eb726444a47749c7f25b561ffea423fbda16c1",
   "checks": [
     "Company entry opens a labeled confirmation with current company and date; Cancel and Escape preserve accepted state, drafts and save bytes; Cancel receives initial focus",
     "320x480 Simplified Chinese dialog reflows and actions remain reachable; in-flight restart cannot be dismissed; failed save preserves current company and durable bytes, displays the error, and can be retried; successful restart clears all business state/drafts and restores onboarding while retaining language, reduced motion and terrain preferences",
@@ -10,6 +10,6 @@
   "limitations": [
     "Synthetic browser inputs; physical phones and native OS input are not qualified by this check."
   ],
-  "checkpoint": "faa763806365000b8b33bc92f9ecf79b11aba7f0775e009e1e7379e22726dd44",
+  "checkpoint": "14fcfc70fdd293a9180b935a1ff4fb2165c3ee1deea21dc77ebb4c35bb6deb4c",
   "result": "passed"
 }

@@ -1,8 +1,8 @@
 {
-  "date": "2026-11-12T23:53:02.561Z",
+  "date": "2026-11-15T15:31:27.414Z",
   "browser": "153.0.8010.12",
-  "wasm_sha256": "4e31ba9167920f561bb33a084614fe8d1253720513d671b202431f51ba970d72",
-  "ui_sha256": "0100c7ce169ef8233aff7c03bd88516d1a65116a70a210f2762ad15844ea991f",
+  "wasm_sha256": "2b28570446c9150c8eef775a53eb726444a47749c7f25b561ffea423fbda16c1",
+  "ui_sha256": "6645f331acc2636dcf7ccbccba712713676773ac54b8551c18ec42f5a4c9cdbd",
   "checks": [
     "Focused service plan fits at 1280x850; fleet and analysis tabs plus collapsed capacity remove secondary detail; pointer and keyboard tabs preserve fare/frequency; finance, identity and settings separate; UI-only actions leave exact save bytes unchanged",
     "320–1920px English/Chinese panes avoid horizontal overflow; 390x844 service plan fits without scrolling; phone fallback preserves left-dock/600px desktop preferences; full map retains focus and zoom controls; Field Notes task link opens the relevant Fleet tab",

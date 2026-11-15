@@ -1,9 +1,9 @@
 {
-  "through_pixel_samples": 44,
-  "phone_track_pixel_samples": 15,
-  "date": "2026-11-13T02:01:40.161Z",
+  "through_pixel_samples": 78,
+  "phone_track_pixel_samples": 28,
+  "date": "2026-11-15T15:33:41.308Z",
   "passed": true,
-  "wasm_sha256": "af9aa14ba1c4cb4b5f133985f08f15e782f419b50b91928c5a67e0f7c240997e",
+  "wasm_sha256": "2b28570446c9150c8eef775a53eb726444a47749c7f25b561ffea423fbda16c1",
   "checks": [
     "Actual map track clicks open Services and scope named direct/through choices to the picked sections",
     "Tokyo–Nagoya pending fare/frequency survive reclick; Tokyo–Nagoya–Osaka through selection highlights its complete route and retains extension behavior",
