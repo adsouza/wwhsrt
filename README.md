@@ -35,7 +35,7 @@ sh tools/build-web.sh
 go run ./cmd/webserve
 ```
 
-Open `http://127.0.0.1:8765/`. Once its offline cache has installed, the browser client can reload and play without networking. Native play has no network requirement. `sh tools/build-native.sh` also produces a native executable and a macOS development app bundle on macOS.
+Open `http://127.0.0.1:8765/`. Once its offline cache has installed, the browser client can reload and play without networking. Native play has no network requirement. Linux users can install the `.deb` or `.flatpak` from [Releases](https://github.com/adsouza/wwhsrt/releases): `sudo apt install ./wwhsrt_<version>_amd64.deb`, or `flatpak install --user wwhsrt-<version>-x86_64.flatpak` (the runtime comes from Flathub). `sh tools/build-native.sh` also produces a native executable and a macOS development app bundle on macOS.
 
 The [first-business notes](docs/validation/FIRST_BUSINESS.md) explain controls, funding, model assumptions, save locations and remaining qualification. [TESTING.md](TESTING.md#first-business-slice) lists focused checks. The graphics-free CLI uses the same application: `go run ./cmd/headless -advance 2`.
 

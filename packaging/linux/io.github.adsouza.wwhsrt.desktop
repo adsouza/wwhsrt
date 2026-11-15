@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=World-wide High-speed Rail Tycoon
+Name[zh_Hans]=世界高速铁路大亨
+GenericName=Railway business game
+Comment=Build and run high-speed rail lines across real geography
+Exec=wwhsrt
+Icon=io.github.adsouza.wwhsrt
+Terminal=false
+Categories=Game;StrategyGame;Simulation;
+Keywords=train;railway;high-speed;tycoon;business;
+StartupWMClass=io.github.adsouza.wwhsrt

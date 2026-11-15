@@ -14,7 +14,7 @@ Upload the PNG under **Settings → Social preview** on GitHub. To export it aga
 rsvg-convert --format png --output social-preview.png social-preview.svg
 ```
 
-Install the desktop SVG at `/app/share/icons/hicolor/scalable/apps/<APP_ID>.svg` inside the Flatpak, using the same app ID as the desktop file's `Icon` value. [Flatpak icon conventions](https://docs.flatpak.org/en/latest/conventions.html#application-icons)
+Install the desktop SVG at `/app/share/icons/hicolor/scalable/apps/io.github.adsouza.wwhsrt.svg` inside the Flatpak, using the same app ID as the desktop file's `Icon` value. [Flatpak icon conventions](https://docs.flatpak.org/en/latest/conventions.html#application-icons)
 
 The native macOS build copies `app-icon.icns` to `Contents/Resources/AppIcon.icns` and references it with `CFBundleIconFile` in `Contents/Info.plist`. [Apple's bundle icon reference](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html#//apple_ref/doc/uid/TP40009249-SW10). Regenerate it from the SVG on macOS with `sh tools/build-icons.sh` (requires `rsvg-convert` and Apple's `iconutil`), then rebuild with `sh tools/build-native.sh`. Ordinary native builds use the checked-in ICNS and need no image-conversion tools.
 

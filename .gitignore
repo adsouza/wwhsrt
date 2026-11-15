@@ -48,3 +48,4 @@ go.work.sum
 
 # Python bytecode cache
 __pycache__/
+/dist/

@@ -1,0 +1,112 @@
+name: Linux release
+on:
+  # A version tag such as v0.1.0 builds, tests and publishes the packages as a GitHub Release.
+  push:
+    tags: ['v[0-9]+.[0-9]+.[0-9]+*']
+  # Pull requests that touch packaging build and test the same packages without publishing them.
+  pull_request:
+    paths:
+      - .github/workflows/release.yml
+      - packaging/**
+      - tools/package-linux.sh
+      - cmd/wwhsrt/**
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+env:
+  WWHSRT_UNCAPPED: '1'
+  APP_ID: io.github.adsouza.wwhsrt
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  packages:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: version
+        name: Version from the tag, or a development version
+        run: |
+          if [[ $GITHUB_REF == refs/tags/v* ]]; then version=${GITHUB_REF_NAME#v}; else version=0.0.0-dev.$GITHUB_RUN_NUMBER; fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Packaging $version"
+      - uses: ./.github/actions/setup-go
+      - name: Packaging tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends flatpak flatpak-builder appstream desktop-file-utils \
+            xvfb xauth xdotool imagemagick libgl1 libgl1-mesa-dri libx11-6 libxrandr2 libxinerama1 libxi6 \
+            libxrender1 libxcursor1 libxext6
+          # Ubuntu's AppArmor blocks the unprivileged user namespaces that flatpak's bubblewrap sandbox needs.
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+          flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+          # The runtime pulls its related GL extension, which the launch test needs for Mesa.
+          flatpak install --user -y --noninteractive flathub org.freedesktop.Platform//26.08 org.freedesktop.Sdk//26.08
+      - name: Build packages
+        run: sh tools/package-linux.sh "${{ steps.version.outputs.version }}" deb flatpak
+      - name: Validate desktop entry and AppStream metadata
+        run: |
+          desktop-file-validate "build/linux/stage/share/applications/$APP_ID.desktop"
+          appstreamcli validate --no-net --explain "build/linux/stage/share/metainfo/$APP_ID.metainfo.xml"
+      - name: Install and launch the .deb on Ubuntu and Debian
+        run: |
+          mkdir -p shots
+          for image in ubuntu:latest debian:stable; do
+            echo "== $image"
+            docker run --rm -v "$PWD/dist:/dist:ro" -v "$PWD/shots:/shots" -v "$PWD/packaging/linux:/test:ro" \
+              -e VERSION="${{ steps.version.outputs.version }}" -e SHOT="/shots/deb-${image%%:*}.png" "$image" sh -euc '
+                export DEBIAN_FRONTEND=noninteractive
+                apt-get update -qq
+                apt-get install -y -qq /dist/wwhsrt_*_amd64.deb >/dev/null
+                apt-get install -y -qq --no-install-recommends xvfb xauth xdotool imagemagick libgl1-mesa-dri >/dev/null
+                test "$(wwhsrt --version)" = "wwhsrt $VERSION"
+                test -f /usr/share/applications/io.github.adsouza.wwhsrt.desktop
+                sh /test/launch-test.sh wwhsrt "$SHOT" "$HOME/.config/wwhsrt/first-business/campaign.json"'
+          done
+      - name: Install and launch the Flatpak
+        run: |
+          flatpak install --user -y --noninteractive dist/wwhsrt-*-x86_64.flatpak
+          test "$(flatpak run "$APP_ID" --version)" = "wwhsrt ${{ steps.version.outputs.version }}"
+          sh packaging/linux/launch-test.sh "flatpak run $APP_ID" shots/flatpak.png \
+            "$HOME/.var/app/$APP_ID/config/wwhsrt/first-business/campaign.json"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: linux-packages
+          path: dist/
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: launch-screenshots
+          path: shots/
+          if-no-files-found: ignore
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: packages
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: linux-packages
+          path: dist
+      - name: Publish the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.packages.outputs.version }}
+        run: |
+          flags=()
+          # Semver pre-releases (v1.0.0-rc.1) are marked as such, so they never become "Latest".
+          if [[ $VERSION == *-* ]]; then flags+=(--prerelease); fi
+          gh release create "$GITHUB_REF_NAME" dist/* --repo "$GITHUB_REPOSITORY" --verify-tag --generate-notes \
+            --title "World-wide High-speed Rail Tycoon $VERSION" "${flags[@]}"

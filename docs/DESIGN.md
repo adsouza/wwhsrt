@@ -823,7 +823,7 @@ Multi-tab browser play has one storage writer; other tabs remain visibly read-on
 
 First targets: macOS arm64, Windows amd64, Linux amd64, and desktop plus smartphone browsers via WebAssembly. Complete core gameplay must reflow to a 320 CSS px width, with portrait and landscape support. Native phone-app packaging is a separate delivery decision. Start phone layout, touch/text entry, background/resume, and storage qualification in the first milestone rather than treating them as late polish. Larger displays add useful map area and optional simultaneous comparison/report views. See [UX.md](UX.md) for proposed layout bands and accessibility/validation requirements.
 
-- For Flatpak, install the app icon at `/app/share/icons/hicolor/scalable/apps/<APP_ID>.svg`. Use the Flatpak application ID as the desktop entry's `Icon` value. [App icon SVG](../assets/branding/app-icon.svg)
+- For Flatpak, install the app icon at `/app/share/icons/hicolor/scalable/apps/io.github.adsouza.wwhsrt.svg`. Use the Flatpak application ID as the desktop entry's `Icon` value. [App icon SVG](../assets/branding/app-icon.svg)
 - For macOS, bundle [app-icon.icns](../assets/branding/app-icon.icns) as `Contents/Resources/AppIcon.icns` and set `CFBundleIconFile` to `AppIcon.icns` in `Contents/Info.plist`. The native build script packages the icon; regenerate its 16–1024 px representations from the SVG with `tools/build-icons.sh`.
 - For the browser build, place `favicon.svg` in the web build's public root, serve it as `image/svg+xml`, and reference it from the document head with `rel="icon"`. [Favicon SVG](../assets/branding/favicon.svg)
 
