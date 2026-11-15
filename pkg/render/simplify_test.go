@@ -34,10 +34,6 @@ func TestSimplifyScreenStaysWithinToleranceAndDropsDenseVertices(t *testing.T) {
 	if out := simplifyScreen(short, screenTolerance); len(out) != 2 {
 		t.Fatal("a two-point line lost a point")
 	}
-	speck := []mapview.Point{{X: 5, Y: 5}, {X: 5.1, Y: 5}, {X: 5.1, Y: 5.1}}
-	if out := simplifyRing(speck); len(out) != 3 {
-		t.Fatal("a ring too small to simplify was dropped instead of drawn as it is")
-	}
 }
 
 func TestPublicTrackChainsDrawEveryEdgeExactlyOnce(t *testing.T) {
@@ -94,26 +90,6 @@ func TestScreenRunsBreakWhereALineLeavesTheMap(t *testing.T) {
 	}
 	if second := runs[1]; second[0].X > -3 || second[len(second)-1].X < 79 {
 		t.Fatal("second stretch did not resume at the map edge", second)
-	}
-}
-
-func TestCoastRingsHideOnlyOutlinesALaterRingPaintedOver(t *testing.T) {
-	square := func(x0, y0, size float64) [][2]float64 {
-		return [][2]float64{{x0, y0}, {x0 + size, y0}, {x0 + size, y0 + size}, {x0, y0 + size}, {x0, y0}}
-	}
-	rings := [][][2]float64{
-		square(2, 2, 1),   // inside the later ring 1: painted over before
-		square(0, 0, 10),  // a continent
-		square(5, 5, 1),   // inside the earlier ring 1: stayed drawn
-		square(9, 9, 3),   // overlaps ring 1 without lying inside it
-		square(20, 0, 10), // apart from everything
-	}
-	got := coastRings(rings)
-	want := []bool{false, true, true, true, true}
-	for i := range want {
-		if got[i] != want[i] {
-			t.Fatalf("ring %d: coast %v, want %v", i, got[i], want[i])
-		}
 	}
 }
 

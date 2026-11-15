@@ -7,9 +7,9 @@ from shapely.geometry import box, mapping, shape
 
 ROOT = Path(__file__).resolve().parents[1]
 source = ROOT / "build/terrain-source/ne_10m_admin_0_countries.geojson"
-coast_meta = json.loads((ROOT / "assets/terrain/land.metadata.json").read_text())
+coast_meta = json.loads((ROOT / "assets/terrain/world-land.metadata.json").read_text())
 raw = source.read_bytes()
-assert hashlib.sha256(raw).hexdigest() == coast_meta["source_sha256"], "Unreviewed coastline input"
+assert hashlib.sha256(raw).hexdigest() == coast_meta["source_countries_sha256"], "Unreviewed coastline input"
 country = next(f for f in json.loads(raw)["features"] if f["properties"]["ADMIN"] == "Japan")
 bounds = [134, 34, 142.5, 44.5]
 land = shape(country["geometry"]).intersection(box(*bounds))

@@ -8,7 +8,9 @@ import (
 	"testing"
 
 	"wwhsrt/assets"
+	"wwhsrt/pkg/gameapi"
 	"wwhsrt/pkg/mapview"
+	"wwhsrt/pkg/terrain"
 )
 
 // ringArea is the ring's signed area in degrees: positive when it winds counter-clockwise.
@@ -18,6 +20,18 @@ func ringArea(ring [][2]float64) float64 {
 		sum += ring[i-1][0]*ring[i][1] - ring[i][0]*ring[i-1][1]
 	}
 	return sum / 2
+}
+
+// ringContains reports whether p is strictly inside ring (even-odd rule).
+func ringContains(ring [][2]float64, p [2]float64) bool {
+	in := false
+	for i, j := 0, len(ring)-1; i < len(ring); j, i = i, i+1 {
+		a, b := ring[i], ring[j]
+		if (a[1] > p[1]) != (b[1] > p[1]) && p[0] < (b[0]-a[0])*(p[1]-a[1])/(b[1]-a[1])+a[0] {
+			in = !in
+		}
+	}
+	return in
 }
 
 func inAny(rings [][][2]float64, lon, lat float64) bool {
@@ -208,6 +222,55 @@ func TestCatalogueCitiesAreOnDrawnLand(t *testing.T) {
 		if !seen[id] {
 			t.Errorf("cityOffLand names %s, which is not in the catalogue", id)
 		}
+	}
+}
+
+// Frames without the public network come only from tests, but they used to draw a regional outline of
+// their own, and the Japanese route check verified alignments against that file, not what players see.
+func TestEveryFrameDrawsTheOneBasemap(t *testing.T) {
+	m, err := New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	with, without := m.land(gameapi.Frame{PublicNetwork: true}), m.land(gameapi.Frame{})
+	if with == nil || with != without || len(with.rings) == 0 {
+		t.Fatal("a frame without the public network does not draw the same basemap as one with it")
+	}
+}
+
+// Lake Biwa is drawn twice for now. Today's relief tiles tint the lake's surface as land, so with
+// terrain on, the terrain layer's own outline is what keeps the lake visible; with terrain off, the
+// basemap's is. Both come from Natural Earth 1:10m, and they must stay close enough to read as one
+// shore. The terrain layer's copy goes when relief is cut to the basemap.
+func TestLakeBiwaHasOneShoreInBothLayers(t *testing.T) {
+	b := loadBasemap(t)
+	var shore [][2]float64
+	for _, ring := range b.lakeRings() {
+		if ringContains(ring, [2]float64{136.08, 35.25}) {
+			shore = ring
+		}
+	}
+	if shore == nil {
+		t.Fatal("the basemap does not draw Lake Biwa")
+	}
+	data, err := terrain.Load(assets.Terrain)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(data.Lakes) != 1 || data.Lakes[0].Key != "lake_biwa" {
+		t.Fatalf("expected the terrain layer to outline Lake Biwa alone, got %d lakes", len(data.Lakes))
+	}
+	worst := 0.0
+	for _, p := range data.Lakes[0].Points { // latitude first
+		at, nearest := mapview.Point{X: p[1], Y: p[0]}, math.Inf(1)
+		for i := 1; i < len(shore); i++ {
+			a, c := mapview.Point{X: shore[i-1][0], Y: shore[i-1][1]}, mapview.Point{X: shore[i][0], Y: shore[i][1]}
+			nearest = min(nearest, math.Sqrt(segmentDistance2(at, a, c)))
+		}
+		worst = max(worst, nearest)
+	}
+	if worst > 0.004 {
+		t.Fatalf("the two outlines of Lake Biwa are %.4f degrees apart at their worst; the limit is 0.004", worst)
 	}
 }
 

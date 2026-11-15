@@ -11,9 +11,6 @@ import (
 //go:embed scenario/scenario.json
 var Scenario []byte
 
-//go:embed terrain/land.json
-var Land []byte
-
 //go:embed scenario/camera.json
 var Camera []byte
 

@@ -2,17 +2,10 @@ package render
 
 import "wwhsrt/pkg/mapview"
 
+// clipScreen clips a closed outline in screen space to the camera's screen, with a 4 px margin.
+//
 // Clip before passing paths to the antialias renderer. Its temporary images use
 // path bounds, so offscreen world geometry must not allocate world-sized images.
-func screenRing(c mapview.Camera, ring [][2]float64) []mapview.Point {
-	points := make([]mapview.Point, 0, len(ring))
-	for _, p := range ring {
-		points = append(points, c.Screen(mapview.Project(p[1], p[0])))
-	}
-	return clipScreen(c, points)
-}
-
-// clipScreen clips a closed outline in screen space to the camera's screen, with a 4 px margin.
 func clipScreen(c mapview.Camera, points []mapview.Point) []mapview.Point {
 	for _, edge := range []struct {
 		axis    int

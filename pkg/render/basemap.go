@@ -173,8 +173,7 @@ func (b *basemap) draw(dst *ebiten.Image, c mapview.Camera, pal ui.Palette) {
 	if b.layer.view == nil || b.camera != c || b.color != pal.Land {
 		b.camera = c
 		b.color = pal.Land
-		outlines := b.visible(c)
-		paintLand(b.layer.reset(int(c.Width), int(c.Height)), outlines, outlines, pal)
+		paintLand(b.layer.reset(int(c.Width), int(c.Height)), b.visible(c), pal)
 	}
 	dst.DrawImage(b.layer.view, nil)
 }
