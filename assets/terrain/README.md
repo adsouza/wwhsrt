@@ -65,11 +65,14 @@ Within 150 km of any line the outline follows the source to 0.003 degrees (about
 outline. "A line" is every existing path in `playable-rail-map.json`, every
 buildable alignment in `compiled-prospects.v1.json`, and both alignments of
 `hokkaido-extension` and `tsuruga-osaka`. The Hokkaido and Kansai relief boxes
-count as near a line throughout. Islands under 25 km across and far from every
-line are left out, as are lakes under 5 km across near a line or under 100 km
-across far from one; a lake left out is drawn as land.
+count as near a line throughout, and so does the whole of Hokkaido, whose east
+is otherwise drawn to 5 km on the island the first scenario is played on.
+Islands under 25 km across and far from every line are left out, as are lakes
+under 5 km across near a line or under 100 km across far from one; a lake left
+out is drawn as land. No two land outlines overlap, and an island inside a lake
+is cut to the lake as drawn.
 
-The result is 73,849 points in 1,990 outlines: 1,499 land, 292 lakes and 199
+The result is 74,361 points in 2,002 outlines: 1,505 land, 292 lakes and 205
 islands inside lakes. Every buildable route lies on the drawn land or its
 reviewed crossing. The tool simplifies less where one would not; none needed it.
 
@@ -78,10 +81,12 @@ downloads. `--check` verifies the committed files, and
 `python3 tools/test-basemap.py` tests the rule in `tools/basemap_rule.py`. CI runs
 both.
 
-Land and the islands inside lakes wind one way and lakes the other, so the
-renderer fills land and cuts lakes out in a single pass (`pkg/render/basemap.go`).
-It chooses how much of each outline to draw from the zoom, to within one screen
-pixel. The terrain layer still draws its own outline of Lake Biwa, because
+The renderer fills land by the even-odd rule, so a lake inside land is left
+clear and an island inside the lake is land again (`pkg/render/land.go`). The file
+also winds land and the islands inside lakes one way and lakes the other, for
+readers that fill by winding. The renderer chooses how much of each outline to
+draw from the zoom, to within one screen pixel (`pkg/render/basemap.go`). The
+terrain layer still draws its own outline of Lake Biwa, because
 today's relief tints the lake's surface; that goes when relief is cut to the
 basemap.
 

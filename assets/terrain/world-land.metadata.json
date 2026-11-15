@@ -31,19 +31,27 @@
       101
     ]
   ],
+  "near_boxes": {
+    "hokkaido": [
+      139.2,
+      41.3,
+      146.0,
+      45.6
+    ]
+  },
   "winding": "land and lake_islands counter-clockwise, lakes clockwise",
   "tightened": [],
   "counts": {
-    "land": 1499,
+    "land": 1505,
     "lakes": 292,
-    "lake_islands": 199,
-    "points": 73849,
-    "left_out_islands": 2555,
+    "lake_islands": 205,
+    "points": 74361,
+    "left_out_islands": 2552,
     "left_out_lakes": 1042
   },
   "existing_line_points_off_land": {
     "sampled": 48417,
     "off_land": 411
   },
-  "output_sha256": "94f0a53e73c9060f8506b743b7d8e12b3c13b24a841936fde60c551353955e64"
+  "output_sha256": "a15c9ad72986b9eccc109e9ce7885f05206bd91da4888f0ddf409fd502e592fc"
 }

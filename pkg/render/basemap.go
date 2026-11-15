@@ -17,21 +17,29 @@ import (
 // The basemap follows the coast to about 300 m near lines, far finer than a
 // wide view can show. At the World view on a 3737x2029 window a quarter-pixel
 // tolerance drew 45,800 land vertices, more than twice what the coarser
-// basemap before it did, and every vertex becomes sixteen or more in
-// Ebitengine's antialiased fill (see screenTolerance). One pixel draws about
-// 22,000. It is no coarser than that earlier basemap was at the World view,
-// and at close zooms it is finer than the data.
+// basemap before it did, and every vertex of the coast becomes sixteen or more
+// in Ebitengine's antialiased stroke (see screenTolerance). One pixel draws
+// about 22,000. It is no coarser than that earlier basemap was at the World
+// view, and at close zooms it is finer than the data.
 const landTolerance = 1.0
+
+// landSpeck is the length in screen pixels below which an outline with no
+// shape at this zoom is not drawn. Longer ones are kept as slivers (see
+// chosen). Keeping every such outline from one pixel up added 1,980 vertices
+// at the World view and took it past its limit of 22,000; from three pixels up
+// adds 796, for islands and lakes that would otherwise be a dot of coast line.
+const landSpeck = 3.0
 
 // basemap is the one worldwide land outline: land pieces, the lakes cut out of
 // them, and the islands inside those lakes. tools/prepare-basemap.py writes it,
 // detailed near lines and coarse elsewhere. There are no lines between
 // countries.
 //
-// Land and lake islands wind counter-clockwise and lakes clockwise, so the
-// single nonzero fill in paintLand leaves lakes clear and the scene's water
-// shows through them. Lakes need no fill of their own, which would be a third
-// antialiased pass and another map-sized box in Ebitengine's stencil.
+// The land is filled by the even-odd rule (see paintLand), so a lake inside
+// land is left clear for the scene's water to show through, and an island
+// inside the lake is land again. That needs no two land outlines to overlap,
+// which the tool guarantees. The file also winds land and lake islands
+// counter-clockwise and lakes clockwise, for readers that fill by winding.
 type basemap struct {
 	rings                [][][2]float64 // land, then lakes, then lake islands
 	land, lakes, islands int            // how many of each
@@ -46,6 +54,9 @@ type outline struct {
 	points   []mapview.Point
 	rank     []float64 // see rankOutline
 	min, max mapview.Point
+	// corners are the two highest-ranked points other than the ends, in order along the outline:
+	// with the ends, the least that still draws the outline as a shape.
+	corners [2]int
 }
 
 func newBasemap() (*basemap, error) {
@@ -77,6 +88,17 @@ func newBasemap() (*basemap, error) {
 			o.max = mapview.Point{X: max(o.max.X, q.X), Y: max(o.max.Y, q.Y)}
 		}
 		o.rank = rankOutline(o.points)
+		for j := 1; j < len(o.points)-1; j++ {
+			switch {
+			case o.corners[0] == 0 || o.rank[j] > o.rank[o.corners[0]]:
+				o.corners = [2]int{j, o.corners[0]}
+			case o.corners[1] == 0 || o.rank[j] > o.rank[o.corners[1]]:
+				o.corners[1] = j
+			}
+		}
+		if o.corners[0] > o.corners[1] {
+			o.corners[0], o.corners[1] = o.corners[1], o.corners[0]
+		}
 		b.outlines[i] = o
 	}
 	return b, nil
@@ -136,12 +158,21 @@ func (b *basemap) chosen(i int, c mapview.Camera) []mapview.Point {
 			out = append(out, p)
 		}
 	}
-	return out
+	if len(out) >= 4 {
+		return out
+	}
+	// Every point of a long thin outline lies within the tolerance of the line through its ends, so
+	// rank alone would leave an island many pixels long with nothing to draw. Keep it as a sliver.
+	if max(o.max.X-o.min.X, o.max.Y-o.min.Y) < landSpeck/scale || o.corners[0] == 0 {
+		return nil
+	}
+	last := len(o.points) - 1
+	return []mapview.Point{o.points[0], o.points[o.corners[0]], o.points[o.corners[1]], o.points[last]}
 }
 
 // visible returns the outlines to draw, in order and in screen space, each
 // clipped to the screen. An outline wholly off screen is skipped without
-// touching its points, and one smaller than landTolerance is not drawn.
+// touching its points, and one shorter than landSpeck is not drawn.
 func (b *basemap) visible(c mapview.Camera) [][]mapview.Point {
 	if c.Width <= 0 || c.Height <= 0 {
 		return nil
@@ -168,12 +199,36 @@ func (b *basemap) visible(c mapview.Camera) [][]mapview.Point {
 	return out
 }
 
+// landCell is the most pixels across a piece of land filled as one fan.
+//
+// A fan's triangles all start at one point of the piece. For a whole
+// continent each would cross the map, and Apple's tile-based GPUs list a
+// triangle in every tile it covers (see coastRun for what that cost the
+// coast). Cutting the outline first keeps every triangle inside one cell.
+const landCell = 256
+
+// cells cuts screen outlines into pieces no larger than landCell for filling.
+// Two pieces meet on exactly the same points along a cut, and each pixel is
+// flipped by whichever piece holds its centre, so the cuts leave no seam. The
+// coast is stroked from the outlines, not from the pieces.
+func cells(outlines [][]mapview.Point) [][]mapview.Point {
+	pieces := make([][]mapview.Point, 0, len(outlines))
+	for _, points := range outlines {
+		pieces = cutCells(points, landCell, pieces)
+	}
+	return pieces
+}
+
+// fill returns the pieces of land to fill at the camera, in screen space.
+func (b *basemap) fill(c mapview.Camera) [][]mapview.Point { return cells(b.visible(c)) }
+
 // draw paints the land, redrawing its layer only when the camera or palette changed.
 func (b *basemap) draw(dst *ebiten.Image, c mapview.Camera, pal ui.Palette) {
 	if b.layer.view == nil || b.camera != c || b.color != pal.Land {
 		b.camera = c
 		b.color = pal.Land
-		paintLand(b.layer.reset(int(c.Width), int(c.Height)), b.visible(c), pal)
+		outlines := b.visible(c)
+		paintLand(b.layer.reset(int(c.Width), int(c.Height)), cells(outlines), outlines, pal)
 	}
 	dst.DrawImage(b.layer.view, nil)
 }

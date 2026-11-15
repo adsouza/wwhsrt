@@ -26,6 +26,10 @@ MAX_POINTS = 80000
 MAX_OUTLINES = 2200
 # The Hokkaido and Kansai relief boxes (zoom, x0, y0, x1, y1). Relief there is detailed, so the coast is too.
 JAPAN_BOXES = [(8, 227, 93, 228, 95), (8, 224, 100, 225, 101)]
+# Places kept detailed whatever their distance from a line (west, south, east, north). Hokkaido's east
+# and north are more than 150 km from any line; drawn to 5 km at the Japan region's zoom, the Shiretoko
+# and Nemuro peninsulas were spikes on the island the first scenario is played on.
+NEAR_BOXES = {"hokkaido": (139.2, 41.3, 146.0, 45.6)}
 EARTH_KM = 6371.0
 SAMPLE_KM = 10
 
@@ -195,9 +199,74 @@ def simplify_outline(ring, flags, fine=FINE, coarse=COARSE):
     return valid_rings(_joined(points, flags, fine, coarse))
 
 
-def _wound(ring, counter_clockwise):
-    ring = [[round(p[0], 6), round(p[1], 6)] for p in ring]
-    return ring if (signed_area(ring) > 0) == counter_clockwise else ring[::-1]
+def _emitted(ring, counter_clockwise):
+    """The ring as it is written: rounded to six places and wound as asked.
+
+    Rounding can collapse a small outline to a line or make it touch itself, so this returns a list:
+    empty when nothing with area is left, and more than one ring when rounding split it.
+    """
+    rounded = []
+    for p in ring:
+        point = (round(p[0], 6), round(p[1], 6))
+        if not rounded or rounded[-1] != point:
+            rounded.append(point)
+    if len(set(rounded)) < 3:
+        return []
+    if rounded[0] != rounded[-1]:
+        rounded.append(rounded[0])
+    out = []
+    for part in valid_rings(rounded):
+        if len(set(part)) >= 3 and signed_area(part) != 0:
+            part = part if (signed_area(part) > 0) == counter_clockwise else part[::-1]
+            out.append([[p[0], p[1]] for p in part])
+    return out
+
+
+def _apart(rings):
+    """(index of the ring it came from, ring) for each ring, cut so that no two overlap.
+
+    Coarse outlines of neighbouring islands can cross. A ring wholly inside another is dropped; where
+    two cross, the later one loses the shared part. Rings that touch nothing come back unchanged.
+    """
+    shapes = [Polygon(ring) for ring in rings]
+    if not shapes:
+        return []
+    tree = STRtree(shapes)
+    crossing = {
+        j: sorted(int(i) for i in tree.query(shape, predicate="intersects") if i != j)
+        for j, shape in enumerate(shapes)
+    }
+    inside = {j for j, others in crossing.items() if any(shapes[j].within(shapes[i]) for i in others)}
+    out = []
+    for j, shape in enumerate(shapes):
+        if j in inside:
+            continue
+        cut = shape
+        for i in crossing[j]:
+            if i < j and i not in inside and shapes[i].intersection(shape).area > 0:
+                cut = cut.difference(shapes[i])
+        if cut is shape:
+            out.append((j, rings[j]))
+        else:
+            out += [(j, [tuple(p) for p in part.exterior.coords]) for part in _polygons(cut)]
+    return out
+
+
+def overlap_area(rings):
+    """The area, in square degrees, that is covered by more than one of the rings."""
+    shapes = [Polygon(ring) for ring in rings]
+    tree = STRtree(shapes)
+    total = 0.0
+    for j, shape in enumerate(shapes):
+        for i in tree.query(shape, predicate="intersects"):
+            if i < j:
+                total += shapes[i].intersection(shape).area
+    return total
+
+
+def without_overlaps(rings):
+    """The rings, cut so that no two overlap. The renderer fills by the even-odd rule."""
+    return [ring for _, ring in _apart(rings)]
 
 
 def compose(polygons, index, fine_for=None):
@@ -234,7 +303,7 @@ def compose(polygons, index, fine_for=None):
                 return ring
         return None
 
-    land, lakes, islands, source_land = [], [], [], []
+    land, lakes, islands, source_land, whole = [], [], [], [], []
     left_out_islands = left_out_lakes = 0
     lake_rings, pending = {}, []
     for i, polygon in enumerate(polygons):
@@ -248,27 +317,37 @@ def compose(polygons, index, fine_for=None):
             continue
         outline = simplify_outline(polygon[0], flags, fine_for.get(i, FINE))
         exterior = unary_union([Polygon(ring) for ring in outline])
-        for ring in outline:
-            land.append(_wound(ring, True))
-            source_land.append(i)
+        kept = [(i, ring) for ring in outline]
         for h in range(len(polygon) - 1):
             ring = kept_lake(i, h, exterior)
-            if ring is None:
+            written = _emitted(ring, False) if ring is not None else []
+            if len(written) != 1:  # left out by the rule, or lost to rounding
                 left_out_lakes += 1
                 continue
-            lake_rings[(i, h)] = Polygon(ring)
-            lakes.append(_wound(ring, False))
+            lake_rings[(i, h)] = Polygon(written[0])
+            lakes.append(written[0])
+        whole += kept
+    for at, ring in _apart([ring for _, ring in whole]):
+        written = _emitted(ring, True)
+        if not written:
+            left_out_islands += 1
+        for part in written:
+            land.append(part)
+            source_land.append(whole[at][0])
     for i in pending:
         polygon, lake = polygons[i], lake_rings.get(lake_around(i))
         left_out_lakes += len(polygon) - 1  # a lake on an island in a lake is not drawn
         if lake is None:
             continue  # its lake was left out, so the island is already part of the land around it
         flags = index.flags(polygon[0])
-        fine = fine_for.get(i, FINE)
-        for ring in (simplify_ring(polygon[0], flags, fine), list(map(tuple, polygon[0]))):
-            if Polygon(ring).within(lake):
-                islands.append(_wound(ring, True))
-                break
+        island = Polygon(simplify_ring(polygon[0], flags, fine_for.get(i, FINE)))
+        if not island.within(lake):
+            # Simplifying the lake moved its shore across the island. Keep the part still in the lake.
+            island = Polygon(polygon[0]).intersection(lake)
+        written = [w for part in _polygons(island) for w in _emitted(part.exterior.coords, True)]
+        if not written:
+            left_out_islands += 1
+        islands += written
     return {
         "land": land,
         "lakes": lakes,

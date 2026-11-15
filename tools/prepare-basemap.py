@@ -128,7 +128,7 @@ def main():
         other = json.loads(pathlib.Path(sys.argv[sys.argv.index("--compare") + 1]).read_text())
         print(json.dumps(points_off_land(other, existing)))
         return
-    boxes = [rule.tile_bounds(*b) for b in rule.JAPAN_BOXES]
+    boxes = [rule.tile_bounds(*b) for b in rule.JAPAN_BOXES] + list(rule.NEAR_BOXES.values())
     index = rule.NearIndex(existing + [r[2] for r in routes], boxes)
     composed, tightened = fit(mask["land"]["coordinates"], index, routes)
     basemap = {k: composed[k] for k in ("land", "lakes", "lake_islands")}
@@ -139,6 +139,13 @@ def main():
     outlines = counts["land"] + counts["lakes"] + counts["lake_islands"]
     assert counts["points"] <= rule.MAX_POINTS, f"{counts['points']} points exceed the budget"
     assert outlines <= rule.MAX_OUTLINES, f"{outlines} outlines exceed the budget"
+    for name, rings in basemap.items():
+        for ring in rings:
+            assert len({tuple(p) for p in ring}) >= 3 and rule.signed_area(ring) != 0, f"A {name} outline has no area"
+    # The renderer fills by the even-odd rule: land drawn twice would come out as water. Rounding to
+    # six places can leave a hair's width along a cut.
+    doubled = rule.overlap_area(basemap["land"])
+    assert doubled < 1e-6, f"Land outlines overlap by {doubled} square degrees"
     output = (json.dumps(basemap, separators=(",", ":")) + "\n").encode()
     metadata = {
         "role": "Single worldwide land outline with lakes cut out; display only, no political boundaries",
@@ -154,6 +161,7 @@ def main():
         "near_lake_km": rule.NEAR_LAKE_KM,
         "far_lake_km": rule.FAR_LAKE_KM,
         "japan_boxes": [list(b) for b in rule.JAPAN_BOXES],
+        "near_boxes": {name: list(box) for name, box in rule.NEAR_BOXES.items()},
         "winding": "land and lake_islands counter-clockwise, lakes clockwise",
         "tightened": tightened,
         "counts": counts,

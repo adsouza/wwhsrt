@@ -69,6 +69,43 @@ def test_a_ring_that_crosses_itself_is_split_not_abandoned():
     assert rule.valid_rings(square(0, 0, 1)) == [square(0, 0, 1)]
 
 
+def test_an_outline_that_rounds_to_a_line_is_left_out():
+    # A 1.2 km island in a lake came out as [A, A, B, A] after rounding to six places. Its area is zero,
+    # which a Go test saw only on amd64: arm64 fuses the multiply and subtract and got 2.5e-13.
+    index = rule.NearIndex([[(0, 0), (4, 0)]], [])
+    speck = [(2.0000001, -1.2000001), (2.0000004, -1.2000001), (2.0000004, -1.2000004), (2.0000001, -1.2000001)]
+    out = rule.compose([[square(-1, -1, 6, 3)], [speck]], index)
+    assert len(out["land"]) == 1 and out["sources"]["left_out_islands"] == 1, out["sources"]
+    for ring in out["land"] + out["lakes"] + out["lake_islands"]:
+        assert len({tuple(p) for p in ring}) >= 3 and rule.signed_area(ring) != 0 and Polygon(ring).is_valid
+
+
+def test_an_island_poking_out_of_its_simplified_lake_is_cut_to_it():
+    # A far lake is simplified to 5 km, which can move its shore across an island near it. Eight real
+    # islands, up to 37 km long, were silently drawn as water.
+    index = rule.NearIndex([[(0, 0), (4, 0)]], [])
+    shore = [(60 + i * 0.02, 40 + (0.03 if i % 2 else 0.0)) for i in range(151)]  # teeth the coarse shore loses
+    lake = shore + [(63, 43), (60, 43), shore[0]]
+    island = square(61.005, 39.99, 0.03, 0.2)  # stands in a tooth of the real shore, across the coarse one
+    out = rule.compose([[square(50, 30, 20, 20), lake], [island]], index)
+    assert len(out["lakes"]) == 1 and len(out["lake_islands"]) == 1, out["sources"]
+    kept, water = Polygon(out["lake_islands"][0]), Polygon(out["lakes"][0])
+    assert kept.area > 0 and kept.difference(water).area < 1e-9
+    assert rule.drawn_geometry(out).contains(Point(61.02, 40.1))
+
+
+def test_land_outlines_never_overlap():
+    # The renderer fills by the even-odd rule, so land drawn twice would come out as water.
+    a, b = square(0, 0, 2), square(1, 1, 2)
+    rings = rule.without_overlaps([a, b, square(10, 10, 1)])
+    shapes = [Polygon(r) for r in rings]
+    assert len(shapes) == 3 and all(s.is_valid for s in shapes)
+    assert abs(sum(s.area for s in shapes) - 8) < 1e-9  # 4 + 4 - 1 shared + 1
+    for i, s in enumerate(shapes):
+        assert all(s.intersection(t).area < 1e-12 for t in shapes[i + 1 :])
+    assert rule.without_overlaps([a]) == [a]
+
+
 def test_across_km():
     assert 150 < rule.across_km([(0, 0), (1, 0), (1, 1), (0, 1), (0, 0)]) < 160
 

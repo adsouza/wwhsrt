@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"image/color"
 	"math"
 	"testing"
 
@@ -94,6 +95,15 @@ func TestBasemapMatchesItsMetadata(t *testing.T) {
 		if len(ring) < 4 || ring[0] != ring[len(ring)-1] {
 			t.Fatalf("ring %d is not a closed outline of at least four points", i)
 		}
+		// Counted, not measured: an area computed in floating point differs between arm64, which
+		// fuses a multiply and a subtract, and amd64, which does not.
+		distinct := map[[2]float64]bool{}
+		for _, p := range ring {
+			distinct[p] = true
+		}
+		if len(distinct) < 3 {
+			t.Fatalf("ring %d has only %d distinct points: %v", i, len(distinct), ring)
+		}
 		for _, p := range ring {
 			if math.Abs(p[0]) > 180 || math.Abs(p[1]) > 90 {
 				t.Fatalf("ring %d has a point outside the globe: %v", i, p)
@@ -106,8 +116,9 @@ func TestBasemapMatchesItsMetadata(t *testing.T) {
 	}
 }
 
-// The renderer fills every outline as one nonzero path, so a lake is only cut out of its land when it
-// winds the other way. A lake wound like land would be filled as land with no error.
+// The file winds land and lake islands one way and lakes the other, for any reader that fills by
+// winding. The renderer fills by the even-odd rule and does not depend on it. An area of zero means an
+// outline collapsed to a line when its coordinates were rounded.
 func TestBasemapOutlinesWindSoLakesAreCutOut(t *testing.T) {
 	b := loadBasemap(t)
 	for i, ring := range b.rings {
@@ -387,6 +398,169 @@ func TestCoastIsStrokedInShortRuns(t *testing.T) {
 	}
 	if runs := coastRuns([][]mapview.Point{closed, closed}); len(runs) != 2*len(coastRuns([][]mapview.Point{closed})) {
 		t.Fatal("two outlines should give twice the runs of one")
+	}
+}
+
+// parityGrid marks, at the centre of every third pixel, whether an odd number of the given shapes cover
+// it. Each shape is a closed polygon; a sample is covered when a ray to its right crosses the shape's
+// edges an odd number of times. An edge is always measured from its upper end, so two shapes sharing
+// an edge agree exactly on which side of it a sample lies.
+func parityGrid(shapes [][]mapview.Point, w, h float64) []bool {
+	const stride = 3
+	cols, rows := int(w)/stride, int(h)/stride
+	flips := make([]int32, (cols+1)*rows)
+	for _, points := range shapes {
+		for i := range points {
+			p, q := points[i], points[(i+1)%len(points)]
+			if p.Y == q.Y {
+				continue
+			}
+			if p.Y > q.Y {
+				p, q = q, p
+			}
+			first := max(0, int(math.Ceil((p.Y-1.5)/stride)))
+			for r := first; r < rows && float64(r*stride)+1.5 < q.Y; r++ {
+				y := float64(r*stride) + 1.5
+				if y < p.Y {
+					continue
+				}
+				x := p.X + (y-p.Y)/(q.Y-p.Y)*(q.X-p.X)
+				// Samples left of the edge see it to their right.
+				flips[r*(cols+1)+min(cols, max(0, int(math.Ceil((x-1.5)/stride))))]++
+			}
+		}
+	}
+	covered := make([]bool, cols*rows)
+	for r := range rows {
+		crossings := int32(0)
+		for c := cols - 1; c >= 0; c-- {
+			crossings += flips[r*(cols+1)+c+1]
+			covered[r*cols+c] = crossings%2 == 1
+		}
+	}
+	return covered
+}
+
+// The fill is drawn as triangles that each flip the pixels they cover, so a pixel ends up land when an
+// odd number cover it. This checks the triangles handed to the GPU against the outlines themselves.
+//
+// The fill used to be Ebitengine's own, which counts overlapping triangles in four bits. With one land
+// outline a continent is a single shape, pixels deep in France sat under 33 to 39 triangles, and the
+// map showed water-coloured streaks from Spain to the Baltic.
+func TestLandFillPaintsExactlyTheLand(t *testing.T) {
+	b := loadBasemap(t)
+	const w, h = 3032, 1863
+	zoomed := func(lat, lon, zoom float64) mapview.Camera {
+		c := mapview.RegionCamera(w, h, "world", false)
+		c.Zoom *= zoom
+		at := c.Screen(mapview.Project(lat, lon))
+		c.PanX, c.PanY = c.PanX+w/2-at.X, c.PanY+h/2-at.Y
+		return c
+	}
+	for name, c := range map[string]mapview.Camera{
+		"the World":                  mapview.RegionCamera(w, h, "world", false),
+		"Europe at four times":       zoomed(48, 15, 4),
+		"Britain at eight times":     zoomed(54, -2, 8),
+		"North America at two times": zoomed(40, -95, 2),
+		"the Great Lakes at eight":   zoomed(45, -84, 8),
+		"Norway's fjords at sixteen": zoomed(62, 6, 16),
+		"the Japan region":           mapview.RegionCamera(w, h, "japan", false),
+	} {
+		outlines := b.visible(c)
+		vertices, indices := landFan(cells(outlines), color.NRGBA{R: 1, G: 2, B: 3, A: 255})
+		if len(indices) == 0 || len(indices)%3 != 0 {
+			t.Fatalf("%s: %d indices", name, len(indices))
+		}
+		triangles := make([][]mapview.Point, 0, len(indices)/3)
+		for i := 0; i < len(indices); i += 3 {
+			triangle := make([]mapview.Point, 3)
+			for k := range 3 {
+				v := vertices[indices[i+k]]
+				triangle[k] = mapview.Point{X: float64(v.DstX), Y: float64(v.DstY)}
+			}
+			if side := max(triangle[0].X, triangle[1].X, triangle[2].X) - min(triangle[0].X, triangle[1].X, triangle[2].X); side > landCell+1 {
+				t.Fatalf("%s: a triangle is %.0f px wide; pieces are cut to %d so that none crosses the map", name, side, landCell)
+			}
+			triangles = append(triangles, triangle)
+		}
+		// The outlines as the GPU receives them: single precision.
+		single := make([][]mapview.Point, len(outlines))
+		for i, points := range outlines {
+			for _, p := range points {
+				single[i] = append(single[i], mapview.Point{X: float64(float32(p.X)), Y: float64(float32(p.Y))})
+			}
+		}
+		want, got := parityGrid(single, w, h), parityGrid(triangles, w, h)
+		land, wrong := 0, 0
+		for i := range want {
+			if want[i] {
+				land++
+			}
+			if want[i] != got[i] {
+				wrong++
+			}
+		}
+		// Cutting an outline makes new points on the cut, rounded to single precision, so a sample
+		// within a millionth of a pixel of an edge can fall either way.
+		if land == 0 || wrong > land/100000 {
+			t.Errorf("%s: %d of %d land samples are painted wrongly", name, wrong, land)
+		}
+	}
+}
+
+// Hokkaido's east and north are more than 150 km from any line, so the rule alone drew them to 5 km:
+// at the Japan region's zoom the Shiretoko and Nemuro peninsulas came out as spikes, where the whole
+// island had been detailed before.
+func TestAllOfHokkaidoIsDetailed(t *testing.T) {
+	b := loadBasemap(t)
+	for _, ring := range b.landRings() {
+		if !ringContains(ring, [2]float64{141.35, 43.06}) { // Sapporo
+			continue
+		}
+		// A detailed coast has no long straight edges; the smooth Okhotsk shore's longest is 19 km. The
+		// spikes were drawn with edges of 50 km and more.
+		longest := 0.0
+		for i := 1; i < len(ring); i++ {
+			a, c := ring[i-1], ring[i]
+			if a[0] > 143 && c[0] > 143 {
+				km := 111 * math.Hypot((c[0]-a[0])*math.Cos(43.5*math.Pi/180), c[1]-a[1])
+				longest = max(longest, km)
+			}
+		}
+		if longest == 0 || longest > 30 {
+			t.Fatalf("Hokkaido's coast east of 143°E has an edge %.0f km long; detailed, none passes 30", longest)
+		}
+		return
+	}
+	t.Fatal("no land outline contains Sapporo")
+}
+
+// A long thin island has every point within a pixel of the line through its ends, so choosing points
+// by rank alone leaves it two: at a 1440x800 World view a 61x2 px island and K'gari both vanished.
+func TestThinOutlinesAreStillDrawn(t *testing.T) {
+	b := loadBasemap(t)
+	for _, size := range [][2]float64{{3032, 1863}, {1440, 800}} {
+		c := mapview.RegionCamera(size[0], size[1], "world", false)
+		drawn, specks := 0, 0
+		for i := range b.outlines {
+			o := &b.outlines[i]
+			lo, hi := c.Screen(o.min), c.Screen(o.max)
+			long := max(hi.X-lo.X, lo.Y-hi.Y)
+			points := len(b.chosen(i, c))
+			switch {
+			case long >= landSpeck && points < 4:
+				t.Fatalf("%vx%v: outline %d is %.1f px long and is not drawn", size[0], size[1], i, long)
+			case long < landTolerance && points != 0: // between the two it depends on the outline's shape
+				t.Fatalf("%vx%v: outline %d is %.2f px long and is drawn", size[0], size[1], i, long)
+			case points == 0:
+				specks++
+			default:
+				drawn++
+			}
+		}
+		if drawn == 0 || specks == 0 {
+			t.Fatalf("%vx%v: %d outlines drawn, %d too small to draw; expected some of each", size[0], size[1], drawn, specks)
+		}
 	}
 }
 
