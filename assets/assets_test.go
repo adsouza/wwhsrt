@@ -154,24 +154,52 @@ func TestEastAsiaScenarioMatchesSourceAndCameraPolicy(t *testing.T) {
 	}
 }
 
-// Harbin is the northern extent of East Asia in both orientations.
-func TestEastAsiaNorthernExtentIsHarbin(t *testing.T) {
-	var camera map[string][][2]float64
-	if e := json.Unmarshal(Camera, &camera); e != nil {
+// Chosen extents hold in both orientations: Harbin is East Asia's northernmost anchor and Makkah is
+// Mashreq's southernmost. regions.json East Asia is pinned to camera.json by the policy test above.
+func TestRegionExtentAnchors(t *testing.T) {
+	var regions []struct {
+		ID        string `json:"id"`
+		Landscape struct {
+			Points [][2]float64 `json:"points"`
+		} `json:"landscape"`
+		Portrait struct {
+			Points [][2]float64 `json:"points"`
+		} `json:"portrait"`
+	}
+	if e := json.Unmarshal(Regions, &regions); e != nil {
 		t.Fatal(e)
 	}
-	harbin := [2]float64{45.75, 126.65}
-	for _, orientation := range []string{"landscape", "portrait"} {
-		found := false
-		for _, p := range camera[orientation] {
-			if p == harbin {
-				found = true
-			} else if p[0] >= harbin[0] {
-				t.Fatal("an anchor north of Harbin", orientation, p)
+	for _, tc := range []struct {
+		region, anchor string
+		lonLat         [2]float64
+		north          bool
+	}{
+		{"east-asia", "Harbin", [2]float64{126.65, 45.75}, true},
+		{"mashreq", "Makkah", [2]float64{39.82563, 21.42664}, false},
+	} {
+		seen := false
+		for _, r := range regions {
+			if r.ID != tc.region {
+				continue
+			}
+			seen = true
+			for orientation, points := range map[string][][2]float64{"landscape": r.Landscape.Points, "portrait": r.Portrait.Points} {
+				found := false
+				for _, p := range points {
+					switch {
+					case p == tc.lonLat:
+						found = true
+					case tc.north && p[1] >= tc.lonLat[1], !tc.north && p[1] <= tc.lonLat[1]:
+						t.Errorf("%s %s: anchor %v lies beyond %s", tc.region, orientation, p, tc.anchor)
+					}
+				}
+				if !found {
+					t.Errorf("%s %s: %s is not an anchor", tc.region, orientation, tc.anchor)
+				}
 			}
 		}
-		if !found {
-			t.Fatal("Harbin is not an East Asia anchor", orientation)
+		if !seen {
+			t.Errorf("no %s region", tc.region)
 		}
 	}
 }
@@ -250,5 +278,116 @@ func TestRegionExclusionsMatchPresets(t *testing.T) {
 	}
 	if checked != 3 { // Dhaka twice for East Asia, Karachi once for portrait Africa+Arabia
 		t.Fatal("expected three preset exclusions, checked", checked)
+	}
+}
+
+// regions.json is an authored projection of the launch presets: the base manifest with the launch
+// framing overrides applied. Each view's points are its metro anchors in order (lon, lat), followed by
+// one point per station anchor. Station coordinates come from OSM and are not re-resolved here.
+func TestRegionsMatchEffectivePresets(t *testing.T) {
+	type view struct {
+		Metros   []string `json:"metro_ids"`
+		Stations []string `json:"station_ids"`
+	}
+	type preset struct {
+		ID string `json:"id"`
+		view
+		Landscape *view `json:"landscape"`
+		Portrait  *view `json:"portrait"`
+	}
+	read := func(path string, into any) {
+		raw, e := os.ReadFile(path)
+		if e != nil {
+			t.Fatal(e)
+		}
+		if e = json.Unmarshal(raw, into); e != nil {
+			t.Fatal(path, e)
+		}
+	}
+	var metros []struct {
+		ID  string  `json:"id"`
+		Lat float64 `json:"lat"`
+		Lon float64 `json:"lng"`
+	}
+	read("../data/prototypes/playable-metros.v1.json", &metros)
+	var base struct {
+		Regions []preset `json:"regions"`
+	}
+	read("../data/prototypes/map-region-presets.v1.json", &base)
+	var launch struct {
+		Anchors []struct {
+			ID  string  `json:"id"`
+			Lat float64 `json:"lat"`
+			Lon float64 `json:"lng"`
+		} `json:"additional_anchors"`
+		Overrides  []preset `json:"region_overrides"`
+		Additional []preset `json:"additional_regions"`
+	}
+	read("../data/prototypes/launch-map-framing.v1.json", &launch)
+	lonLat := map[string][2]float64{}
+	for _, m := range metros {
+		lonLat[m.ID] = [2]float64{m.Lon, m.Lat}
+	}
+	for _, a := range launch.Anchors {
+		lonLat[a.ID] = [2]float64{a.Lon, a.Lat}
+	}
+	// A view's own lists win over the region-wide ones; a field the override names replaces it.
+	merge := func(into *view, from view) {
+		if from.Metros != nil {
+			into.Metros = from.Metros
+		}
+		if from.Stations != nil {
+			into.Stations = from.Stations
+		}
+	}
+	effective := map[string]map[string]*view{}
+	apply := func(p preset) {
+		if effective[p.ID] == nil {
+			effective[p.ID] = map[string]*view{"landscape": {}, "portrait": {}}
+		}
+		for orientation, own := range map[string]*view{"landscape": p.Landscape, "portrait": p.Portrait} {
+			v := effective[p.ID][orientation]
+			merge(v, p.view)
+			if own != nil {
+				merge(v, *own)
+			}
+		}
+	}
+	for _, p := range base.Regions {
+		apply(p)
+	}
+	for _, p := range append(launch.Overrides, launch.Additional...) {
+		apply(p)
+	}
+	var regions []struct {
+		ID        string `json:"id"`
+		Landscape struct {
+			Points [][2]float64 `json:"points"`
+		} `json:"landscape"`
+		Portrait struct {
+			Points [][2]float64 `json:"points"`
+		} `json:"portrait"`
+	}
+	if e := json.Unmarshal(Regions, &regions); e != nil {
+		t.Fatal(e)
+	}
+	authored := map[string][][2]float64{}
+	for _, r := range regions {
+		authored[r.ID+"/landscape"], authored[r.ID+"/portrait"] = r.Landscape.Points, r.Portrait.Points
+	}
+	for id, views := range effective {
+		for orientation, v := range views {
+			key := id + "/" + orientation
+			points := authored[key]
+			if len(points) != len(v.Metros)+len(v.Stations) {
+				t.Errorf("%s: %d points for %d metros and %d stations", key, len(points), len(v.Metros), len(v.Stations))
+				continue
+			}
+			for i, m := range v.Metros {
+				if want, ok := lonLat[m]; !ok || points[i] != want {
+					t.Errorf("%s: point %d is %v, want %s %v", key, i, points[i], m, want)
+				}
+			}
+		}
 	}
 }

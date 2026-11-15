@@ -31,6 +31,13 @@
       "lat": 45.75,
       "lng": 126.65,
       "source": "https://www.geonames.org/2037013/"
+    },
+    {
+      "id": "makkah",
+      "name": "Makkah",
+      "lat": 21.42664,
+      "lng": 39.82563,
+      "source": "https://www.geonames.org/104515/"
     }
   ],
   "region_overrides": [
@@ -45,6 +52,10 @@
         "metro_ids": ["lisbon", "milan", "randstad"],
         "station_ids": ["node/11428753978", "node/260383905"]
       }
+    },
+    {
+      "id": "mashreq",
+      "metro_ids": ["alexandria", "tehran", "makkah", "dubai"]
     },
     {
       "id": "north-america",
