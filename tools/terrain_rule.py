@@ -46,10 +46,43 @@ def pixel_exact(z, x, y, lon, lat):
     return ((lon + 180) / 360 * 2**z - x) * 256, (_mercator_y(z, lat) - y) * 256
 
 
-def pixel(z, x, y, lon, lat):
-    """The pixel of tile z/x/y that holds a place, as (column, row)."""
+# A written tile is 256 pixels across, but only the middle 254 are its own area: the outermost pixel on
+# each side lies in the neighbouring tile. Two tiles side by side therefore hold the same two columns
+# of ground along their shared edge, and a renderer that blends between pixel centres can draw each
+# from 1 to 255 with no seam and without reading outside the image. Sizes stay a power of two, which
+# the game's graphics library would otherwise round up to 512.
+OWN = 254
+HALO = 4  # source pixels needed around a tile to resample it and its border
+
+
+def texel_exact(z, x, y, lon, lat):
+    """Where a place falls in the written tile z/x/y, in its pixels from the north-west corner."""
     col, row = pixel_exact(z, x, y, lon, lat)
+    return col * OWN / 256 + 1, row * OWN / 256 + 1
+
+
+def texel(z, x, y, lon, lat):
+    """The pixel of the written tile z/x/y that holds a place, as (column, row)."""
+    col, row = texel_exact(z, x, y, lon, lat)
     return math.floor(col), math.floor(row)
+
+
+def overlapped(padded, width=HALO):
+    """Resample a tile's source heights, with width source pixels around them, onto the written grid.
+
+    Returns 258x258: the 256 written pixels and one more around them for the shading's slopes. Written
+    pixel k is centred (k - 0.5) * 256 / 254 source pixels from the tile's edge. The grid is less than
+    1% coarser than the source, so a written pixel falls anywhere between two source pixels; a
+    Catmull-Rom curve through the four nearest keeps the detail that blending the nearest two would
+    blur away.
+    """
+    assert padded.shape == (256 + 2 * width, 256 + 2 * width), padded.shape
+    position = (np.arange(-1, 257) - 0.5) * 256 / OWN - 0.5 + width
+    index = np.floor(position).astype(int)
+    t = position - index
+    weights = [(-t**3 + 2 * t**2 - t) / 2, (3 * t**3 - 5 * t**2 + 2) / 2, (-3 * t**3 + 4 * t**2 + t) / 2, (t**3 - t**2) / 2]
+    rows = sum(w[:, None] * padded[index + k - 1, :] for k, w in enumerate(weights))
+    return sum(w[None, :] * rows[:, index + k - 1] for k, w in enumerate(weights))
 
 
 def place(z, x, y, col, row):
@@ -129,19 +162,17 @@ def elevation(rgb):
     return rgb[..., 0] * 256 + rgb[..., 1] + rgb[..., 2] / 256 - 32768
 
 
-def shade(heights, z, y, halo):
-    """Colour and hillshade one tile of row y at level z.
+def shade(heights, z, y):
+    """Colour and hillshade one written tile of row y at level z.
 
-    heights is 258x258 with a pixel from each neighbour around it when halo is true, and the tile's own
-    256x256 otherwise (its edge pixels then stand in for the neighbours, which leaves a faint seam).
-    Ground distance per pixel is taken row by row, so shading does not step between rows of tiles.
+    heights is 258x258 on the written grid: the tile's 256 pixels and one more around them (see
+    overlapped). Ground distance per pixel is taken row by row, so shading does not step between rows
+    of tiles, and neighbouring tiles shade the ground they share identically.
     """
-    if not halo:
-        heights = np.pad(heights, 1, mode="edge")
     assert heights.shape == (258, 258), heights.shape
-    rows = y + (np.arange(256) + 0.5) / 256
+    rows = y + (np.arange(256) - 0.5) / OWN
     lat = np.arctan(np.sinh(math.pi * (1 - 2 * rows / 2**z)))
-    metres = (np.cos(lat) * 2 * math.pi * 6378137 / (256 * 2**z))[:, None]
+    metres = (np.cos(lat) * 2 * math.pi * 6378137 / (OWN * 2**z))[:, None]
     dx = (heights[1:-1, 2:] - heights[1:-1, :-2]) / (2 * metres)
     dy = (heights[2:, 1:-1] - heights[:-2, 1:-1]) / (2 * metres)
     own = heights[1:-1, 1:-1]
@@ -180,9 +211,12 @@ def densified(geometry, step_km=EDGE_KM):
 
 
 def land_mask(heights, geometry, z, x, y):
-    """Which pixels of tile z/x/y are land: above 1 m and inside the geometry (already densified)."""
+    """Which pixels of the written tile z/x/y are land: above 1 m and inside the geometry (already densified).
+
+    heights is the tile's 256x256 written pixels, border included.
+    """
     west, south, east, north = rule.tile_bounds(z, x, y, x, y)
-    margin = (east - west) / 64
+    margin = (east - west) / 32
     near = shapely.clip_by_rect(geometry, west - margin, max(-89.9, south - margin), east + margin, north + margin)
     inside = np.zeros((256, 256), dtype=bool)
 
@@ -190,7 +224,7 @@ def land_mask(heights, geometry, z, x, y):
         image = Image.new("1", (256, 256), 0)
         # A pixel is land when its centre is inside, so shift half a pixel.
         ImageDraw.Draw(image).polygon(
-            [(c - 0.5, r - 0.5) for c, r in (pixel_exact(z, x, y, p[0], p[1]) for p in points)], fill=1
+            [(c - 0.5, r - 0.5) for c, r in (texel_exact(z, x, y, p[0], p[1]) for p in points)], fill=1
         )
         return np.array(image, dtype=bool)
 

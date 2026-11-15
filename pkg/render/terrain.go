@@ -26,31 +26,52 @@ type relief struct {
 	// redraws the map without the player moving it.
 	arrivals uint64
 	// world holds each drawn area's mesh points on the map, which do not change with the camera.
-	world    map[terrain.Address]*[meshPoints]mapview.Point
-	vertices []ebiten.Vertex
+	world     map[meshKey][]mapview.Point
+	triangles map[int][]uint16
+	vertices  []ebiten.Vertex
+}
+
+// meshKey names an area's mesh: the area and how many cells it is cut into along each side.
+type meshKey struct {
+	area  terrain.Address
+	cells int
 }
 
 const (
-	// meshCells is how many cells a drawn area is cut into along each side. Tiles are square on the
-	// Web Mercator grid and curved on this map; eight cells keep the curve within a fraction of a pixel.
-	meshCells  = 8
-	meshPoints = (meshCells + 1) * (meshCells + 1)
-	// worldLimit bounds the remembered mesh points; past it they are forgotten and worked out again.
+	// meshCells is how many cells a drawn area is cut into along each side when it is of the level being
+	// drawn. Tiles are square on the Web Mercator grid and curved on this map; eight cells keep the
+	// curve within a fraction of a pixel.
+	meshCells = 8
+	// meshCellsMax bounds the cells of an area coarser than the level being drawn (see cellsFor).
+	meshCellsMax = 64
+	// worldLimit bounds the remembered meshes; past it they are forgotten and worked out again.
 	worldLimit = 4096
 )
 
-// meshIndices joins a mesh's points into triangles; it is the same for every area.
-var meshIndices = func() []uint16 {
-	out := make([]uint16, 0, meshCells*meshCells*6)
-	for y := range meshCells {
-		for x := range meshCells {
-			a := uint16(y*(meshCells+1) + x)
-			b, c := a+1, a+meshCells+1
+// cellsFor is how many cells a side an area is cut into in a view drawn from a level. An area coarser
+// than the level spans several of the level's tiles, and is cut as finely as they are: every mesh point
+// on a fine piece's edge is then also a point of the coarse piece beside it. Without that, the coarse
+// piece's longer straight edges leave slivers of plain land along the join.
+func cellsFor(area terrain.Address, level int) int {
+	return min(meshCellsMax, meshCells<<max(0, level-area.Z))
+}
+
+// indices joins a mesh of the given cells a side into triangles.
+func (t *relief) indices(cells int) []uint16 {
+	if out := t.triangles[cells]; out != nil {
+		return out
+	}
+	out := make([]uint16, 0, cells*cells*6)
+	for y := range cells {
+		for x := range cells {
+			a := uint16(y*(cells+1) + x)
+			b, c := a+1, a+uint16(cells)+1
 			out = append(out, a, b, c, b, c+1, c)
 		}
 	}
+	t.triangles[cells] = out
 	return out
-}()
+}
 
 // contourSet is one region's contour lines and the box on the map that holds them.
 type contourSet struct {
@@ -69,7 +90,7 @@ func newRelief() (*relief, error) {
 	if e != nil {
 		return nil, e
 	}
-	t := &relief{set: set, features: set.Features, world: map[terrain.Address]*[meshPoints]mapview.Point{}}
+	t := &relief{set: set, features: set.Features, world: map[meshKey][]mapview.Point{}, triangles: map[int][]uint16{}}
 	for _, region := range set.Regions {
 		lines := contourSet{
 			min: mapview.Point{X: math.Inf(1), Y: math.Inf(1)},
@@ -88,7 +109,8 @@ func newRelief() (*relief, error) {
 	}
 	t.cache = newTileCache(tileCap, t.decode, func(img *image.RGBA) texture {
 		// Unmanaged: a tile on Ebitengine's shared atlas would leave its page held by small images after
-		// it is freed (see layer).
+		// it is freed (see layer). An unmanaged image's texture is rounded up to a power of two, which
+		// 256 already is.
 		tile := ebiten.NewImageWithOptions(img.Bounds(), &ebiten.NewImageOptions{Unmanaged: true})
 		tile.WritePixels(img.Pix)
 		return tile
@@ -120,27 +142,27 @@ func (t *relief) level(c mapview.Camera) int {
 	return terrain.LevelFor(math.Abs(b.X - a.X))
 }
 
-// points are an area's mesh points on the map: a grid of meshCells cells a side, row by row from the
-// north-west.
-func (t *relief) points(a terrain.Address) *[meshPoints]mapview.Point {
-	if p := t.world[a]; p != nil {
+// points are an area's mesh points on the map: a grid of cells a side, row by row from the north-west.
+func (t *relief) points(a terrain.Address, cells int) []mapview.Point {
+	key := meshKey{a, cells}
+	if p := t.world[key]; p != nil {
 		return p
 	}
 	if len(t.world) >= worldLimit {
 		clear(t.world)
 	}
-	p := new([meshPoints]mapview.Point)
+	p := make([]mapview.Point, (cells+1)*(cells+1))
 	for i := range p {
-		lat, lon := terrain.Corner(a, float64(i%(meshCells+1))/meshCells, float64(i/(meshCells+1))/meshCells)
+		lat, lon := terrain.Corner(a, float64(i%(cells+1))/float64(cells), float64(i/(cells+1))/float64(cells))
 		p[i] = mapview.Project(lat, lon)
 	}
-	t.world[a] = p
+	t.world[key] = p
 	return p
 }
 
 // visible reports whether any part of a tile may be on screen, from its corners, edge middles and centre.
 func (t *relief) visible(c mapview.Camera, a terrain.Address) bool {
-	p := t.points(a)
+	p := t.points(a, meshCells)
 	x0, y0, x1, y1 := math.Inf(1), math.Inf(1), math.Inf(-1), math.Inf(-1)
 	for row := 0; row <= meshCells; row += meshCells / 2 {
 		for col := 0; col <= meshCells; col += meshCells / 2 {
@@ -159,27 +181,23 @@ func (t *relief) cover(c mapview.Camera) ([]terrain.Piece, []terrain.Address) {
 // reliefOpacity fades relief at wide views, where it would otherwise bury the lines.
 func reliefOpacity(c mapview.Camera) float32 { return float32(math.Min(.98, .42+.075*c.Zoom)) }
 
-// mesh places one piece on screen. It reads only the part of the source tile that covers the piece's
-// area, and stays half a pixel inside the tile's own edge: beyond it there is nothing to blend with,
-// and a blend with nothing would show as a pale line between tiles.
-func (t *relief) mesh(c mapview.Camera, p terrain.Piece, opacity float32, dark bool) []ebiten.Vertex {
-	world := t.points(p.Area)
-	shift := p.Area.Z - p.Source.Z
-	size := float32(terrain.TileSize) / float32(int(1)<<shift)
-	left, top := float32(p.Area.X-p.Source.X<<shift)*size, float32(p.Area.Y-p.Source.Y<<shift)*size
-	inside := func(v float32) float32 { return min(terrain.TileSize-.5, max(.5, v)) }
+// mesh places one piece on screen for a view drawn from a level. It reads the part of the source
+// tile's image that covers the piece's area (see terrain.Piece.Rect).
+func (t *relief) mesh(c mapview.Camera, p terrain.Piece, level int, opacity float32, dark bool) []ebiten.Vertex {
+	cells := cellsFor(p.Area, level)
+	left, top, size := p.Rect()
 	r, g, b := float32(1), float32(1), float32(1)
 	if dark {
 		r, g, b = .30, .38, .40
 	}
 	t.vertices = t.vertices[:0]
-	for i, point := range world {
+	for i, point := range t.points(p.Area, cells) {
 		s := c.Screen(point)
 		t.vertices = append(t.vertices, ebiten.Vertex{
 			DstX:   float32(s.X),
 			DstY:   float32(s.Y),
-			SrcX:   inside(left + size*float32(i%(meshCells+1))/meshCells),
-			SrcY:   inside(top + size*float32(i/(meshCells+1))/meshCells),
+			SrcX:   float32(left + size*float64(i%(cells+1))/float64(cells)),
+			SrcY:   float32(top + size*float64(i/(cells+1))/float64(cells)),
 			ColorR: r,
 			ColorG: g,
 			ColorB: b,
@@ -191,13 +209,14 @@ func (t *relief) mesh(c mapview.Camera, p terrain.Piece, opacity float32, dark b
 
 func (t *relief) draw(dst *ebiten.Image, c mapview.Camera, s ui.State) {
 	pal := ui.PaletteFor(s)
-	pieces, wanted := t.cover(c)
+	level := t.level(c)
+	pieces, wanted := t.set.Cover(level, func(a terrain.Address) bool { return t.visible(c, a) }, t.cache.ready)
 	t.cache.want(wanted)
 	opacity, dark := reliefOpacity(c), ui.IsDark(s)
 	op := &ebiten.DrawTrianglesOptions{Filter: ebiten.FilterLinear}
 	for _, p := range pieces {
 		if tile, ok := t.cache.get(p.Source).(*ebiten.Image); ok {
-			dst.DrawTriangles(t.mesh(c, p, opacity, dark), meshIndices, tile, op)
+			dst.DrawTriangles(t.mesh(c, p, level, opacity, dark), t.indices(cellsFor(p.Area, level)), tile, op)
 		}
 	}
 	if c.Zoom >= 4 {

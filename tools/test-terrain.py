@@ -69,23 +69,54 @@ def surface(rows, cols):
     return 1500 + 1000 * np.sin(cols[None, :] / 4.0) * np.cos(rows[:, None] / 7.0)
 
 
-def tile_of_surface(first_col, halo):
-    pad = 1 if halo else 0
-    rows = np.arange(-pad, 256 + pad, dtype=np.float64)
-    cols = np.arange(first_col - pad, first_col + 256 + pad, dtype=np.float64)
-    return T.shade(surface(rows, cols), 8, 100, halo)
+def tile_of_surface(first_col):
+    """The shading of a tile whose west edge is at source column first_col, sampled on the written grid."""
+    at = (np.arange(-1, 257) - 0.5) * 256 / T.OWN
+    return T.shade(surface(at, first_col + at), 8, 100)
 
 
-def test_shading_is_continuous_across_a_tile_edge():
-    # Columns 255 and 256 of the surface sit on a tile edge in tiles A and B, and inside tile C.
-    a, b, c = tile_of_surface(0, True), tile_of_surface(256, True), tile_of_surface(128, True)
-    assert np.array_equal(a[:, 255], c[:, 127]) and np.array_equal(b[:, 0], c[:, 128])
-    # Without the neighbour's pixels the edge column is shaded from a guessed slope, and differs.
-    assert not np.array_equal(tile_of_surface(0, False)[:, 255], c[:, 127])
+def test_neighbouring_tiles_share_two_columns_of_ground():
+    # A written tile's outermost pixels lie in its neighbours: the last two columns of one tile are the
+    # same ground as the first two of the next, so blending across the shared edge has no seam.
+    west, east = tile_of_surface(0), tile_of_surface(256)
+    for mine, theirs in ((254, 0), (255, 1)):
+        difference = np.abs(west[:, mine].astype(int) - east[:, theirs].astype(int))
+        assert difference.max() <= 1, (mine, theirs, difference.max())
+    # The surface is steep enough that columns one apart do differ, so the agreement above means something.
+    assert np.abs(west[:, 255].astype(int) - east[:, 0].astype(int)).max() > 10
+
+
+def test_resampling_keeps_a_slope_exact():
+    # Source pixel j of a tile is centred j + 0.5 from its edge; with HALO around it, index i is centred i + 0.5 - HALO.
+    index = np.arange(256 + 2 * T.HALO, dtype=np.float64) + 0.5 - T.HALO
+    padded = 10 * index[None, :] + 1000 * index[:, None]  # 10 m per pixel east, 1,000 south
+    out = T.overlapped(padded)
+    assert out.shape == (258, 258)
+    centre = (np.arange(-1, 257) - 0.5) * 256 / T.OWN  # where each written pixel is centred
+    assert np.allclose(out, 10 * centre[None, :] + 1000 * centre[:, None])
+
+
+def test_resampling_keeps_fine_detail():
+    # A ridge-and-valley pattern four source pixels long is close to the finest the source can hold.
+    # Blending only the two nearest pixels would flatten it by a third where a written pixel falls
+    # between source pixels (an error of 29 here); a curve through the four nearest keeps it within 12.
+    index = np.arange(256 + 2 * T.HALO, dtype=np.float64) + 0.5 - T.HALO
+    padded = np.tile(100 * np.sin(index * np.pi / 2), (len(index), 1))
+    out = T.overlapped(padded)[1:-1, 1:-1]
+    centre = (np.arange(256) - 0.5) * 256 / T.OWN
+    exact = 100 * np.sin(centre * np.pi / 2)
+    assert np.abs(out[100] - exact).max() < 15, np.abs(out[100] - exact).max()
+
+
+def test_a_place_on_a_tile_edge_is_one_pixel_in():
+    west, _, east, north = rule.tile_bounds(8, 128, 127, 128, 127)
+    assert np.allclose(T.texel_exact(8, 128, 127, west, north), (1, 1))
+    assert np.allclose(T.texel_exact(8, 128, 127, east, north), (255, 1))
+    assert T.texel(8, 128, 127, west + 1e-9, north - 1e-9) == (1, 1)
 
 
 def test_flat_ground_gets_the_plain_colour_times_flat_shade():
-    rgb = T.shade(np.full((258, 258), 400.0), 8, 100, True)
+    rgb = T.shade(np.full((258, 258), 400.0), 8, 100)
     assert rgb.shape == (256, 256, 3) and rgb.dtype == np.uint8
     assert tuple(rgb[128, 128]) == tuple(int(c * (0.74 + 0.34 * 0.7071)) for c in (199, 211, 145))
 
@@ -93,13 +124,13 @@ def test_flat_ground_gets_the_plain_colour_times_flat_shade():
 def test_slopes_facing_the_light_are_brighter():
     # Light comes from the northwest: ground rising to the southeast faces it, ground rising to the northwest does not.
     rows, cols = np.mgrid[0:258, 0:258].astype(np.float64)
-    lit = T.shade(1000 + 200 * (rows + cols), 8, 100, True)
-    shadowed = T.shade(1000 + 200 * (516 - rows - cols), 8, 100, True)
+    lit = T.shade(1000 + 200 * (rows + cols), 8, 100)
+    shadowed = T.shade(1000 + 200 * (516 - rows - cols), 8, 100)
     assert int(lit[128, 128, 0]) > int(shadowed[128, 128, 0])
 
 
 def test_high_ground_is_not_all_one_tone():
-    low, high = T.shade(np.full((258, 258), 2600.0), 8, 100, True), T.shade(np.full((258, 258), 4800.0), 8, 100, True)
+    low, high = T.shade(np.full((258, 258), 2600.0), 8, 100), T.shade(np.full((258, 258), 4800.0), 8, 100)
     assert int(high[0, 0, 2]) - int(low[0, 0, 2]) > 90  # Bogota's plateau and a 4,800 m peak differ
 
 
@@ -118,7 +149,7 @@ def test_mask_leaves_lakes_clear_and_keeps_their_islands():
     mask = T.land_mask(np.full((256, 256), 50.0), land, 8, 128, 127)
 
     def at(lon, lat):
-        return mask[T.pixel(8, 128, 127, lon, lat)[::-1]]
+        return mask[T.texel(8, 128, 127, lon, lat)[::-1]]
 
     assert at(0.2, 0.2) and not at(0.5, 0.5) and at(0.7, 0.7)
 
@@ -135,13 +166,13 @@ def test_mask_follows_map_straight_edges():
     x, y = T.tile_at(z, lon, lat)
     land = T.densified(shapely.geometry.Polygon([a, b, (105.0, 58.0)]))  # land lies south-east of the edge
     mask = T.land_mask(np.full((256, 256), 50.0), land, z, x, y)
-    col, row = T.pixel(z, x, y, lon, lat)
+    col, row = T.texel(z, x, y, lon, lat)
     edge = int(np.argmax(mask[row]))  # the first land pixel in that row
     assert mask[row].any() and not mask[row].all() and abs(edge - col) <= 1, (edge, col)
     # The same edge taken as straight in degrees, or straight on the tile, would be drawn somewhere else.
-    degrees = T.pixel_exact(z, x, y, a[0] + (lat - a[1]) / (b[1] - a[1]) * (b[0] - a[0]), lat)[0]
+    degrees = T.texel_exact(z, x, y, a[0] + (lat - a[1]) / (b[1] - a[1]) * (b[0] - a[0]), lat)[0]
     assert abs(degrees - col) > 2, (degrees, col)
-    naive = shapely.geometry.LineString([T.pixel_exact(z, x, y, *a), T.pixel_exact(z, x, y, *b)])
+    naive = shapely.geometry.LineString([T.texel_exact(z, x, y, *a), T.texel_exact(z, x, y, *b)])
     assert naive.distance(shapely.geometry.Point(col, row)) > 2
 
 
@@ -230,15 +261,17 @@ def test_a_tile_borrows_edge_pixels_only_from_neighbours_it_has():
     P = tool()
     own, east = np.full((256, 256), 100.0, np.float32), np.full((256, 256), 300.0, np.float32)
     padded = P.with_halo({(5, 5): own, (6, 5): east}, 8, 5, 5)
-    assert padded.shape == (258, 258)
-    assert padded[100, 257] == 300 and padded[100, 0] == 100  # east from the neighbour, west repeats its own edge
-    assert padded[0, 100] == 100 and padded[1, 1] == 100
+    h = T.HALO
+    assert padded.shape == (256 + 2 * h, 256 + 2 * h)
+    assert (padded[100, 256 + h :] == 300).all() and (padded[100, :h] == 100).all()  # east: the neighbour; west: its own edge
+    assert padded[0, 100] == 100 and padded[h, h] == 100
+    assert padded[0, -1] == 100  # no north-east neighbour: the corner repeats its own
 
 
 def test_a_tile_at_the_date_line_borrows_from_the_other_side():
     P = tool()
     heights = {(0, 1): np.full((256, 256), 100.0, np.float32), (3, 1): np.full((256, 256), 700.0, np.float32)}
-    assert P.with_halo(heights, 2, 0, 1)[100, 0] == 700
+    assert (P.with_halo(heights, 2, 0, 1)[100, : T.HALO] == 700).all()
 
 
 def test_sample_selection_takes_named_routes_and_boxes():

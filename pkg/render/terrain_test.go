@@ -78,11 +78,12 @@ func TestPieceMeshUsesOnlyItsPartOfTheSource(t *testing.T) {
 		source         terrain.Address
 		x0, x1, y0, y1 float32
 	}{
-		{area, 0, 256, 0, 256},
-		{terrain.Address{Z: 7, X: 113, Y: 46}, 128, 256, 128, 256},
-		{terrain.Address{Z: 6, X: 56, Y: 23}, 192, 256, 64, 128},
+		// A tile's outermost pixels belong to its neighbours, so its own area runs from 1 to 255.
+		{area, 1, 255, 1, 255},
+		{terrain.Address{Z: 7, X: 113, Y: 46}, 128, 255, 128, 255},
+		{terrain.Address{Z: 6, X: 56, Y: 23}, 191.5, 255, 64.5, 128},
 	} {
-		vertices := m.terrain.mesh(c, terrain.Piece{Area: area, Source: want.source}, 1, false)
+		vertices := m.terrain.mesh(c, terrain.Piece{Area: area, Source: want.source}, 8, 1, false)
 		if len(vertices) != 81 {
 			t.Fatalf("a piece has %d vertices, want 81", len(vertices))
 		}
@@ -90,11 +91,9 @@ func TestPieceMeshUsesOnlyItsPartOfTheSource(t *testing.T) {
 		for _, v := range vertices {
 			x0, x1, y0, y1 = min(x0, v.SrcX), max(x1, v.SrcX), min(y0, v.SrcY), max(y1, v.SrcY)
 		}
-		// Half a pixel is kept back at the image's own edge, where there is nothing beyond to blend with.
-		inset := func(v float32) float32 { return min(255.5, max(0.5, v)) }
-		if x0 != inset(want.x0) || x1 != inset(want.x1) || y0 != inset(want.y0) || y1 != inset(want.y1) {
+		if x0 != want.x0 || x1 != want.x1 || y0 != want.y0 || y1 != want.y1 {
 			t.Errorf("from %+v the piece reads x %v to %v, y %v to %v; want x %v to %v, y %v to %v",
-				want.source, x0, x1, y0, y1, inset(want.x0), inset(want.x1), inset(want.y0), inset(want.y1))
+				want.source, x0, x1, y0, y1, want.x0, want.x1, want.y0, want.y1)
 		}
 	}
 }
@@ -102,18 +101,38 @@ func TestPieceMeshUsesOnlyItsPartOfTheSource(t *testing.T) {
 func TestNeighbouringPiecesShareTheirEdgeVertices(t *testing.T) {
 	m := reliefMap(t)
 	c := bogotaMedellin(1440, 960)
-	west := append([]vertexAt{}, corners(m.terrain.mesh(c, piece(8, 74, 123), 1, false))...)
-	east := corners(m.terrain.mesh(c, piece(8, 75, 123), 1, false))
+	west := corners(m.terrain.mesh(c, piece(8, 74, 123), 8, 1, false))
+	east := corners(m.terrain.mesh(c, piece(8, 75, 123), 8, 1, false))
 	for row := range 9 {
 		if a, b := west[row*9+8], east[row*9]; a != b {
 			t.Fatalf("row %d: the west tile's east edge is at %v and the east tile's west edge at %v", row, a, b)
 		}
 	}
-	// A coarse piece beside fine ones: its corner is exactly the fine pieces' corner, so no gap opens.
-	coarse := corners(m.terrain.mesh(c, piece(7, 37, 62), 1, false)) // holds 8/74..75/124..125
-	fine := corners(m.terrain.mesh(c, piece(8, 74, 123), 1, false))
-	if coarse[0] != fine[8*9] {
-		t.Fatalf("a level-7 piece's corner %v is not the level-8 corner %v beside it", coarse[0], fine[8*9])
+	// A coarse piece beside fine ones is cut as finely as they are, so every point on a fine piece's
+	// edge is also a point of the coarse piece and no sliver opens between them. The level-7 piece
+	// here lies south of the level-8 one and spans two of them.
+	fine := corners(m.terrain.mesh(c, piece(8, 74, 123), 8, 1, false))
+	coarse := corners(m.terrain.mesh(c, piece(7, 37, 62), 8, 1, false))
+	if len(coarse) != 17*17 {
+		t.Fatalf("a level-7 piece in a level-8 view has %d vertices, want 289", len(coarse))
+	}
+	for col := range 9 {
+		if a, b := fine[8*9+col], coarse[col]; a != b {
+			t.Fatalf("column %d: the fine piece's south edge is at %v and the coarse piece's north edge at %v", col, a, b)
+		}
+	}
+	// In a view drawn from its own level the same piece needs no more than the usual mesh.
+	if n := len(m.terrain.mesh(c, piece(7, 37, 62), 7, 1, false)); n != 81 {
+		t.Fatalf("a level-7 piece in a level-7 view has %d vertices, want 81", n)
+	}
+	// Very coarse pieces are not cut without limit.
+	if n := len(m.terrain.mesh(c, piece(3, 2, 3), 8, 1, false)); n != 65*65 {
+		t.Fatalf("a level-3 piece in a level-8 view has %d vertices, want %d", n, 65*65)
+	}
+	for _, cells := range []int{8, 16, 32, 64} {
+		if got := len(m.terrain.indices(cells)); got != cells*cells*6 {
+			t.Fatalf("%d cells a side give %d indices", cells, got)
+		}
 	}
 }
 
@@ -136,11 +155,11 @@ func TestReliefIsDimmedAtWideViewsAndTintedInTheDark(t *testing.T) {
 	m := reliefMap(t)
 	c := bogotaMedellin(1440, 960)
 	c.Zoom = 2
-	light := m.terrain.mesh(c, piece(8, 74, 123), reliefOpacity(c), false)[0]
+	light := m.terrain.mesh(c, piece(8, 74, 123), 8, reliefOpacity(c), false)[0]
 	if want := float32(0.42 + 0.075*2); math.Abs(float64(light.ColorA-want)) > 1e-6 || light.ColorR != 1 {
 		t.Errorf("at zoom 2 relief has opacity %v and red %v, want %v and 1", light.ColorA, light.ColorR, want)
 	}
-	dark := m.terrain.mesh(c, piece(8, 74, 123), reliefOpacity(c), true)[0]
+	dark := m.terrain.mesh(c, piece(8, 74, 123), 8, reliefOpacity(c), true)[0]
 	if dark.ColorR != .30 || dark.ColorG != .38 || dark.ColorB != .40 {
 		t.Errorf("dark relief is tinted %v, %v, %v", dark.ColorR, dark.ColorG, dark.ColorB)
 	}

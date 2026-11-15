@@ -9,8 +9,14 @@ import (
 const (
 	MinLevel = 2
 	MaxLevel = 8
-	// TileSize is a tile's width and height in pixels.
+	// CompleteLevel is the finest level that lists every tile holding land. Up to it, a quarter with no
+	// tile is open sea; beyond it, relief exists only near lines and a missing tile means "use the parent".
+	CompleteLevel = 5
+	// TileSize is the width and height of a tile's image in pixels.
 	TileSize = 256
+	// OwnSize is how much of that image is the tile's own area; the rest is a border of its neighbours.
+	OwnSize = 254
+	border  = (TileSize - OwnSize) / 2
 )
 
 // Address names one tile: level, column from the date line eastward, row from the north.
@@ -52,11 +58,23 @@ func LevelFor(pixelsPerDegree float64) int {
 // Piece draws Area using the part of Source's image that covers it. Source is Area or a tile that holds it.
 type Piece struct{ Area, Source Address }
 
+// Rect is the square of Source's image that covers Area, in pixels: its left and top edge and its size.
+//
+// A tile's image is TileSize pixels across but only the middle OwnSize are its own area; the outermost
+// pixel on each side lies in the neighbouring tile. Tiles side by side therefore hold the same ground
+// along their shared edge, and blending between pixel centres from 1 to 255 leaves no seam and never
+// reads outside the image.
+func (p Piece) Rect() (left, top, size float64) {
+	shift := p.Area.Z - p.Source.Z
+	size = OwnSize / float64(int(1)<<shift)
+	return border + float64(p.Area.X-p.Source.X<<shift)*size, border + float64(p.Area.Y-p.Source.Y<<shift)*size, size
+}
+
 // Cover lists what to draw at a level and which tiles the view wants loaded, coarsest first.
 //
 // Every area of land is drawn once. A tile at the level, or one with nothing finer beneath it, is drawn
-// whole. Where only some of a tile's quarters have finer tiles, the others are drawn as quarters of it.
-// A sea tile draws nothing. Each area comes from the tile that should supply it when that is ready and
+// whole. Where only some of a tile's quarters have finer tiles, the others are drawn as quarters of it,
+// unless the quarter is open sea (see CompleteLevel). A sea tile draws nothing. Each area comes from the tile that should supply it when that is ready and
 // otherwise from the finest tile above it that is, so a view sharpens as tiles arrive; with none ready
 // the area is left to the plain land beneath.
 func (s *Set) Cover(level int, visible, ready func(Address) bool) (pieces []Piece, wanted []Address) {
@@ -98,7 +116,7 @@ func (s *Set) Cover(level int, visible, ready func(Address) bool) (pieces []Piec
 			}
 			if _, ok := s.Tiles[c]; ok {
 				walk(c)
-			} else {
+			} else if c.Z > CompleteLevel {
 				emit(c, t)
 			}
 		}

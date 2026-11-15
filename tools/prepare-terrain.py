@@ -195,20 +195,17 @@ def write_tile(out, z, x, y, rgb, mask):
     return entry
 
 
-def with_halo(heights, z, x, y):
-    """A tile's heights with one pixel around them: from each neighbour that is in heights, else its own edge."""
-    padded = np.pad(heights[(x, y)], 1, mode="edge")
+def with_halo(heights, z, x, y, width=T.HALO):
+    """A tile's source heights with width pixels around them: from each neighbour heights has, else its own edge."""
+    padded = np.pad(heights[(x, y)], width, mode="edge")
     n = 2**z
+    mine = {-1: slice(0, width), 0: slice(width, width + 256), 1: slice(width + 256, None)}
+    theirs = {-1: slice(256 - width, None), 0: slice(None), 1: slice(0, width)}
     for dx in (-1, 0, 1):
         for dy in (-1, 0, 1):
             other = heights.get(((x + dx) % n, y + dy))  # columns wrap at the date line; rows do not
-            if other is None or (dx, dy) == (0, 0):
-                continue
-            rows = slice(1, 257) if dy == 0 else (0 if dy < 0 else 257)
-            cols = slice(1, 257) if dx == 0 else (0 if dx < 0 else 257)
-            theirs_rows = slice(None) if dy == 0 else (255 if dy < 0 else 0)
-            theirs_cols = slice(None) if dx == 0 else (255 if dx < 0 else 0)
-            padded[rows, cols] = other[theirs_rows, theirs_cols]
+            if other is not None and (dx, dy) != (0, 0):
+                padded[mine[dy], mine[dx]] = other[theirs[dy], theirs[dx]]
     return padded
 
 
@@ -260,8 +257,9 @@ def write(levels, complete):
     for z in sorted(levels):
         heights = {(x, y): decode(z, x, y, pins) for x, y in sorted(levels[z])}
         for x, y in sorted(heights):
-            mask = T.land_mask(heights[(x, y)], land, z, x, y)
-            rgb = T.shade(with_halo(heights, z, x, y), z, y, True)
+            samples = T.overlapped(with_halo(heights, z, x, y))
+            mask = T.land_mask(samples[1:-1, 1:-1], land, z, x, y)
+            rgb = T.shade(samples, z, y)
             entry = write_tile(tiles_out, z, x, y, rgb, mask)
             entries.append(entry)
             counts[(z, entry[3])] += 1
