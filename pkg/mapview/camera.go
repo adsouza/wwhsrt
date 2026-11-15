@@ -21,6 +21,25 @@ func Project(lat, lon float64) Point {
 	}
 }
 
+// Unproject is the latitude and longitude of a point on the map: the reverse of Project.
+func Unproject(p Point) (lat, lon float64) {
+	const a1, a2, a3, a4 = 1.340264, -0.081106, 0.000893, 0.003796
+	t := p.Y / a1
+	for range 12 {
+		t2 := t * t
+		t6 := t2 * t2 * t2
+		step := (t*(a1+a2*t2+t6*(a3+a4*t2)) - p.Y) / (a1 + 3*a2*t2 + t6*(7*a3+9*a4*t2))
+		t -= step
+		if math.Abs(step) < 1e-14 {
+			break
+		}
+	}
+	t2 := t * t
+	t6 := t2 * t2 * t2
+	lon = p.X * 3 * (a1 + 3*a2*t2 + t6*(7*a3+9*a4*t2)) / (2 * math.Sqrt(3) * math.Cos(t))
+	return math.Asin(2*math.Sin(t)/math.Sqrt(3)) * 180 / math.Pi, lon * 180 / math.Pi
+}
+
 type Camera struct {
 	Width, Height    float64
 	Zoom, PanX, PanY float64
