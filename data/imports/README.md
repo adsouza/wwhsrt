@@ -17,7 +17,7 @@ python3 tools/import-public-network.py --check
 ```
 
 The deterministic compiler writes `assets/scenario/public-network.json`,
-`assets/terrain/world-land.json`, `assets/scenario/rail-display-paths.json`, and
+`assets/scenario/rail-display-paths.json`, and
 `assets/scenario/playable-rail-map.json`. The first file records the exact input SHA-256.
 `assets/scenario/regions.json` is an authored orientation-aware camera projection
 of the existing manifests, with additional China/Japan/Korea views. Camera changes
@@ -136,16 +136,15 @@ The full source inventory, economic catalog, services, fares, times and saves st
 unchanged. Add/qualify a corridor before promoting additional source geometry into
 the playable map; do not patch a geographic fragment into the world arbitrarily.
 
-## Shoreline replacement
+## Basemap
 
-The world basemap incorporates the refined regional coastline once, replacing its
-coarse source rings. Japan and China/Taiwan use the same pinned Natural Earth
-1:10m source and 0.003-degree simplification. The physical China land geometry
-includes Hong Kong/Macao coastlines; internal overlay seams are dissolved.
-`tools/prepare-shorelines.py` regenerates this subset, and
-`tools/import-public-network.py` composes the final world layer and provenance
-metadata. The runtime does not draw the regional layer over it again. This is
-presentation data outside the public-network save fingerprint.
+The world basemap, `assets/terrain/world-land.json`, is no longer written by the
+network compiler. `tools/prepare-basemap.py` composes it after the compiler has
+run, because it reads the compiled lines to decide where the coast is detailed:
+one land outline from the pinned Natural Earth 1:10m land, at 0.003 degrees within
+150 km of any line and 0.05 degrees beyond. See
+[the terrain README](../../assets/terrain/README.md#basemap). This is presentation
+data outside the public-network save fingerprint.
 
 
 ## Whole-network completion (2026-11-13)
@@ -195,13 +194,13 @@ explicitly upgraded conventional rail, and its distinct dedicated-HSR prospect
 has separate track capacity. [Current construction report](../../docs/validation/LAUNCH_PROSPECTS.md).
 
 
-The world basemap additionally replaces coarse Australia, South Africa and Chile
-rings from the pinned construction mask, removing visual water crossings caused
-by the old coast. `launch_shorelines.py` chooses the coarsest screened refinement
-that covers every affected route in both projections; it never overlays duplicate
-coastlines or changes prices/saves. Metadata records the source mask and country
-vertex/tolerance counts. The construction checker independently checks the actual
-rendered world land as well as the detailed land/lake mask.
+The world basemap is derived from the same pinned construction mask, so the coast
+a route is drawn on is the coast it was reviewed against. `tools/prepare-basemap.py`
+requires every buildable route to lie on the drawn land or its reviewed crossing in
+both projections, simplifying the coast less where one would not; it changes no
+prices or saves. Metadata records the source mask, the rule and any such
+tightening. The construction checker independently checks the actual rendered
+world land as well as the detailed land/lake mask.
 
 
 ## Gyeongju connector, Taipei and Texas addition

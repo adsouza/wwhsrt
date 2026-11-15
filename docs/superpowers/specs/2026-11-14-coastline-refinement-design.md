@@ -1,6 +1,8 @@
 # Coastline refinement (worldwide basemap)
 
-Status: approved 2026-11-14. Nothing is built.
+Status: approved 2026-11-14; implemented 2026-11-15 on branch
+worktree-coastline-refinement. See "As built" at the end for what differs from
+the text below. The browser coastline check has not run; hosted CI runs it.
 Amended 2026-11-14 at the user's request: the regional Japan files and the
 test-only frames that draw them are folded into the new basemap (Behaviour 5).
 Size: a small project (one tool reworked, one asset replaced, a small renderer
@@ -273,5 +275,58 @@ From the design reviewer's read-only probes of the same files:
   Zhuhai and Lisbon, and Miami's marker, test as sea. The exception list in
   Behaviour 8 will have about five to nine names.
 
-Not measured: land redraw time today or after, the real tool's counts, and
-whether any buildable route needs local tightening.
+## As built (2026-11-15)
+
+Between approval and the build, 17 commits on `main` rewrote land drawing
+(`pkg/render/land.go`: one fill path and one coast path, to keep Ebitengine's
+stencil small) and made hosted CI run the browser and data checks on push. The
+build follows that code. Where it differs from the text above:
+
+- **Far islands: 25 km, not 20.** At 20 km the basemap had 2,343 outlines against
+  the budget of 2,200. At 25 km it has 1,990 outlines and 73,849 points: 1,499
+  land, 292 lakes, 199 islands inside lakes; 2,555 islands and 1,042 lakes left
+  out.
+- **No route needed tightening.** All 76 alignments of the 74 buildable routes
+  lie on the drawn land at 0.003 degrees.
+- **Lakes are holes, not a second fill.** Land and lake islands wind one way and
+  lakes the other, so the renderer's single nonzero fill cuts lakes out. A third
+  antialiased pass would have added a map-sized box to the stencil.
+- **Detail is chosen by zoom, to within one pixel.** At the earlier quarter-pixel
+  tolerance the World view drew 45,849 land vertices against a guard of 22,000
+  (`TestWorldViewGeometryStaysNearScreenResolution`), because the finer coast has
+  more to show. Each point now carries a rank computed once at load, and the map
+  draws the points whose rank exceeds one pixel at the current zoom: 20,936
+  vertices at the World view. The choice does not depend on where the camera is,
+  so the coast does not shimmer when dragged. Outlines smaller than a pixel are
+  not drawn.
+- **The coast is stroked in runs of 32 segments.** The planned before-and-after
+  measurement found 7.3 GB of memory at the World view against 2.6 GB before,
+  5.1 GB of it on the GPU. Ebitengine fills a sub-path as a fan of triangles
+  from its first point, and one land outline makes a continent a single
+  sub-path. Cutting the stroke into short open runs inside one path fixed it.
+- **Lake Biwa is drawn by both layers for now.** Today's relief tiles tint the
+  lake's surface as land, so the terrain layer keeps its own outline until
+  relief is cut to the basemap. A test holds the two shores within 0.004
+  degrees.
+- **Existing lines off land rose, and that is correct.** Sampled every 10 km,
+  411 of 48,417 points are off the drawn land; the full-detail source says 420
+  are over water. The old basemap had 252 off but disagreed with the source at
+  214 points; the new one disagrees at 21. Behaviour 6's "the number should
+  fall" was wrong: the old coast painted land over 191 points of real water.
+- **City exceptions:** Hong Kong, Dongguan, Miami, Lisbon and Zhuhai, whose
+  markers sit 10 to 473 m off Natural Earth's land.
+- **Browser check.** The decision not to run it locally stands, but hosted CI
+  now runs `tools/check-coastlines.cjs` on push. It was updated to sample the
+  new file and has not run yet. Its eight water points are pinned as sea by a Go
+  test.
+
+Measured at 3737x2029 on a copy of a real save, panning every frame for 30
+seconds (land redraw mean, 95th percentile, footprint at the end):
+
+| View | Before | After |
+|---|---|---|
+| World | 9.9 ms, 10.6 ms, 2.6 GB | 7.4 ms, 7.8 ms, 2.5 GB |
+| Japan | 3.0 ms, 3.1 ms, 1.2 GB | 1.5 ms, 1.5 ms, 1.2 GB |
+
+The tool takes about 6 seconds and 613 MB. `world-land.json` is 1.67 MB, up
+from 1.05 MB; the regional file it retires was 345 KB.

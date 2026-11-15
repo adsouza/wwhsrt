@@ -188,13 +188,13 @@ frame. Source-only geometry remains in the pinned input for audits; neither it n
 unrelated station dots are painted as playable infrastructure. This projection is
 excluded from economic saves, so map decluttering requires no campaign migration.
 
-Shoreline refinements replace coarse rings before rendering. The generated
-`world-land.json` combines the worldwide base and refined regional geometry once;
-public frames draw that layer alone, and legacy fixtures draw the regional layer
-alone. `prepare-shorelines.py` shares the pinned Japan/China/Taiwan derivation with
-the relief preparer, without requiring tile downloads for coastline work. Data
-checks enforce unique rings and source hashes; pixel checks verify that former
-coarse land protrusions are water across palette/terrain settings.
+The basemap is one worldwide land outline, `world-land.json`, written by
+`tools/prepare-basemap.py` from the pinned Natural Earth 1:10m land. It is detailed
+within 150 km of any line and coarse beyond, with lakes cut out and no lines
+between countries, and every frame draws it. Data checks enforce its source
+hashes, its point budget, known places on land and water, and every buildable
+route on drawn land; pixel checks in CI verify coastal water across
+palette/terrain settings.
 ### Construction prospect presentation
 
 `ui.ConstructionOpportunities` supplies the current unstarted, non-public corridor

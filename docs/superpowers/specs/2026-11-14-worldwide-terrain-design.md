@@ -2,7 +2,8 @@
 
 Status: approved 2026-11-14. Nothing is built. Coastline refinement is to be
 built first; the build plan for this design is written after that.
-Amended 2026-11-14 and the amendment approved the same day: relief is cut to the land the refined
+Amended 2026-11-14 and the amendment approved the same day (and on 2026-11-15
+for what the coastline build found; see "After the coastline build" at the end): relief is cut to the land the refined
 basemap draws (the user's decision), and "a line" gained the two older
 Japanese routes (my call). See Behaviour 1 and 4.
 Size: a project (a new tile format, a reworked generator, an on-demand loader,
@@ -60,9 +61,11 @@ today, and coarser relief on all other land.
   fix this by refining coastlines for every country with lines, as a separate
   project that is built first. This design does not change the basemap; it
   reads the refined one (Behaviour 4).
-- Running the browser check. `TESTING.md` blocks full browser/WASM startup
-  under the unresolved 2 GiB cap. The user chose to build the web bundle and
-  state that relief in the browser is unverified.
+- Running the browser check locally. `TESTING.md` blocks full browser/WASM
+  startup under the unresolved 2 GiB cap, and the user chose not to run it.
+  Since 2026-11-15 hosted CI runs the browser checks on push, so
+  `tools/check-terrain.cjs` must be right for the new assets and is first
+  verified there.
 - Reducing the app's existing idle memory footprint.
 
 ## Anti-goals
@@ -221,9 +224,9 @@ and no network.
 - A test shows the cache cap holds: after loading more tiles than the cap, the
   number held does not exceed it and the rest were deallocated.
 - `tools/check-terrain.cjs` is updated for the new assets and for a line
-  outside Japan, but is not run, and `docs/validation/terrain-checks.json` is
-  not regenerated (decided by the user; see Non-goals). The web bundle is
-  built. The README states that relief in the browser is unverified.
+  outside Japan. It is not run locally (decided by the user; see Non-goals);
+  hosted CI runs it and produces `docs/validation/terrain-checks.json`. The web
+  bundle is built.
 - Memory is measured in the native app at 3737×2029 on a copy of a real save,
   before and after, while panning between continents.
 
@@ -329,3 +332,23 @@ Measured on 2026-11-14 with a throwaway spike (not in the repository):
 
 Not measured: decode time per tile on native or in the browser, the real tile
 counts after the generator runs, and memory with the pyramid in place.
+
+## After the coastline build (2026-11-15)
+
+Building coastlines first taught three things this design must respect. None
+changes what the user approved; all change how it is built.
+
+- **Memory baseline.** Other work on `main` cut the native map's memory, and
+  the coastline build measured 2.5 GB while panning the World view at
+  3737×2029 and 1.2 GB at the Japan region. Those, not the 3.6 GB idle figure
+  quoted in the conversation that produced this design, are the numbers the
+  terrain goals are measured against.
+- **Ebitengine's costs are in the shape of what is drawn.** A third antialiased
+  pass adds a map-sized stencil box, and one large sub-path fans map-spanning
+  triangles (5 GB of GPU memory, found by measurement). Relief tiles are drawn
+  with `DrawTriangles`, not `vector`, but anything this design strokes or fills
+  must be measured the same way, at a large window while panning.
+- **Lake Biwa.** The terrain layer still draws its own outline of the lake,
+  because today's relief tints the lake's surface. Once tiles are cut to the
+  basemap (Behaviour 4) that outline and `relief.lakes` are removed, together
+  with `TestLakeBiwaHasOneShoreInBothLayers`.

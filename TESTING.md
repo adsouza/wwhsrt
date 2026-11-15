@@ -297,14 +297,16 @@ Harbin–Shenyang/Changchun–Jilin and removal of the reported unused parallel 
 The browser check verifies actual retained/removed rail pixels and unchanged saves.
 See [PLAYABLE_MAP.md](docs/validation/PLAYABLE_MAP.md).
 
-For coastline replacement/refinement, run focused `go test -p 1 ./pkg/render`,
-`python3 tools/prepare-shorelines.py --check`,
-`python3 tools/import-public-network.py --check` and the route geography checker.
-After building web/native, run
-`NODE_OPTIONS=--max-old-space-size=1536 node tools/check-coastlines.cjs <server-url>`.
-It checks Japan/China coastal water and fine shoreline pixels in light/dark modes
-with terrain on/off, plus unchanged save bytes/checkpoint. See
-[COASTLINES.md](docs/validation/COASTLINES.md).
+For the basemap, run focused `go test -p 1 ./pkg/render`,
+`python3 tools/test-basemap.py`, `python3 tools/prepare-basemap.py --check`,
+`python3 tools/check-launch-prospects.py` and the route geography checker. A change
+to what `pkg/render` draws as land also needs the native app's memory compared
+before and after while panning at a large window: the Go tests do not draw.
+`tools/check-coastlines.cjs` checks Japan/China coastal water and fine shoreline
+pixels in light/dark modes with terrain on/off, plus unchanged save bytes/checkpoint.
+It runs in hosted CI, which uploads a fresh `coastline-checks.json` and screenshots
+as evidence; the copies in `docs/validation` predate the single-outline basemap
+until that evidence is committed. See [COASTLINES.md](docs/validation/COASTLINES.md).
 
 
 ## Worldwide construction catalog
