@@ -134,14 +134,14 @@ func TestFitAvoidingPansAPointOutWithinTheGutters(t *testing.T) {
 	}
 	for _, p := range anchors {
 		q := c.Screen(p)
-		if q.X < MarkerClearance-1e-9 || q.X > c.Width-MarkerClearance+1e-9 || q.Y < MarkerClearance-1e-9 || q.Y > c.Height-MarkerClearance+1e-9 {
+		if q.X < AnchorClearance-1e-9 || q.X > c.Width-AnchorClearance+1e-9 || q.Y < AnchorClearance-1e-9 || q.Y > c.Height-AnchorClearance+1e-9 {
 			t.Fatal("an anchor left its marker clearance", q)
 		}
 	}
 	if c.Zoom != plain.Zoom || c.Min != plain.Min || c.Max != plain.Max {
 		t.Fatal("avoiding a point must pan, not refit")
 	}
-	if got := c.Screen(dhaka).X; math.Abs(got+MarkerClearance) > 1e-6 {
+	if got := c.Screen(dhaka).X; math.Abs(got+ExcludeClearance) > 1e-6 {
 		t.Fatal("the pan should be the smallest that clears the margin", got)
 	}
 	far := Project(-33.8688, 151.2093)
@@ -152,8 +152,8 @@ func TestFitAvoidingPansAPointOutWithinTheGutters(t *testing.T) {
 		t.Fatal("a point already outside must not move the frame")
 	}
 	// Squeezed to the clearance on both axes there is no spare room to pan into.
-	tight := FitAvoiding(2*MarkerClearance+1, 2*MarkerClearance+1, anchors, []Point{Project(30, 115)})
-	if tight != Fit(2*MarkerClearance+1, 2*MarkerClearance+1, anchors) {
+	tight := FitAvoiding(2*AnchorClearance+1, 2*AnchorClearance+1, anchors, []Point{Project(30, 115)})
+	if tight != Fit(2*AnchorClearance+1, 2*AnchorClearance+1, anchors) {
 		t.Fatal("an unclearable point must leave the fit unchanged")
 	}
 }

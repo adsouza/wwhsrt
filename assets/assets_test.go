@@ -175,3 +175,80 @@ func TestEastAsiaNorthernExtentIsHarbin(t *testing.T) {
 		}
 	}
 }
+
+// Every regions.json view keeps off screen exactly the metros its preset excludes, whether the
+// preset names them for the whole region (East Asia) or for one orientation (portrait Africa+Arabia).
+func TestRegionExclusionsMatchPresets(t *testing.T) {
+	raw, e := os.ReadFile("../data/prototypes/playable-metros.v1.json")
+	if e != nil {
+		t.Fatal(e)
+	}
+	var metros []struct {
+		ID  string  `json:"id"`
+		Lat float64 `json:"lat"`
+		Lon float64 `json:"lng"`
+	}
+	if e = json.Unmarshal(raw, &metros); e != nil {
+		t.Fatal(e)
+	}
+	lonLat := map[string][2]float64{}
+	for _, m := range metros {
+		lonLat[m.ID] = [2]float64{m.Lon, m.Lat}
+	}
+	raw, e = os.ReadFile("../data/prototypes/map-region-presets.v1.json")
+	if e != nil {
+		t.Fatal(e)
+	}
+	type view struct {
+		Exclude []string `json:"exclude_metro_ids"`
+	}
+	var presets struct {
+		Regions []struct {
+			ID        string   `json:"id"`
+			Exclude   []string `json:"exclude_metro_ids"`
+			Landscape *view    `json:"landscape"`
+			Portrait  *view    `json:"portrait"`
+		} `json:"regions"`
+	}
+	if e = json.Unmarshal(raw, &presets); e != nil {
+		t.Fatal(e)
+	}
+	var regions []struct {
+		ID        string `json:"id"`
+		Landscape struct {
+			Exclude [][2]float64 `json:"exclude"`
+		} `json:"landscape"`
+		Portrait struct {
+			Exclude [][2]float64 `json:"exclude"`
+		} `json:"portrait"`
+	}
+	if e = json.Unmarshal(Regions, &regions); e != nil {
+		t.Fatal(e)
+	}
+	got := map[string][][2]float64{}
+	for _, r := range regions {
+		got[r.ID+"/landscape"], got[r.ID+"/portrait"] = r.Landscape.Exclude, r.Portrait.Exclude
+	}
+	checked := 0
+	for _, p := range presets.Regions {
+		for orientation, v := range map[string]*view{"landscape": p.Landscape, "portrait": p.Portrait} {
+			ids := p.Exclude
+			if v != nil && v.Exclude != nil {
+				ids = v.Exclude
+			}
+			key := p.ID + "/" + orientation
+			if len(got[key]) != len(ids) {
+				t.Fatal("regions.json exclusions differ from the preset", key, got[key], ids)
+			}
+			for i, id := range ids {
+				if want, ok := lonLat[id]; !ok || got[key][i] != want {
+					t.Fatal("regions.json exclusion differs from the preset", key, id)
+				}
+				checked++
+			}
+		}
+	}
+	if checked != 3 { // Dhaka twice for East Asia, Karachi once for portrait Africa+Arabia
+		t.Fatal("expected three preset exclusions, checked", checked)
+	}
+}

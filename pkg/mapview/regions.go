@@ -9,6 +9,8 @@ type RegionView struct {
 	Points [][2]float64 `json:"points"`
 	Label  string       `json:"label"`
 	AlignY string       `json:"align_y"`
+	// Exclude lists metros (lon, lat) the frame pans off screen; see FitAvoiding.
+	Exclude [][2]float64 `json:"exclude,omitempty"`
 }
 type Region struct {
 	ID        string     `json:"id"`
@@ -48,6 +50,9 @@ func RegionCamera(w, h float64, id string, portrait bool) Camera {
 					top = min(top, c.Screen(p).Y)
 				}
 				c.PanY = 40 - top
+			}
+			for _, p := range v.Exclude {
+				c.panClear(points, Project(p[1], p[0]))
 			}
 			return c
 		}

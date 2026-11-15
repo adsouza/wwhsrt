@@ -38,26 +38,30 @@ func Fit(w, h float64, points []Point) Camera {
 	return c
 }
 
-// MarkerClearance covers the widest city marker (the 13 px selection ring and
-// its stroke), in pixels. When FitAvoiding pans, anchors stay at least this far
-// inside the screen and avoided points end at least this far outside it.
+// Clearances for FitAvoiding, in pixels. When it pans, anchors stay
+// AnchorClearance inside the screen, enough for a city's widest marker (the
+// 13 px selection ring and its stroke), and avoided points end ExcludeClearance
+// outside it: the radius of a plain city dot, so the dot lies wholly off
+// screen. The renderer already skips any city whose centre is off screen,
+// ring and label included, so that is the most that could ever show.
 const (
-	MarkerClearance = 16.0
+	AnchorClearance  = 16.0
+	ExcludeClearance = 6.0
 	// avoidSlack absorbs rounding, so a cleared point counts as cleared.
 	avoidSlack = 1e-6
 )
 
-// Clear reports whether screen point q lies at least MarkerClearance beyond an edge.
+// Clear reports whether screen point q lies at least ExcludeClearance beyond an edge.
 func (c Camera) Clear(q Point) bool {
-	m := MarkerClearance - avoidSlack
+	m := ExcludeClearance - avoidSlack
 	return q.X <= -m || q.X >= c.Width+m || q.Y <= -m || q.Y >= c.Height+m
 }
 
 // FitAvoiding fits points like Fit, then pans each avoided point at least
-// MarkerClearance beyond an edge of the screen, taking the smallest pan that
-// keeps every fitted point MarkerClearance inside. Only the pan changes, never
+// ExcludeClearance beyond an edge of the screen, taking the smallest pan that
+// keeps every fitted point AnchorClearance inside. Only the pan changes, never
 // the scale; a point already outside, or one no such pan can clear, leaves the
-// camera as it is. Fit's own padding is wider, so the clearance only decides
+// camera as it is. Fit's own padding is wider, so AnchorClearance only decides
 // whether a pan is possible, never how far it goes.
 func FitAvoiding(w, h float64, points, avoid []Point) Camera {
 	c := Fit(w, h, points)
@@ -75,13 +79,13 @@ func (c *Camera) panClear(points []Point, avoid Point) {
 	lo, hi := Point{X: math.Inf(-1), Y: math.Inf(-1)}, Point{X: math.Inf(1), Y: math.Inf(1)}
 	for _, p := range points {
 		q := c.Screen(p)
-		lo.X, hi.X = math.Max(lo.X, MarkerClearance-q.X), math.Min(hi.X, c.Width-MarkerClearance-q.X)
-		lo.Y, hi.Y = math.Max(lo.Y, MarkerClearance-q.Y), math.Min(hi.Y, c.Height-MarkerClearance-q.Y)
+		lo.X, hi.X = math.Max(lo.X, AnchorClearance-q.X-avoidSlack), math.Min(hi.X, c.Width-AnchorClearance-q.X+avoidSlack)
+		lo.Y, hi.Y = math.Max(lo.Y, AnchorClearance-q.Y-avoidSlack), math.Min(hi.Y, c.Height-AnchorClearance-q.Y+avoidSlack)
 	}
 	best, dx, dy := math.Inf(1), 0.0, 0.0
 	for _, m := range []struct{ dx, dy float64 }{
-		{dx: -MarkerClearance - a.X}, {dx: c.Width + MarkerClearance - a.X},
-		{dy: -MarkerClearance - a.Y}, {dy: c.Height + MarkerClearance - a.Y},
+		{dx: -ExcludeClearance - a.X}, {dx: c.Width + ExcludeClearance - a.X},
+		{dy: -ExcludeClearance - a.Y}, {dy: c.Height + ExcludeClearance - a.Y},
 	} {
 		if m.dx < lo.X || m.dx > hi.X || m.dy < lo.Y || m.dy > hi.Y {
 			continue
