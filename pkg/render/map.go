@@ -28,7 +28,7 @@ type Map struct {
 	anchors   map[string][][2]float64
 	terrain   *relief
 	public    *publicLayer
-	scene     *ebiten.Image
+	scene     layer
 	sceneKey  sceneKey
 	marks     markers
 }

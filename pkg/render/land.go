@@ -42,7 +42,13 @@ func drawLand(dst *ebiten.Image, c mapview.Camera, rings [][][2]float64, coast [
 			path.Close()
 		}
 	}
-	op := &vector.DrawPathOptions{AntiAlias: true}
+	// The fill names source-over and the coast leaves Blend at its zero
+	// value, which Ebitengine also draws as source-over. FillPath compares the
+	// two as different options and flushes the fill before batching the
+	// coast, so each batch holds one map-sized box. Batched together, the two
+	// boxes stack into a stencil twice as tall: an 8192x8192 GPU page (268 MB)
+	// at 3737x2029 instead of 8192x4096.
+	op := &vector.DrawPathOptions{AntiAlias: true, Blend: ebiten.BlendSourceOver}
 	op.ColorScale.ScaleWithColor(pal.Land)
 	vector.FillPath(dst, &fill, nil, op)
 	op = &vector.DrawPathOptions{AntiAlias: true}

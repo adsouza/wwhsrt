@@ -27,9 +27,9 @@ type publicLayer struct {
 	Stops       []publicStop
 	land        [][][2]float64
 	landCoast   []bool
-	image       *ebiten.Image
+	trackLayer  layer
 	camera      mapview.Camera
-	landImage   *ebiten.Image
+	landLayer   layer
 	landCamera  mapview.Camera
 	landColor   color.NRGBA
 	color       color.NRGBA
@@ -86,20 +86,17 @@ func newPublicLayer() (*publicLayer, error) {
 }
 func (p *publicLayer) drawLand(dst *ebiten.Image, c mapview.Camera, s ui.State) {
 	pal := ui.PaletteFor(s)
-	if p.landImage != nil && p.landCamera == c && p.landColor == pal.Land {
-		dst.DrawImage(p.landImage, nil)
-		return
+	if p.landLayer.view == nil || p.landCamera != c || p.landColor != pal.Land {
+		p.landCamera = c
+		p.landColor = pal.Land
+		drawLand(p.landLayer.reset(int(c.Width), int(c.Height)), c, p.land, p.landCoast, pal)
 	}
-	p.landImage = layerImage(p.landImage, int(c.Width), int(c.Height))
-	p.landCamera = c
-	p.landColor = pal.Land
-	drawLand(p.landImage, c, p.land, p.landCoast, pal)
-	dst.DrawImage(p.landImage, nil)
+	dst.DrawImage(p.landLayer.view, nil)
 }
 func (p *publicLayer) draw(dst *ebiten.Image, c mapview.Camera, s ui.State) {
 	pal := ui.PaletteFor(s)
-	if p.image == nil || p.camera != c || p.color != pal.Existing {
-		p.image = layerImage(p.image, int(c.Width), int(c.Height))
+	if p.trackLayer.view == nil || p.camera != c || p.color != pal.Existing {
+		img := p.trackLayer.reset(int(c.Width), int(c.Height))
 		p.camera = c
 		p.color = pal.Existing
 		var path vector.Path
@@ -116,10 +113,10 @@ func (p *publicLayer) draw(dst *ebiten.Image, c mapview.Camera, s ui.State) {
 		}
 		op := &vector.DrawPathOptions{AntiAlias: true}
 		op.ColorScale.ScaleWithColor(pal.Existing)
-		vector.StrokePath(p.image, &path, &vector.StrokeOptions{Width: 2}, op)
-		p.drawStops(p.image, c, pal.Existing)
+		vector.StrokePath(img, &path, &vector.StrokeOptions{Width: 2}, op)
+		p.drawStops(img, c, pal.Existing)
 	}
-	dst.DrawImage(p.image, nil)
+	dst.DrawImage(p.trackLayer.view, nil)
 }
 
 func (p *publicLayer) drawStops(dst *ebiten.Image, c mapview.Camera, ink color.NRGBA) {

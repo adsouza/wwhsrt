@@ -44,3 +44,27 @@ func TestSceneCacheTracksVisibleStateAndExcludesReplayClock(t *testing.T) {
 		t.Fatal("new company state kept old geometry")
 	}
 }
+
+// Ebitengine rounds an antialiased path's box up to 16 px and caps its stencil
+// buffer by the destination's whole image. A layer's image must leave room for
+// that rounding, or a path spanning the map reallocates the buffer every redraw
+// and loses its last few columns.
+func TestLayerLeavesRoomForStencilRounding(t *testing.T) {
+	var l layer
+	for _, size := range [][2]int{{3032, 1863}, {3040, 1872}, {1, 1}, {801, 4100}} {
+		img := l.reset(size[0], size[1])
+		if b := img.Bounds(); b.Dx() != size[0] || b.Dy() != size[1] {
+			t.Fatalf("asked for %v, drew into %v", size, b)
+		}
+		if b := l.backing.Bounds(); b.Dx() < roundUp16(size[0]) || b.Dy() < roundUp16(size[1]) {
+			t.Fatalf("%v layer is backed by %v: no room for 16 px rounding", size, b)
+		}
+		if l.view != img {
+			t.Fatal("the layer composites a different image from the one it drew into")
+		}
+	}
+	backing := l.backing
+	if l.reset(801, 4100); l.backing != backing {
+		t.Fatal("a redraw at the same size allocated a new image")
+	}
+}
