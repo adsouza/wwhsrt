@@ -34,20 +34,15 @@ jobs:
           GOOS=js GOARCH=wasm go vet ./...
       - run: xvfb-run -a go test ./...
 
-  race:
+  # Race and fuzz share a runner: together they still finish well inside the browser jobs, and the
+  # slot they free lets every browser job start at once under the 20-job concurrency limit.
+  race-and-fuzz:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/setup-go
       - run: go test -race ./internal/application ./internal/adapters/filestore
-
-  fuzz:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v7
-      - uses: ./.github/actions/setup-go
       - name: Bounded fuzz campaigns
         # The campaigns are independent and time-boxed, so they share the runner's cores.
         run: |
@@ -155,12 +150,27 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        check: [business, milestone2, milestone3, economy, public-network, workspace, idle-review, map-services,
-                onboarding, prospects, capacity, new-game, theme, coastlines, terrain, funding, osaka-map,
-                playable-map, existing-connections, campaign-completion]
-        include:
-          - check: campaign-completion
-            args: --layout
+        # Each entry is one runner. Long checkers (workspace and milestone3 take over two minutes) run
+        # alone; short ones share a runner so the browser jobs and the five other jobs still running
+        # stay under the 20-job concurrency limit, and no long checker waits in the queue.
+        checks:
+          - workspace
+          - milestone3
+          - map-services
+          - onboarding
+          - funding
+          - capacity
+          - idle-review
+          - theme
+          - new-game
+          - coastlines
+          - terrain
+          - business
+          - milestone2
+          - economy
+          - prospects
+          - public-network campaign-completion
+          - osaka-map playable-map existing-connections
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -178,13 +188,22 @@ jobs:
         with:
           name: web-bundle
       - run: chmod +x build/headless build/webserve
-      - name: Check ${{ matrix.check }}
+      - name: Check ${{ matrix.checks }}
         env:
+          CHECKS: ${{ matrix.checks }}
           NODE_OPTIONS: --max-old-space-size=1536
         run: |
           build/webserve > "$RUNNER_TEMP/webserve.log" 2>&1 &
           for _ in $(seq 100); do curl -fsS -o /dev/null http://127.0.0.1:8765/ && break; sleep 0.1; done
-          node tools/check-${{ matrix.check }}.cjs ${{ matrix.args }}
+          status=0
+          for check in $CHECKS; do
+            args=()
+            # The hosted gate is the isolated campaign-end footer check, not a second full WASM start.
+            if [ "$check" = campaign-completion ]; then args=(--layout); fi
+            echo "== $check"
+            node "tools/check-$check.cjs" "${args[@]}" || status=1
+          done
+          exit "$status"
       - name: Collect evidence
         if: always()
         run: |
@@ -194,7 +213,7 @@ jobs:
       - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: evidence-${{ matrix.check }}
+          name: evidence-${{ matrix.checks }}
           path: ${{ runner.temp }}/evidence
           if-no-files-found: ignore
 
