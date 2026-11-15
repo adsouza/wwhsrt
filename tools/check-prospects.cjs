@@ -173,7 +173,10 @@ async function dots(p, points, ink) {
       co = s.frame.corridors.find((c) => c.id === 'tsuruga-osaka'),
       at = samples(s, co.alignments[0].path);
     await clickMap(p, at[Math.floor(at.length / 2)]);
-    assert.equal((await snap(p)).state.view, 'map');
+    // A built line is no longer a prospect, so the click must not open it in Build. Open public track under the
+    // click may legitimately pick a service instead, depending on where the platform's fonts put the map.
+    await p.waitForTimeout(500);
+    assert.notEqual((await snap(p)).state.view, 'build');
     await p.reload();
     await p.waitForFunction(() => !!window.railSnapshot, null, { timeout: 60000 });
     await p.locator('#tab-build').click();
