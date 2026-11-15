@@ -12,130 +12,27 @@ import (
 	"wwhsrt/pkg/ui"
 )
 
-type reliefTile struct {
-	image    *ebiten.Image
-	world    []mapview.Point
-	vertices []ebiten.Vertex
-	indices  []uint16
-	contours [][]mapview.Point
-}
+// relief is the terrain layer: shaded tiles, Japan's contours, and a few named features.
 type relief struct {
-	tiles    []reliefTile
+	set      *terrain.Set
 	features []terrain.Feature
-	lakes    [][]mapview.Point
 }
 
+// newRelief reads which tiles exist. It decodes none of them.
 func newRelief() (*relief, error) {
-	d, e := terrain.Load(assets.Terrain)
+	set, e := terrain.Load(assets.Terrain)
 	if e != nil {
 		return nil, e
 	}
-	out := &relief{features: d.Features}
-	for _, region := range d.Regions {
-		t := reliefTile{image: ebiten.NewImageFromImage(region.Image)}
-		cols, rows := region.Width/16, region.Height/16
-		for y := 0; y <= rows; y++ {
-			for x := 0; x <= cols; x++ {
-				px, py := float64(x*16), float64(y*16)
-				t.world = append(t.world, terrain.ProjectedPixel(region, px, py))
-				t.vertices = append(
-					t.vertices,
-					ebiten.Vertex{SrcX: float32(px), SrcY: float32(py), ColorR: 1, ColorG: 1, ColorB: 1, ColorA: 1},
-				)
-			}
-		}
-		for y := 0; y < rows; y++ {
-			for x := 0; x < cols; x++ {
-				a := uint16(y*(cols+1) + x)
-				b := a + 1
-				c := a + uint16(cols+1)
-				d := c + 1
-				t.indices = append(t.indices, a, b, c, b, d, c)
-			}
-		}
-		for _, line := range region.Contours {
-			points := []mapview.Point{}
-			for _, p := range line.Points {
-				points = append(points, mapview.Project(p[0], p[1]))
-			}
-			t.contours = append(t.contours, points)
-		}
-		out.tiles = append(out.tiles, t)
-	}
-	for _, lake := range d.Lakes {
-		points := []mapview.Point{}
-		for _, p := range lake.Points {
-			points = append(points, mapview.Project(p[0], p[1]))
-		}
-		out.lakes = append(out.lakes, points)
-	}
-	return out, nil
+	return &relief{set: set, features: set.Features}, nil
 }
+
 func (t *relief) draw(dst *ebiten.Image, c mapview.Camera, s ui.State) {
-	pal := ui.PaletteFor(s)
-	dark := ui.IsDark(s)
-	opacity := float32(math.Min(.98, .42+.075*c.Zoom))
-	for i := range t.tiles {
-		tile := &t.tiles[i]
-		x0, y0, x1, y1 := math.Inf(1), math.Inf(1), math.Inf(-1), math.Inf(-1)
-		for j, p := range tile.world {
-			s := c.Screen(p)
-			tile.vertices[j].DstX = float32(s.X)
-			tile.vertices[j].DstY = float32(s.Y)
-			tile.vertices[j].ColorA = opacity
-			tile.vertices[j].ColorR, tile.vertices[j].ColorG, tile.vertices[j].ColorB = 1, 1, 1
-			if dark {
-				tile.vertices[j].ColorR, tile.vertices[j].ColorG, tile.vertices[j].ColorB = .30, .38, .40
-			}
-			x0 = math.Min(x0, s.X)
-			x1 = math.Max(x1, s.X)
-			y0 = math.Min(y0, s.Y)
-			y1 = math.Max(y1, s.Y)
-		}
-		if x1 < 0 || y1 < 0 || x0 > c.Width || y0 > c.Height {
-			continue
-		}
-		dst.DrawTriangles(
-			tile.vertices,
-			tile.indices,
-			tile.image,
-			&ebiten.DrawTrianglesOptions{Filter: ebiten.FilterLinear},
-		)
-		if c.Zoom >= 4 {
-			for _, line := range tile.contours {
-				var path vector.Path
-				for j, p := range line {
-					q := c.Screen(p)
-					if j == 0 {
-						path.MoveTo(float32(q.X), float32(q.Y))
-					} else {
-						path.LineTo(float32(q.X), float32(q.Y))
-					}
-				}
-				op := &vector.DrawPathOptions{AntiAlias: true}
-				op.ColorScale.ScaleWithColor(color.NRGBA{pal.Contour.R, pal.Contour.G, pal.Contour.B, 75})
-				vector.StrokePath(dst, &path, &vector.StrokeOptions{Width: .8}, op)
-			}
-		}
-	}
-	for _, lake := range t.lakes {
-		var path vector.Path
-		for j, p := range lake {
-			q := c.Screen(p)
-			if j == 0 {
-				path.MoveTo(float32(q.X), float32(q.Y))
-			} else {
-				path.LineTo(float32(q.X), float32(q.Y))
-			}
-		}
-		path.Close()
-		op := &vector.DrawPathOptions{AntiAlias: true}
-		op.ColorScale.ScaleWithColor(pal.Water)
-		vector.FillPath(dst, &path, nil, op)
-		op = &vector.DrawPathOptions{AntiAlias: true}
-		op.ColorScale.ScaleWithColor(pal.Coast)
-		vector.StrokePath(dst, &path, &vector.StrokeOptions{Width: 1}, op)
-	}
+	t.marks(dst, c, ui.PaletteFor(s))
+}
+
+// marks draws the peak and lake symbols of the named features.
+func (t *relief) marks(dst *ebiten.Image, c mapview.Camera, pal ui.Palette) {
 	if c.Zoom < 3 {
 		return
 	}

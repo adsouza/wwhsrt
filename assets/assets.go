@@ -63,7 +63,7 @@ var Font []byte
 
 // Terrain contains presentation-only relief. It never enters campaign hashes.
 //
-//go:embed terrain/*.json terrain/*.png terrain/ATTRIBUTION.md
+//go:embed terrain/*.json terrain/tiles terrain/ATTRIBUTION.md
 var Terrain embed.FS
 
 //go:embed scenario/economy.json

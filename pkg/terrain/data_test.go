@@ -1,30 +1,44 @@
 package terrain
 
 import (
-	"math"
 	"testing"
 	"testing/fstest"
+
 	"wwhsrt/assets"
 )
 
-func TestGeoreferencedTerrainLoadsAndProjects(t *testing.T) {
-	d, e := Load(assets.Terrain)
+// manifestOnly holds the two JSON files and no tile, as a view that has drawn nothing needs.
+func manifestOnly(t *testing.T) fstest.MapFS {
+	t.Helper()
+	files := fstest.MapFS{}
+	for _, name := range []string{"terrain/terrain.json", "terrain/features.json"} {
+		b, e := assets.Terrain.ReadFile(name)
+		if e != nil {
+			t.Fatal(e)
+		}
+		files[name] = &fstest.MapFile{Data: append([]byte{}, b...)}
+	}
+	return files
+}
+
+func TestManifestLoadsWithoutDecodingATile(t *testing.T) {
+	s, e := Load(manifestOnly(t))
 	if e != nil {
 		t.Fatal(e)
 	}
-	if len(d.Features) < 6 || len(d.Lakes) != 1 {
+	if len(s.Tiles) < 100 || len(s.BasemapSHA) != 64 {
+		t.Fatalf("%d tiles, basemap %q", len(s.Tiles), s.BasemapSHA)
+	}
+	if tile, ok := s.Tiles[Address{8, 224, 101}]; !ok || tile.Kind != Coast || len(tile.SHA) != 64 || len(tile.MaskSHA) != 64 {
+		t.Fatalf("the Lake Biwa tile is %+v", tile)
+	}
+	if len(s.Regions) != 2 || s.Regions[0].ID != "hokkaido" || len(s.Regions[0].Contours) == 0 {
+		t.Fatal("Japan's contours are missing")
+	}
+	if len(s.Features) < 6 {
 		t.Fatal("context missing")
 	}
-	r := d.Regions[0]
-	lat, lon := GeographicPixel(r, 0, 0)
-	if math.Abs(lon-139.21875) > 1e-8 || math.Abs(lat-44.087585) > 1e-5 {
-		t.Fatal("tile origin misplaced", lat, lon)
-	}
-	lat2, lon2 := GeographicPixel(r, float64(r.Width), float64(r.Height))
-	if lat2 >= lat || lon2 <= lon {
-		t.Fatal("terrain axes reversed")
-	}
-	for _, feature := range d.Features {
+	for _, feature := range s.Features {
 		if feature.Key == "mt_yotei" {
 			if feature.Lat < 42.8 || feature.Lat > 42.9 || feature.Lon < 140.7 || feature.Lon > 140.9 {
 				t.Fatal("Yotei label outside its massif")
@@ -32,22 +46,23 @@ func TestGeoreferencedTerrainLoadsAndProjects(t *testing.T) {
 		}
 	}
 }
-func TestBadTerrainCannotLoadAsFlatLand(t *testing.T) {
-	files := fstest.MapFS{}
-	for _, name := range []string{
-		"terrain/terrain.json",
-		"terrain/features.json",
-		"terrain/hokkaido.png",
-		"terrain/kansai.png",
+
+func TestBadManifestsAreRefused(t *testing.T) {
+	for name, text := range map[string]string{
+		"an old schema":         `{"schema_version":1,"regions":[]}`,
+		"a tile off the grid":   `{"schema_version":2,"basemap_sha256":"x","tiles":[[2,4,0,"sea"]],"regions":[]}`,
+		"a level out of range":  `{"schema_version":2,"basemap_sha256":"x","tiles":[[9,0,0,"sea"]],"regions":[]}`,
+		"an unknown kind":       `{"schema_version":2,"basemap_sha256":"x","tiles":[[2,0,0,"swamp"]],"regions":[]}`,
+		"land without a hash":   `{"schema_version":2,"basemap_sha256":"x","tiles":[[2,0,0,"land"]],"regions":[]}`,
+		"coast without a mask":  `{"schema_version":2,"basemap_sha256":"x","tiles":[[2,0,0,"coast","aa"]],"regions":[]}`,
+		"a tile listed twice":   `{"schema_version":2,"basemap_sha256":"x","tiles":[[2,0,0,"sea"],[2,0,0,"sea"]],"regions":[]}`,
+		"a contour off the map": `{"schema_version":2,"basemap_sha256":"x","tiles":[],"regions":[{"id":"a","contours":[{"metres":500,"points":[[95,0],[0,0]]}]}]}`,
+		"not JSON":              `broken`,
 	} {
-		b, e := assets.Terrain.ReadFile(name)
-		if e != nil {
-			t.Fatal(e)
+		files := manifestOnly(t)
+		files["terrain/terrain.json"].Data = []byte(text)
+		if _, e := Load(files); e == nil {
+			t.Errorf("%s was accepted", name)
 		}
-		files[name] = &fstest.MapFile{Data: append([]byte{}, b...)}
-	}
-	files["terrain/hokkaido.png"].Data = []byte("broken")
-	if _, e := Load(files); e == nil {
-		t.Fatal("corrupt terrain accepted")
 	}
 }

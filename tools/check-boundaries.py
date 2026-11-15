@@ -5,7 +5,7 @@ import subprocess
 
 decoder = json.JSONDecoder()
 raw = subprocess.check_output(
-    ["go", "list", "-json", "./internal/domain", "./pkg/gameapi", "./internal/application"], text=True
+    ["go", "list", "-json", "./internal/domain", "./pkg/gameapi", "./internal/application", "./pkg/terrain"], text=True
 )
 packages = []
 while raw.strip():
@@ -23,4 +23,4 @@ for package in packages:
             assert not imported.startswith("wwhsrt/"), (name, imported)
 deps = subprocess.check_output(["go", "list", "-deps", "./cmd/headless"], text=True)
 assert "ebiten" not in deps and "wwhsrt/pkg/render" not in deps
-print("Domain/API/application boundaries and graphics-free headless composition passed")
+print("Domain/API/application/terrain boundaries and graphics-free headless composition passed")
