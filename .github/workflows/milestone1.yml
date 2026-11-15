@@ -235,3 +235,28 @@ jobs:
           sh tools/build-native.sh
           plutil -lint 'build/World-wide High-speed Rail Tycoon.app/Contents/Info.plist'
           test -s 'build/World-wide High-speed Rail Tycoon.app/Contents/Resources/AppIcon.icns'
+
+  # Publish the browser build that every other job just checked to https://adsouza.github.io/wwhsrt/.
+  # Only main deploys (pull requests have a refs/pull ref, and the github-pages environment admits
+  # main alone); a failed job anywhere keeps the previous build live.
+  pages:
+    if: github.ref == 'refs/heads/main'
+    needs: [test, race-and-fuzz, data, web, browser, native]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: web-bundle
+      # The checked bundle, not a rebuild; the headless and webserve tools stay out of the site.
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: web/
+      - id: deploy
+        uses: actions/deploy-pages@v5

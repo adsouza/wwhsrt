@@ -28,7 +28,7 @@ Run the native client from this checkout:
 go run ./cmd/wwhsrt
 ```
 
-Or build and serve the browser version:
+The browser version of the latest `main` that passed CI is at <https://adsouza.github.io/wwhsrt/>. To build and serve it yourself:
 
 ```sh
 sh tools/build-web.sh
