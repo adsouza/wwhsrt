@@ -28,6 +28,7 @@ COLORS = [
     [244, 243, 240],
 ]
 LOWLAND = tuple(COLORS[0])
+JPEG_QUALITY = 80
 NEAR_KM = 60  # level-8 tiles reach this far either side of a line
 SAMPLE_KM = 5
 LEVELS = range(2, 9)
@@ -49,6 +50,12 @@ def pixel(z, x, y, lon, lat):
     """The pixel of tile z/x/y that holds a place, as (column, row)."""
     col, row = pixel_exact(z, x, y, lon, lat)
     return math.floor(col), math.floor(row)
+
+
+def place(z, x, y, col, row):
+    """Longitude and latitude of a pixel position in tile z/x/y; the reverse of pixel_exact."""
+    n = 2**z
+    return (x + col / 256) / n * 360 - 180, math.degrees(math.atan(math.sinh(math.pi * (1 - 2 * (y + row / 256) / n))))
 
 
 def tile_at(z, lon, lat):
@@ -199,6 +206,15 @@ def land_mask(heights, geometry, z, x, y):
 
 def kind(mask):
     return "land" if mask.all() else "coast" if mask.any() else "sea"
+
+
+# Elevation datasets the credits file names, by the directory Mapzen's source headers cite them under.
+CREDITED = {"srtm": "SRTM", "gmted": "GMTED2010", "etopo1": "ETOPO1"}
+
+
+def uncredited(names, attribution_text):
+    """Dataset names that have no credit: unknown ones, and known ones whose label the credits text lacks."""
+    return {name for name in names if name not in CREDITED or CREDITED[name] not in attribution_text}
 
 
 def datasets(imagery_sources):

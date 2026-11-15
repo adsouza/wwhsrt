@@ -1,10 +1,13 @@
 """Tests for the worldwide terrain rules and tool. Run as a script; needs tools/requirements-terrain.txt."""
 
-import math
+import hashlib
+import importlib.util
 import pathlib
 import sys
+import tempfile
 
 import numpy as np
+from PIL import Image
 import shapely.geometry
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
@@ -153,6 +156,105 @@ def test_datasets_are_read_from_the_source_header():
     header = "srtm/N43E140.tif, gmted/30N120E_20101117_gmted_mea075.tif, etopo1/ETOPO1_Bed_g.tif"
     assert T.datasets(header) == {"srtm", "gmted", "etopo1"}
     assert T.datasets("") == set()
+
+
+def test_uncredited_datasets_are_named():
+    text = "SRTM and GMTED2010 from USGS; ETOPO1 from NOAA."
+    assert T.uncredited({"srtm", "gmted", "etopo1"}, text) == set()
+    assert T.uncredited({"srtm", "ned", "eudem"}, text) == {"ned", "eudem"}
+    assert T.uncredited({"srtm"}, "nothing here") == {"srtm"}
+
+
+def test_the_committed_credits_cover_the_credited_datasets():
+    text = (pathlib.Path(__file__).resolve().parents[1] / "assets/terrain/ATTRIBUTION.md").read_text()
+    assert T.uncredited(set(T.CREDITED), text) == set()
+
+
+def tool():
+    spec = importlib.util.spec_from_file_location("prepare_terrain", pathlib.Path(__file__).with_name("prepare-terrain.py"))
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def half_land():
+    mask = np.zeros((256, 256), bool)
+    mask[:, :128] = True
+    return mask
+
+
+def hills():
+    rows, cols = np.mgrid[0:256, 0:256]
+    return np.stack([100 + cols // 2, 120 + rows // 3, np.full((256, 256), 90)], axis=-1).astype(np.uint8)
+
+
+def test_coast_tile_has_a_jpeg_and_a_one_bit_mask():
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = pathlib.Path(tmp)
+        entry = tool().write_tile(tmp, 8, 1, 2, hills(), half_land())
+        assert entry[:4] == [8, 1, 2, "coast"] and len(entry) == 6
+        assert entry[4] == hashlib.sha256((tmp / "8/1/2.jpg").read_bytes()).hexdigest()
+        assert entry[5] == hashlib.sha256((tmp / "8/1/2.png").read_bytes()).hexdigest()
+        mask = Image.open(tmp / "8/1/2.png")
+        assert mask.mode == "1" and mask.size == (256, 256)
+        assert np.array_equal(np.array(mask, dtype=bool), half_land())
+        jpeg = np.array(Image.open(tmp / "8/1/2.jpg"))
+        assert jpeg.shape == (256, 256, 3)
+        assert all(abs(int(jpeg[128, 250, i]) - T.LOWLAND[i]) <= 3 for i in range(3))  # sea carries the lowland colour
+        assert abs(int(jpeg[128, 20, 0]) - 110) <= 6  # land keeps its own
+
+
+def test_all_land_tile_has_no_mask():
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = pathlib.Path(tmp)
+        entry = tool().write_tile(tmp, 8, 1, 3, hills(), np.ones((256, 256), bool))
+        assert entry[3] == "land" and len(entry) == 5 and not (tmp / "8/1/3.png").exists()
+
+
+def test_all_sea_tile_is_listed_without_files():
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = pathlib.Path(tmp)
+        entry = tool().write_tile(tmp, 8, 1, 4, hills(), np.zeros((256, 256), bool))
+        assert entry == [8, 1, 4, "sea"] and not (tmp / "8/1/4.jpg").exists()
+
+
+def test_writing_twice_gives_the_same_bytes():
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = pathlib.Path(tmp)
+        first = tool().write_tile(tmp / "a", 8, 1, 2, hills(), half_land())
+        second = tool().write_tile(tmp / "b", 8, 1, 2, hills(), half_land())
+        assert first == second
+
+
+def test_a_tile_borrows_edge_pixels_only_from_neighbours_it_has():
+    P = tool()
+    own, east = np.full((256, 256), 100.0, np.float32), np.full((256, 256), 300.0, np.float32)
+    padded = P.with_halo({(5, 5): own, (6, 5): east}, 8, 5, 5)
+    assert padded.shape == (258, 258)
+    assert padded[100, 257] == 300 and padded[100, 0] == 100  # east from the neighbour, west repeats its own edge
+    assert padded[0, 100] == 100 and padded[1, 1] == 100
+
+
+def test_a_tile_at_the_date_line_borrows_from_the_other_side():
+    P = tool()
+    heights = {(0, 1): np.full((256, 256), 100.0, np.float32), (3, 1): np.full((256, 256), 700.0, np.float32)}
+    assert P.with_halo(heights, 2, 0, 1)[100, 0] == 700
+
+
+def test_sample_selection_takes_named_routes_and_boxes():
+    P = tool()
+    routes = [("near", "a", [(0.0, 0.0), (1.0, 0.0)]), ("far", "a", [(50.0, 0.0), (51.0, 0.0)])]
+    in_box, also_in_box = T.tile_at(8, 100.2, 10.5), T.tile_at(8, 103.5, 10.5)
+    assert in_box != also_in_box
+    tiles = P.selected_level8(routes, ["near"], [(100.0, 10.0, 104.0, 11.0)], {in_box})
+    assert (128, 127) in tiles and in_box in tiles
+    assert also_in_box not in tiles  # a box takes only tiles the full list has: nothing else was fetched
+    assert T.tile_at(8, 50.5, 0.0) not in tiles
+    try:
+        P.selected_level8(routes, ["missing"], [], set())
+        raise AssertionError("an unknown route was accepted")
+    except SystemExit:
+        pass
 
 
 def main():
