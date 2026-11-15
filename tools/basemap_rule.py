@@ -8,15 +8,16 @@ applies the rule is tools/prepare-basemap.py; the checks that read its output sh
 import math
 
 import numpy as np
+import shapely
 from scipy.spatial import cKDTree
 from shapely import STRtree
 from shapely.geometry import LineString, Polygon
-from shapely.ops import unary_union
+from shapely.ops import transform, unary_union
 
 NEAR_KM = 150
 FINE = 0.003
 COARSE = 0.05
-FAR_ISLAND_KM = 20
+FAR_ISLAND_KM = 25
 NEAR_LAKE_KM = 5
 FAR_LAKE_KM = 100
 # Tolerances tried in turn where FINE would put a buildable route offshore.
@@ -51,6 +52,15 @@ def project(x, y, z=None):
     return 2 * math.sqrt(3) * math.radians(x) * math.cos(t) / (
         3 * (1.340264 - 3 * 0.081106 * t2 + t6 * (7 * 0.000893 + 9 * 0.003796 * t2))
     ), t * (1.340264 - 0.081106 * t2 + t6 * (0.000893 + 0.003796 * t2))
+
+
+def on_map(geometry):
+    """The geometry as the map draws it: Equal Earth, with straight edges between projected points.
+
+    A long edge is a curve on the globe but a straight chord on the map, so a coarse outline that is
+    valid in degrees can cross itself once projected (Antarctica's does). make_valid keeps the area.
+    """
+    return shapely.make_valid(transform(project, geometry))
 
 
 def km_between(a, b):
@@ -110,7 +120,9 @@ def signed_area(ring):
 def _simplify_run(points, tolerance):
     if tolerance <= 0 or len(points) < 3:
         return list(points)
-    return [tuple(p) for p in LineString(points).simplify(tolerance, preserve_topology=False).coords]
+    # Topology-preserving, so a run cannot cross itself: plain Douglas-Peucker does in fjords and deltas,
+    # and one crossing anywhere would make a whole continent's outline invalid.
+    return [tuple(p) for p in LineString(points).simplify(tolerance, preserve_topology=True).coords]
 
 
 def _joined(points, flags, fine, coarse):
@@ -146,8 +158,41 @@ def simplify_ring(ring, flags, fine=FINE, coarse=COARSE):
         if len(out) >= 4 and Polygon(out).is_valid:
             return out
         if tolerance <= fine:
-            return points + [points[0]]
+            # Two runs crossed each other. Simplify the ring whole at the fine tolerance, which cannot.
+            closed = points + [points[0]]
+            if fine <= 0:
+                return closed
+            return [tuple(p) for p in Polygon(closed).simplify(fine, preserve_topology=True).exterior.coords]
         tolerance = max(fine, tolerance / 2)
+
+
+def _polygons(geometry):
+    if geometry.geom_type == "Polygon":
+        return [] if geometry.is_empty else [geometry]
+    return [p for part in getattr(geometry, "geoms", []) for p in _polygons(part)]
+
+
+def valid_rings(ring):
+    """The ring itself, or the valid rings it splits into where it crosses itself, largest first."""
+    ring = [tuple(p[:2]) for p in ring]
+    polygon = Polygon(ring)
+    if polygon.is_valid:
+        return [ring]
+    parts = sorted(_polygons(shapely.make_valid(polygon)), key=lambda part: -part.area)
+    return [[tuple(p) for p in part.exterior.coords] for part in parts]
+
+
+def simplify_outline(ring, flags, fine=FINE, coarse=COARSE):
+    """simplify_ring for a land outline, which may come back as more than one ring.
+
+    Runs simplified apart can cross each other where the coast doubles back within the tolerance.
+    Splitting the outline at such a crossing keeps the rest of it at the tolerances asked for.
+    """
+    points = [tuple(p[:2]) for p in ring]
+    flags = list(flags)
+    if points[0] == points[-1]:
+        points, flags = points[:-1], flags[: len(points) - 1]
+    return valid_rings(_joined(points, flags, fine, coarse))
 
 
 def _wound(ring, counter_clockwise):
@@ -201,11 +246,13 @@ def compose(polygons, index, fine_for=None):
             left_out_islands += 1
             left_out_lakes += len(polygon) - 1
             continue
-        exterior = simplify_ring(polygon[0], flags, fine_for.get(i, FINE))
-        land.append(_wound(exterior, True))
-        source_land.append(i)
+        outline = simplify_outline(polygon[0], flags, fine_for.get(i, FINE))
+        exterior = unary_union([Polygon(ring) for ring in outline])
+        for ring in outline:
+            land.append(_wound(ring, True))
+            source_land.append(i)
         for h in range(len(polygon) - 1):
-            ring = kept_lake(i, h, Polygon(exterior))
+            ring = kept_lake(i, h, exterior)
             if ring is None:
                 left_out_lakes += 1
                 continue

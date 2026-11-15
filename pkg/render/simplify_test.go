@@ -140,11 +140,12 @@ func TestWorldViewGeometryStaysNearScreenResolution(t *testing.T) {
 	}
 	c := mapview.RegionCamera(3032, 1863, "world", false)
 	source, land := 0, 0
-	for _, ring := range layer.land {
+	basemap := loadBasemap(t)
+	for _, ring := range basemap.rings {
 		source += len(ring)
-		if points := screenRing(c, ring); len(points) >= 3 {
-			land += len(simplifyRing(points))
-		}
+	}
+	for _, points := range basemap.visible(c) {
+		land += len(points)
 	}
 	track := 0
 	for _, chain := range layer.chains {

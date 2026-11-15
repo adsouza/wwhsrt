@@ -59,6 +59,16 @@ def test_simplify_keeps_detail_only_where_near():
     assert all(p[1] < 1.02 for p in south_near if p not in all_far)  # detail only in the south
 
 
+def test_a_ring_that_crosses_itself_is_split_not_abandoned():
+    # Runs simplified apart can cross each other at a sand spit (Afro-Eurasia's outline does, in the Nile
+    # delta). Falling back to less simplification for the whole continent tripled the basemap.
+    bowtie = [(0, 0), (2, 2), (2, 0), (0, 2), (0, 0)]
+    rings = rule.valid_rings(bowtie)
+    assert len(rings) == 2 and all(Polygon(r).is_valid and r[0] == r[-1] for r in rings), rings
+    assert abs(sum(abs(rule.signed_area(r)) for r in rings) - 2) < 1e-9
+    assert rule.valid_rings(square(0, 0, 1)) == [square(0, 0, 1)]
+
+
 def test_across_km():
     assert 150 < rule.across_km([(0, 0), (1, 0), (1, 1), (0, 1), (0, 0)]) < 160
 
@@ -90,6 +100,58 @@ def test_compose_tightens_one_polygon():
     loose = rule.compose(wiggly(), index)
     tight = rule.compose(wiggly(), index, fine_for={0: 0})
     assert len(tight["land"][0]) > len(loose["land"][0])
+
+
+def load(name):
+    path = pathlib.Path(__file__).resolve().parent / name
+    spec = importlib.util.spec_from_file_location(name.removesuffix(".py").replace("-", "_"), path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def toothed_coast():
+    """Land whose south coast has teeth 0.002 degrees deep: real land that the fine tolerance shaves off."""
+    south = [(i * 0.01, 0.2 if i % 2 else 0.202) for i in range(101)]
+    return [[south + [(1, 1), (0, 1), south[0]]]]
+
+
+def tooth_route():
+    return [("tooth-route", "launch", [(0.51, 0.2005), (0.51, 0.6)], None)]  # id, alignment, path, allowed crossing
+
+
+def test_offshore_route_stops_the_tool():
+    tool = load("prepare-basemap.py")
+    polygons = [[square(0, 0, 1)]]
+    routes = [("test-route", "launch", [(0.5, 0.5), (1.5, 0.5)], None)]
+    try:
+        tool.fit(polygons, rule.NearIndex([r[2] for r in routes], []), routes)
+    except SystemExit as e:
+        assert "test-route" in str(e) and "off the drawn land at 1.0" in str(e), str(e)  # just past the coast
+    else:
+        raise AssertionError("an offshore route was accepted")
+
+
+def test_fit_tightens_only_the_polygon_a_route_touches():
+    tool = load("prepare-basemap.py")
+    polygons = toothed_coast() + [[square(3, 0, 1)]]
+    index = rule.NearIndex([r[2] for r in tooth_route()], [])
+    assert not rule.drawn_geometry(rule.compose(polygons, index)).covers(LineString(tooth_route()[0][2]))
+    basemap, tightened = tool.fit(polygons, index, tooth_route())
+    assert tightened == [{"route": "tooth-route", "polygon": 0, "tolerance": 0.001}], tightened
+    assert rule.drawn_geometry(basemap).covers(LineString(tooth_route()[0][2]))
+
+
+def test_fit_survives_land_that_is_invalid_once_projected():
+    # A spike that stops short of a long meridian edge on the globe crosses that edge's straight chord on
+    # the map, so the projected outline intersects itself. Antarctica's coarse outline does the same.
+    tool = load("prepare-basemap.py")
+    spiked = [(100, -60), (100, 60), (90, 60), (90, 1), (99, 0.5), (90, 0), (90, -60), (100, -60)]
+    assert Polygon(spiked).is_valid
+    polygons = [[square(0, 0, 1)], [spiked]]
+    routes = [("crossing-route", "launch", [(0.2, 0.5), (0.8, 0.5)], Polygon(square(0.4, 0.4, 0.2)))]
+    basemap, tightened = tool.fit(polygons, rule.NearIndex([r[2] for r in routes], []), routes)
+    assert tightened == [] and len(basemap["land"]) == 2
 
 
 def main():

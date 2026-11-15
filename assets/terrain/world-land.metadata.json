@@ -1,1 +1,49 @@
-{"launch_shoreline_refinements":{"replaced_coarse_rings":5,"refinements":{"Australia":{"simplification_degrees":0.003,"rings":94,"vertices":8748},"Chile":{"simplification_degrees":0.003,"rings":163,"vertices":11389},"South Africa":{"simplification_degrees":0.003,"rings":3,"vertices":1173}},"source_mask_sha256":"4ce8321410e45877cdf11c8d28e49eb0eb46b77d6662f883df7efdf2b008f91a"},"role":"Single worldwide basemap with regional shoreline replacements; display only","world_source_sha256":"c4468a0d23cf3ff6a53ba63fb15ce246152a757bb672037d1fbe95c9f5cced28","regional_base_sha256":"52bc1f16dbaf8c02d672c2d69c19319338543a89ac9ebcbab20068a50de52935","regional_refinement_sha256":"9778e134693ce21685068597135f93cd1870016d09eed59c904c9bbdb3cb92be","output_sha256":"6f69e6232469bc5034a5d5fca25dfb71452c0838ccf969c40a4aa10de40676a9","world_source_rings":288,"replaced_coarse_rings":17,"refined_regional_rings":203,"output_rings":729}
+{
+  "role": "Single worldwide land outline with lakes cut out; display only, no political boundaries",
+  "source_mask_sha256": "4ce8321410e45877cdf11c8d28e49eb0eb46b77d6662f883df7efdf2b008f91a",
+  "source_countries_sha256": "239eec57ac17f100a11e2536cffc56752c318b50ae765b0918ff7aab4ce8f255",
+  "source_lakes_sha256": "2d036f53dedec578001c5c30c2959ee7d4eebc1306900fa4367c49929ec8f2d9",
+  "license": "Natural Earth public domain",
+  "line_sources": {
+    "assets/scenario/playable-rail-map.json": "a259eed97f36b7bbdf5f6480b2ae3f9971280763d3f39c494eb458a56cb3d94a",
+    "data/construction/compiled-prospects.v1.json": "72cc59125cfc9a2b9b8427c7337102d99307fb742e4236b8b60f24af6e864c45",
+    "assets/scenario/public-network.json": "df6df65b2f9a9be5f26cb416d174025652b3bd76c5655f3b49e44a2b4e302a1a"
+  },
+  "near_km": 150,
+  "fine_degrees": 0.003,
+  "coarse_degrees": 0.05,
+  "far_island_km": 25,
+  "near_lake_km": 5,
+  "far_lake_km": 100,
+  "japan_boxes": [
+    [
+      8,
+      227,
+      93,
+      228,
+      95
+    ],
+    [
+      8,
+      224,
+      100,
+      225,
+      101
+    ]
+  ],
+  "winding": "land and lake_islands counter-clockwise, lakes clockwise",
+  "tightened": [],
+  "counts": {
+    "land": 1499,
+    "lakes": 292,
+    "lake_islands": 199,
+    "points": 73849,
+    "left_out_islands": 2555,
+    "left_out_lakes": 1042
+  },
+  "existing_line_points_off_land": {
+    "sampled": 48417,
+    "off_land": 411
+  },
+  "output_sha256": "94f0a53e73c9060f8506b743b7d8e12b3c13b24a841936fde60c551353955e64"
+}

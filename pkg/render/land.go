@@ -20,18 +20,28 @@ import (
 // rings (refined Chile beside coarse Argentina) leave sub-pixel slivers that a
 // one-pass fill shows as dotted water.
 func drawLand(dst *ebiten.Image, c mapview.Camera, rings [][][2]float64, coast []bool, pal ui.Palette) {
-	var fill, shore vector.Path
+	var filled, outlined [][]mapview.Point
 	for i, ring := range rings {
 		points := screenRing(c, ring)
 		if len(points) < 3 {
 			continue
 		}
 		points = simplifyRing(points)
-		paths := []*vector.Path{&fill}
+		filled = append(filled, points)
 		if coast[i] {
-			paths = append(paths, &shore)
+			outlined = append(outlined, points)
 		}
-		for _, path := range paths {
+	}
+	paintLand(dst, filled, outlined, pal)
+}
+
+// paintLand fills the first set of screen outlines as one path and strokes
+// the second as one more; see drawLand for why there are exactly two passes.
+func paintLand(dst *ebiten.Image, filled, outlined [][]mapview.Point, pal ui.Palette) {
+	var fill, shore vector.Path
+	for i, outlines := range [][][]mapview.Point{filled, outlined} {
+		path := []*vector.Path{&fill, &shore}[i]
+		for _, points := range outlines {
 			for j, q := range points {
 				if j == 0 {
 					path.MoveTo(float32(q.X), float32(q.Y))

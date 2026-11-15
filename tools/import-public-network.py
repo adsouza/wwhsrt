@@ -774,38 +774,6 @@ def main(audit=False):
     for s in stations:
         s.pop("line", None)
         s.pop("point", None)
-    rings = []
-    for f in source["countries"]["features"]:
-        g = f["geometry"]
-        polys = [g["coordinates"]] if g["type"] == "Polygon" else g["coordinates"]
-        rings.extend(poly[0] for poly in polys)
-    # Regional shorelines replace their world-scale counterparts. Overlaying
-    # both leaves coarse land protrusions and a second coast around Japan.
-    ring_key = lambda r: json.dumps(r, separators=(",", ":"))
-    regional_base = {ring_key(r) for r in read("assets/scenario/land.json")}
-    assert regional_base <= {ring_key(r) for r in rings}, "Regional coarse coast no longer matches the world source"
-    original_count = len(rings)
-    rings = [r for r in rings if ring_key(r) not in regional_base] + read("assets/terrain/land.json")
-    assert len(rings) == len({ring_key(r) for r in rings}), "Duplicate shoreline rings"
-    from launch_shorelines import refine
-
-    rings, launch_coasts = refine(rings, source, launch)
-    emit("assets/terrain/world-land.json", rings)
-    emit(
-        "assets/terrain/world-land.metadata.json",
-        dict(
-            launch_shoreline_refinements=launch_coasts,
-            role="Single worldwide basemap with regional shoreline replacements; display only",
-            world_source_sha256=hashlib.sha256((ROOT / "data/imports/hsr-prototype.v1.json").read_bytes()).hexdigest(),
-            regional_base_sha256=hashlib.sha256((ROOT / "assets/scenario/land.json").read_bytes()).hexdigest(),
-            regional_refinement_sha256=hashlib.sha256((ROOT / "assets/terrain/land.json").read_bytes()).hexdigest(),
-            output_sha256=output_hash("assets/terrain/world-land.json"),
-            world_source_rings=original_count,
-            replaced_coarse_rings=len(regional_base),
-            refined_regional_rings=len(read("assets/terrain/land.json")),
-            output_rings=len(rings),
-        ),
-    )
     emit("assets/scenario/public-network.json", output)
     # The game map shows infrastructure that supports an admitted city corridor.
     # Keep the full extract above for audits, not as disconnected map decoration.

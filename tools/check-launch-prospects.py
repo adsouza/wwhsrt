@@ -1,10 +1,12 @@
 """Independent catalog admission checks for all launch construction pairs."""
 
-import gzip, hashlib, importlib.util, json, math, pathlib, re
+import gzip, hashlib, importlib.util, json, math, pathlib, re, sys
 from shapely.geometry import shape, LineString
 from shapely.ops import unary_union, transform
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import basemap_rule as rule  # noqa: E402
 
 
 def read(p):
@@ -33,10 +35,8 @@ def main():
     mask = json.loads(gzip.decompress((ROOT / "data/construction/route-land.v1.json.gz").read_bytes()))
     land = shape(mask["land"])
     projected = transform(geo.project, land)
-    drawn = unary_union(
-        [shape({"type": "Polygon", "coordinates": [r]}).buffer(0) for r in read("assets/terrain/world-land.json")]
-    )
-    projected_drawn = transform(geo.project, drawn)
+    drawn = rule.drawn_geometry(read("assets/terrain/world-land.json"))
+    projected_drawn = rule.on_map(drawn)
     profiles = {p["id"]: p for p in read("data/costs/construction_costs.v1.json")["profiles"]}
     prior = json.loads(gzip.decompress((ROOT / "assets/scenario/public-network-v3.json.gz").read_bytes()))
     old_markets = {c["id"]: c for c in prior["network"]["cities"]}

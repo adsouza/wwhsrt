@@ -28,6 +28,7 @@ type Map struct {
 	anchors   map[string][][2]float64
 	terrain   *relief
 	public    *publicLayer
+	basemap   *basemap
 	scene     layer
 	sceneKey  sceneKey
 	marks     markers
@@ -62,6 +63,10 @@ func New() (*Map, error) {
 		return nil, e
 	}
 	m.public.marks = &m.marks
+	m.basemap, e = newBasemap()
+	if e != nil {
+		return nil, e
+	}
 	m.terrain, e = newRelief()
 	return m, e
 }
@@ -171,7 +176,7 @@ func (m *Map) drawScene(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s 
 	pal := ui.PaletteFor(s)
 	dst.Fill(pal.Water)
 	if f.PublicNetwork {
-		m.public.drawLand(dst, c, s)
+		m.basemap.draw(dst, c, pal)
 	} else {
 		drawLand(dst, c, m.rings, m.ringCoast, pal)
 	}

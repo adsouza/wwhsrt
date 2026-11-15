@@ -9,6 +9,11 @@ func screenRing(c mapview.Camera, ring [][2]float64) []mapview.Point {
 	for _, p := range ring {
 		points = append(points, c.Screen(mapview.Project(p[1], p[0])))
 	}
+	return clipScreen(c, points)
+}
+
+// clipScreen clips a closed outline in screen space to the camera's screen, with a 4 px margin.
+func clipScreen(c mapview.Camera, points []mapview.Point) []mapview.Point {
 	for _, edge := range []struct {
 		axis    int
 		bound   float64
