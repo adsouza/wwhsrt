@@ -18,8 +18,24 @@ async function terrain(p, hidden) {
   await p.waitForFunction(async (h) => (await railSnapshot()).state.hide_terrain === h, hidden);
   assert.equal(await p.locator('#terrain-toggle').getAttribute('aria-pressed'), String(!hidden));
 }
+// Relief tiles load after the view that asks for them, so a picture is taken only once the map has stopped
+// changing. This looks at the middle of the map, clear of the legend and the controls, and returns it:
+// relief is the only thing the terrain toggle changes there.
+async function settled(p) {
+  const box = await p.locator('#map-frame').boundingBox(),
+    side = Math.min(300, box.width - 40, box.height - 40),
+    clip = { x: box.x + (box.width - side) / 2, y: box.y + (box.height - side) / 2, width: side, height: side };
+  let last = await p.screenshot({ clip });
+  for (let i = 0; i < 24; i++) {
+    await p.waitForTimeout(250);
+    const now = await p.screenshot({ clip });
+    if (now.equals(last)) break;
+    last = now;
+  }
+  return last;
+}
 async function shot(p, name) {
-  await p.waitForTimeout(500);
+  await settled(p);
   await p.screenshot({ path: path.join(out, name) });
 }
 (async () => {
@@ -140,6 +156,29 @@ async function shot(p, name) {
     result.checks.push(
       'Kansai relief and Lake Biwa inspected; Simplified Chinese Hokkaido map; ' +
         '320–1920px layouts keep terrain toggle visible without horizontal overflow',
+    );
+    // Relief outside Japan. The Bogotá–Medellín route follows the Magdalena valley between two ranges.
+    await p.setViewportSize({ width: 1440, height: 960 });
+    await p.waitForFunction(() => document.getElementById('phone-map-tools').hidden);
+    await p.keyboard.press('Escape'); // the phone steps left the map expanded, which hides the tabs
+    await p.waitForFunction(() => !document.body.classList.contains('expanded'));
+    await (await control(p, '#region-select')).selectOption('south-america');
+    await prospect(p, 'launch_64_bogota__medellin');
+    await (await control(p, '#expand')).click();
+    await (await control(p, '#focus-route')).click();
+    await p.waitForFunction(async () => (await railSnapshot()).camera.Zoom > 3);
+    const andes = await settled(p);
+    await p.screenshot({ path: path.join(out, 'terrain-bogota-medellin-desktop.png') });
+    await terrain(p, true);
+    const plain = await settled(p);
+    assert(!andes.equals(plain), 'relief does not change the middle of the Bogotá–Medellín map');
+    await terrain(p, false);
+    assert.equal((await snap(p)).frame.checkpoint, before.checkpoint);
+    await p.keyboard.press('Escape');
+    console.log('Relief outside Japan passed');
+    result.checks.push(
+      'Relief outside Japan: the middle of the Bogotá–Medellín map changes with the terrain toggle; ' +
+        'checkpoint unchanged',
     );
     await p.evaluate(() => navigator.serviceWorker.ready);
     await p.waitForFunction(() => !!navigator.serviceWorker.controller);

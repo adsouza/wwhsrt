@@ -1,7 +1,7 @@
 # Worldwide terrain relief
 
-Status: approved 2026-11-14. Nothing is built. Coastline refinement is to be
-built first; the build plan for this design is written after that.
+Status: approved 2026-11-14; built 2026-11-15 (see "As built" at the end).
+Coastline refinement was built first.
 Amended 2026-11-14 and the amendment approved the same day (and on 2026-11-15
 for what the coastline build found; see "After the coastline build" at the end): relief is cut to the land the refined
 basemap draws (the user's decision), and "a line" gained the two older
@@ -352,3 +352,49 @@ changes what the user approved; all change how it is built.
   because today's relief tints the lake's surface. Once tiles are cut to the
   basemap (Behaviour 4) that outline and `relief.lakes` are removed, together
   with `TestLakeBiwaHasOneShoreInBothLayers`.
+
+## As built (2026-11-15)
+
+Built to the plan in `docs/superpowers/plans/2026-11-15-worldwide-terrain.md`.
+What differs from the text above, and what was measured:
+
+- **Coverage is graded (the user's decision at the look approval).** Level 8
+  alone ended 60 km from a line against level 5, eight times coarser, along a
+  hard straight edge. Level 7 now reaches 180 km from a line and level 6 reaches
+  400 km, in addition to holding the parents of finer tiles. The distances are
+  the builder's.
+- **Counts and size.** 2,637 tiles: 12, 44, 135, 415, 365, 626 and 1,040 at
+  levels 2 to 8, of which 86 are all sea and have no files. 14.6 MB of tile
+  files against the 21 to 23 MB estimated; coast tiles and coarse levels
+  compress better than the all-land sample did. Levels 4 and 5 hold 135 and
+  415 tiles, more than the 102 and 338 counted here, because the refined
+  basemap draws many more islands than the outline those were counted against.
+- **Sources.** 2,637 source tiles, 198 MB in the ignored cache. Every one cites
+  only SRTM, GMTED2010 and ETOPO1, so no credit was added.
+- **A tile's own area is its middle 254 pixels.** The outermost pixel on each
+  side lies in the neighbouring tile. Blending between pixel centres cannot
+  reach a tile's edge without reading outside the image, which showed as a
+  faint line between tiles; with shared border pixels each tile is drawn from
+  1 to 255 and the join is exact. A 258-pixel tile would not do: Ebitengine
+  rounds an unmanaged image's texture up to a power of two. The source is
+  resampled onto that grid with a Catmull-Rom curve before shading.
+- **Builder's choices from "Left to the builder".** One file per tile with a
+  one-bit PNG mask; one level per view, the coarsest whose tiles are at most
+  twice their stored width at the view's centre; part of a parent drawn where a
+  child is absent or not ready, with no offscreen image; an 8 by 8 mesh per
+  piece, cut finer where a coarse piece meets fine ones; a cache of 288 tiles
+  (75 MB), least recently drawn freed first; one worker goroutine on both
+  targets and at most 8 uploads a frame; levels 6 and 7 fetched from the
+  source; ground distance per pixel taken row by row for the shading.
+- **Wide views are not flat.** The shading method was kept as it is and levels
+  2 to 5 show clear relief.
+- **`features.json` is unchanged.** Its Lake Biwa outline is no longer drawn by
+  the terrain layer, but the route-geography tools read it and pin the file.
+- **Decode time on native:** 0.75 ms for a coast tile.
+- **Size:** the native binary is 54.2 MB and the web bundle 55.4 MB, about
+  14 MB more than without the tiles.
+- **Browser.** `tools/check-terrain.cjs` gained a check that relief changes
+  the middle of the Bogotá–Medellín map. Run locally under the 2 GiB footprint
+  watch, that section passed in the browser before the watch stopped the run at
+  a later step; hosted CI is its test. Browser decode speed and memory were
+  not measured.

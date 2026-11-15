@@ -13,7 +13,7 @@ protection under Title 17 U.S.C. within the United States. SRTM's source terms
 also state: copyright by the United States Government; no copyright claimed under
 Title 17 U.S.C. See the linked source terms for distribution outside the US.
 
-Worldwide land outline, its lakes, and the terrain layer's Lake Biwa outline:
+Worldwide land outline, its lakes, and the Lake Biwa reference outline:
 Natural Earth 1:10m countries and lakes, public domain.
 https://www.naturalearthdata.com/about/terms-of-use/
 https://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-admin-0-countries/
@@ -23,7 +23,7 @@ https://www.env.go.jp/park/content/000169509.pdf
 Labels and small lake point symbols are approximate context, not surveyed locations.
 
 Raster sources, SHA-256 identities, imagery-source headers and generation details
-are recorded in terrain.json and tools/prepare-terrain.py. Ordinary game builds
+are recorded in data/terrain/sources.v1.json, terrain.json and tools/prepare-terrain.py. Ordinary game builds
 and offline play use the checked-in derived assets without downloading terrain.
 
 
