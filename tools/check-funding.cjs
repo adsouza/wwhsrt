@@ -18,7 +18,8 @@ const amounts = async (p) =>
   (await p.locator('#company-funding-values dd').allTextContents()).map((s) => Number(s.replace(/[^0-9]/g, '')));
 (async () => {
   const browser = await chromium.launch({ headless: true, args: ['--enable-unsafe-swiftshader'] });
-  const watchdog = setTimeout(() => browser.close(), 180000);
+  // Hosted runners have taken 92–157 s for this checker, close to the earlier 180 s.
+  const watchdog = setTimeout(() => browser.close(), 240000);
   const result = {
     date: new Date().toISOString(),
     wasm_sha256: crypto.createHash('sha256').update(fs.readFileSync('web/main.wasm')).digest('hex'),
