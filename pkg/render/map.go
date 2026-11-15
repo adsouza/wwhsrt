@@ -79,7 +79,11 @@ func (m *Map) Camera(w, h float64, portrait bool) mapview.Camera {
 	for _, p := range m.anchors["exclude"] {
 		avoid = append(avoid, mapview.Project(p[0], p[1]))
 	}
-	return mapview.FitAvoiding(w, h, points, avoid)
+	c := mapview.FitAvoiding(w, h, points, avoid)
+	if !portrait {
+		mapview.LimitToWorld(&c)
+	}
+	return c
 }
 
 // face is the only place the map makes a font, so drawn and measured sizes cannot differ.

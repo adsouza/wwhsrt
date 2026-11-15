@@ -70,39 +70,22 @@ func FuzzProjectionIsFinite(f *testing.F) {
 // put any of that out of reach: the world position of each screen edge, with the map dragged as far as
 // it goes, is the same at every zoom.
 func TestPanLimitDoesNotShrinkWithZoom(t *testing.T) {
-	for _, id := range []string{"world", "east-asia", "japan"} {
-		edges := func(zoom float64) [4]float64 {
-			var out [4]float64
-			for i, pan := range [][2]float64{{-1e12, 0}, {1e12, 0}, {0, -1e12}, {0, 1e12}} {
-				c := RegionCamera(2929, 1861, id, false)
-				c.ZoomAt(zoom, Point{X: c.Width / 2, Y: c.Height / 2})
-				c.PanX, c.PanY = pan[0], pan[1]
-				c.Clamp()
-				switch i {
-				case 0:
-					out[i] = c.World(Point{X: c.Width, Y: c.Height / 2}).X
-				case 1:
-					out[i] = c.World(Point{X: 0, Y: c.Height / 2}).X
-				case 2:
-					out[i] = c.World(Point{X: c.Width / 2, Y: c.Height}).Y
-				default:
-					out[i] = c.World(Point{X: c.Width / 2, Y: 0}).Y
-				}
-			}
-			return out
-		}
-		base := edges(1)
+	// Landscape cameras are limited by the World view; portrait ones by their own frame.
+	for _, tc := range []struct {
+		id       string
+		portrait bool
+	}{{"world", false}, {"east-asia", false}, {"japan", false}, {"south-america", true}, {"japan", true}} {
+		c := RegionCamera(2929, 1861, tc.id, tc.portrait)
+		base := edgeReach(c, 1)
 		for _, zoom := range []float64{2, 8, 32} {
-			for i, edge := range edges(zoom) {
+			for i, edge := range edgeReach(c, zoom) {
 				if math.Abs(edge-base[i]) > 1e-9 {
-					t.Errorf("%s at zoom %v: dragged fully, edge %d reaches %.4f but zoom 1 reaches %.4f", id, zoom, i, edge, base[i])
+					t.Errorf("%s portrait=%v at zoom %v: dragged fully, edge %d reaches %.4f but zoom 1 reaches %.4f", tc.id, tc.portrait, zoom, i, edge, base[i])
 				}
 			}
 		}
 	}
 }
-
-// The reported case: the World view on a 3737x2029 window with an 800 px panel.
 func TestTokyoStaysReachableInTheWorldViewAtMaximumZoom(t *testing.T) {
 	tokyo := Project(35.685, 139.7514)
 	for _, zoom := range []float64{1, 4, 16, 32} {
@@ -155,5 +138,121 @@ func TestFitAvoidingPansAPointOutWithinTheGutters(t *testing.T) {
 	tight := FitAvoiding(2*AnchorClearance+1, 2*AnchorClearance+1, anchors, []Point{Project(30, 115)})
 	if tight != Fit(2*AnchorClearance+1, 2*AnchorClearance+1, anchors) {
 		t.Fatal("an unclearable point must leave the fit unchanged")
+	}
+}
+
+// edgeReach is how far each screen edge reaches with the map dragged fully west, east, south and north
+// at the given zoom factor from c: world X of the right, left edges, world Y of the bottom, top edges.
+func edgeReach(c Camera, zoom float64) [4]float64 {
+	var out [4]float64
+	for i, pan := range [][2]float64{{-1e12, 0}, {1e12, 0}, {0, -1e12}, {0, 1e12}} {
+		d := c
+		d.ZoomAt(zoom, Point{X: d.Width / 2, Y: d.Height / 2})
+		d.PanX, d.PanY = pan[0], pan[1]
+		d.Clamp()
+		switch i {
+		case 0:
+			out[i] = d.World(Point{X: d.Width, Y: d.Height / 2}).X
+		case 1:
+			out[i] = d.World(Point{X: 0, Y: d.Height / 2}).X
+		case 2:
+			out[i] = d.World(Point{X: d.Width / 2, Y: d.Height}).Y
+		default:
+			out[i] = d.World(Point{X: d.Width / 2, Y: 0}).Y
+		}
+	}
+	return out
+}
+
+// A landscape region opens on its own frame but is not a cage: it zooms out as far as the World view
+// and pans as far as the World view does, at every zoom. Portrait keeps the region's own limits.
+func TestLandscapeRegionsReachWhatTheWorldViewReaches(t *testing.T) {
+	const w, h = 1472, 912
+	world := RegionCamera(w, h, "world", false)
+	want := edgeReach(world, 1)
+	for _, id := range []string{"south-america", "japan", "mashreq", "australia", "north-america"} {
+		c := RegionCamera(w, h, id, false)
+		out := c
+		out.ZoomAt(1e-6, Point{X: w / 2, Y: h / 2})
+		if math.Abs(out.scale()-world.scale()) > 1e-9*world.scale() {
+			t.Errorf("%s: zoomed fully out at scale %v, the World view is %v", id, out.scale(), world.scale())
+		}
+		for _, zoom := range []float64{1e-6, 0.5, 1, 4, 32} {
+			for i, edge := range edgeReach(c, zoom) {
+				if math.Abs(edge-want[i]) > 1e-9 {
+					t.Errorf("%s at zoom %v: edge %d reaches %.4f, the World view reaches %.4f", id, zoom, i, edge, want[i])
+				}
+			}
+		}
+	}
+	// The case that was reported: Bogotá from landscape South America on a 1920x1080 window.
+	// Dragging to centre it must leave it in view, at zoom 1 and zoomed in.
+	bogota := Project(4.711, -74.0721)
+	for _, zoom := range []float64{1, 8} {
+		c := RegionCamera(w, h, "south-america", false)
+		c.ZoomAt(zoom, Point{X: w / 2, Y: h / 2})
+		q := c.Screen(bogota)
+		c.PanX += w/2 - q.X
+		c.PanY += h/2 - q.Y
+		c.Clamp()
+		if q = c.Screen(bogota); q.X < 0 || q.X > w || q.Y < 0 || q.Y > h {
+			t.Errorf("zoom %v: dragged towards Bogotá, it stays at %.0f,%.0f outside the %vx%v map", zoom, q.X, q.Y, w, h)
+		}
+	}
+	p := RegionCamera(w, h, "south-america", true)
+	fit := p.scale()
+	p.ZoomAt(1e-6, Point{X: w / 2, Y: h / 2})
+	if p.scale() != fit {
+		t.Errorf("portrait South America zoomed out past its own frame: %v < %v", p.scale(), fit)
+	}
+}
+
+// In landscape the World view at its own fit is a hard edge: fully zoomed out nothing pans, and at
+// any zoom the screen edges reach exactly what that view shows. Portrait keeps half a screen of
+// drag beyond its region's frame, its only way to see past the region.
+func TestLandscapeWorldEdgeIsHard(t *testing.T) {
+	for _, wh := range [][2]float64{{1472, 912}, {396, 222}} {
+		w, h := wh[0], wh[1]
+		world := RegionCamera(w, h, "world", false)
+		shown := [4]float64{
+			world.World(Point{X: w, Y: h / 2}).X, world.World(Point{X: 0, Y: h / 2}).X,
+			world.World(Point{X: w / 2, Y: h}).Y, world.World(Point{X: w / 2, Y: 0}).Y,
+		}
+		for _, id := range []string{"world", "south-america", "east-asia", "australia"} {
+			c := RegionCamera(w, h, id, false)
+			for _, zoom := range []float64{1e-6, 1, 8} {
+				for i, edge := range edgeReach(c, zoom) {
+					if math.Abs(edge-shown[i]) > 1e-9 {
+						t.Errorf("%vx%v %s at zoom %v: edge %d reaches %.4f, the World view shows to %.4f", w, h, id, zoom, i, edge, shown[i])
+					}
+				}
+			}
+		}
+		for _, pan := range [][2]float64{{-1e12, 0}, {1e12, 0}, {0, -1e12}, {0, 1e12}} {
+			c := world
+			c.PanX, c.PanY = pan[0], pan[1]
+			c.Clamp()
+			if math.Abs(c.PanX) > 1e-9 || math.Abs(c.PanY) > 1e-9 {
+				t.Errorf("%vx%v: the World view at its fit panned to %v,%v", w, h, c.PanX, c.PanY)
+			}
+		}
+		p := RegionCamera(w, h, "south-america", true)
+		p.PanX, p.PanY = 1e12, -1e12
+		p.Clamp()
+		if math.Abs(p.PanX-w/2) > 1e-9 || math.Abs(p.PanY+h/2) > 1e-9 {
+			t.Errorf("%vx%v: portrait South America at zoom 1 pans to %v,%v, want half a screen", w, h, p.PanX, p.PanY)
+		}
+	}
+}
+
+// The World limit changes what can be reached, never where a landscape region opens.
+func TestLandscapeRegionsOpenOnTheirOwnFit(t *testing.T) {
+	for _, wh := range [][2]float64{{1472, 912}, {992, 732}, {576, 600}, {352, 432}, {396, 222}} {
+		for _, r := range VisibleRegions(false) {
+			got, fit := RegionCamera(wh[0], wh[1], r.ID, false), regionFit(wh[0], wh[1], r.ID, false)
+			if got.Zoom != fit.Zoom || math.Abs(got.PanX-fit.PanX) > 1e-9 || math.Abs(got.PanY-fit.PanY) > 1e-9 {
+				t.Errorf("%vx%v %s opens at zoom %v pan %.2f,%.2f, its fit is zoom %v pan %.2f,%.2f", wh[0], wh[1], r.ID, got.Zoom, got.PanX, got.PanY, fit.Zoom, fit.PanX, fit.PanY)
+			}
+		}
 	}
 }

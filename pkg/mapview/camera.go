@@ -25,6 +25,40 @@ type Camera struct {
 	Width, Height    float64
 	Zoom, PanX, PanY float64
 	Min, Max         Point
+	// LimitMin and LimitMax, when set, are a hard limit: the camera zooms out
+	// until that frame fills the screen and never shows beyond what it shows
+	// then. A landscape region opens on its own frame inside the World view's.
+	// Unset (equal), the camera's own frame is a soft limit: it may be dragged
+	// half a screen beyond what that frame shows at zoom 1.
+	LimitMin, LimitMax Point
+}
+
+// LimitTo bounds c's zoom-out and panning by frame's instead of its own, and
+// brings the current view inside the new limits.
+func (c *Camera) LimitTo(frame Camera) {
+	c.LimitMin, c.LimitMax = frame.Min, frame.Max
+	c.Clamp()
+}
+
+// limitFrame is the frame that bounds the camera, and how many screens beyond
+// what it shows at its own fit the view may be dragged.
+func (c Camera) limitFrame() (Point, Point, float64) {
+	if c.LimitMin == c.LimitMax {
+		return c.Min, c.Max, 0.5
+	}
+	return c.LimitMin, c.LimitMax, 0
+}
+
+// fitScale is the scale at which a and b fill the screen inside Fit's padding.
+func (c Camera) fitScale(a, b Point) float64 {
+	return math.Min(math.Max(1, c.Width-72)/(b.X-a.X), math.Max(1, c.Height-80)/(b.Y-a.Y))
+}
+
+// minZoom is the zoom at which the limit frame fills the screen: 1 for a
+// camera limited by its own frame, less for a region inside a larger limit.
+func (c Camera) minZoom() float64 {
+	a, b, _ := c.limitFrame()
+	return math.Min(1, c.fitScale(a, b)/c.fitScale(c.Min, c.Max))
 }
 
 func Fit(w, h float64, points []Point) Camera {
@@ -114,8 +148,7 @@ func New(w, h float64) Camera {
 	)
 }
 func (c Camera) scale() float64 {
-	a, b := c.Min, c.Max
-	return math.Min(math.Max(1, c.Width-72)/(b.X-a.X), math.Max(1, c.Height-80)/(b.Y-a.Y)) * c.Zoom
+	return c.fitScale(c.Min, c.Max) * c.Zoom
 }
 func (c Camera) Screen(p Point) Point {
 	center := Point{(c.Min.X + c.Max.X) / 2, (c.Min.Y + c.Max.Y) / 2}
@@ -143,27 +176,42 @@ func (c *Camera) Resize(w, h float64) {
 	center, scale := c.World(Point{X: c.Width / 2, Y: c.Height / 2}), c.scale()
 	c.Width, c.Height = w, h
 	c.Zoom, c.PanX, c.PanY = 1, 0, 0
-	c.Zoom = math.Max(1, math.Min(maxZoom, scale/c.scale()))
+	c.Zoom = math.Max(c.minZoom(), math.Min(maxZoom, scale/c.scale()))
 	at := c.Screen(center)
 	c.PanX, c.PanY = w/2-at.X, h/2-at.Y
 	c.Clamp()
 }
 func (c *Camera) ZoomAt(factor float64, at Point) {
 	before := c.World(at)
-	c.Zoom = math.Max(1, math.Min(maxZoom, c.Zoom*factor))
+	c.Zoom = math.Max(c.minZoom(), math.Min(maxZoom, c.Zoom*factor))
 	after := c.Screen(before)
 	c.PanX += at.X - after.X
 	c.PanY += at.Y - after.Y
 	c.Clamp()
 }
 
-// Clamp keeps the view inside the area that dragging can show at zoom 1: the fitted frame and half a
-// screen beyond it on each side. The limit grows with zoom so that the same area stays reachable;
-// a limit of half a screen per zoom step would let a place be seen from afar but not approached.
+// Clamp keeps the view inside the area the limit frame shows at its own fit, widened by the limit's
+// overscroll (half a screen for a camera's own frame, none for a set limit). The area is fixed in
+// world units, so the same places stay reachable at every zoom; a limit of half a screen per zoom
+// step would let a place be seen from afar but not approached. For a camera limited by its own
+// frame this is a pan of at most (zoom - 1/2) screens each way.
 func (c *Camera) Clamp() {
-	reach := math.Max(1, c.Zoom) - 0.5
-	c.PanX = math.Max(-c.Width*reach, math.Min(c.Width*reach, c.PanX))
-	c.PanY = math.Max(-c.Height*reach, math.Min(c.Height*reach, c.PanY))
+	a, b, over := c.limitFrame()
+	fit := c.fitScale(a, b)
+	center, own := Point{X: (a.X + b.X) / 2, Y: (a.Y + b.Y) / 2}, Point{X: (c.Min.X + c.Max.X) / 2, Y: (c.Min.Y + c.Max.Y) / 2}
+	s := c.scale()
+	// keep holds a view centre v within the reach, given the half-size of the view in world units.
+	keep := func(v, middle, size, half float64) float64 {
+		reach := size * (0.5 + over) / fit
+		lo, hi := middle-reach+half, middle+reach-half
+		if lo > hi {
+			return middle
+		}
+		return math.Max(lo, math.Min(hi, v))
+	}
+	viewX := keep(own.X-c.PanX/s, center.X, c.Width, c.Width/2/s)
+	viewY := keep(own.Y+c.PanY/s, center.Y, c.Height, c.Height/2/s)
+	c.PanX, c.PanY = (own.X-viewX)*s, (viewY-own.Y)*s
 }
 func (c *Camera) Focus(points []Point) {
 	if len(points) < 2 {
@@ -176,7 +224,7 @@ func (c *Camera) Focus(points []Point) {
 	base.Zoom = 1
 	base.PanX = 0
 	base.PanY = 0
-	c.Zoom = math.Max(1, math.Min(maxZoom, fit.scale()/base.scale()))
+	c.Zoom = math.Max(c.minZoom(), math.Min(maxZoom, fit.scale()/base.scale()))
 	c.PanX = 0
 	c.PanY = 0
 	center := Point{X: (fit.Min.X + fit.Max.X) / 2, Y: (fit.Min.Y + fit.Max.Y) / 2}
