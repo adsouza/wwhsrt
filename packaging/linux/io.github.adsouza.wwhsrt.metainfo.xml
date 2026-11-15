@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- tools/package-linux.sh fills in @VERSION@ and @DATE@ for each release. -->
+<component type="desktop-application">
+  <id>io.github.adsouza.wwhsrt</id>
+  <name>World-wide High-speed Rail Tycoon</name>
+  <summary>Build and run high-speed rail lines across real geography</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>AGPL-3.0-only</project_license>
+  <developer id="io.github.adsouza">
+    <name>Antonio D'souza</name>
+  </developer>
+  <description>
+    <p>
+      A strategic railway business game about operating and expanding the world's high-speed rail networks.
+      Plan monthly business turns, watch an animated operating day, and compete for passengers through fares,
+      frequency, speed and useful connections.
+    </p>
+    <p>
+      Real geography shapes expansion: compare longer valley routes with expensive mountain works, tunnels and
+      bridges, balancing construction time and upkeep against journey speed. Single-player runs offline.
+    </p>
+  </description>
+  <launchable type="desktop-id">io.github.adsouza.wwhsrt.desktop</launchable>
+  <provides>
+    <binary>wwhsrt</binary>
+  </provides>
+  <url type="homepage">https://github.com/adsouza/wwhsrt</url>
+  <url type="bugtracker">https://github.com/adsouza/wwhsrt/issues</url>
+  <url type="vcs-browser">https://github.com/adsouza/wwhsrt</url>
+  <screenshots>
+    <screenshot type="default">
+      <caption>Monthly revenue report for a running railway</caption>
+      <image>https://raw.githubusercontent.com/adsouza/wwhsrt/main/docs/validation/business-revenue-desktop.png</image>
+    </screenshot>
+  </screenshots>
+  <requires>
+    <display_length compare="ge">320</display_length>
+  </requires>
+  <supports>
+    <control>pointing</control>
+    <control>keyboard</control>
+  </supports>
+  <content_rating type="oars-1.1"/>
+  <releases>
+    <release version="@VERSION@" date="@DATE@"/>
+  </releases>
+</component>

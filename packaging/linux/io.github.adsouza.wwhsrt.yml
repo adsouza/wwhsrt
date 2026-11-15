@@ -1,0 +1,22 @@
+# Flatpak manifest for the release bundle. Build it with `sh tools/package-linux.sh <version> flatpak`, which
+# stages build/linux/stage first. It packages that prebuilt, cgo-free binary rather than compiling Go inside
+# flatpak-builder; a Flathub submission would need a source build with vendored modules instead.
+id: io.github.adsouza.wwhsrt
+runtime: org.freedesktop.Platform
+runtime-version: '26.08'
+sdk: org.freedesktop.Sdk
+command: wwhsrt
+finish-args:
+  # Ebitengine draws through X11 (XWayland on Wayland sessions) with OpenGL.
+  - --socket=x11
+  - --share=ipc
+  - --device=dri
+  # Saves need no filesystem access: os.UserConfigDir is ~/.var/app/io.github.adsouza.wwhsrt/config.
+modules:
+  - name: wwhsrt
+    buildsystem: simple
+    build-commands:
+      - cp -R bin share /app/
+    sources:
+      - type: dir
+        path: ../../build/linux/stage
