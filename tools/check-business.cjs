@@ -29,7 +29,8 @@ async function clickCommand(p, id, trace, command) {
 }
 (async () => {
   const browser = await chromium.launch({ headless: true, args: ['--enable-unsafe-swiftshader'] });
-  const watchdog = setTimeout(() => browser.close(), 180000);
+  // Hosted runners have taken 106 s to over 180 s; two were still in the offline cold launch at 180 s.
+  const watchdog = setTimeout(() => browser.close(), 240000);
   const result = {
     date: new Date().toISOString(),
     browser: browser.version(),
@@ -139,7 +140,8 @@ async function clickCommand(p, id, trace, command) {
     await language(p, 'zh-Hans');
     await p.waitForFunction(() => document.documentElement.lang === 'zh-Hans');
     await p.setViewportSize({ width: 320, height: 740 });
-    assert(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+    // The client lays out again after a bridge round trip, so wait for the phone layout rather than catch the old one.
+    await p.waitForFunction(() => document.documentElement.scrollWidth <= innerWidth);
     const warningBox = await p.locator('#review-idle').boundingBox(),
       advanceBox = await p.locator('#advance').boundingBox();
     assert(warningBox.x >= 0 && warningBox.x + warningBox.width <= 320 && advanceBox.y + advanceBox.height <= 740);
