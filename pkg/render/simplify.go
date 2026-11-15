@@ -47,15 +47,6 @@ func simplifyScreen(points []mapview.Point, tol float64) []mapview.Point {
 	return out
 }
 
-// simplifyRing simplifies a closed outline, keeping the source when the
-// simplified ring would be too small to fill.
-func simplifyRing(points []mapview.Point) []mapview.Point {
-	if out := simplifyScreen(points, screenTolerance); len(out) >= 3 {
-		return out
-	}
-	return points
-}
-
 func segmentDistance2(p, a, b mapview.Point) float64 {
 	dx, dy := b.X-a.X, b.Y-a.Y
 	px, py := p.X-a.X, p.Y-a.Y

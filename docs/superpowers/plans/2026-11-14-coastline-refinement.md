@@ -10,6 +10,8 @@
 
 **Spec:** `docs/superpowers/specs/2026-11-14-coastline-refinement-design.md`
 
+**Revised 2026-11-15** against `b6ecac4`. After the plan was written, land drawing moved to `pkg/render/land.go` (one fill path and one coast path for all outlines, to keep Ebitengine's stencil small), outlines are simplified in screen space, and CI began running the browser and data checks on push. Tasks 2 to 5 below are the revised ones.
+
 ## Global Constraints
 
 - Within 150 km of a line the outline is simplified at 0.003°; farther away at 0.05°. Detail may change along one outline; both stretches share the point where it changes.
@@ -22,19 +24,22 @@
 - No downloads. Every input is already in the repository.
 - Python is `python3` (3.12, `/Library/Frameworks`); shapely and scipy are in its user site, so do not pass `-I`.
 - Run memory-heavy tools one at a time. `tools/import-public-network.py` peaks near 1,768 MiB. Stop if combined check processes pass 2 GiB.
-- No browser or WASM run, and no TypeScript compilation. `tools/check-coastlines.cjs` is edited but not run.
+- No local browser or WASM run, and no TypeScript compilation. CI runs `tools/check-coastlines.cjs` on push; it is updated here and first verified by this branch's CI.
+- Land is drawn in two antialiased passes, one fill and one coast (`pkg/render/land.go`). Do not add a third: each pass adds a map-sized box to Ebitengine's stencil.
+- In `world-land.json`, land and lake-island outlines wind counter-clockwise and lakes clockwise, so the renderer's one nonzero fill cuts lakes out of land.
+- `TestWorldViewGeometryStaysNearScreenResolution` keeps its limit of 22,000 land vertices at the World view.
 - `pkg/terrain` and the headless composition stay graphics-free (`python3 tools/check-boundaries.py`).
 - Lines stay within 120 columns; `gofmt` clean; `go vet ./...` and `GOOS=js GOARCH=wasm go vet ./...` clean.
 - Go test command for a task unless it says otherwise:
   `GOMEMLIMIT=768MiB GOMAXPROCS=2 go test -p 1 ./pkg/render ./pkg/terrain ./pkg/app -count=1`
-- Commit once per task on `main`; never push. Check `git status` first: another session may be editing this checkout, and its work is not ours to revert.
+- Commit once per task on branch `worktree-coastline-refinement` (the user's choice, 2026-11-15); never push without being asked.
 
 ## Review Focus
 
 1. **An outline that reaches the antimeridian.** Russia, Fiji and Antarctica touch ±180°. No drawn outline may have an edge spanning more than 180° of longitude, which would paint a streak across the map. (Task 2 Go test.)
 2. **A route that ends at the waterfront.** If a path is still off land with the outline unsimplified, the tool stops and names the route and the point; it does not loop or write a file. (Task 2 tool test.)
 3. **Islands inside lakes, and lakes that are left out.** An island in a kept lake is drawn as land over the lake; an island in a lake that was left out is not emitted at all. (Task 1 test.)
-4. **Light and dark palettes.** The cached land image is redrawn when either the land or the water colour changes, so lakes never keep the other palette's colour. (Task 2 Go test.)
+4. **Winding.** A lake wound the same way as its land is filled as land by the nonzero rule, with no error. Every outline's direction is checked. (Task 1 test and Task 2 Go test.)
 5. **A window of zero size, or a camera looking at open sea.** Drawing with no visible outline, or a 0×0 map area, produces no outline and does not panic. (Task 4 Go test.)
 
 ---
@@ -55,6 +60,7 @@
   - `simplify_ring(ring, flags, fine=FINE, coarse=COARSE) -> list[(lon, lat)]`: `ring` closed, `flags[i]` true where vertex `i` is near
   - `compose(polygons, index, fine_for=None) -> dict`: `polygons` is the `coordinates` of a GeoJSON MultiPolygon; `fine_for` maps a polygon's index to a tighter fine tolerance; returns `{"land": [...], "lakes": [...], "lake_islands": [...], "sources": {...}}` where each list holds closed rings of `[lon, lat]` rounded to 6 places and `sources["land"][i]` is the index of the source polygon for `land[i]`
   - `drawn_geometry(basemap) -> shapely geometry`: union of `land`, minus union of `lakes`, plus union of `lake_islands`
+  - `signed_area(ring) -> float`: positive for a counter-clockwise ring. `compose` emits `land` and `lake_islands` counter-clockwise and `lakes` clockwise.
 
 - [ ] **Step 1: Write the failing tests in `tools/test-basemap.py`**
 
@@ -101,6 +107,8 @@ def test_compose_leaves_out_what_the_rule_says():
     assert len(out["land"]) == 3 and out["sources"]["land"] == [0, 4, 5]
     assert len(out["lakes"]) == 2          # the 22 km near lake and the 280 km far lake
     assert len(out["lake_islands"]) == 1
+    assert all(rule.signed_area(r) > 0 for r in out["land"] + out["lake_islands"])
+    assert all(rule.signed_area(r) < 0 for r in out["lakes"])
     drawn = rule.drawn_geometry(out)
     assert drawn.contains(Point(2.075, 0.575)) and not drawn.contains(Point(2.15, 0.65))
     assert drawn.contains(Point(1.01, 0.51)) and drawn.contains(Point(51.2, 31.2))
@@ -135,39 +143,38 @@ git commit -m "Add the basemap rule: near lines detailed, elsewhere coarse"
 
 ---
 
+
 ### Task 2: Generate the basemap and draw it
 
 **Files:**
 - Create: `tools/prepare-basemap.py`, `pkg/render/basemap.go`, `pkg/render/basemap_test.go`
-- Modify: `tools/import-public-network.py:777-808` (stop emitting `world-land.json` and its metadata; drop the `launch_shorelines` import), `tools/check-launch-prospects.py:36-39`, `pkg/render/public_network.go` (remove `land`, `landImage`, `landCamera`, `landColor`, `drawLand` and the `world-land.json` read), `pkg/render/map.go:155-156`, `tools/test-basemap.py`
-- Delete: `tools/launch_shorelines.py`
+- Modify: `tools/import-public-network.py` (delete the block from `rings = []` to the end of the `world-land.metadata.json` emit, about lines 777–808), `tools/check-launch-prospects.py:36-38`, `pkg/render/public_network.go` (remove `land`, `landCoast`, `landLayer`, `landCamera`, `landColor`, `drawLand` and the `world-land.json` read), `pkg/render/map.go:173-174`, `pkg/render/simplify_test.go` (`TestWorldViewGeometryStaysNearScreenResolution` reads `basemap.rings`), `tools/test-basemap.py`, `.github/workflows/milestone1.yml` (data job)
+- Delete: `tools/launch_shorelines.py`, `pkg/render/coastline_test.go` (it tests regional rings replacing coarse ones inside `world-land.json`, which no longer happens)
 - Regenerate: `assets/terrain/world-land.json`, `assets/terrain/world-land.metadata.json`, `docs/validation/launch-prospects-geography.json`
 
 **Interfaces:**
 - Consumes: everything Task 1 produces.
 - Produces:
-  - `assets/terrain/world-land.json`: `{"land": [...], "lakes": [...], "lake_islands": [...]}`, each a list of closed rings of `[lon, lat]`.
+  - `assets/terrain/world-land.json`: `{"land": [...], "lakes": [...], "lake_islands": [...]}`, each a list of closed rings of `[lon, lat]`; land and lake islands counter-clockwise, lakes clockwise.
   - `assets/terrain/world-land.metadata.json` with keys `role`, `source_mask_sha256`, `source_countries_sha256`, `source_lakes_sha256`, `line_sources` (path → sha256 for the three line files), `near_km`, `fine_degrees`, `coarse_degrees`, `far_island_km`, `near_lake_km`, `far_lake_km`, `japan_boxes`, `tightened` (list of `{"route", "polygon", "tolerance"}`), `counts` (`land`, `lakes`, `lake_islands`, `points`, `left_out_islands`, `left_out_lakes`), `existing_line_points_off_land` (`before`, `after`), `output_sha256`.
   - `python3 tools/prepare-basemap.py` writes both files; `--check` exits non-zero with `Generated asset differs: <path>` if either differs.
   - In `pkg/render/basemap.go`:
 
     ```go
-    type outlineKind uint8
-    const (landOutline outlineKind = iota; lakeOutline; lakeIslandOutline)
-    type outline struct { kind outlineKind; ring [][2]float64 }
+    // basemap is the one worldwide land outline.
     type basemap struct {
-        outlines    []outline          // draw order: land, lakes, lake islands
-        image       *ebiten.Image
-        camera      mapview.Camera
-        land, water color.NRGBA
+        rings                [][][2]float64 // land, then lakes, then lake islands
+        land, lakes, islands int            // how many of each
+        layer                layer
+        camera               mapview.Camera
+        color                color.NRGBA
     }
     func newBasemap() (*basemap, error)
-    func (b *basemap) fresh(c mapview.Camera, land, water color.NRGBA) bool
-    func (b *basemap) draw(dst *ebiten.Image, c mapview.Camera, s ui.State)
+    func (b *basemap) draw(dst *ebiten.Image, c mapview.Camera, pal ui.Palette)
     ```
   - `Map.basemap *basemap`, set in `render.New`.
 
-- [ ] **Step 1: Add the tool's failing test to `tools/test-basemap.py`**
+- [ ] **Step 1: Add the tool's failing tests to `tools/test-basemap.py`**
 
 ```python
 def test_offshore_route_stops_the_tool():
@@ -198,17 +205,20 @@ Run `python3 tools/test-basemap.py`; expect `basemap rule tests passed`.
 
 - [ ] **Step 3: Remove the old emission**
 
-In `tools/import-public-network.py` delete the block that builds `rings` from `source["countries"]`, calls `refine`, and emits `world-land.json` and `world-land.metadata.json` (currently lines 777–808). Delete `tools/launch_shorelines.py`. In `tools/check-launch-prospects.py` replace the `drawn = unary_union([...world-land.json...])` expression with `rule.drawn_geometry(read("assets/terrain/world-land.json"))`, importing `basemap_rule` as `rule`.
+In `tools/import-public-network.py` delete the block that builds `rings` from `source["countries"]`, calls `refine`, and emits `world-land.json` and `world-land.metadata.json`. Delete `tools/launch_shorelines.py`. In `tools/check-launch-prospects.py` replace the `drawn = unary_union([...world-land.json...])` expression with `rule.drawn_geometry(read("assets/terrain/world-land.json"))`, importing `basemap_rule` as `rule`.
 
 - [ ] **Step 4: Write the failing Go tests in `pkg/render/basemap_test.go`**
 
-A test helper `drawnLand(b *basemap, lon, lat float64) bool` (even-odd point-in-ring over the outlines: on land, and not in a lake unless on a lake island) and `inLake(b, lon, lat) bool`.
+Helpers: `ringArea(ring [][2]float64) float64` (signed, positive counter-clockwise), `drawnLand(b *basemap, lon, lat float64) bool` (inside a land ring and not inside a lake, or inside a lake island) and `inLake(b, lon, lat) bool`, built on the existing `ringContains`.
 
 ```go
 func TestBasemapMatchesItsMetadata(t *testing.T)
 // sha256 of terrain/world-land.json equals metadata.output_sha256; total points <= 80000; outlines <= 2200;
-// each of the three lists is non-empty; every ring has >= 4 points, first == last, lon in [-180,180], lat in [-90,90];
-// outlines are ordered land, then lakes, then lake islands.
+// b.land, b.lakes and b.islands are all > 0 and sum to len(b.rings);
+// every ring has >= 4 points, first == last, lon in [-180,180], lat in [-90,90].
+
+func TestBasemapOutlinesWindSoLakesAreCutOut(t *testing.T)
+// ringArea > 0 for every land ring and lake island, < 0 for every lake.
 
 func TestBasemapHasNoEdgeAcrossTheMap(t *testing.T)
 // no consecutive pair of points in any ring differs by more than 180 degrees of longitude.
@@ -217,25 +227,24 @@ func TestBasemapKnownPoints(t *testing.T)
 // land:  Istanbul Europe (28.95, 41.02), Istanbul Asia (29.06, 41.00), Tangier (-5.80, 35.76),
 //        Folkestone (1.15, 51.10), Bogota (-74.07, 4.71), Manitoulin Island (-82.2, 45.75)
 // sea:   San Francisco Bay (-122.25, 37.70), Thames estuary (0.90, 51.48), Gulf of Izmit (29.60, 40.73),
-//        Osaka Bay (135.25, 34.55)
+//        Osaka Bay (135.25, 34.55), and the eight water points tools/check-coastlines.cjs samples
+//        (lat, lon there): (140.09867836, 42.95577938), (138.1263546, 37.31509792), (141.60869049, 40.63917142),
+//        (140.54059505, 41.59805279), (121.15774495, 30.47348219), (119.10184264, 37.29738934),
+//        (121.17869533, 28.26677417), (110.48955745, 20.07817143)
 // lake:  Lake Michigan (-87.0, 43.5), Lake Biwa (136.08, 35.25), Lake Geneva (6.55, 46.45)
 
 func TestCatalogueCitiesAreOnDrawnLand(t *testing.T)
 // every city in assets.PublicNetwork ("cities": station_lon, station_lat) is on drawn land, except ids in
 // a map[string]string of id -> reason. The test also fails for an exception that is on drawn land.
-
-func TestBasemapRedrawsWhenEitherColourChanges(t *testing.T)
-// with b.camera, b.land, b.water set and b.image non-nil (use ebiten.NewImage(1, 1)): fresh is true for the same
-// three values, and false when the camera, the land colour or the water colour differs; false when image is nil.
 ```
 
-All thirteen known points were checked against the full-detail source on 2026-11-14 and give the stated answer. If one fails, the outline is wrong, not the test.
+The first thirteen known points were checked against the full-detail source on 2026-11-14 and give the stated answer. If one fails, the outline is wrong, not the test. The eight checker points are water in today's basemap by that checker's own evidence.
 
 Run the Go test command; expect a build failure: `undefined: basemap`.
 
 - [ ] **Step 5: Implement `pkg/render/basemap.go` and switch the renderer to it**
 
-`newBasemap` reads `terrain/world-land.json` from `assets.Terrain`. `draw` follows the removed `drawLand`: redraw into `b.image` only when `!b.fresh(...)`, filling land outlines in `pal.Land`, lake outlines in `pal.Water` and lake-island outlines in `pal.Land`, each with a 1-pixel `pal.Coast` stroke, then draw the image. In `render.New` set `m.basemap`; in `drawScene` replace `m.public.drawLand(dst, c, s)` with `m.basemap.draw(dst, c, s)`, leaving the `else` branch for Task 3.
+`newBasemap` reads `terrain/world-land.json` from `assets.Terrain` and joins the three lists in order. `draw` is the removed `publicLayer.drawLand`: redraw `b.layer` only when the layer is empty or the camera or `pal.Land` changed, by calling `drawLand(layer, c, b.rings, coast, pal)` with every entry of `coast` true, then draw the layer's view. Because lakes wind the other way, the one nonzero fill leaves them clear and the scene's water fill shows through; the one coast path outlines land, lakes and lake islands alike. In `render.New` set `m.basemap`; in `drawScene` replace `m.public.drawLand(dst, c, s)` with `m.basemap.draw(dst, c, pal)`, leaving the `else` branch for Task 3.
 
 - [ ] **Step 6: Generate the basemap and run the checks, one at a time**
 
@@ -246,16 +255,20 @@ python3 tools/import-public-network.py --check
 python3 tools/check-launch-prospects.py
 ```
 
-Expected: the first prints the counts; the second and third print nothing that says `differs`; the fourth ends with its usual pass line. Then run the Go test command. `TestCatalogueCitiesAreOnDrawnLand` will name the cities that fail: for each, confirm against the mask at full detail that its station marker really is in the sea (the design expects five to nine, among them Hong Kong, Dongguan, Zhuhai, Lisbon and Miami), then add it to the exception map with the reason. A city that is on land at full detail but off the drawn land is a defect in the rule: fix the rule, not the list.
+Expected: the first prints the counts; the second and third print nothing that says `differs`; the fourth ends with its usual pass line. Then run the Go test command. `TestCatalogueCitiesAreOnDrawnLand` will name the cities that fail: for each, confirm against the mask at full detail that its station marker really is in the sea (the design expects five to nine, among them Hong Kong, Dongguan, Zhuhai, Lisbon and Miami), then add it to the exception map with the reason. A city that is on land at full detail but off the drawn land is a defect in the rule: fix the rule, not the list. If `TestWorldViewGeometryStaysNearScreenResolution` exceeds 22,000 land vertices, raise the far-island or far-lake size threshold; do not raise the limit.
 
 Expected after that: PASS.
 
-- [ ] **Step 7: Confirm nothing else changed, then commit**
+- [ ] **Step 7: Add the new checks to CI's data job**
 
-`git status --short` must list only the files named in this task. `git diff --stat -- assets/scenario data` must be empty.
+In `.github/workflows/milestone1.yml`, the `preparation` lane gains `tools/test-basemap.py` and `'tools/prepare-basemap.py --check'`.
+
+- [ ] **Step 8: Confirm nothing else changed, then commit**
+
+`git status --short` must list only the files named in this task. `git diff --no-ext-diff --stat -- assets/scenario data` must be empty.
 
 ```bash
-git add -A tools pkg/render assets/terrain/world-land.json assets/terrain/world-land.metadata.json docs/validation/launch-prospects-geography.json
+git add -A tools pkg/render assets/terrain/world-land.json assets/terrain/world-land.metadata.json docs/validation/launch-prospects-geography.json .github/workflows/milestone1.yml
 git commit -m "Draw one worldwide land outline with lakes"
 ```
 
@@ -264,13 +277,13 @@ git commit -m "Draw one worldwide land outline with lakes"
 ### Task 3: One basemap for every frame; retire the regional files
 
 **Files:**
-- Modify: `pkg/render/map.go` (remove `rings`, its load, and the `else` branch in `drawScene`; add `land`), `assets/assets.go:14-15` (remove `Land`), `pkg/render/terrain.go` (stop drawing `lakes`; remove the field and its load in `newRelief`), `tools/check-route-geography.py:55-60,170`, `tools/prepare-route-geography.py:10-12`, `tools/prepare-terrain.py:167-169`, `tools/prepare-skeleton-assets.py` (remove the `land.json` block ending at line 44), `tools/check-coastlines.cjs:113`, `pkg/render/basemap_test.go`
-- Delete: `pkg/render/coastline_test.go`, `assets/terrain/land.json`, `assets/terrain/land.metadata.json`, `assets/scenario/land.json`, `tools/prepare-shorelines.py`
+- Modify: `pkg/render/map.go` (remove `rings`, `ringCoast`, their load, and the `else` branch in `drawScene`; add `land`), `pkg/render/land.go` (`drawLand` loses its `coast` parameter; `coastRings` goes; `ringContains` moves to `basemap_test.go`), `pkg/render/simplify_test.go` (remove `TestCoastRingsHideOnlyOutlinesALaterRingPaintedOver`), `assets/assets.go` (remove `Land`), `pkg/render/terrain.go` (stop drawing `lakes`; remove the field and its load in `newRelief`), `tools/check-route-geography.py:55-60,170`, `tools/prepare-route-geography.py:10-12`, `tools/prepare-terrain.py:167-169`, `tools/prepare-skeleton-assets.py` (remove the `land.json` block ending at line 44), `tools/check-coastlines.cjs:113`, `pkg/render/basemap_test.go`
+- Delete: `assets/terrain/land.json`, `assets/terrain/land.metadata.json`, `assets/scenario/land.json`, `tools/prepare-shorelines.py`
 - Regenerate: `docs/validation/route-geography-checks.json`
 
 **Interfaces:**
 - Consumes: `Map.basemap`, `rule.drawn_geometry`, the metadata key `source_countries_sha256`.
-- Produces: `func (m *Map) land(f gameapi.Frame) *basemap`, which `drawScene` uses for its land.
+- Produces: `func (m *Map) land(f gameapi.Frame) *basemap`, which `drawScene` uses for its land; `func drawLand(dst *ebiten.Image, c mapview.Camera, rings [][][2]float64, pal ui.Palette)`.
 
 - [ ] **Step 1: Write the failing Go tests in `pkg/render/basemap_test.go`**
 
@@ -279,38 +292,39 @@ func TestEveryFrameDrawsTheOneBasemap(t *testing.T) {
     m, err := New()
     // ...
     with, without := m.land(gameapi.Frame{PublicNetwork: true}), m.land(gameapi.Frame{})
-    if with == nil || with != without || len(with.outlines) == 0 { t.Fatal(...) }
+    if with == nil || with != without || len(with.rings) == 0 { t.Fatal(...) }
 }
 
 func TestReliefNoLongerDrawsItsOwnLake(t *testing.T)
-// reflect.TypeOf(relief{}) has no field named "lakes"; the basemap has a lake outline containing (136.08, 35.25).
+// reflect.TypeOf(relief{}) has no field named "lakes"; inLake(m.basemap, 136.08, 35.25) is true.
 ```
 
 Run the Go test command; expect a build failure: `m.land undefined`.
 
 - [ ] **Step 2: Make the renderer use one basemap**
 
-`drawScene` becomes `dst.Fill(pal.Water); m.land(f).draw(dst, c, s)` with no branch. Remove `Map.rings`, `assets.Land` and `relief.lakes`. `pkg/terrain` and `features.json` are unchanged; `terrain.Data.Lakes` stays because `tools/prepare-route-geography.py` and `pkg/terrain` tests use the file.
+`drawScene` becomes `dst.Fill(pal.Water); m.land(f).draw(dst, c, pal)` with no branch. Remove `Map.rings`, `Map.ringCoast`, `assets.Land`, `coastRings` and `relief.lakes`. `pkg/terrain` and `features.json` are unchanged; `terrain.Data.Lakes` stays because `tools/prepare-route-geography.py` and `pkg/terrain` tests use the file. In `land.go`'s comment, the note about slivers between neighbouring country rings no longer applies; say what is true now.
 
-- [ ] **Step 3: Repoint the Python tools**
+- [ ] **Step 3: Repoint the Python tools and the browser checker**
 
 - `tools/check-route-geography.py`: `coastline` is `assets/terrain/world-land.json`; its metadata is `world-land.metadata.json`; the source assertion compares `coast_meta["source_countries_sha256"]` with `meta["coast_source_sha256"]`; `drawn` is `rule.drawn_geometry(...)`. The result key stays `drawn_coast_sha256`.
 - `tools/prepare-route-geography.py`: read `source_countries_sha256` from `world-land.metadata.json` in place of `source_sha256` from `land.metadata.json`. Do not run it.
 - `tools/prepare-terrain.py`: delete the closing `subprocess.run([... "prepare-shorelines.py"])` and its comment.
-- `tools/check-coastlines.cjs:113`: `all = JSON.parse(fs.readFileSync('assets/terrain/world-land.json')).land`. Do not run it.
+- `tools/check-coastlines.cjs:113`: `all = JSON.parse(fs.readFileSync('assets/terrain/world-land.json')).land`. Its eight water points are pinned as sea by Task 2's Go test, and its two coast boxes (Hokkaido, and Shanghai at lon 120–122.5, lat 29–32) lie near lines, so they stay detailed. Not run locally.
 
 - [ ] **Step 4: Delete the retired files, then run everything**
 
 ```bash
-git rm -q pkg/render/coastline_test.go assets/terrain/land.json assets/terrain/land.metadata.json assets/scenario/land.json tools/prepare-shorelines.py
+git rm -q assets/terrain/land.json assets/terrain/land.metadata.json assets/scenario/land.json tools/prepare-shorelines.py
 python3 tools/check-route-geography.py
 python3 tools/check-launch-prospects.py
 python3 -m py_compile tools/prepare-route-geography.py tools/prepare-terrain.py tools/prepare-skeleton-assets.py
-grep -rn "terrain/land\.json\|scenario/land\.json\|land\.metadata\.json\|prepare-shorelines\|launch_shorelines\|assets\.Land\b" \
-  --include='*.go' --include='*.py' --include='*.cjs' --include='*.sh' .
+node --check tools/check-coastlines.cjs
+grep -rn "terrain/land\.json\|scenario/land\.json\|land\.metadata\.json\|prepare-shorelines\|launch_shorelines\|assets\.Land\b\|coastRings" \
+  --include='*.go' --include='*.py' --include='*.cjs' --include='*.sh' --include='*.yml' .
 ```
 
-Expected: both checks pass, with `check-route-geography.py` reporting its six alignments; `py_compile` prints nothing; `grep` prints nothing outside `build/`. If `check-route-geography.py` reports a sea or lake intersection for one of the four older alignments, that alignment is off the new drawn land: go back to `tools/prepare-basemap.py`, whose `fit` should have tightened it, and find why it did not. Then run the Go test command; expect PASS.
+Expected: both checks pass, with `check-route-geography.py` reporting its six alignments; `py_compile` and `node --check` print nothing; `grep` prints nothing outside `build/` and `.claude/`. If `check-route-geography.py` reports a sea or lake intersection for one of the four older alignments, that alignment is off the new drawn land: go back to `tools/prepare-basemap.py`, whose `fit` should have tightened it, and find why it did not. Then run the Go test command; expect PASS.
 
 - [ ] **Step 5: Commit**
 
@@ -323,51 +337,57 @@ git commit -m "Draw the one basemap in every frame and retire the regional files
 
 ### Task 4: Skip what is off screen, and measure
 
+> **As executed (2026-11-15):** this task's code went into Task 2, because the basemap could not land
+> without it: at a quarter-pixel tolerance the World view drew 45,849 land vertices against the 22,000
+> guard. Detail is chosen by zoom from a rank computed once per point (`rankOutline`, `chosen`,
+> `visible` in `pkg/render/basemap.go`), with a one-pixel tolerance. The clip helper is `clipScreen`,
+> not `clipRing`. The measurement below then found a second cost, 5 GB of GPU memory from stroking a
+> continent's outline as one sub-path, fixed by `coastRuns` in `pkg/render/land.go`.
+
 **Files:**
-- Modify: `pkg/render/basemap.go`, `pkg/render/clip.go`, `pkg/render/clip_test.go`, `pkg/render/basemap_test.go`
+- Modify: `pkg/render/basemap.go`, `pkg/render/land.go`, `pkg/render/clip.go`, `pkg/render/clip_test.go`, `pkg/render/simplify_test.go`, `pkg/render/basemap_test.go`
 - Create (not committed): timing overlays in the session scratchpad
 
 **Interfaces:**
-- Consumes: `basemap`, `outline`.
+- Consumes: `basemap`, `drawLand`.
 - Produces:
-  - `outline` gains `points []mapview.Point` (projected once at load) and `min, max mapview.Point` (their bounds).
-  - `type screenOutline struct { kind outlineKind; points []mapview.Point }`
-  - `func (b *basemap) screen(c mapview.Camera) []screenOutline`: the outlines to draw, in draw order, clipped to the screen; an outline whose bounds lie wholly off screen is skipped without touching its points.
+  - `type outline struct { points []mapview.Point; min, max mapview.Point }`: an outline projected once at load, with its bounds. `basemap.outlines []outline` sits beside `rings`, one per ring.
+  - `func (b *basemap) visible(c mapview.Camera) [][]mapview.Point`: the outlines to draw, in order, each clipped to the screen and simplified; an outline whose bounds lie wholly off screen is skipped without touching its points.
   - `func clipRing(c mapview.Camera, projected []mapview.Point) []mapview.Point` replaces `screenRing`.
+  - `func drawLand(dst *ebiten.Image, outlines [][]mapview.Point, pal ui.Palette)` draws what `visible` returns, still as one fill path and one coast path.
 
 - [ ] **Step 1: Write the failing tests**
 
 ```go
 func TestBasemapSkipsOutlinesOffScreen(t *testing.T)
 // camera := mapview.Fit(1280, 850, Tokyo and Osaka projected), Zoom 8:
-//   0 < len(b.screen(camera)) < len(b.outlines)/10, and every returned outline has >= 3 points inside
+//   0 < len(b.visible(camera)) < len(b.rings)/10, and every returned outline has >= 3 points inside
 //   [-4, Width+4] x [-4, Height+4].
-// a camera fitted on two mid-Pacific points (-150, 0) and (-149, 1), Zoom 32: len(b.screen(camera)) == 0.
-// a camera with Width 0 and Height 0: len(b.screen(camera)) == 0 and no panic.
-// the world camera (Fit on the "world" region points): kinds in the result never go backwards.
+// a camera fitted on two mid-Pacific points (-150, 0) and (-149, 1), Zoom 32: len(b.visible(camera)) == 0.
+// a camera with Width 0 and Height 0: len(b.visible(camera)) == 0 and no panic.
 
 func TestProjectedPointsMatchTheRing(t *testing.T)
 // for every outline, len(points) == len(ring), points[i] == mapview.Project(ring[i][1], ring[i][0]),
 // and min/max bound every point.
 ```
 
-`clip_test.go` calls `clipRing` with projected input in place of `screenRing`. Run the Go test command; expect a build failure: `b.screen undefined`.
+`clip_test.go` calls `clipRing` with projected input in place of `screenRing`; `TestWorldViewGeometryStaysNearScreenResolution` counts the points `visible` returns. Run the Go test command; expect a build failure: `b.visible undefined`.
 
-- [ ] **Step 2: Implement, with `draw` filling and stroking what `screen` returns**
+- [ ] **Step 2: Implement**
 
 Bounds test: map the outline's `min` and `max` through `c.Screen` (it is a scale and a shift, so the box maps to a box) and skip when it does not meet `[-4, Width+4] × [-4, Height+4]`.
 
 Run the Go test command; expect PASS.
 
-- [ ] **Step 3: Measure land redraw time before and after**
+- [ ] **Step 3: Measure land redraw time and memory before and after**
 
-Follow the recipe in the memory note `measure-native-memory-on-a-save-copy`: build with `go build -overlay`, run on a copy of the save under a scratch `HOME`, never the real one. Baseline is commit `8d71be1` in `git worktree add --detach <scratch>/base 8d71be1`; remove the worktree afterwards.
+Follow the recipe in the memory note `measure-native-memory-on-a-save-copy`: build with `go build -overlay`, run on a copy of the save under a scratch `HOME`, never the real one. Baseline is commit `b6ecac4` in `git worktree add --detach <scratch>/base b6ecac4`; remove that worktree afterwards.
 
-The overlay adds, in each tree, a file `pkg/render/exp_timing.go` holding `var expLand []time.Duration` and a function that prints count, mean and 95th percentile in milliseconds to stderr every 300 samples, and replaces the land-drawing file with a copy whose cache-miss path is timed with `time.Now()` / `time.Since` (`drawLand` in `public_network.go` at baseline, `basemap.draw` now). A second overlaid file, `pkg/app/host_native.go`, adds one line at the top of `host.update`: `g.Camera.PanX += 1`, so every frame redraws the scene.
+The overlay adds, in each tree, a file `pkg/render/exp_timing.go` holding the samples and a function that prints count, mean and 95th percentile in milliseconds to stderr every 300 samples, and replaces the file holding the land layer's cache-miss path with a copy that times it with `time.Now()` / `time.Since` (`publicLayer.drawLand` at baseline, `basemap.draw` now). A second overlaid file, `pkg/app/host_native.go`, adds one line at the top of `host.update`: `g.Camera.PanX += 1`, so every frame redraws the scene.
 
-Run each build for 30 seconds at the saved window size (3737×2029), once on the World view and once after selecting the Japan region in the test window. Record the four mean and 95th-percentile figures.
+Run each build for 30 seconds at the saved window size (3737×2029), once on the World view and once on the Japan region. Record the four mean and 95th-percentile figures, and each run's physical footprint from `vmmap --summary` at the end.
 
-Pass: no figure for the new build is more than twice its baseline. If one is, look at which outlines `screen` returns for that view before changing anything else.
+Pass: no timing for the new build is more than twice its baseline, and no footprint is more than 100 MB above its baseline. `land.go` records how sensitive Ebitengine's stencil and vertex buffers are; a footprint jump means the two-pass rule was broken somewhere.
 
 - [ ] **Step 4: Commit**
 
@@ -383,7 +403,7 @@ Put the measured figures in the commit body.
 ### Task 5: Documents and final verification
 
 **Files:**
-- Modify: `assets/terrain/README.md`, `assets/terrain/ATTRIBUTION.md`, `assets/scenario/README.md:7`, `ARCHITECTURE.md:188-196`, `data/imports/README.md:20,145,200`, `TESTING.md:117,274-279,300-304`, `docs/validation/README.md:83`, `docs/superpowers/specs/2026-11-14-coastline-refinement-design.md` (Status and Evidence)
+- Modify: `assets/terrain/README.md`, `assets/terrain/ATTRIBUTION.md`, `assets/scenario/README.md:7`, `ARCHITECTURE.md` (the shoreline paragraph), `data/imports/README.md:20,145,200`, `TESTING.md` (the alignment-geometry, legacy-geometry and coastline passages), `docs/validation/README.md:83`, `docs/superpowers/specs/2026-11-14-coastline-refinement-design.md` (Status, Constraints and Evidence), `docs/superpowers/specs/2026-11-14-worldwide-terrain-design.md` (the browser-check non-goal)
 
 **Interfaces:**
 - Consumes: the counts in `world-land.metadata.json`, the exception list from Task 2, the timings from Task 4.
@@ -392,13 +412,13 @@ Put the measured figures in the commit body.
 
 Each passage that describes per-country outlines, the regional files, `prepare-shorelines.py`, `launch_shorelines.py` or "legacy fixtures draw the regional layer" is rewritten to say what is now true:
 - one land outline from the `land` geometry of `route-land.v1.json.gz`, with the tolerances, the 150 km distance, the size thresholds and the real counts;
-- no lines between countries;
+- no lines between countries; lakes are holes in the one fill;
 - every frame draws it;
 - how to regenerate and check it (`python3 tools/prepare-basemap.py`, `--check`, `python3 tools/test-basemap.py`);
 - `ATTRIBUTION.md` credits Natural Earth 1:10m countries and lakes for the whole basemap and drops the per-country paragraphs;
-- `TESTING.md` and `docs/validation/README.md` say that `docs/validation/coastline-checks.json` and `docs/validation/launch-prospects-checks.json` record browser checks made against the previous basemap (they hold its hash), that they are left as records, and that `tools/check-coastlines.cjs` has been updated but not run, under the existing browser limit.
+- `docs/validation/coastline-checks.json` and its screenshots are refreshed by CI, not here.
 
-In the design, set Status to implemented and replace "Not measured" in Evidence with the real counts, the tightened routes, the city exceptions, the existing-line points off land before and after, and the redraw timings.
+In the coastline design, set Status to implemented; replace "Not measured" in Evidence with the real counts, the tightened routes, the city exceptions, the existing-line points off land before and after, and the timings and footprints; and bring Constraints up to date (land is drawn by `land.go` in two passes; the browser check runs in CI). In the terrain design, the non-goal about not running the browser check is replaced by: CI runs the browser checks on push, and they are not run locally.
 
 - [ ] **Step 2: Run the full verification, one command at a time**
 
@@ -412,14 +432,14 @@ GOOS=js GOARCH=wasm go vet ./...
 GOMEMLIMIT=768MiB GOMAXPROCS=2 go test -p 1 ./... -count=1
 sh tools/build-native.sh
 sh tools/build-web.sh
-git diff --stat 8d71be1 -- assets/scenario/public-network.json assets/scenario/playable-rail-map.json data assets/terrain/features.json
+git diff --no-ext-diff --stat b6ecac4 -- assets/scenario/public-network.json assets/scenario/playable-rail-map.json data assets/terrain/features.json
 ```
 
 Expected: the first prints `basemap rule tests passed`; `gofmt -l` and the last `git diff` print nothing; everything else exits 0. Check each command's own exit status; do not pipe a test into a commit.
 
 - [ ] **Step 3: Look at it in the native app**
 
-Run the built app on a copy of the save (scratch `HOME`) and look at: the Sea of Marmara (Istanbul on land, the line no longer over open water), San Francisco Bay, Lake Biwa with terrain on and off, the Great Lakes, and the World view in light and dark. Screenshot each for the user. This is the only check of the drawn result; the Go tests do not draw.
+Run the built app on a copy of the save (scratch `HOME`) and look at: the Sea of Marmara (Istanbul on land, the line no longer over open water), San Francisco Bay, Lake Biwa with terrain on and off, the Great Lakes, and the World view in light and dark. Screenshot each for the user. This is the only local check of the drawn result; the Go tests do not draw, and the browser check runs only in CI.
 
 - [ ] **Step 4: Commit**
 
@@ -428,4 +448,4 @@ git add -A assets ARCHITECTURE.md TESTING.md data/imports/README.md docs
 git commit -m "Document the single-outline basemap"
 ```
 
-Report to the user: what ran, the counts, the timings, the exceptions, and that the browser build was built but not checked.
+Report to the user: what ran, the counts, the timings and footprints, the exceptions, and that the browser coastline check has not run and will first run in this branch's CI.

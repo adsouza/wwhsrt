@@ -1,109 +1,110 @@
 package render
 
 import (
+	"image"
+	"image/color"
+
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 	"wwhsrt/pkg/mapview"
 	"wwhsrt/pkg/ui"
 )
 
-// drawLand fills every ring as one path and strokes the coast as one more.
+// coastRun is the most segments of coast stroked as one sub-path.
 //
-// Ebitengine packs the bounding box of every path in an antialiased batch, at
-// twice its width, into stencil images that it keeps at their largest size.
-// Filling and stroking each of 729 rings in turn made that one batch of 1,458
-// boxes, and the stencil grew into a 537 MB GPU texture at 3737x2029. One path
-// per pass needs one box the size of the map.
+// Ebitengine fills a sub-path as a fan of triangles from its first point, and
+// a stroke is filled the same way. A continent's outline stroked as one closed
+// sub-path made thousands of triangles that each crossed the map, and Apple's
+// tile-based GPUs list a triangle in every tile it covers: 5 GB of GPU memory
+// at 3737x2029, against 1 GB with the coast cut into runs like this.
+const coastRun = 32
+
+// landPixel is an opaque white pixel for drawing plain triangles, cut from the
+// middle of a larger image so that sampling never reaches its edge.
+var landPixel = func() *ebiten.Image {
+	img := ebiten.NewImage(3, 3)
+	img.Fill(color.White)
+	return img.SubImage(image.Rect(1, 1, 2, 2)).(*ebiten.Image)
+}()
+
+// paintLand fills the pieces of land and strokes the coast of the outlines
+// they were cut from (see basemap.fill for the pieces).
 //
-// All rings wind the same way, so the nonzero fill of the joined path is the
-// union the separate fills painted. The fill stays antialiased: neighbouring
-// rings (refined Chile beside coarse Argentina) leave sub-pixel slivers that a
-// one-pass fill shows as dotted water.
-func drawLand(dst *ebiten.Image, c mapview.Camera, rings [][][2]float64, coast []bool, pal ui.Palette) {
-	var fill, shore vector.Path
-	for i, ring := range rings {
-		points := screenRing(c, ring)
-		if len(points) < 3 {
-			continue
-		}
-		points = simplifyRing(points)
-		paths := []*vector.Path{&fill}
-		if coast[i] {
-			paths = append(paths, &shore)
-		}
-		for _, path := range paths {
-			for j, q := range points {
-				if j == 0 {
-					path.MoveTo(float32(q.X), float32(q.Y))
-				} else {
-					path.LineTo(float32(q.X), float32(q.Y))
-				}
+// The fill is a fan of triangles per piece, each flipping the pixels it covers
+// between land and clear, so a pixel ends up land when an odd number of
+// triangles cover it. That is the even-odd rule: a lake inside land is clear
+// and an island inside the lake is land again, whichever way they wind. It is
+// not Ebitengine's own fill, which counts the triangles of each facing over a
+// pixel in four bits of a stencil. With one land outline a continent is a
+// single shape, pixels deep inland sat under 20 to 40 triangles, the count
+// wrapped, and the map showed water-coloured streaks from Spain to the Baltic.
+// Flipping has no count to overflow. It is not antialiased; the antialiased
+// coast drawn over its edge hides that.
+//
+// The coast is one antialiased path. Ebitengine packs the bounding box of
+// every path in an antialiased batch, at twice its width, into stencil images
+// that it keeps at their largest size, so one path means one map-sized box.
+func paintLand(dst *ebiten.Image, pieces, outlines [][]mapview.Point, pal ui.Palette) {
+	if vertices, indices := landFan(pieces, pal.Land); len(indices) > 0 {
+		dst.DrawTriangles32(vertices, indices, landPixel, &ebiten.DrawTrianglesOptions{Blend: ebiten.BlendXor})
+	}
+	var shore vector.Path
+	for _, run := range coastRuns(outlines) {
+		for j, q := range run {
+			if j == 0 {
+				shore.MoveTo(float32(q.X), float32(q.Y))
+			} else {
+				shore.LineTo(float32(q.X), float32(q.Y))
 			}
-			path.Close()
 		}
 	}
-	// The fill names source-over and the coast leaves Blend at its zero
-	// value, which Ebitengine also draws as source-over. FillPath compares the
-	// two as different options and flushes the fill before batching the
-	// coast, so each batch holds one map-sized box. Batched together, the two
-	// boxes stack into a stencil twice as tall: an 8192x8192 GPU page (268 MB)
-	// at 3737x2029 instead of 8192x4096.
-	op := &vector.DrawPathOptions{AntiAlias: true, Blend: ebiten.BlendSourceOver}
-	op.ColorScale.ScaleWithColor(pal.Land)
-	vector.FillPath(dst, &fill, nil, op)
-	op = &vector.DrawPathOptions{AntiAlias: true}
+	op := &vector.DrawPathOptions{AntiAlias: true}
 	op.ColorScale.ScaleWithColor(pal.Coast)
 	vector.StrokePath(dst, &shore, &vector.StrokeOptions{Width: 1}, op)
 }
 
-// coastRings reports, for each ring, whether its outline is drawn. Rings used
-// to be filled and outlined one at a time, so a ring lying wholly inside a
-// later one (Lesotho inside South Africa, Mongolia inside Asia) had its outline
-// painted over. Joining the passes would bring those lines back; this keeps
-// the map as it was. Outlines inside an earlier ring (Bolivia) stay drawn.
-func coastRings(rings [][][2]float64) []bool {
-	type box struct{ minX, minY, maxX, maxY float64 }
-	boxes := make([]box, len(rings))
-	for i, ring := range rings {
-		b := box{1e9, 1e9, -1e9, -1e9}
-		for _, p := range ring {
-			b = box{min(b.minX, p[0]), min(b.minY, p[1]), max(b.maxX, p[0]), max(b.maxY, p[1])}
-		}
-		boxes[i] = b
+// landFan returns each piece as a fan of triangles from its first point, in
+// the colour given.
+func landFan(pieces [][]mapview.Point, c color.NRGBA) ([]ebiten.Vertex, []uint32) {
+	points := 0
+	for _, piece := range pieces {
+		points += len(piece)
 	}
-	coast := make([]bool, len(rings))
-	for i, ring := range rings {
-		coast[i] = true
-		a := boxes[i]
-		for j := i + 1; j < len(rings); j++ {
-			outer, b := rings[j], boxes[j]
-			if a.minX < b.minX || a.minY < b.minY || a.maxX > b.maxX || a.maxY > b.maxY {
-				continue
-			}
-			inside := len(ring) > 0
-			for _, p := range ring {
-				if !ringContains(outer, p) {
-					inside = false
-					break
-				}
-			}
-			if inside {
-				coast[i] = false
-				break
-			}
+	vertices := make([]ebiten.Vertex, 0, points)
+	indices := make([]uint32, 0, 3*points)
+	r, g, b, a := float32(c.R)/255, float32(c.G)/255, float32(c.B)/255, float32(c.A)/255
+	for _, piece := range pieces {
+		if len(piece) < 3 {
+			continue
+		}
+		first := uint32(len(vertices))
+		for _, p := range piece {
+			vertices = append(vertices, ebiten.Vertex{
+				DstX: float32(p.X), DstY: float32(p.Y), SrcX: 1, SrcY: 1, ColorR: r, ColorG: g, ColorB: b, ColorA: a,
+			})
+		}
+		for i := uint32(1); i+1 < uint32(len(piece)); i++ {
+			indices = append(indices, first, first+i, first+i+1)
 		}
 	}
-	return coast
+	return vertices, indices
 }
 
-// ringContains reports whether p is strictly inside ring (even-odd rule).
-func ringContains(ring [][2]float64, p [2]float64) bool {
-	in := false
-	for i, j := 0, len(ring)-1; i < len(ring); j, i = i, i+1 {
-		a, b := ring[i], ring[j]
-		if (a[1] > p[1]) != (b[1] > p[1]) && p[0] < (b[0]-a[0])*(p[1]-a[1])/(b[1]-a[1])+a[0] {
-			in = !in
+// coastRuns cuts each closed outline into open runs of at most coastRun
+// segments. Each run starts on the last point of the one before, and the last
+// run of an outline returns to its first point.
+func coastRuns(outlines [][]mapview.Point) [][]mapview.Point {
+	runs := [][]mapview.Point{}
+	for _, points := range outlines {
+		if len(points) < 2 {
+			continue
+		}
+		if points[0] != points[len(points)-1] { // clipping can leave an outline without its closing point
+			points = append(points[:len(points):len(points)], points[0])
+		}
+		for start := 0; start < len(points)-1; start += coastRun {
+			runs = append(runs, points[start:min(start+coastRun, len(points)-1)+1])
 		}
 	}
-	return in
+	return runs
 }

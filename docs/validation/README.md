@@ -34,6 +34,10 @@ regression, slider render/event checks, rebuilt app and qualification limits.
 [Coastline replacement and China refinement](COASTLINES.md) removes duplicate
 coarse/fine shoreline layers and extends the detailed source to China/Taiwan.
 The [coastline ledger](coastline-checks.json) records palette/terrain pixel checks.
+Both describe the per-country basemap. It has since been replaced by one worldwide
+land outline ([design](../superpowers/specs/2026-11-14-coastline-refinement-design.md));
+the ledger and `launch-prospects-checks.json` hold the earlier basemap's hash until
+fresh evidence from hosted CI is committed.
 
 
 [Playable map filtering](PLAYABLE_MAP.md) removes source-only rail fragments and

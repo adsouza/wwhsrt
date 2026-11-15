@@ -21,16 +21,14 @@ type Map struct {
 	Font *text.GoTextFaceSource
 	// Text is the host's text scale. Its zero value draws the sizes written in this package, which is
 	// what the browser client uses.
-	Text  ui.TextScale
-	rings [][][2]float64
-	// ringCoast reports which rings get a coast line; see coastRings.
-	ringCoast []bool
-	anchors   map[string][][2]float64
-	terrain   *relief
-	public    *publicLayer
-	scene     layer
-	sceneKey  sceneKey
-	marks     markers
+	Text     ui.TextScale
+	anchors  map[string][][2]float64
+	terrain  *relief
+	public   *publicLayer
+	basemap  *basemap
+	scene    layer
+	sceneKey sceneKey
+	marks    markers
 	// idleLines and idleEnds are the cached scene's physical idle lines and their endpoint cities, which Draw
 	// repeats above the representative trains.
 	idleLines []ui.IdleHighlight
@@ -48,11 +46,6 @@ func New() (*Map, error) {
 		return nil, e
 	}
 	m := &Map{Font: font}
-	e = json.Unmarshal(assets.Land, &m.rings)
-	if e != nil {
-		return nil, e
-	}
-	m.ringCoast = coastRings(m.rings)
 	e = json.Unmarshal(assets.Camera, &m.anchors)
 	if e != nil {
 		return nil, e
@@ -62,6 +55,10 @@ func New() (*Map, error) {
 		return nil, e
 	}
 	m.public.marks = &m.marks
+	m.basemap, e = newBasemap()
+	if e != nil {
+		return nil, e
+	}
 	m.terrain, e = newRelief()
 	return m, e
 }
@@ -167,14 +164,15 @@ func Pick(c mapview.Camera, cities []gameapi.City, at mapview.Point) gameapi.Cit
 	}
 	return id
 }
+
+// land returns the basemap a frame is drawn on. There is one, whatever the frame holds: frames without
+// the public network come only from tests, and they used to draw a regional outline no player saw.
+func (m *Map) land(gameapi.Frame) *basemap { return m.basemap }
+
 func (m *Map) drawScene(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s ui.State) {
 	pal := ui.PaletteFor(s)
 	dst.Fill(pal.Water)
-	if f.PublicNetwork {
-		m.public.drawLand(dst, c, s)
-	} else {
-		drawLand(dst, c, m.rings, m.ringCoast, pal)
-	}
+	m.land(f).draw(dst, c, pal)
 	if !s.HideTerrain {
 		m.terrain.draw(dst, c, s)
 	}

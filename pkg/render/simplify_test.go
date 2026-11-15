@@ -34,10 +34,6 @@ func TestSimplifyScreenStaysWithinToleranceAndDropsDenseVertices(t *testing.T) {
 	if out := simplifyScreen(short, screenTolerance); len(out) != 2 {
 		t.Fatal("a two-point line lost a point")
 	}
-	speck := []mapview.Point{{X: 5, Y: 5}, {X: 5.1, Y: 5}, {X: 5.1, Y: 5.1}}
-	if out := simplifyRing(speck); len(out) != 3 {
-		t.Fatal("a ring too small to simplify was dropped instead of drawn as it is")
-	}
 }
 
 func TestPublicTrackChainsDrawEveryEdgeExactlyOnce(t *testing.T) {
@@ -97,26 +93,6 @@ func TestScreenRunsBreakWhereALineLeavesTheMap(t *testing.T) {
 	}
 }
 
-func TestCoastRingsHideOnlyOutlinesALaterRingPaintedOver(t *testing.T) {
-	square := func(x0, y0, size float64) [][2]float64 {
-		return [][2]float64{{x0, y0}, {x0 + size, y0}, {x0 + size, y0 + size}, {x0, y0 + size}, {x0, y0}}
-	}
-	rings := [][][2]float64{
-		square(2, 2, 1),   // inside the later ring 1: painted over before
-		square(0, 0, 10),  // a continent
-		square(5, 5, 1),   // inside the earlier ring 1: stayed drawn
-		square(9, 9, 3),   // overlaps ring 1 without lying inside it
-		square(20, 0, 10), // apart from everything
-	}
-	got := coastRings(rings)
-	want := []bool{false, true, true, true, true}
-	for i := range want {
-		if got[i] != want[i] {
-			t.Fatalf("ring %d: coast %v, want %v", i, got[i], want[i])
-		}
-	}
-}
-
 func TestMarkerPlacementLandsWithinAnEighthOfAPixel(t *testing.T) {
 	for v := float32(-3); v < 3; v += 0.01 {
 		pixel, phase := markerPlace(v)
@@ -140,11 +116,12 @@ func TestWorldViewGeometryStaysNearScreenResolution(t *testing.T) {
 	}
 	c := mapview.RegionCamera(3032, 1863, "world", false)
 	source, land := 0, 0
-	for _, ring := range layer.land {
+	basemap := loadBasemap(t)
+	for _, ring := range basemap.rings {
 		source += len(ring)
-		if points := screenRing(c, ring); len(points) >= 3 {
-			land += len(simplifyRing(points))
-		}
+	}
+	for _, points := range basemap.visible(c) {
+		land += len(points)
 	}
 	track := 0
 	for _, chain := range layer.chains {

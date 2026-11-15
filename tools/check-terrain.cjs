@@ -126,6 +126,8 @@ async function shot(p, name) {
     await shot(p, 'terrain-hokkaido-phone-zh.png');
     for (const width of [320, 390, 768, 1920]) {
       await p.setViewportSize({ width, height: width > 1000 ? 1080 : 844 });
+      // The page moves the map tools only after its resize handler has asked the game for a new frame.
+      await p.waitForFunction(() => document.getElementById('phone-map-tools').hidden === innerWidth >= 800);
       assert(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
       assert(await (await control(p, '#terrain-toggle')).isVisible());
       if (

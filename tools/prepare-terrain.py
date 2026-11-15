@@ -163,7 +163,3 @@ manifest = {
 }
 (OUT / "terrain.json").write_text(json.dumps(manifest, separators=(",", ":")) + "\n")
 print("Prepared", len(regions), "terrain regions from", sum(len(r["sources"]) for r in regions), "pinned tiles")
-
-# Shoreline preparation is shared with the worldwide basemap and can also run
-# independently, without rebuilding or downloading relief tiles.
-subprocess.run(["python3", str(ROOT / "tools/prepare-shorelines.py")], check=True)

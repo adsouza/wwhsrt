@@ -6,12 +6,15 @@ Requires shapely==2.1.2. No downloads, game writes or runtime route generation.
 import hashlib
 import json
 import math
+import sys
 from pathlib import Path
 
-from shapely.geometry import LineString, Polygon, box, shape
-from shapely.ops import transform, unary_union
+from shapely.geometry import LineString, box, shape
+from shapely.ops import transform
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import basemap_rule as rule  # noqa: E402
 
 
 def sha(path):
@@ -52,12 +55,13 @@ def main():
     land = shape(mask["detailed_land"])
     assert land.is_valid
     lakes = {x["id"]: shape(x["geometry"]) for x in mask["lakes"]}
-    coastline = ROOT / "assets/terrain/land.json"
-    coast_meta = json.loads(coastline.with_name("land.metadata.json").read_text())
+    # The coast every frame draws: the worldwide basemap, land minus its lakes.
+    coastline = ROOT / "assets/terrain/world-land.json"
+    coast_meta = json.loads(coastline.with_name("world-land.metadata.json").read_text())
     assert sha(coastline) == coast_meta["output_sha256"], "Drawn coastline changed without provenance review"
-    assert coast_meta["source_sha256"] == meta["coast_source_sha256"]
+    assert coast_meta["source_countries_sha256"] == meta["coast_source_sha256"]
     assert sha(ROOT / "assets/terrain/features.json") == meta["lake_reference_sha256"]
-    drawn = unary_union([Polygon(r) for r in json.loads(coastline.read_text())])
+    drawn = rule.drawn_geometry(json.loads(coastline.read_text()))
     spaces = [
         ("geographic", lambda p: p, land, lakes),
         (
@@ -69,7 +73,7 @@ def main():
         (
             "equal_earth_drawn",
             lambda p: [project(*x) for x in p],
-            transform(project, drawn),
+            rule.on_map(drawn),
             {k: transform(project, v) for k, v in lakes.items()},
         ),
     ]

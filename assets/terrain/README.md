@@ -4,8 +4,8 @@ Native and browser maps share offline shaded relief around the current Hokkaido
 and Kansai construction corridors. Elevation tint, northwest hillshade, 500 m
 contours, named peaks/uplands and lowland labels help explain route choices.
 Lake Biwa has a Natural Earth outline; Toya and Shikotsu use **point symbols**,
-not invented lake boundaries. The finer Japan and China/Taiwan shorelines replace the world-scale outlines.
-A single basemap prevents coarse coast polygons from obscuring local terrain.
+not invented lake boundaries. The land under the relief is one worldwide outline,
+described under Basemap below.
 
 This is presentation data, outside scenario hashes, costs, gradients, schedules
 and save compatibility. Railway sketches and engineering quantities remain authored
@@ -29,11 +29,8 @@ Contours are simplified display lines at 500, 1000 and 1500 m; higher elevations
 remain visible through relief tint and shading.
 
 `terrain.json` pins source URLs, raw hashes, imagery headers, dimensions and derived
-image hashes. `land.metadata.json` pins the Natural Earth countries source and
-derived coastline hash. Japan, China (including Hong Kong/Macao physical land)
-and Taiwan exterior rings, simplified by 0.003 degrees, replace their old 1:110m
-rings; other countries retain their previous geometry. Hong Kong/Macao are unioned
-with the adjacent physical land to avoid internal overlay seams. Sources cache
+image hashes. `world-land.metadata.json` pins the basemap's sources, rule and
+output hash. Sources cache
 under ignored `build/terrain-source`. Changed inputs require provenance review before
 repinning. `features.json` contains approximate reference labels and the Natural Earth
 Lake Biwa extraction, with source links/hash; the script does not generate that file.
@@ -56,20 +53,43 @@ record the WASM hash, toggle persistence, unchanged financial state/quotes, narr
 layouts, Chinese labels and offline continuation. Inspect the screenshots; synthetic
 browser checks cannot qualify physical phones or native accessibility.
 
-`python3 tools/prepare-shorelines.py` regenerates only those shoreline refinements
-from the pinned local Natural Earth 1:10m source (fetching/hash-checking it if the
-cache is absent). `--check` verifies identical output. The full relief preparer
-calls the same helper. Then run `python3 tools/import-public-network.py` to compose
-`world-land.json`: remove all 17 replaced coarse regional rings, append the refined
-regional set exactly once, and record source/output hashes in
-`world-land.metadata.json`. Runtime public-network frames draw that combined
-basemap only; legacy fixture frames draw only the regional set. Neither depends on
-the terrain visibility toggle, and neither changes economic/save inputs.
+## Basemap
 
+`world-land.json` is one worldwide land outline, drawn in every frame. It comes
+from the `land` geometry pinned in `data/construction/route-land.v1.json.gz`:
+Natural Earth 1:10m countries merged into physical land, with Natural Earth 1:10m
+lakes cut out. There are no lines between countries.
 
-The worldwide map also replaces coarse Australia, South Africa and Chile
-shorelines using the same pinned Natural Earth 1:10m country source in the launch
-construction mask. These corrections keep four new land alignments from appearing
-offshore. The public compiler records simplification/source metadata and removes
-the old rings; the construction checker tests the actual drawn geometry in both
-coordinate spaces. This remains presentation-only data, outside campaign hashes.
+Within 150 km of any line the outline follows the source to 0.003 degrees (about
+300 m); from there to 400 km, to 0.0125 degrees (about 1.4 km); farther away, to
+0.05 degrees (about 5 km). Detail can change along one outline. The middle step
+is there because a view of a line at regional zoom shows coast that far away:
+without it eastern Hokkaido was drawn with edges 70 km long. "A line" is every
+existing path in `playable-rail-map.json`, every buildable alignment in
+`compiled-prospects.v1.json`, and both alignments of `hokkaido-extension` and
+`tsuruga-osaka`. The Hokkaido and Kansai relief boxes count as on a line
+throughout. Islands under 25 km across and more than 150 km from every line are
+left out, as are lakes under 5 km across within 150 km of a line or under 100 km
+across beyond it; a lake left out is drawn as land. No two land outlines
+overlap, and an island inside a lake is cut to the lake as drawn.
+
+The result is 84,164 points in 1,997 outlines: 1,500 land, 292 lakes and 205
+islands inside lakes. Every buildable route lies on the drawn land or its
+reviewed crossing. The tool simplifies less where one would not; none needed it.
+
+`python3 tools/prepare-basemap.py` regenerates the file and its metadata, with no
+downloads. `--check` verifies the committed files, and
+`python3 tools/test-basemap.py` tests the rule in `tools/basemap_rule.py`. CI runs
+both.
+
+The renderer fills land by the even-odd rule, so a lake inside land is left
+clear and an island inside the lake is land again (`pkg/render/land.go`). The file
+also winds land and the islands inside lakes one way and lakes the other, for
+readers that fill by winding. The renderer chooses how much of each outline to
+draw from the zoom, to within one screen pixel (`pkg/render/basemap.go`). The
+terrain layer still draws its own outline of Lake Biwa, because
+today's relief tints the lake's surface; that goes when relief is cut to the
+basemap.
+
+The basemap does not depend on the terrain toggle and changes no economic or
+save input. It is presentation-only data, outside campaign hashes.

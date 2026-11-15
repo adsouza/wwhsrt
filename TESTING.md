@@ -9,7 +9,10 @@ Use the [architecture](ARCHITECTURE.md) for system boundaries, [game design veri
 - Use focused checks appropriate to the change. Documentation-only edits need document/reference checks, not game builds or browser runs.
 - The full Go suite may be run locally, for example `GOMEMLIMIT=768MiB GOMAXPROCS=2 go test -p 1 ./... -count=1`.
 - Do not run local TypeScript compilation, directly or indirectly through scripts or hooks. Use hosted/CI typechecks if TypeScript is introduced.
-- Inspect scripts, hooks, and child commands before running automatic checks. Serialize memory-heavy work. For Node-based checks, cap old space at 1536 MB per process; stop if combined memory-heavy check processes exceed 2 GiB RSS.
+- Inspect scripts, hooks, and child commands before running automatic checks. Serialize memory-heavy work. For Node-based checks, cap old space at 1536 MB per process; stop if combined memory-heavy check processes exceed 2 GiB.
+- Measure that 2 GiB as physical footprint, not RSS. A browser checker is a tree of processes (Node, the local server, and the headless browser's browser, GPU and renderer processes) that map the same libraries; summed `ps` RSS counts those shared pages once per process and peaked 10% to 46% above the footprint in the runs below. Take the process IDs from `ps -axo pid=,ppid=` and the sizes from one `top -l 1 -stats pid,mem -pid …` call, about once a second.
+- Browser checkers may run locally one at a time under that watch, each against a freshly started local server on a free port, with the tree killed when it passes 2 GiB. On 2026-11-15, at the single-outline basemap, 17 of the 20 checkers hosted CI runs finished and passed this way, with peak footprints of 1,440 to 1,968 MiB (`check-campaign-completion.cjs --layout` 124 MiB). The same watch on summed RSS had stopped 18 of the 20 within 43 seconds. `check-terrain.cjs`, `check-business.cjs` and `check-milestone3.cjs` cross 2 GiB in most runs (terrain fitted in 3 of 14, the other two in 1 of 3 each), so a local stop of those three is not a result; hosted CI qualifies them. Peaks vary by a few hundred MiB between runs of the same checker.
+- A checker rewrites tracked evidence in `docs/validation` even when it is stopped part-way. Look at what changed and restore partial files before committing.
 - State exactly which checks ran and any remaining limits. A build is not an interaction check; browser touch emulation is not physical-device qualification.
 
 ## Existing checks
@@ -31,7 +34,7 @@ For the economy calibration, run the focused domain/application/UI/native-app pa
 
 Public-network repairs are documented in [NETWORK_TOPOLOGY.md](docs/validation/NETWORK_TOPOLOGY.md). Run `python3 tools/prepare-network-repairs.py --check`, `python3 tools/import-public-network.py --check`, `python3 tools/test-network-coverage.py` and `python3 tools/audit-public-network.py --check --strict` sequentially. All ten whole-network contracts, ordered NEC/Uzbekistan/Al Boraq services, required station markers and map endpoints must pass, alongside the earlier seven pair checks. Negative regressions sever the NEC, isolate Tashkent, damage stop/section lists and remove a marker. Focused Go application tests operate complete services, carry end-to-end/intermediate passengers, check capacity/ledger/reload and v6→v7 historical migration/atomicity. The domain/UI/mapview/app/render packages cover shared behavior and drawings.
 
-Source preparation handles about 3.43 million vertices; serialize it with all heavy checks and monitor RSS. The successful local reproducibility run peaked at 1,768 MiB. After building web/native/headless, the optional focused desktop check is `NODE_OPTIONS=--max-old-space-size=1536 node tools/check-network-completion.cjs <server-url>`. It uses a fresh isolated campaign, checks visible NEC/Uzbekistan paths and normal service controls, and closes the browser before native-headless parity. It stops above the 2 GiB combined checker RSS cap. Earlier broad browser/phone runs were stopped at that cap; do not repeat them without a material memory fix or changed authorized budget. Current historical-catalog parsing is lazy; this does not establish physical-phone or repeated-reload memory qualification.
+Source preparation handles about 3.43 million vertices; serialize it with all heavy checks and monitor RSS. The successful local reproducibility run peaked at 1,768 MiB. After building web/native/headless, the optional focused desktop check is `NODE_OPTIONS=--max-old-space-size=1536 node tools/check-network-completion.cjs <server-url>`. It uses a fresh isolated campaign, checks visible NEC/Uzbekistan paths and normal service controls, and closes the browser before native-headless parity. It stops above the 2 GiB combined checker cap. Earlier broad browser/phone runs were stopped at that cap as summed RSS; the local verification policy above now measures footprint, under which most checkers fit. Current historical-catalog parsing is lazy; this does not establish physical-phone or repeated-reload memory qualification.
 
 For service selection from map track, run the focused UI/mapview/app/render
 packages or `-run 'Test(MapService|ServicePicking|MapResize|NativeMapService)'`.
@@ -299,14 +302,16 @@ Harbin–Shenyang/Changchun–Jilin and removal of the reported unused parallel 
 The browser check verifies actual retained/removed rail pixels and unchanged saves.
 See [PLAYABLE_MAP.md](docs/validation/PLAYABLE_MAP.md).
 
-For coastline replacement/refinement, run focused `go test -p 1 ./pkg/render`,
-`python3 tools/prepare-shorelines.py --check`,
-`python3 tools/import-public-network.py --check` and the route geography checker.
-After building web/native, run
-`NODE_OPTIONS=--max-old-space-size=1536 node tools/check-coastlines.cjs <server-url>`.
-It checks Japan/China coastal water and fine shoreline pixels in light/dark modes
-with terrain on/off, plus unchanged save bytes/checkpoint. See
-[COASTLINES.md](docs/validation/COASTLINES.md).
+For the basemap, run focused `go test -p 1 ./pkg/render`,
+`python3 tools/test-basemap.py`, `python3 tools/prepare-basemap.py --check`,
+`python3 tools/check-launch-prospects.py` and the route geography checker. A change
+to what `pkg/render` draws as land also needs the native app's memory compared
+before and after while panning at a large window: the Go tests do not draw.
+`tools/check-coastlines.cjs` checks Japan/China coastal water and fine shoreline
+pixels in light/dark modes with terrain on/off, plus unchanged save bytes/checkpoint.
+It passed locally under the footprint watch (peak 1,652 MiB) and runs in hosted CI, which uploads a fresh `coastline-checks.json` and screenshots
+as evidence; the copies in `docs/validation` predate the single-outline basemap
+until that evidence is committed. See [COASTLINES.md](docs/validation/COASTLINES.md).
 
 
 ## Worldwide construction catalog
@@ -327,9 +332,8 @@ campaigns, Tokyo–Sapporo through-running, v7→v8 migration including retired 
 services, and native 70-entry selection in both languages at 320/1440 px. The
 native dropdown test exercises controlled initialization and stale deferred events.
 No TypeScript compilation is authorized by this section.
-Rebuild native, web and headless after data changes. Existing browser interaction
-qualification remains blocked by the documented startup memory cap; do not repeat
-that workflow without a material fix or changed authorized budget.
+Rebuild native, web and headless after data changes. Browser interaction checks
+run under the footprint watch in the local verification policy above.
 
 ## Network bridge expansion
 
@@ -345,6 +349,6 @@ import, launch geography, regional, coverage and strict audit checks. The
 operating manifest has 14 network contracts; bridge cuts must fail even when old
 express aliases remain. Focused Go packages are domain, application, UI, mapview,
 app and render, with the existing memory/process limits. Rebuild native, web and
-headless after catalog changes. This does not authorize another full
-browser/WASM startup under the unresolved 2 GiB cap. See
+headless after catalog changes. Browser checks follow the footprint watch in the
+local verification policy above. See
 [NETWORK_BRIDGES.md](docs/validation/NETWORK_BRIDGES.md).

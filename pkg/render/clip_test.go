@@ -8,8 +8,14 @@ import (
 
 func TestClipWorldGeometryBeforeAntialiasing(t *testing.T) {
 	c := mapview.Fit(390, 280, []mapview.Point{mapview.Project(25, 100), mapview.Project(40, 125)})
-	ring := [][2]float64{{-170, -80}, {170, -80}, {170, 80}, {-170, 80}}
-	clipped := screenRing(c, ring)
+	onScreen := func(ring [][2]float64) []mapview.Point {
+		points := []mapview.Point{}
+		for _, p := range ring {
+			points = append(points, c.Screen(mapview.Project(p[1], p[0])))
+		}
+		return points
+	}
+	clipped := clipScreen(c, onScreen([][2]float64{{-170, -80}, {170, -80}, {170, 80}, {-170, 80}}))
 	if len(clipped) < 3 {
 		t.Fatal("visible world polygon lost")
 	}
@@ -18,7 +24,7 @@ func TestClipWorldGeometryBeforeAntialiasing(t *testing.T) {
 			t.Fatalf("unbounded offscreen path %+v", p)
 		}
 	}
-	if points := screenRing(c, [][2]float64{{-100, 20}, {-90, 20}, {-90, 25}}); len(points) != 0 {
+	if points := clipScreen(c, onScreen([][2]float64{{-100, 20}, {-90, 20}, {-90, 25}})); len(points) != 0 {
 		t.Fatal("offscreen polygon retained")
 	}
 	a, b, ok := screenSegment(c, mapview.Point{X: -10000, Y: 140}, mapview.Point{X: 10000, Y: 140})

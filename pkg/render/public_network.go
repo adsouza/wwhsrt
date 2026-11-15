@@ -25,13 +25,8 @@ type publicLayer struct {
 	tracks      []railSegment
 	chains      [][]mapview.Point
 	Stops       []publicStop
-	land        [][][2]float64
-	landCoast   []bool
 	trackLayer  layer
 	camera      mapview.Camera
-	landLayer   layer
-	landCamera  mapview.Camera
-	landColor   color.NRGBA
 	color       color.NRGBA
 	marks       *markers
 }
@@ -77,21 +72,7 @@ func newPublicLayer() (*publicLayer, error) {
 	}
 	p.tracks = publicTrackSegments(p.Lines)
 	p.chains = publicTrackChains(p.tracks)
-	data, _ := assets.Terrain.ReadFile("terrain/world-land.json")
-	if err := json.Unmarshal(data, &p.land); err != nil {
-		return nil, err
-	}
-	p.landCoast = coastRings(p.land)
 	return p, nil
-}
-func (p *publicLayer) drawLand(dst *ebiten.Image, c mapview.Camera, s ui.State) {
-	pal := ui.PaletteFor(s)
-	if p.landLayer.view == nil || p.landCamera != c || p.landColor != pal.Land {
-		p.landCamera = c
-		p.landColor = pal.Land
-		drawLand(p.landLayer.reset(int(c.Width), int(c.Height)), c, p.land, p.landCoast, pal)
-	}
-	dst.DrawImage(p.landLayer.view, nil)
 }
 func (p *publicLayer) draw(dst *ebiten.Image, c mapview.Camera, s ui.State) {
 	pal := ui.PaletteFor(s)

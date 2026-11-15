@@ -110,7 +110,7 @@ async function pixels(p, qa, coast) {
     await p.waitForFunction(() => !!window.railSnapshot, null, { timeout: 60000 });
     const before = await snap(p),
       saved = await p.evaluate(() => railStorageLoad()),
-      all = JSON.parse(fs.readFileSync('assets/terrain/land.json'));
+      all = JSON.parse(fs.readFileSync('assets/terrain/world-land.json')).land;
     const checks = [];
     for (const country of ['Japan', 'China']) {
       if (country === 'Japan') {

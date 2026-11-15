@@ -1,6 +1,8 @@
 # Coastline refinement (worldwide basemap)
 
-Status: approved 2026-11-14. Nothing is built.
+Status: approved 2026-11-14; implemented 2026-11-15 on branch
+worktree-coastline-refinement. See "As built" at the end for what differs from
+the text below. The browser coastline check has not run; hosted CI runs it.
 Amended 2026-11-14 at the user's request: the regional Japan files and the
 test-only frames that draw them are folded into the new basemap (Behaviour 5).
 Size: a small project (one tool reworked, one asset replaced, a small renderer
@@ -273,5 +275,86 @@ From the design reviewer's read-only probes of the same files:
   Zhuhai and Lisbon, and Miami's marker, test as sea. The exception list in
   Behaviour 8 will have about five to nine names.
 
-Not measured: land redraw time today or after, the real tool's counts, and
-whether any buildable route needs local tightening.
+## As built (2026-11-15)
+
+Between approval and the build, 17 commits on `main` rewrote land drawing
+(`pkg/render/land.go`: one fill path and one coast path, to keep Ebitengine's
+stencil small) and made hosted CI run the browser and data checks on push. The
+build follows that code. Where it differs from the text above:
+
+- **Far islands: 25 km, not 20.** At 20 km the basemap had 2,343 outlines against
+  the budget of 2,200. At 25 km it has 1,997 outlines: 1,500 land, 292 lakes,
+  205 islands inside lakes; 2,557 islands and 1,042 lakes left out.
+- **A middle step: 1.4 km out to 400 km (decided by the user, 2026-11-15).** With
+  nothing between fine and coarse, eastern Hokkaido, 150 to 350 km from
+  Sapporo, was drawn with edges up to 71 km long, as spikes at the Japan
+  region's zoom, where the whole island had been detailed before. I first kept
+  all of Hokkaido fine by a box around it; the user asked why, and chose a rule
+  that applies everywhere. Coast between 150 and 400 km from a line is drawn to
+  0.0125 degrees. Eastern Hokkaido's longest edge is now 29 km. The basemap has
+  84,164 points, and the point budget is 88,000, not 80,000. Of the rules
+  measured this bought the most: finer steps out to 1,200 km cost 100,000
+  points for an edge of 28 km, and scaling the island and lake limits with
+  distance took the World view past its vertex limit. The World view itself
+  draws the same under every rule, since all are finer than a pixel there.
+- **No route needed tightening.** All 76 alignments of the 74 buildable routes
+  lie on the drawn land at 0.003 degrees.
+- **Lakes are holes, by the even-odd rule.** The land fill is a fan of triangles
+  per piece, each flipping the pixels it covers, so a lake inside land is clear
+  and an island inside the lake is land again. It is not Ebitengine's own fill:
+  that counts overlapping triangles in four bits, a continent as one outline
+  put 20 to 40 over pixels deep inland, and the map showed water-coloured
+  streaks from Spain to the Baltic (found in review, confirmed on screen).
+  Pieces are cut to 256 px so that no triangle crosses the map. The fill is not
+  antialiased; the antialiased coast over its edge hides that. The even-odd
+  rule needs land outlines that never overlap, which the tool now guarantees,
+  and an island inside a lake is cut to the lake as drawn.
+- **Detail is chosen by zoom, to within one pixel.** At the earlier quarter-pixel
+  tolerance the World view drew 45,849 land vertices against a guard of 22,000
+  (`TestWorldViewGeometryStaysNearScreenResolution`), because the finer coast has
+  more to show. Each point now carries a rank computed once at load, and the map
+  draws the points whose rank exceeds one pixel at the current zoom: 21,794
+  vertices at the World view. The choice does not depend on where the camera is,
+  so the coast does not shimmer when dragged. An outline with no shape at the
+  current zoom is drawn as a sliver when it is at least three pixels long and
+  not at all when shorter.
+- **The coast is stroked in runs of 32 segments.** The planned before-and-after
+  measurement found 7.3 GB of memory at the World view against 2.6 GB before,
+  5.1 GB of it on the GPU. Ebitengine fills a sub-path as a fan of triangles
+  from its first point, and one land outline makes a continent a single
+  sub-path. Cutting the stroke into short open runs inside one path fixed it.
+- **Lake Biwa is drawn by both layers for now.** Today's relief tiles tint the
+  lake's surface as land, so the terrain layer keeps its own outline until
+  relief is cut to the basemap. A test holds the two shores within 0.004
+  degrees.
+- **Existing lines off land rose, and that is correct.** Sampled every 10 km,
+  411 of 48,417 points are off the drawn land; the full-detail source says 420
+  are over water. The old basemap had 252 off but disagreed with the source at
+  214 points; the new one disagrees at 21. Behaviour 6's "the number should
+  fall" was wrong: the old coast painted land over 191 points of real water.
+- **City exceptions:** Hong Kong, Dongguan, Miami, Lisbon and Zhuhai, whose
+  markers sit 10 to 473 m off Natural Earth's land.
+- **Browser check.** The decision not to run it locally stands, but hosted CI
+  now runs `tools/check-coastlines.cjs` on push. It was updated to sample the
+  new file and has not run yet. Its eight water points are pinned as sea by a Go
+  test.
+
+Measured at 3737x2029 on a copy of a real save, panning every frame for 30
+seconds (land redraw mean, 95th percentile, footprint at the end):
+
+| View | Before | After |
+|---|---|---|
+| World | 9.9 ms, 10.6 ms, 2.6 GB | 2.9 ms, 3.5 ms, 1.9 GB |
+| Japan | 3.0 ms, 3.1 ms, 1.2 GB | 0.6 ms, 0.7 ms, 1.2 GB |
+
+The After figures are the final build, with the flip fill; with Ebitengine's fill
+and the coast in runs they were 7.4 ms and 1.5 ms at the same footprints. The
+tool takes about 7 seconds and 613 MB. The World view's footprint varied
+between 1.9 and 2.5 GB across runs of the same build. `world-land.json` is
+1.90 MB, up from
+1.05 MB; the regional file it retires was 345 KB.
+
+A fresh review of the whole branch found the streaks, an outline that rounding
+had collapsed to a line (it would have failed a Go test on amd64 only), long
+thin islands that vanished, and eight islands in lakes drawn as water. All four
+are fixed with tests.

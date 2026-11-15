@@ -100,7 +100,8 @@ jobs:
           names=(prospects preparation network)
           pids=()
           lane prospects tools/check-launch-prospects.py & pids+=($!)
-          lane preparation 'tools/prepare-network-repairs.py --check' 'tools/prepare-launch-prospects.py --check' &
+          lane preparation 'tools/prepare-network-repairs.py --check' 'tools/prepare-launch-prospects.py --check' \
+            tools/test-basemap.py 'tools/prepare-basemap.py --check' &
           pids+=($!)
           lane network tools/check-route-geography.py 'tools/import-public-network.py --check' \
             tools/check-regional-network.py tools/test-network-coverage.py 'tools/audit-public-network.py --check --strict' &
