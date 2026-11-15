@@ -113,8 +113,9 @@ async function throughPixels(p, id = 'nagoya-osaka') {
   );
 }
 (async () => {
+  // Hosted runners have taken 93–152 s for this checker on the same build, so 150 s closed passing runs.
   const b = await chromium.launch({ headless: true, args: ['--enable-unsafe-swiftshader'] }),
-    timer = setTimeout(() => b.close(), 150000);
+    timer = setTimeout(() => b.close(), 240000);
   try {
     const ctx = await b.newContext({ viewport: { width: 1280, height: 850 }, reducedMotion: 'reduce' }),
       p = await ctx.newPage(),
