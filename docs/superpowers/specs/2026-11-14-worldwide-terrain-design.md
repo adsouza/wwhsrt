@@ -391,8 +391,26 @@ What differs from the text above, and what was measured:
 - **`features.json` is unchanged.** Its Lake Biwa outline is no longer drawn by
   the terrain layer, but the route-geography tools read it and pin the file.
 - **Decode time on native:** 0.75 ms for a coast tile.
-- **Size:** the native binary is 54.2 MB and the web bundle 55.4 MB, about
-  14 MB more than without the tiles.
+- **Size:** the native binary went from 39.6 MB to 54.2 MB and `web/main.wasm`
+  from 41.0 MB to 55.4 MB: 14.6 and 14.4 MB more, against a goal of 25.
+- **Memory, measured on native at the saved window size (3737x2029) on a copy
+  of a real save.** A scripted camera glided between eight views on three
+  continents, holding each for two seconds, on `main` and on this build.
+  Physical footprint stayed between 1.6 and 2.2 GB here against 1.8 to 2.3 GB
+  on `main`, and did not grow over five laps (276 s). GPU memory
+  (`IOAccelerator (graphics)`) was about 870 MB on `main`; here it was 910 MB
+  in the first lap and 965 MB from the second lap on, level for three more
+  laps. That is about 95 MB for terrain against the "about 80 MB" goal: 75 MB
+  is the 288 tiles, and the rest was not traced. The cache never held more
+  than 288 tiles.
+- **Frame time.** Frames more than 33 ms apart: 1 to 4 per four-second glide
+  on both builds (mean 2.1 on `main`, 1.9 here), with a worst gap of about
+  600 ms on both. That gap is a map redraw that takes about 600 ms once or
+  twice a glide on `main` too, so it is not tile loading; it was not
+  investigated here. No difference attributable to tiles was measured.
+- **Time to sharp.** After an instant jump to a view with nothing cached, no
+  tile was wanted or in hand after 25 to 250 ms (worst: Europe, 67 new tiles),
+  against a goal of one second. After a glide the view was already sharp.
 - **Browser.** `tools/check-terrain.cjs` gained a check that relief changes
   the middle of the Bogotá–Medellín map. Run locally under the 2 GiB footprint
   watch, that section passed in the browser before the watch stopped the run at

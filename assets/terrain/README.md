@@ -63,6 +63,13 @@ redraws the map. At most 288 tiles (75 MB) are held on the GPU, the ones drawn
 longest ago are freed explicitly, and nothing is loaded while terrain is hidden
 (`pkg/terrain`, `pkg/render/tilecache.go`, `pkg/render/terrain.go`).
 
+Measured on the native app at 3737x2029 on a copy of a real save, gliding between
+eight views on three continents: GPU memory was about 95 MB above the build
+without tiles and stopped rising after the second lap, the physical footprint
+stayed in the same 1.6 to 2.2 GB range as before, tile loading added no frames
+over 33 ms, and after an instant jump to an unseen view the relief was fully
+sharp within 250 ms. The browser was not measured.
+
 ## Reproducing
 
 Install `tools/requirements-terrain.txt` and `tools/requirements-geography.txt`
