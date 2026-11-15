@@ -1,6 +1,8 @@
 package render
 
 import (
+	"image"
+
 	"github.com/hajimehoshi/ebiten/v2"
 	"wwhsrt/pkg/gameapi"
 	"wwhsrt/pkg/mapview"
@@ -46,13 +48,31 @@ func (m *Map) sceneKeyFor(c mapview.Camera, f gameapi.Frame, s ui.State) sceneKe
 func (m *Map) Draw(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s ui.State, minute float64) {
 	key := m.sceneKeyFor(c, f, s)
 	if m.scene == nil || m.sceneKey != key || f.Checkpoint == "" {
-		if m.scene != nil {
-			m.scene.Deallocate()
-		}
-		m.scene = ebiten.NewImage(max(1, int(c.Width)), max(1, int(c.Height)))
+		m.scene = layerImage(m.scene, int(c.Width), int(c.Height))
 		m.sceneKey = key
 		m.drawScene(m.scene, c, f, s)
 	}
 	dst.DrawImage(m.scene, nil)
 	m.drawDay(dst, c, f, s, minute)
+}
+
+// layerImage returns img cleared for reuse at w x h, or a new image when the
+// size changed.
+//
+// The map's window-sized layers are redrawn on every pan and zoom. Ebitengine
+// packs a managed image into a shared atlas page, and small images (glyphs,
+// marker sprites) then fill the strip beside it. Freeing the layer leaves that
+// page held by the small images, so the next layer took a new 34 MB page: two
+// dozen of them after a minute at 3737x2029. Reusing the image avoids the
+// churn, and an unmanaged image has a texture of its own that is freed with it.
+func layerImage(img *ebiten.Image, w, h int) *ebiten.Image {
+	w, h = max(1, w), max(1, h)
+	if img != nil && img.Bounds().Dx() == w && img.Bounds().Dy() == h {
+		img.Clear()
+		return img
+	}
+	if img != nil {
+		img.Deallocate()
+	}
+	return ebiten.NewImageWithOptions(image.Rect(0, 0, w, h), &ebiten.NewImageOptions{Unmanaged: true})
 }

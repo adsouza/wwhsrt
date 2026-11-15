@@ -4,7 +4,6 @@ import (
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/vector"
 	"wwhsrt/pkg/gameapi"
 	"wwhsrt/pkg/mapview"
 	"wwhsrt/pkg/ui"
@@ -80,8 +79,8 @@ func (m *Map) drawProspects(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame
 				for d := start; d < visible; d += 12 {
 					u := d / visible
 					x, y := float32(left.X+(right.X-left.X)*u), float32(left.Y+(right.Y-left.Y)*u)
-					vector.FillCircle(dst, x, y, 3.5, p.Surface, true)
-					vector.FillCircle(dst, x, y, 2.5, p.Action, true)
+					m.marks.disc(dst, x, y, 3.5, p.Surface)
+					m.marks.disc(dst, x, y, 2.5, p.Action)
 				}
 			}
 			total += length

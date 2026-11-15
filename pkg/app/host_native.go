@@ -420,7 +420,9 @@ func (h *host) draw(g *Game, screen *ebiten.Image) {
 			if h.mapImage != nil {
 				h.mapImage.Deallocate()
 			}
-			h.mapImage = ebiten.NewImage(r.Dx(), r.Dy())
+			// Unmanaged: a window-sized image on Ebitengine's shared atlas can leave its page
+			// held by small images after it is freed (see render.layerImage).
+			h.mapImage = ebiten.NewImageWithOptions(image.Rect(0, 0, r.Dx(), r.Dy()), &ebiten.NewImageOptions{Unmanaged: true})
 		}
 		g.Map.Draw(h.mapImage, g.Camera, g.Frame, g.State, g.replayTime())
 		op := &ebiten.DrawImageOptions{}

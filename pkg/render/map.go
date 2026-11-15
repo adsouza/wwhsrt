@@ -21,13 +21,16 @@ type Map struct {
 	Font *text.GoTextFaceSource
 	// Text is the host's text scale. Its zero value draws the sizes written in this package, which is
 	// what the browser client uses.
-	Text     ui.TextScale
-	rings    [][][2]float64
-	anchors  map[string][][2]float64
-	terrain  *relief
-	public   *publicLayer
-	scene    *ebiten.Image
-	sceneKey sceneKey
+	Text  ui.TextScale
+	rings [][][2]float64
+	// ringCoast reports which rings get a coast line; see coastRings.
+	ringCoast []bool
+	anchors   map[string][][2]float64
+	terrain   *relief
+	public    *publicLayer
+	scene     *ebiten.Image
+	sceneKey  sceneKey
+	marks     markers
 }
 type labelRect struct{ x, y, w, h float64 }
 
@@ -45,6 +48,7 @@ func New() (*Map, error) {
 	if e != nil {
 		return nil, e
 	}
+	m.ringCoast = coastRings(m.rings)
 	e = json.Unmarshal(assets.Camera, &m.anchors)
 	if e != nil {
 		return nil, e
@@ -53,6 +57,7 @@ func New() (*Map, error) {
 	if e != nil {
 		return nil, e
 	}
+	m.public.marks = &m.marks
 	m.terrain, e = newRelief()
 	return m, e
 }
@@ -155,27 +160,7 @@ func (m *Map) drawScene(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s 
 	if f.PublicNetwork {
 		m.public.drawLand(dst, c, s)
 	} else {
-		for _, ring := range m.rings {
-			var path vector.Path
-			points := screenRing(c, ring)
-			if len(points) < 3 {
-				continue
-			}
-			for i, q := range points {
-				if i == 0 {
-					path.MoveTo(float32(q.X), float32(q.Y))
-				} else {
-					path.LineTo(float32(q.X), float32(q.Y))
-				}
-			}
-			path.Close()
-			op := &vector.DrawPathOptions{AntiAlias: true}
-			op.ColorScale.ScaleWithColor(pal.Land)
-			vector.FillPath(dst, &path, nil, op)
-			op = &vector.DrawPathOptions{AntiAlias: true}
-			op.ColorScale.ScaleWithColor(pal.Coast)
-			vector.StrokePath(dst, &path, &vector.StrokeOptions{Width: 1}, op)
-		}
+		drawLand(dst, c, m.rings, m.ringCoast, pal)
 	}
 	if !s.HideTerrain {
 		m.terrain.draw(dst, c, s)
@@ -288,15 +273,15 @@ func (m *Map) drawScene(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s 
 			continue
 		}
 		if idleCities[city.ID] {
-			vector.StrokeCircle(dst, float32(p.X), float32(p.Y), 10, 3, pal.WarningText, true)
+			m.marks.ring(dst, float32(p.X), float32(p.Y), 10, 3, pal.WarningText)
 		}
 		if city.ID == s.Selected {
-			vector.FillCircle(dst, float32(p.X), float32(p.Y), 13, pal.Surface, true)
-			vector.StrokeCircle(dst, float32(p.X), float32(p.Y), 13, 3, pal.Accent, true)
+			m.marks.disc(dst, float32(p.X), float32(p.Y), 13, pal.Surface)
+			m.marks.ring(dst, float32(p.X), float32(p.Y), 13, 3, pal.Accent)
 		}
 		station, hasStation := ui.StationAt(f, city.ID)
 		if !hasStation {
-			vector.StrokeCircle(dst, float32(p.X), float32(p.Y), 4.5, 1.5, pal.Muted, true)
+			m.marks.ring(dst, float32(p.X), float32(p.Y), 4.5, 1.5, pal.Muted)
 		} else if !station.Open {
 			vector.FillRect(dst, float32(p.X-5), float32(p.Y-5), 10, 10, pal.Construction, true)
 		} else {
@@ -304,9 +289,9 @@ func (m *Map) drawScene(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s 
 			if station.Public {
 				ink = pal.Existing
 			}
-			vector.FillCircle(dst, float32(p.X), float32(p.Y), 6, ink, true)
+			m.marks.disc(dst, float32(p.X), float32(p.Y), 6, ink)
 		}
-		vector.FillCircle(dst, float32(p.X), float32(p.Y), 3.5, pal.Surface, true)
+		m.marks.disc(dst, float32(p.X), float32(p.Y), 3.5, pal.Surface)
 		if s.View == "build" {
 			tag := ""
 			if city.ID == s.FromCity {
@@ -316,7 +301,7 @@ func (m *Map) drawScene(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s 
 				tag = "B"
 			}
 			if tag != "" {
-				vector.FillCircle(dst, float32(p.X), float32(p.Y), float32(m.by(13, 12)), pal.Accent, true)
+				m.marks.disc(dst, float32(p.X), float32(p.Y), float32(m.by(13, 12)), pal.Accent)
 				tagInk := pal.OnAction
 				if ui.IsDark(s) {
 					tagInk = pal.Outline

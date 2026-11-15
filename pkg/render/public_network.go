@@ -23,14 +23,17 @@ type publicLayer struct {
 	CorridorIDs []string
 	Lines       [][]mapview.Point
 	tracks      []railSegment
+	chains      [][]mapview.Point
 	Stops       []publicStop
 	land        [][][2]float64
+	landCoast   []bool
 	image       *ebiten.Image
 	camera      mapview.Camera
 	landImage   *ebiten.Image
 	landCamera  mapview.Camera
 	landColor   color.NRGBA
 	color       color.NRGBA
+	marks       *markers
 }
 
 func newPublicLayer() (*publicLayer, error) {
@@ -73,10 +76,12 @@ func newPublicLayer() (*publicLayer, error) {
 		p.Lines = append(p.Lines, points)
 	}
 	p.tracks = publicTrackSegments(p.Lines)
+	p.chains = publicTrackChains(p.tracks)
 	data, _ := assets.Terrain.ReadFile("terrain/world-land.json")
 	if err := json.Unmarshal(data, &p.land); err != nil {
 		return nil, err
 	}
+	p.landCoast = coastRings(p.land)
 	return p, nil
 }
 func (p *publicLayer) drawLand(dst *ebiten.Image, c mapview.Camera, s ui.State) {
@@ -85,53 +90,29 @@ func (p *publicLayer) drawLand(dst *ebiten.Image, c mapview.Camera, s ui.State) 
 		dst.DrawImage(p.landImage, nil)
 		return
 	}
-	if p.landImage != nil {
-		p.landImage.Deallocate()
-	}
-	p.landImage = ebiten.NewImage(max(1, int(c.Width)), max(1, int(c.Height)))
+	p.landImage = layerImage(p.landImage, int(c.Width), int(c.Height))
 	p.landCamera = c
 	p.landColor = pal.Land
-	target := p.landImage
-	for _, ring := range p.land {
-		var path vector.Path
-		points := screenRing(c, ring)
-		if len(points) < 3 {
-			continue
-		}
-		for i, q := range points {
-			if i == 0 {
-				path.MoveTo(float32(q.X), float32(q.Y))
-			} else {
-				path.LineTo(float32(q.X), float32(q.Y))
-			}
-		}
-		path.Close()
-		op := &vector.DrawPathOptions{AntiAlias: true}
-		op.ColorScale.ScaleWithColor(pal.Land)
-		vector.FillPath(target, &path, nil, op)
-		op = &vector.DrawPathOptions{AntiAlias: true}
-		op.ColorScale.ScaleWithColor(pal.Coast)
-		vector.StrokePath(target, &path, &vector.StrokeOptions{Width: 1}, op)
-	}
+	drawLand(p.landImage, c, p.land, p.landCoast, pal)
 	dst.DrawImage(p.landImage, nil)
 }
 func (p *publicLayer) draw(dst *ebiten.Image, c mapview.Camera, s ui.State) {
 	pal := ui.PaletteFor(s)
 	if p.image == nil || p.camera != c || p.color != pal.Existing {
-		if p.image != nil {
-			p.image.Deallocate()
-		}
-		p.image = ebiten.NewImage(max(1, int(c.Width)), max(1, int(c.Height)))
+		p.image = layerImage(p.image, int(c.Width), int(c.Height))
 		p.camera = c
 		p.color = pal.Existing
 		var path vector.Path
-		for _, edge := range p.tracks {
-			a, b, ok := screenSegment(c, c.Screen(edge[0]), c.Screen(edge[1]))
-			if !ok {
-				continue
+		for _, chain := range p.chains {
+			for _, run := range screenRuns(c, chain) {
+				for i, q := range simplifyScreen(run, screenTolerance) {
+					if i == 0 {
+						path.MoveTo(float32(q.X), float32(q.Y))
+					} else {
+						path.LineTo(float32(q.X), float32(q.Y))
+					}
+				}
 			}
-			path.MoveTo(float32(a.X), float32(a.Y))
-			path.LineTo(float32(b.X), float32(b.Y))
 		}
 		op := &vector.DrawPathOptions{AntiAlias: true}
 		op.ColorScale.ScaleWithColor(pal.Existing)
@@ -142,29 +123,26 @@ func (p *publicLayer) draw(dst *ebiten.Image, c mapview.Camera, s ui.State) {
 }
 
 func (p *publicLayer) drawStops(dst *ebiten.Image, c mapview.Camera, ink color.NRGBA) {
-	var filled, hollow vector.Path
-	for _, stop := range p.Stops {
-		q := c.Screen(mapview.Project(stop.Lat, stop.Lon))
-		if q.X < 0 || q.Y < 0 || q.X > c.Width || q.Y > c.Height {
-			continue
+	// Hollow stops go on top, as they did when each kind was one path.
+	for _, hollow := range []bool{false, true} {
+		for _, stop := range p.Stops {
+			if stop.MapGap != hollow {
+				continue
+			}
+			q := c.Screen(mapview.Project(stop.Lat, stop.Lon))
+			if q.X < 0 || q.Y < 0 || q.X > c.Width || q.Y > c.Height {
+				continue
+			}
+			if c.Zoom < 2 && !stop.Tagged && stop.Operator == "" {
+				continue
+			}
+			if hollow {
+				p.marks.ring(dst, float32(q.X), float32(q.Y), 2.5, 1, ink)
+			} else {
+				p.marks.disc(dst, float32(q.X), float32(q.Y), 2, ink)
+			}
 		}
-		if c.Zoom < 2 && !stop.Tagged && stop.Operator == "" {
-			continue
-		}
-		radius := float32(2)
-		path := &filled
-		if stop.MapGap {
-			radius = 2.5
-			path = &hollow
-		}
-		path.MoveTo(float32(q.X)+radius, float32(q.Y))
-		path.Arc(float32(q.X), float32(q.Y), radius, 0, 2*math.Pi, vector.Clockwise)
-		path.Close()
 	}
-	op := &vector.DrawPathOptions{AntiAlias: true}
-	op.ColorScale.ScaleWithColor(ink)
-	vector.FillPath(dst, &filled, nil, op)
-	vector.StrokePath(dst, &hollow, &vector.StrokeOptions{Width: 1}, op)
 }
 
 // Source stops are inspectable cartographic features. Strategic city stations
