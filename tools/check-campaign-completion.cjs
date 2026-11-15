@@ -49,7 +49,8 @@ for (const locale of ['en', 'zh-Hans']) {
   assert.equal(nodes['campaign-new-game'].hidden, true);
   assert.equal(nodes.advance.hidden, false);
 }
-assert(source.includes("$('campaign-new-game').onclick=()=>$('new-game').click()"));
+// Compare without whitespace so reformatting app.js does not break the wiring check.
+assert(source.replace(/\s+/g, '').includes("$('campaign-new-game').onclick=()=>$('new-game').click()"));
 console.log(
   'Campaign completion footer: final-month boundary, reload/reset, ' +
     'both locales and busy/composition states passed (DOM model; ' +

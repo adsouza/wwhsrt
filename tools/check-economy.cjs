@@ -75,7 +75,8 @@ const sha = (file) => crypto.createHash('sha256').update(fs.readFileSync(file)).
     const q = { corridor_id: 'public_lyon__marseille', frequency: 1, fare: 4446 },
       direct = await forecast(p, q);
     expenses(direct);
-    assert.equal(direct.passengers, 8821);
+    // Same forecast as internal/application/economy_test.go, which pins the rule-level value.
+    assert.equal(direct.passengers, 8723);
     assert.equal(direct.break_even_passengers, 6399);
     await p.screenshot({ path: path.join(out, 'economy-plan-desktop.png') });
     await (await control(p, '#economics-values')).scrollIntoViewIfNeeded();
@@ -194,7 +195,8 @@ const sha = (file) => crypto.createHash('sha256').update(fs.readFileSync(file)).
     assert.equal(f.reports[2].lease_costs, 24000000);
     ledger(f);
     const saved = JSON.parse(await p.evaluate(() => railStorageLoad()));
-    assert.equal(saved.version, 9);
+    // Expanded worlds save as version 10 (internal/application/game.go; pinned by economy_test.go).
+    assert.equal(saved.version, 10);
     assert.equal(saved.payload.economy_since, 2);
     assert.equal(saved.payload.economy_sha256, result.economy_sha256);
     await p.evaluate(() => navigator.serviceWorker.ready);

@@ -2,7 +2,7 @@ const assert = require('node:assert/strict'),
   fs = require('node:fs'),
   crypto = require('node:crypto');
 const { chromium } = require('playwright'),
-  { control } = require('./ui-helpers.cjs');
+  { control, prospect } = require('./ui-helpers.cjs');
 const snap = (p) => p.evaluate(() => railSnapshot()),
   url = process.argv[2] || 'http://127.0.0.1:8765/';
 function screen(c, lat, lon) {
@@ -115,7 +115,7 @@ async function pixels(p, qa, coast) {
     for (const country of ['Japan', 'China']) {
       if (country === 'Japan') {
         await (await control(p, '#region-select')).selectOption('japan');
-        await (await control(p, '[data-corridor=hokkaido-extension]')).click();
+        await prospect(p, 'hokkaido-extension');
         await (await control(p, '#focus-route')).click();
       } else {
         await (await control(p, '#region-select')).selectOption('china');

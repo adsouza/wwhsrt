@@ -1,4 +1,4 @@
-const { control, language } = require('./ui-helpers.cjs');
+const { control, language, prospect, selected } = require('./ui-helpers.cjs');
 // Focused real Go/WASM + semantic-HUD business workflow; no physical-device claim.
 const assert = require('node:assert/strict'),
   fs = require('node:fs'),
@@ -59,7 +59,7 @@ async function clickCommand(p, id, trace, command) {
     const box = await p.locator('#map-frame').boundingBox(),
       at = (await snap(p)).points.seoul;
     await p.mouse.click(box.x + at.X, box.y + at.Y);
-    await p.waitForFunction(() => document.querySelector('[data-city=seoul]').getAttribute('aria-pressed') === 'true');
+    await selected(p, 'seoul');
     await p.locator('#advance').focus();
     await p.keyboard.press('Enter');
     await p.waitForFunction(async () => (await railSnapshot()).frame.months_resolved === 1);
@@ -114,8 +114,8 @@ async function clickCommand(p, id, trace, command) {
     assert.equal(f.projects.length, 1);
     assert.equal(f.projects[0].ready, 49);
     assert(f.pending.grants > 0 && f.pending.construction > f.pending.grants);
-    assert.equal(await p.locator('#opportunities [data-corridor=tsuruga-osaka]').count(), 0);
-    assert.equal(await p.locator('#opportunities [data-corridor=hokkaido-extension]').count(), 1);
+    assert.equal(await p.locator('#prospect-picker option[value=tsuruga-osaka]').count(), 0);
+    assert.equal(await p.locator('#prospect-picker option[value=hokkaido-extension]').count(), 1);
     assert(await p.locator('#project-progress').isVisible());
     assert.equal(f.idle_lines.length, 0);
     assert(await p.locator('#review-idle').isHidden());
@@ -129,7 +129,7 @@ async function clickCommand(p, id, trace, command) {
         .innerText()
         .then((s) => s.includes('ready for services')),
     );
-    assert.equal(await p.locator('#opportunities [data-corridor=tsuruga-osaka]').count(), 0);
+    assert.equal(await p.locator('#prospect-picker option[value=tsuruga-osaka]').count(), 0);
     assert.equal(f.idle_lines.length, 1);
     assert.equal(f.idle_lines[0].maintenance, 193890000);
     assert.equal(f.idle_lines[0].needs_trains, true);
@@ -152,8 +152,12 @@ async function clickCommand(p, id, trace, command) {
     assert(await p.locator('[data-idle-corridor=tsuruga-osaka]').isVisible());
     await clickCommand(p, 'lease-train', trace, { kind: 'lease_train', corridor_id: 'tsuruga-osaka' });
     assert.equal((await snap(p)).frame.idle_lines[0].needs_trains, false);
-    assert.equal((await snap(p)).frame.idle_lines[0].leases, 40000000);
+    const leased = (await snap(p)).frame;
+    assert.equal(leased.idle_lines[0].leases, leased.train_family.lease_monthly); // one train's monthly lease
     assert(await p.locator('#idle-warning').isVisible());
+    // The suggested plan now opens at 8 trains a day; enter the plan the trace records, which one train runs.
+    await (await control(p, '#frequency')).fill('4');
+    await (await control(p, '#fare')).fill('90');
     await p.waitForFunction(() => !document.getElementById('apply-service').disabled);
     await clickCommand(p, 'apply-service', trace, {
       kind: 'set_service',
@@ -242,15 +246,13 @@ async function clickCommand(p, id, trace, command) {
     });
     await p.waitForTimeout(100);
     await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
-    await p.waitForFunction(
-      () => document.querySelector('[data-city=chengdu]').getAttribute('aria-pressed') === 'true',
-    );
+    await selected(p, 'chengdu');
     await (await control(p, '#tab-report')).click();
     assert(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
     await p.evaluate(() => scrollTo(0, 0));
     await p.screenshot({ path: path.join(out, 'business-report-phone-zh.png') });
     await (await control(p, '#tab-build')).click();
-    await (await control(p, '[data-corridor=hokkaido-extension]')).click();
+    await prospect(p, 'hokkaido-extension');
     await p.evaluate(() => {
       const q = document.getElementById('quote');
       scrollTo(0, q.getBoundingClientRect().top + scrollY - 100);
@@ -290,7 +292,7 @@ async function clickCommand(p, id, trace, command) {
     await p.waitForFunction(() => !!window.railSnapshot);
     assert.equal((await snap(p)).frame.checkpoint, before);
     assert.equal(await p.locator('#company-name').inputValue(), '保留此草稿');
-    assert.equal(await p.locator('#opportunities [data-corridor=tsuruga-osaka]').count(), 0);
+    assert.equal(await p.locator('#prospect-picker option[value=tsuruga-osaka]').count(), 0);
     await p.evaluate(() => navigator.serviceWorker.ready);
     await p.waitForFunction(() => !!navigator.serviceWorker.controller);
     await p.close();

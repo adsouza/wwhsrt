@@ -1,4 +1,4 @@
-const { control, language } = require('./ui-helpers.cjs');
+const { city, control, language } = require('./ui-helpers.cjs');
 const assert = require('node:assert/strict'),
   fs = require('node:fs'),
   path = require('node:path'),
@@ -175,7 +175,7 @@ async function settled(p) {
     await p.screenshot({ path: path.join(out, 'onboarding-report-desktop.png') });
 
     await (await control(p, '#tab-map')).click();
-    await (await control(p, '[data-city=tokyo]')).click();
+    await (await city(p, 'tokyo')).click();
     const replayCheckpoint = (await snap(p)).frame.checkpoint;
     await (await control(p, '#watch-day')).click();
     await p.locator('#view-map [data-help-anchor=replay] .learning-cue').waitFor();

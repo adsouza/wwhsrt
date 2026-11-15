@@ -86,8 +86,12 @@ const amounts = async (p) =>
     await (await control(p, '#frequency')).fill('0');
     await p.waitForFunction(() => !document.getElementById('apply-service').disabled);
     await command(p, 'apply-service');
+    // The starter's two idle leases no longer exhaust the starting cash within the campaign, so lease eight more
+    // on the suspended service and run until their real lease costs leave the company overdrawn.
+    for (let i = 0; i < 8; i++) await command(p, 'lease-train');
+    assert.equal((await snap(p)).frame.fleet.length, 10);
     await (await control(p, '#tab-report')).click();
-    for (let i = 0; i < 13; i++) await command(p, 'advance-year');
+    for (let year = 0; year < 15 && (await snap(p)).frame.player.cash >= 0; year++) await command(p, 'advance-year');
     f = (await snap(p)).frame;
     assert(f.player.cash < 0);
     const deficit = -f.player.cash;
@@ -112,7 +116,7 @@ const amounts = async (p) =>
     assert.equal((await amounts(p)).at(-1), 0);
     assert.deepEqual(errors, []);
     result.checks.push(
-      'Actual suspended service produces a negative balance; ' +
+      'Idle leases on an actual suspended service produce a negative balance; ' +
         'breakdown separates zero available cash and existing deficit; ' +
         'exact-gap loan clears that deficit and funds the company contribution; ' +
         'Chinese dark phone layout fits 320px',

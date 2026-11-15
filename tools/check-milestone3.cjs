@@ -228,6 +228,8 @@ function conserved(n) {
     for (let i = 0; i < 4; i++) await act(p, 'advance-year', trace, { kind: 'advance_year' });
     await (await control(p, '#project-service')).click();
     await act(p, 'lease-train', trace, { kind: 'lease_train', corridor_id: 'tsuruga-osaka' });
+    // The suggested plan now opens at 8 trains a day; enter the 4 the trace records, which one train runs.
+    await (await control(p, '#frequency')).fill('4');
     await (await control(p, '#fare')).fill('50');
     await apply(p, trace, { kind: 'set_service', corridor_id: 'tsuruga-osaka', frequency: 4, fare: 5000 });
     await act(p, 'advance', trace, { kind: 'advance_month' });

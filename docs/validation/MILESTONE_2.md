@@ -7,7 +7,7 @@ Implementation and verification checkpoint for the limited East Asia first-busin
 | Requirement | Implementation |
 | --- | --- |
 | 8–12-city map and existing HSR start | Twelve map cities; Tokyo–Nagoya–Osaka public sections; active Tokyo–Nagoya starter service |
-| Independent unserved-city pair | Shin-Hakodate-Hokuto–Sapporo has neither starting station nor a connection to the public starter network |
+| Independent extension to an unserved city | Shin-Hakodate-Hokuto–Sapporo had neither starting station when this milestone shipped; the expanded public network now ends at Shin-Hakodate-Hokuto, so the checker reuses that public station and the project builds Sapporo's |
 | Substantial terrain barrier and alternatives | Hokkaido/Kansai tunnel and valley packages, terrain context and component cost breakdown |
 | Construction and stations | Track and basic endpoint station works share the project's opening date; public stations are reused; city, construction and operating-station markers are distinct |
 | One train family and direct services | Fictional Swift 400, 400 seats; published lease, running, access, station-handling and fleet-availability assumptions |

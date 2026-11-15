@@ -2,9 +2,11 @@ const assert = require('node:assert/strict'),
   fs = require('node:fs'),
   crypto = require('node:crypto');
 const { chromium } = require('playwright'),
-  { control, language } = require('./ui-helpers.cjs');
+  { control, language, prospect } = require('./ui-helpers.cjs');
 const snap = (p) => p.evaluate(() => railSnapshot()),
   url = process.argv[2] || 'http://127.0.0.1:8765/';
+// Construction prospects in the catalog; pkg/app and pkg/render tests pin the same count.
+const PROSPECTS = 74;
 function screen(c, q) {
   const t = Math.asin((Math.sqrt(3) / 2) * Math.sin((q.lat * Math.PI) / 180)),
     t2 = t * t,
@@ -84,9 +86,9 @@ async function dots(p, points, ink) {
     const prospects = initial.frame.corridors.filter(
       (c) => !c.existing && !initial.frame.projects.some((v) => v.corridor_id === c.id),
     );
-    assert.equal(prospects.length, 71);
+    assert.equal(prospects.length, PROSPECTS);
     await (await control(p, '#tab-build')).click();
-    assert.equal(await p.locator('#prospect-picker option').count(), 72);
+    assert.equal(await p.locator('#prospect-picker option').count(), PROSPECTS + 1); // plus the placeholder
     await (await control(p, '#region-select')).selectOption('japan');
     await closeTools(p);
     await p.screenshot({ path: 'docs/validation/prospects-overview.png' });
@@ -94,7 +96,7 @@ async function dots(p, points, ink) {
     for (const co of prospects.filter((c) => ['tsuruga-osaka', 'hokkaido-extension'].includes(c.id))) {
       console.log('Checking prospect', co.id);
       await (await control(p, '#tab-build')).click();
-      await p.locator('[data-corridor="' + co.id + '"]').click();
+      await prospect(p, co.id);
       await (await control(p, '#focus-route')).click();
       await closeTools(p);
       await p.locator('#tab-map').click();
@@ -162,7 +164,7 @@ async function dots(p, points, ink) {
     await p.waitForFunction(async (r) => (await railSnapshot()).frame.revision > r, rev);
     assert.equal(await p.locator('[data-corridor=tsuruga-osaka]').count(), 0);
     assert.equal(await p.locator('#opportunities button').count(), 2);
-    assert.equal(await p.locator('#prospect-picker option').count(), 71);
+    assert.equal(await p.locator('#prospect-picker option').count(), PROSPECTS); // one built, plus the placeholder
     assert.equal(await p.locator('#prospect-picker option[value=tsuruga-osaka]').count(), 0);
     await (await control(p, '#focus-route')).click();
     await closeTools(p);
@@ -183,7 +185,7 @@ async function dots(p, points, ink) {
       wasm_sha256: crypto.createHash('sha256').update(fs.readFileSync('web/main.wasm')).digest('hex'),
       checks,
       verified: [
-        'All 71 prospects are available in the bounded picker; ' +
+        'All ' + PROSPECTS + ' prospects are available in the bounded picker; ' +
           'the two Japanese sample prospects have actual dotted map pixels and can be selected by their curved paths; ' +
           'drag does not select',
         'Selection opens the complete project and preserves the campaign; no arbitrary endpoint controls',

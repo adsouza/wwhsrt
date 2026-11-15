@@ -52,6 +52,9 @@ async function command(p, id, trace, c) {
     await (await control(p, '#tab-services')).click();
     for (const id of ['tsuruga-osaka', 'nagoya-tsuruga-express', 'tokyo-tsuruga']) {
       await (await control(p, '#service-corridor')).selectOption(id);
+      // The suggested plan now opens at 8 trains a day. Enter the 4 the trace records, so three services fill the
+      // 12-trip Tsuruga–Osaka section and one more train exceeds it.
+      await (await control(p, '#frequency')).fill('4');
       await (await control(p, '#fare')).fill('90');
       await p.waitForFunction(() => document.querySelectorAll('#forecast-values>div').length > 0);
       const needed = await p.locator('#fleet-count').evaluate((e) => Number(e.dataset.needed));
@@ -135,11 +138,13 @@ async function command(p, id, trace, c) {
     assert(!(await p.locator('#service-capacity').getAttribute('class')).includes('over-capacity'));
     await command(p, 'lease-train', trace, { kind: 'lease_train', corridor_id: 'tokyo-tsuruga-express' });
     await p.waitForFunction(() => !document.getElementById('apply-service').disabled);
+    // This service keeps the suggested fare, so record the one the form holds for the headless replay.
+    const suggestedFare = Math.round(Number((await p.locator('#fare').inputValue()).replace(/,/g, '')) * 100);
     await command(p, 'apply-service', trace, {
       kind: 'set_service',
       corridor_id: 'tokyo-tsuruga-express',
       frequency: 1,
-      fare: 18925,
+      fare: suggestedFare,
     });
     assert.equal((await snap(p)).frame.services.find((s) => s.corridor_id === 'tokyo-tsuruga-express').frequency, 1);
     result.checks.push(

@@ -1,4 +1,4 @@
-const { control, language } = require('./ui-helpers.cjs');
+const { city, control, language, prospect } = require('./ui-helpers.cjs');
 // Milestone 2: existing-track start and standalone build/operate/save through actual HUD controls.
 const assert = require('node:assert/strict'),
   fs = require('node:fs'),
@@ -60,7 +60,9 @@ async function hint(p, text) {
     const startingStations = f.stations.length;
     assert(f.stations.every((s) => s.public && s.open));
     assert.equal(f.train_family.seats, 400);
-    assert.equal(f.train_family.lease_monthly, 40000000);
+    // The lease comes from the economy catalog, so the check follows calibration changes.
+    const economy = JSON.parse(fs.readFileSync('assets/scenario/economy.json', 'utf8'));
+    assert.equal(f.train_family.lease_monthly, economy.lease_monthly);
     await hint(p, 'passenger income and costs');
     await act(p, 'advance', trace, { kind: 'advance_month' });
     f = (await snap(p)).frame;
@@ -74,7 +76,10 @@ async function hint(p, text) {
     );
     await (await control(p, '#tab-services')).click();
     await (await control(p, '#train-details summary')).click();
-    assert((await p.locator('#train-values').innerText()).includes('400,000'));
+    assert(await p.locator('#train-details').evaluate((d) => d.open));
+    const leaseDollars = (economy.lease_monthly / 100).toLocaleString('en-US');
+    const trainValues = await p.locator('#train-values').innerText();
+    assert(trainValues.includes(leaseDollars), trainValues);
     assert((await p.locator('#train-summary').innerText()).includes('Swift 400'));
     assert.equal((await snap(p)).frame.checkpoint, checkpoint);
     await (await control(p, '#tab-company')).click();
@@ -83,9 +88,9 @@ async function hint(p, text) {
     await (await control(p, '#guidance-settings')).click();
     assert.equal((await snap(p)).frame.checkpoint, checkpoint);
     await (await control(p, '#tab-map')).click();
-    await (await control(p, '[data-city=sapporo]')).click();
+    await (await city(p, 'sapporo')).click();
     assert((await p.locator('#city-details').innerText()).includes('No station yet'));
-    await (await control(p, '[data-city=tokyo]')).click();
+    await (await city(p, 'tokyo')).click();
     await control(p, '#city-details dl');
     assert((await p.locator('#city-details').innerText()).includes('Public network'));
     result.checks.push(
@@ -97,7 +102,7 @@ async function hint(p, text) {
     );
 
     await (await control(p, '#tab-build')).click();
-    await (await control(p, '[data-corridor=hokkaido-extension]')).click();
+    await prospect(p, 'hokkaido-extension');
     f = (await snap(p)).frame;
     const c = f.corridors.find((c) => c.id === 'hokkaido-extension'),
       a = c.alignments.find((a) => a.id === 'mountain');
@@ -135,13 +140,19 @@ async function hint(p, text) {
     await (await control(p, '#review-funding-plan')).click();
     await act(p, 'build-line', trace, { kind: 'build_line', corridor_id: c.id, alignment_id: a.id });
     f = (await snap(p)).frame;
+    // The public network now reaches Shin-Hakodate-Hokuto, so the extension reuses that open public station and
+    // builds a private one only where no public line stops (Sapporo).
     const publicCities = new Set(f.corridors.filter((c) => c.existing).flatMap((c) => [c.from_city, c.to_city]));
-    assert(!publicCities.has(c.from_city) && !publicCities.has(c.to_city));
-    assert.equal(f.stations.length, startingStations + 2);
+    const newEnds = [c.from_city, c.to_city].filter((id) => !publicCities.has(id));
+    assert(newEnds.length > 0);
+    assert.equal(f.stations.length, startingStations + newEnds.length);
     const readyMonth = f.projects[0].ready;
     for (const id of [c.from_city, c.to_city]) {
-      const s = f.stations.find((s) => s.city_id === id);
-      assert(!s.open && !s.public && s.ready === readyMonth && s.owner === f.player.id);
+      const here = f.stations.filter((s) => s.city_id === id);
+      assert.equal(here.length, 1);
+      const s = here[0];
+      if (publicCities.has(id)) assert(s.open && s.public);
+      else assert(!s.open && !s.public && s.ready === readyMonth && s.owner === f.player.id);
     }
     await (await control(p, '#focus-route')).click();
     await p.screenshot({ path: path.join(out, 'milestone2-construction-desktop.png') });
@@ -149,7 +160,7 @@ async function hint(p, text) {
     await p.waitForFunction(() => document.documentElement.lang === 'zh-Hans');
     await p.setViewportSize({ width: 390, height: 844 });
     await (await control(p, '#tab-map')).click();
-    await (await control(p, '[data-city=sapporo]')).click();
+    await (await city(p, 'sapporo')).click();
     assert((await p.locator('#city-details').innerText()).includes('正在建设'));
     assert(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
     await (await control(p, '#city-details')).scrollIntoViewIfNeeded();
@@ -166,6 +177,8 @@ async function hint(p, text) {
     assert.equal(await p.locator('#service-corridor').inputValue(), c.id);
     await hint(p, '开通线路没有列车');
     await act(p, 'lease-train', trace, { kind: 'lease_train', corridor_id: c.id });
+    // The suggested plan now opens at 8 trains a day, which needs two leases; one train runs the 4 the trace records.
+    await (await control(p, '#frequency')).fill('4');
     await (await control(p, '#fare')).fill('110');
     await p.waitForFunction(() => !document.getElementById('apply-service').disabled);
     await act(p, 'apply-service', trace, { kind: 'set_service', corridor_id: c.id, frequency: 4, fare: 11000 });
@@ -183,7 +196,7 @@ async function hint(p, text) {
     result.checks.push(
       'Substantial barrier and priced terrain alternatives reconcile; ' +
         'one full-gap loan funds a standalone project; ' +
-        'both initially stationless endpoints receive timed station works; ' +
+        'the stationless endpoint receives timed station works and the public terminus is reused; ' +
         'ordinary guidance leads through construction, opening, local fleet lease, ' +
         'applied service and positive revenue; every report reconciles on a Chinese phone layout',
     );

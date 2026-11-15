@@ -145,7 +145,16 @@ function fresh(f) {
     assert.equal(await p.locator('#company-name').inputValue(), 'Sunrise Rail');
     await accept(p, 'advance', trace, { kind: 'advance_month' });
     s = await snap(p);
-    assert.equal(s.frame.reports[0].revenue, 714132000);
+    // A restarted company earns exactly what a fresh campaign earns in its first month under the same rules.
+    const freshMonth = JSON.parse(
+      execFileSync(path.resolve('build/headless'), ['-advance', '1'], {
+        encoding: 'utf8',
+        maxBuffer: 32 * 1024 * 1024,
+        stdio: ['ignore', 'pipe', 'pipe'],
+      }),
+    );
+    assert(s.frame.reports[0].revenue > 0);
+    assert.equal(s.frame.reports[0].revenue, freshMonth.reports[0].revenue);
     await p.evaluate(() => navigator.serviceWorker.ready);
     await p.waitForFunction(() => !!navigator.serviceWorker.controller);
     await ctx.setOffline(true);

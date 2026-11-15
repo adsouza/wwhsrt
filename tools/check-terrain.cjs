@@ -1,4 +1,4 @@
-const { control, language } = require('./ui-helpers.cjs');
+const { control, language, prospect } = require('./ui-helpers.cjs');
 // Focused real Go/WASM terrain workflow. No commands change the company.
 const assert = require('node:assert/strict'),
   fs = require('node:fs'),
@@ -52,7 +52,7 @@ async function shot(p, name) {
       'All six WASM frame alignments exactly match the geography-checked station-connected display paths',
     );
     await (await control(p, '#tab-build')).click();
-    await (await control(p, '[data-corridor=hokkaido-extension]')).click();
+    await prospect(p, 'hokkaido-extension');
     assert.match(await (await control(p, '#terrain-explanation')).innerText(), /170 km/);
     await (
       await control(p, '#alignments button')
@@ -101,7 +101,7 @@ async function shot(p, name) {
     await (await control(p, '#focus-route')).click();
     await shot(p, 'terrain-kansai-desktop.png');
     await p.keyboard.press('Escape');
-    await (await control(p, '[data-corridor=hokkaido-extension]')).click();
+    await prospect(p, 'hokkaido-extension');
     await (
       await control(p, '#alignments button')
     )
