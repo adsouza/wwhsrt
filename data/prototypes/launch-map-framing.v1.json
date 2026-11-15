@@ -24,6 +24,13 @@
       "lat": -27.46794,
       "lng": 153.02809,
       "source": "https://www.geonames.org/2174003/"
+    },
+    {
+      "id": "harbin",
+      "name": "Harbin",
+      "lat": 45.75,
+      "lng": 126.65,
+      "source": "https://www.geonames.org/2037013/"
     }
   ],
   "region_overrides": [
@@ -42,6 +49,11 @@
     {
       "id": "north-america",
       "metro_ids": ["quebec_city", "mexico_city", "san_francisco"]
+    },
+    {
+      "id": "east-asia",
+      "landscape": { "metro_ids": ["harbin", "chengdu", "hong_kong", "tokyo"] },
+      "portrait": { "metro_ids": ["harbin", "chengdu", "hong_kong", "tokyo", "yangon"] }
     },
     {
       "id": "south-east-asia",

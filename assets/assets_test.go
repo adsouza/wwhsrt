@@ -44,43 +44,134 @@ func TestEastAsiaScenarioMatchesSourceAndCameraPolicy(t *testing.T) {
 		}
 		seen[c.ID] = true
 	}
+	// The launch map applies its framing overrides to the base presets, and
+	// those overrides may add anchors outside the metro roster (Harbin).
+	raw, e = os.ReadFile("../data/prototypes/launch-map-framing.v1.json")
+	if e != nil {
+		t.Fatal(e)
+	}
+	type anchorSet struct {
+		IDs []string `json:"metro_ids"`
+	}
+	type regionPolicy struct {
+		ID        string    `json:"id"`
+		Exclude   []string  `json:"exclude_metro_ids"`
+		Landscape anchorSet `json:"landscape"`
+		Portrait  anchorSet `json:"portrait"`
+	}
+	var launch struct {
+		Anchors []struct {
+			ID  string  `json:"id"`
+			Lat float64 `json:"lat"`
+			Lon float64 `json:"lng"`
+		} `json:"additional_anchors"`
+		Overrides []regionPolicy `json:"region_overrides"`
+	}
+	if e = json.Unmarshal(raw, &launch); e != nil {
+		t.Fatal(e)
+	}
+	for _, a := range launch.Anchors {
+		coords[a.ID] = [2]float64{a.Lat, a.Lon}
+	}
 	raw, e = os.ReadFile("../data/prototypes/map-region-presets.v1.json")
 	if e != nil {
 		t.Fatal(e)
 	}
 	var policy struct {
-		Regions []struct {
-			ID        string `json:"id"`
-			Landscape struct {
-				IDs []string `json:"metro_ids"`
-			} `json:"landscape"`
-			Portrait struct {
-				IDs []string `json:"metro_ids"`
-			} `json:"portrait"`
-		} `json:"regions"`
+		Regions []regionPolicy `json:"regions"`
 	}
 	if e = json.Unmarshal(raw, &policy); e != nil {
 		t.Fatal(e)
+	}
+	var effective *regionPolicy
+	for i := range policy.Regions {
+		if policy.Regions[i].ID == "east-asia" {
+			effective = &policy.Regions[i]
+		}
+	}
+	if effective == nil {
+		t.Fatal("East Asia camera policy missing")
+	}
+	for _, o := range launch.Overrides {
+		if o.ID != "east-asia" {
+			continue
+		}
+		if o.Landscape.IDs != nil {
+			effective.Landscape = o.Landscape
+		}
+		if o.Portrait.IDs != nil {
+			effective.Portrait = o.Portrait
+		}
 	}
 	var camera map[string][][2]float64
 	if e = json.Unmarshal(Camera, &camera); e != nil {
 		t.Fatal(e)
 	}
-	for _, r := range policy.Regions {
-		if r.ID != "east-asia" {
-			continue
-		}
-		for orientation, ids := range map[string][]string{"landscape": r.Landscape.IDs, "portrait": r.Portrait.IDs} {
-			if len(camera[orientation]) != len(ids) {
-				t.Fatal("camera anchor count changed", orientation)
-			}
-			for i, id := range ids {
-				if camera[orientation][i] != coords[id] {
-					t.Fatal("camera differs from owning preset", orientation, id)
-				}
-			}
-		}
-		return
+	// Metros the preset keeps off screen ride along as camera.json "exclude".
+	if len(camera["exclude"]) != len(effective.Exclude) || len(effective.Exclude) == 0 {
+		t.Fatal("camera exclusions differ from the preset", camera["exclude"], effective.Exclude)
 	}
-	t.Fatal("East Asia camera policy missing")
+	for i, id := range effective.Exclude {
+		if camera["exclude"][i] != coords[id] {
+			t.Fatal("camera exclusion differs from the preset", id)
+		}
+	}
+	var regions []struct {
+		ID        string `json:"id"`
+		Landscape struct {
+			Points [][2]float64 `json:"points"`
+		} `json:"landscape"`
+		Portrait struct {
+			Points [][2]float64 `json:"points"`
+		} `json:"portrait"`
+	}
+	if e = json.Unmarshal(Regions, &regions); e != nil {
+		t.Fatal(e)
+	}
+	menu := map[string][][2]float64{}
+	for _, r := range regions {
+		if r.ID == "east-asia" {
+			menu["landscape"], menu["portrait"] = r.Landscape.Points, r.Portrait.Points
+		}
+	}
+	for orientation, ids := range map[string][]string{"landscape": effective.Landscape.IDs, "portrait": effective.Portrait.IDs} {
+		if len(camera[orientation]) != len(ids) || len(menu[orientation]) != len(ids) {
+			t.Fatal("camera anchor count changed", orientation)
+		}
+		for i, id := range ids {
+			want, ok := coords[id]
+			if !ok {
+				t.Fatal("camera anchor has no coordinates", orientation, id)
+			}
+			if camera[orientation][i] != want {
+				t.Fatal("camera differs from owning preset", orientation, id)
+			}
+			// regions.json stores the same anchors as lon/lat for the region picker.
+			if menu[orientation][i] != [2]float64{want[1], want[0]} {
+				t.Fatal("regions.json East Asia differs from camera.json", orientation, id)
+			}
+		}
+	}
+}
+
+// Harbin is the northern extent of East Asia in both orientations.
+func TestEastAsiaNorthernExtentIsHarbin(t *testing.T) {
+	var camera map[string][][2]float64
+	if e := json.Unmarshal(Camera, &camera); e != nil {
+		t.Fatal(e)
+	}
+	harbin := [2]float64{45.75, 126.65}
+	for _, orientation := range []string{"landscape", "portrait"} {
+		found := false
+		for _, p := range camera[orientation] {
+			if p == harbin {
+				found = true
+			} else if p[0] >= harbin[0] {
+				t.Fatal("an anchor north of Harbin", orientation, p)
+			}
+		}
+		if !found {
+			t.Fatal("Harbin is not an East Asia anchor", orientation)
+		}
+	}
 }

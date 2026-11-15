@@ -74,7 +74,12 @@ func (m *Map) Camera(w, h float64, portrait bool) mapview.Camera {
 		// No scenario anchors loaded: frame the built-in default region.
 		return mapview.New(w, h)
 	}
-	return mapview.Fit(w, h, points)
+	// Metros the region keeps out of view (Dhaka for East Asia) are panned past an edge.
+	avoid := []mapview.Point{}
+	for _, p := range m.anchors["exclude"] {
+		avoid = append(avoid, mapview.Project(p[0], p[1]))
+	}
+	return mapview.FitAvoiding(w, h, points, avoid)
 }
 
 // face is the only place the map makes a font, so drawn and measured sizes cannot differ.

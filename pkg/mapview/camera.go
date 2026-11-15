@@ -37,16 +37,76 @@ func Fit(w, h float64, points []Point) Camera {
 	}
 	return c
 }
+
+// MarkerClearance covers the widest city marker (the 13 px selection ring and
+// its stroke), in pixels. When FitAvoiding pans, anchors stay at least this far
+// inside the screen and avoided points end at least this far outside it.
+const (
+	MarkerClearance = 16.0
+	// avoidSlack absorbs rounding, so a cleared point counts as cleared.
+	avoidSlack = 1e-6
+)
+
+// Clear reports whether screen point q lies at least MarkerClearance beyond an edge.
+func (c Camera) Clear(q Point) bool {
+	m := MarkerClearance - avoidSlack
+	return q.X <= -m || q.X >= c.Width+m || q.Y <= -m || q.Y >= c.Height+m
+}
+
+// FitAvoiding fits points like Fit, then pans each avoided point at least
+// MarkerClearance beyond an edge of the screen, taking the smallest pan that
+// keeps every fitted point MarkerClearance inside. Only the pan changes, never
+// the scale; a point already outside, or one no such pan can clear, leaves the
+// camera as it is. Fit's own padding is wider, so the clearance only decides
+// whether a pan is possible, never how far it goes.
+func FitAvoiding(w, h float64, points, avoid []Point) Camera {
+	c := Fit(w, h, points)
+	for _, a := range avoid {
+		c.panClear(points, a)
+	}
+	return c
+}
+
+func (c *Camera) panClear(points []Point, avoid Point) {
+	a := c.Screen(avoid)
+	if c.Clear(a) {
+		return
+	}
+	lo, hi := Point{X: math.Inf(-1), Y: math.Inf(-1)}, Point{X: math.Inf(1), Y: math.Inf(1)}
+	for _, p := range points {
+		q := c.Screen(p)
+		lo.X, hi.X = math.Max(lo.X, MarkerClearance-q.X), math.Min(hi.X, c.Width-MarkerClearance-q.X)
+		lo.Y, hi.Y = math.Max(lo.Y, MarkerClearance-q.Y), math.Min(hi.Y, c.Height-MarkerClearance-q.Y)
+	}
+	best, dx, dy := math.Inf(1), 0.0, 0.0
+	for _, m := range []struct{ dx, dy float64 }{
+		{dx: -MarkerClearance - a.X}, {dx: c.Width + MarkerClearance - a.X},
+		{dy: -MarkerClearance - a.Y}, {dy: c.Height + MarkerClearance - a.Y},
+	} {
+		if m.dx < lo.X || m.dx > hi.X || m.dy < lo.Y || m.dy > hi.Y {
+			continue
+		}
+		if size := math.Abs(m.dx) + math.Abs(m.dy); size < best {
+			best, dx, dy = size, m.dx, m.dy
+		}
+	}
+	c.PanX += dx
+	c.PanY += dy
+}
+
+// New frames the built-in default region: landscape East Asia, from Harbin in
+// the north, with Dhaka kept off screen (see assets/scenario/camera.json).
 func New(w, h float64) Camera {
-	return Fit(
+	return FitAvoiding(
 		w,
 		h,
 		[]Point{
 			Project(22.3193, 114.1694),
-			Project(41.8057, 123.4315),
+			Project(45.75, 126.65),
 			Project(30.5728, 104.0668),
 			Project(35.685, 139.7514),
 		},
+		[]Point{Project(23.8103, 90.4125)},
 	)
 }
 func (c Camera) scale() float64 {

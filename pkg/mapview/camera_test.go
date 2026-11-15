@@ -117,3 +117,43 @@ func TestTokyoStaysReachableInTheWorldViewAtMaximumZoom(t *testing.T) {
 		}
 	}
 }
+
+// An avoided point inside the fitted frame is panned past the nearest edge it can reach while every
+// fitted point keeps its marker clearance; a point already outside, or one no pan can clear, changes nothing.
+func TestFitAvoidingPansAPointOutWithinTheGutters(t *testing.T) {
+	anchors := []Point{Project(45.75, 126.65), Project(30.5728, 104.0668), Project(22.3193, 114.1694), Project(35.685, 139.7514), Project(16.8661, 96.1951)}
+	dhaka := Project(23.8103, 90.4125)
+	inside := func(c Camera, p Point) bool { return !c.Clear(c.Screen(p)) }
+	plain := Fit(390, 281, anchors)
+	if !inside(plain, dhaka) {
+		t.Fatal("fixture: the plain fit should show Dhaka")
+	}
+	c := FitAvoiding(390, 281, anchors, []Point{dhaka})
+	if inside(c, dhaka) {
+		t.Fatal("Dhaka is still within the margin", c.Screen(dhaka))
+	}
+	for _, p := range anchors {
+		q := c.Screen(p)
+		if q.X < MarkerClearance-1e-9 || q.X > c.Width-MarkerClearance+1e-9 || q.Y < MarkerClearance-1e-9 || q.Y > c.Height-MarkerClearance+1e-9 {
+			t.Fatal("an anchor left its marker clearance", q)
+		}
+	}
+	if c.Zoom != plain.Zoom || c.Min != plain.Min || c.Max != plain.Max {
+		t.Fatal("avoiding a point must pan, not refit")
+	}
+	if got := c.Screen(dhaka).X; math.Abs(got+MarkerClearance) > 1e-6 {
+		t.Fatal("the pan should be the smallest that clears the margin", got)
+	}
+	far := Project(-33.8688, 151.2093)
+	if FitAvoiding(390, 281, anchors, []Point{dhaka, dhaka}) != c {
+		t.Fatal("clearing an already-cleared point must not pan again")
+	}
+	if FitAvoiding(390, 281, anchors, []Point{far}) != plain {
+		t.Fatal("a point already outside must not move the frame")
+	}
+	// Squeezed to the clearance on both axes there is no spare room to pan into.
+	tight := FitAvoiding(2*MarkerClearance+1, 2*MarkerClearance+1, anchors, []Point{Project(30, 115)})
+	if tight != Fit(2*MarkerClearance+1, 2*MarkerClearance+1, anchors) {
+		t.Fatal("an unclearable point must leave the fit unchanged")
+	}
+}
