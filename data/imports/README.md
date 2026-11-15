@@ -142,7 +142,7 @@ The world basemap, `assets/terrain/world-land.json`, is no longer written by the
 network compiler. `tools/prepare-basemap.py` composes it after the compiler has
 run, because it reads the compiled lines to decide where the coast is detailed:
 one land outline from the pinned Natural Earth 1:10m land, at 0.003 degrees within
-150 km of any line and 0.05 degrees beyond. See
+150 km of any line, 0.0125 degrees out to 400 km and 0.05 degrees beyond. See
 [the terrain README](../../assets/terrain/README.md#basemap). This is presentation
 data outside the public-network save fingerprint.
 

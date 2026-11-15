@@ -21,10 +21,10 @@ def square(west, south, width, height=None):
     ]
 
 
-def zigzag_square():
-    """A 2-degree square whose south and north edges each carry a 0.01-degree zigzag."""
-    south = [(i * 0.02, 0.01 if i % 2 else 0.0) for i in range(101)]
-    north = [(2 - i * 0.02, 1.99 if i % 2 else 2.0) for i in range(101)]
+def zigzag_square(teeth=0.01):
+    """A 2-degree square whose south and north edges each carry a zigzag with teeth of the given depth."""
+    south = [(i * 0.02, teeth if i % 2 else 0.0) for i in range(101)]
+    north = [(2 - i * 0.02, 2 - teeth if i % 2 else 2.0) for i in range(101)]
     return south + north + [south[0]]
 
 
@@ -104,6 +104,26 @@ def test_land_outlines_never_overlap():
     for i, s in enumerate(shapes):
         assert all(s.intersection(t).area < 1e-12 for t in shapes[i + 1 :])
     assert rule.without_overlaps([a]) == [a]
+
+
+def test_coast_between_150_and_400_km_gets_a_middle_tolerance():
+    # Fine to 150 km and 5 km beyond drew eastern Hokkaido, 150 to 350 km from Sapporo, as spikes.
+    index = rule.NearIndex([[(0, 0), (10, 0)]], [])
+    assert index.tolerances([(5, 0.9), (5, 2.7), (5, 5.4)]) == [rule.FINE, rule.MID, rule.COARSE]  # 100, 300, 600 km
+    assert index.tolerances([(5, 0.9), (5, 2.7)], fine=0.001) == [0.001, rule.MID]  # tightening is for near coast
+    assert rule.FINE < rule.MID < rule.COARSE and rule.NEAR_KM < rule.MID_KM
+    ring = zigzag_square(teeth=0.02)
+    middle = rule.simplify_ring(ring, [rule.MID] * len(ring))
+    coarse = rule.simplify_ring(ring, [rule.COARSE] * len(ring))
+    south_middle = rule.simplify_ring(ring, [rule.MID if lat < 1 else rule.COARSE for _, lat in ring])
+    assert len(coarse) == 5 and len(middle) > 100
+    assert len(coarse) < len(south_middle) < len(middle)
+    assert south_middle[0] == south_middle[-1] and Polygon(south_middle).is_valid
+
+
+def test_no_place_is_detailed_by_exception():
+    # All of Hokkaido was once kept fine by a box around it. The middle tolerance replaced that.
+    assert not hasattr(rule, "NEAR_BOXES")
 
 
 def test_across_km():

@@ -128,7 +128,7 @@ def main():
         other = json.loads(pathlib.Path(sys.argv[sys.argv.index("--compare") + 1]).read_text())
         print(json.dumps(points_off_land(other, existing)))
         return
-    boxes = [rule.tile_bounds(*b) for b in rule.JAPAN_BOXES] + list(rule.NEAR_BOXES.values())
+    boxes = [rule.tile_bounds(*b) for b in rule.JAPAN_BOXES]
     index = rule.NearIndex(existing + [r[2] for r in routes], boxes)
     composed, tightened = fit(mask["land"]["coordinates"], index, routes)
     basemap = {k: composed[k] for k in ("land", "lakes", "lake_islands")}
@@ -156,12 +156,13 @@ def main():
         "line_sources": {p: sha(p) for p in (EXISTING, PROSPECTS, NETWORK)},
         "near_km": rule.NEAR_KM,
         "fine_degrees": rule.FINE,
+        "mid_km": rule.MID_KM,
+        "mid_degrees": rule.MID,
         "coarse_degrees": rule.COARSE,
         "far_island_km": rule.FAR_ISLAND_KM,
         "near_lake_km": rule.NEAR_LAKE_KM,
         "far_lake_km": rule.FAR_LAKE_KM,
         "japan_boxes": [list(b) for b in rule.JAPAN_BOXES],
-        "near_boxes": {name: list(box) for name, box in rule.NEAR_BOXES.items()},
         "winding": "land and lake_islands counter-clockwise, lakes clockwise",
         "tightened": tightened,
         "counts": counts,

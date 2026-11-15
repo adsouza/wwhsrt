@@ -190,8 +190,8 @@ excluded from economic saves, so map decluttering requires no campaign migration
 
 The basemap is one worldwide land outline, `world-land.json`, written by
 `tools/prepare-basemap.py` from the pinned Natural Earth 1:10m land. It is detailed
-within 150 km of any line and coarse beyond, with lakes cut out and no lines
-between countries, and every frame draws it. Data checks enforce its source
+within 150 km of any line, less so out to 400 km and coarse beyond, with lakes
+cut out and no lines between countries, and every frame draws it. Data checks enforce its source
 hashes, its point budget, known places on land and water, and every buildable
 route on drawn land; pixel checks in CI verify coastal water across
 palette/terrain settings.

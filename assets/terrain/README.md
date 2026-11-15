@@ -61,18 +61,19 @@ Natural Earth 1:10m countries merged into physical land, with Natural Earth 1:10
 lakes cut out. There are no lines between countries.
 
 Within 150 km of any line the outline follows the source to 0.003 degrees (about
-300 m); farther away to 0.05 degrees (about 5 km). Detail can change along one
-outline. "A line" is every existing path in `playable-rail-map.json`, every
-buildable alignment in `compiled-prospects.v1.json`, and both alignments of
-`hokkaido-extension` and `tsuruga-osaka`. The Hokkaido and Kansai relief boxes
-count as near a line throughout, and so does the whole of Hokkaido, whose east
-is otherwise drawn to 5 km on the island the first scenario is played on.
-Islands under 25 km across and far from every line are left out, as are lakes
-under 5 km across near a line or under 100 km across far from one; a lake left
-out is drawn as land. No two land outlines overlap, and an island inside a lake
-is cut to the lake as drawn.
+300 m); from there to 400 km, to 0.0125 degrees (about 1.4 km); farther away, to
+0.05 degrees (about 5 km). Detail can change along one outline. The middle step
+is there because a view of a line at regional zoom shows coast that far away:
+without it eastern Hokkaido was drawn with edges 70 km long. "A line" is every
+existing path in `playable-rail-map.json`, every buildable alignment in
+`compiled-prospects.v1.json`, and both alignments of `hokkaido-extension` and
+`tsuruga-osaka`. The Hokkaido and Kansai relief boxes count as on a line
+throughout. Islands under 25 km across and more than 150 km from every line are
+left out, as are lakes under 5 km across within 150 km of a line or under 100 km
+across beyond it; a lake left out is drawn as land. No two land outlines
+overlap, and an island inside a lake is cut to the lake as drawn.
 
-The result is 74,361 points in 2,002 outlines: 1,505 land, 292 lakes and 205
+The result is 84,164 points in 1,997 outlines: 1,500 land, 292 lakes and 205
 islands inside lakes. Every buildable route lies on the drawn land or its
 reviewed crossing. The tool simplifies less where one would not; none needed it.
 

@@ -16,20 +16,22 @@ from shapely.ops import transform, unary_union
 
 NEAR_KM = 150
 FINE = 0.003
+# Between NEAR_KM and MID_KM the coast follows the source to MID degrees (about 1.4 km). A view of a
+# line at regional zoom shows coast this far away: with nothing between FINE and COARSE, eastern
+# Hokkaido, 150 to 350 km from Sapporo, was drawn with edges 70 km long. Of the rules measured this
+# one bought the most for its points; finer steps out to 1,200 km cost twice as many for no more.
+MID_KM = 400
+MID = 0.0125
 COARSE = 0.05
 FAR_ISLAND_KM = 25
 NEAR_LAKE_KM = 5
 FAR_LAKE_KM = 100
 # Tolerances tried in turn where FINE would put a buildable route offshore.
 LADDER = [0.003, 0.001, 0.0003, 0.0001, 0]
-MAX_POINTS = 80000
+MAX_POINTS = 88000
 MAX_OUTLINES = 2200
 # The Hokkaido and Kansai relief boxes (zoom, x0, y0, x1, y1). Relief there is detailed, so the coast is too.
 JAPAN_BOXES = [(8, 227, 93, 228, 95), (8, 224, 100, 225, 101)]
-# Places kept detailed whatever their distance from a line (west, south, east, north). Hokkaido's east
-# and north are more than 150 km from any line; drawn to 5 km at the Japan region's zoom, the Shiretoko
-# and Nemuro peninsulas were spikes on the island the first scenario is played on.
-NEAR_BOXES = {"hokkaido": (139.2, 41.3, 146.0, 45.6)}
 EARTH_KM = 6371.0
 SAMPLE_KM = 10
 
@@ -88,23 +90,36 @@ def _unit(points):
 
 
 class NearIndex:
-    """Answers whether a point is within km of any path, or inside any box."""
+    """Answers how far points are from any path, in the rule's terms. Inside a box counts as on a path."""
 
-    def __init__(self, paths, boxes, km=NEAR_KM):
+    def __init__(self, paths, boxes, km=NEAR_KM, mid_km=MID_KM):
         samples = [p for path in paths for p in sample(path)]
         self.tree = cKDTree(_unit(samples)) if samples else None
         self.chord = 2 * math.sin(km / EARTH_KM / 2)
+        self.mid_chord = 2 * math.sin(mid_km / EARTH_KM / 2)
         self.boxes = list(boxes)
 
-    def flags(self, ring):
+    def _within(self, ring):
+        """For each point: within NEAR_KM, and within MID_KM."""
         points = np.asarray([p[:2] for p in ring], dtype=float)
         near = np.zeros(len(points), dtype=bool)
         for west, south, east, north in self.boxes:
             near |= (points[:, 0] >= west) & (points[:, 0] <= east) & (points[:, 1] >= south) & (points[:, 1] <= north)
+        middle = near.copy()
         if self.tree is not None and len(points):
-            distance, _ = self.tree.query(_unit(points), distance_upper_bound=self.chord)
-            near |= np.isfinite(distance)
-        return [bool(v) for v in near]
+            distance, _ = self.tree.query(_unit(points), distance_upper_bound=self.mid_chord)
+            near |= distance <= self.chord
+            middle |= np.isfinite(distance)
+        return near, middle
+
+    def flags(self, ring):
+        """Whether each point is near a line: within NEAR_KM."""
+        return [bool(v) for v in self._within(ring)[0]]
+
+    def tolerances(self, ring, fine=FINE):
+        """The tolerance for each point: fine near a line, MID out to MID_KM, COARSE beyond."""
+        near, middle = self._within(ring)
+        return [fine if n else MID if m else COARSE for n, m in zip(near, middle)]
 
     def near(self, lon, lat):
         return self.flags([(lon, lat)])[0]
@@ -129,45 +144,53 @@ def _simplify_run(points, tolerance):
     return [tuple(p) for p in LineString(points).simplify(tolerance, preserve_topology=True).coords]
 
 
-def _joined(points, flags, fine, coarse):
+def _joined(points, tolerances):
     n = len(points)
-    if all(flags) or not any(flags):
-        tolerance = fine if flags[0] else coarse
+    if len(set(tolerances)) == 1:
         closed = points + [points[0]]
-        if tolerance <= 0:
+        if tolerances[0] <= 0:
             return closed
-        return [tuple(p) for p in Polygon(closed).simplify(tolerance, preserve_topology=True).exterior.coords]
-    # Start where the detail changes, so every run of equal flags is simplified as one open line. A run
-    # ends on the first point of the next, and simplifying keeps end points, so the runs still join.
-    start = next(i for i in range(n) if flags[i] != flags[i - 1])
+        return [tuple(p) for p in Polygon(closed).simplify(tolerances[0], preserve_topology=True).exterior.coords]
+    # Start where the detail changes, so every run of one tolerance is simplified as one open line. A
+    # run ends on the first point of the next, and simplifying keeps end points, so the runs still join.
+    start = next(i for i in range(n) if tolerances[i] != tolerances[i - 1])
     order = [(start + k) % n for k in range(n)] + [start]
     out, run = [], [order[0]]
     for index in order[1:]:
         run.append(index)
-        if index == start or flags[index] != flags[run[0]]:
-            out += _simplify_run([points[i] for i in run], fine if flags[run[0]] else coarse)[:-1]
+        if index == start or tolerances[index] != tolerances[run[0]]:
+            out += _simplify_run([points[i] for i in run], tolerances[run[0]])[:-1]
             run = [index]
     return out + [out[0]]
 
 
-def simplify_ring(ring, flags, fine=FINE, coarse=COARSE):
-    """Simplify a closed ring at fine where flags are true and at coarse elsewhere."""
+def _open(ring, detail, fine, coarse):
+    """The ring without its closing point, and a tolerance for each remaining point.
+
+    detail gives, per point, either a tolerance or a flag: true for fine, false for coarse.
+    """
     points = [tuple(p[:2]) for p in ring]
-    flags = list(flags)
+    tolerances = [(fine if d else coarse) if isinstance(d, bool) else float(d) for d in detail]
     if points[0] == points[-1]:
-        points, flags = points[:-1], flags[: len(points) - 1]
-    tolerance = coarse
+        points, tolerances = points[:-1], tolerances[: len(points) - 1]
+    return points, tolerances
+
+
+def simplify_ring(ring, detail, fine=FINE, coarse=COARSE):
+    """Simplify a closed ring to the tolerance given for each point (or fine and coarse by flag)."""
+    points, tolerances = _open(ring, detail, fine, coarse)
+    finest, cap = min(tolerances), max(tolerances)
     while True:
-        out = _joined(points, flags, fine, tolerance)
+        out = _joined(points, [min(t, cap) for t in tolerances])
         if len(out) >= 4 and Polygon(out).is_valid:
             return out
-        if tolerance <= fine:
-            # Two runs crossed each other. Simplify the ring whole at the fine tolerance, which cannot.
+        if cap <= finest:
+            # Two runs crossed each other. Simplify the ring whole at its finest tolerance, which cannot.
             closed = points + [points[0]]
-            if fine <= 0:
+            if finest <= 0:
                 return closed
-            return [tuple(p) for p in Polygon(closed).simplify(fine, preserve_topology=True).exterior.coords]
-        tolerance = max(fine, tolerance / 2)
+            return [tuple(p) for p in Polygon(closed).simplify(finest, preserve_topology=True).exterior.coords]
+        cap = max(finest, cap / 2)
 
 
 def _polygons(geometry):
@@ -186,17 +209,13 @@ def valid_rings(ring):
     return [[tuple(p) for p in part.exterior.coords] for part in parts]
 
 
-def simplify_outline(ring, flags, fine=FINE, coarse=COARSE):
+def simplify_outline(ring, detail, fine=FINE, coarse=COARSE):
     """simplify_ring for a land outline, which may come back as more than one ring.
 
     Runs simplified apart can cross each other where the coast doubles back within the tolerance.
     Splitting the outline at such a crossing keeps the rest of it at the tolerances asked for.
     """
-    points = [tuple(p[:2]) for p in ring]
-    flags = list(flags)
-    if points[0] == points[-1]:
-        points, flags = points[:-1], flags[: len(points) - 1]
-    return valid_rings(_joined(points, flags, fine, coarse))
+    return valid_rings(_joined(*_open(ring, detail, fine, coarse)))
 
 
 def _emitted(ring, counter_clockwise):
@@ -298,7 +317,8 @@ def compose(polygons, index, fine_for=None):
         if across_km(hole) < (NEAR_LAKE_KM if near else FAR_LAKE_KM):
             return None
         fine = fine_for.get(i, FINE)
-        for ring in (simplify_ring(hole, flags, fine), simplify_ring(hole, flags, fine, fine), list(map(tuple, hole))):
+        graded, even = index.tolerances(hole, fine), [fine] * len(hole)
+        for ring in (simplify_ring(hole, graded), simplify_ring(hole, even), list(map(tuple, hole))):
             if Polygon(ring).is_valid and Polygon(ring).within(exterior):
                 return ring
         return None
@@ -315,7 +335,7 @@ def compose(polygons, index, fine_for=None):
             left_out_islands += 1
             left_out_lakes += len(polygon) - 1
             continue
-        outline = simplify_outline(polygon[0], flags, fine_for.get(i, FINE))
+        outline = simplify_outline(polygon[0], index.tolerances(polygon[0], fine_for.get(i, FINE)))
         exterior = unary_union([Polygon(ring) for ring in outline])
         kept = [(i, ring) for ring in outline]
         for h in range(len(polygon) - 1):
@@ -339,8 +359,7 @@ def compose(polygons, index, fine_for=None):
         left_out_lakes += len(polygon) - 1  # a lake on an island in a lake is not drawn
         if lake is None:
             continue  # its lake was left out, so the island is already part of the land around it
-        flags = index.flags(polygon[0])
-        island = Polygon(simplify_ring(polygon[0], flags, fine_for.get(i, FINE)))
+        island = Polygon(simplify_ring(polygon[0], index.tolerances(polygon[0], fine_for.get(i, FINE))))
         if not island.within(lake):
             # Simplifying the lake moved its shore across the island. Keep the part still in the lake.
             island = Polygon(polygon[0]).intersection(lake)

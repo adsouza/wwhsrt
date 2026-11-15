@@ -111,8 +111,8 @@ func TestBasemapMatchesItsMetadata(t *testing.T) {
 		}
 	}
 	t.Logf("%d points in %d outlines", points, len(b.rings))
-	if points > 80000 || len(b.rings) > 2200 {
-		t.Fatalf("basemap has %d points in %d outlines; the budget is 80000 and 2200", points, len(b.rings))
+	if points > 88000 || len(b.rings) > 2200 {
+		t.Fatalf("basemap has %d points in %d outlines; the budget is 88000 and 2200", points, len(b.rings))
 	}
 }
 
@@ -508,17 +508,17 @@ func TestLandFillPaintsExactlyTheLand(t *testing.T) {
 	}
 }
 
-// Hokkaido's east and north are more than 150 km from any line, so the rule alone drew them to 5 km:
-// at the Japan region's zoom the Shiretoko and Nemuro peninsulas came out as spikes, where the whole
-// island had been detailed before.
-func TestAllOfHokkaidoIsDetailed(t *testing.T) {
+// Coast between 150 and 400 km from a line is drawn to 1.4 km, not 5. Eastern Hokkaido is 150 to
+// 350 km from Sapporo: with nothing between fine and coarse, the Shiretoko and Nemuro peninsulas came
+// out as spikes at the Japan region's zoom, where the whole island had been detailed before.
+func TestCoastJustBeyondALineIsNotCrude(t *testing.T) {
 	b := loadBasemap(t)
 	for _, ring := range b.landRings() {
 		if !ringContains(ring, [2]float64{141.35, 43.06}) { // Sapporo
 			continue
 		}
-		// A detailed coast has no long straight edges; the smooth Okhotsk shore's longest is 19 km. The
-		// spikes were drawn with edges of 50 km and more.
+		// A well-drawn coast has no long straight edges: here the longest is 29 km, on the smooth
+		// Okhotsk shore. The spikes were drawn with edges up to 71 km.
 		longest := 0.0
 		for i := 1; i < len(ring); i++ {
 			a, c := ring[i-1], ring[i]
@@ -527,8 +527,8 @@ func TestAllOfHokkaidoIsDetailed(t *testing.T) {
 				longest = max(longest, km)
 			}
 		}
-		if longest == 0 || longest > 30 {
-			t.Fatalf("Hokkaido's coast east of 143°E has an edge %.0f km long; detailed, none passes 30", longest)
+		if longest == 0 || longest > 40 {
+			t.Fatalf("Hokkaido's coast east of 143°E has an edge %.0f km long; none should pass 40", longest)
 		}
 		return
 	}

@@ -283,14 +283,20 @@ stencil small) and made hosted CI run the browser and data checks on push. The
 build follows that code. Where it differs from the text above:
 
 - **Far islands: 25 km, not 20.** At 20 km the basemap had 2,343 outlines against
-  the budget of 2,200. At 25 km it has 2,002 outlines and 74,361 points: 1,505
-  land, 292 lakes, 205 islands inside lakes; 2,552 islands and 1,042 lakes left
-  out.
-- **All of Hokkaido is detailed.** Its east and north are more than 150 km from
-  any line, and at the Japan region's zoom a 5 km coast drew the Shiretoko and
-  Nemuro peninsulas as spikes, where the whole island had been detailed before.
-  The same angular look remains on other coasts far from lines when they are
-  viewed closely; that is the rule as approved.
+  the budget of 2,200. At 25 km it has 1,997 outlines: 1,500 land, 292 lakes,
+  205 islands inside lakes; 2,557 islands and 1,042 lakes left out.
+- **A middle step: 1.4 km out to 400 km (decided by the user, 2026-11-15).** With
+  nothing between fine and coarse, eastern Hokkaido, 150 to 350 km from
+  Sapporo, was drawn with edges up to 71 km long, as spikes at the Japan
+  region's zoom, where the whole island had been detailed before. I first kept
+  all of Hokkaido fine by a box around it; the user asked why, and chose a rule
+  that applies everywhere. Coast between 150 and 400 km from a line is drawn to
+  0.0125 degrees. Eastern Hokkaido's longest edge is now 29 km. The basemap has
+  84,164 points, and the point budget is 88,000, not 80,000. Of the rules
+  measured this bought the most: finer steps out to 1,200 km cost 100,000
+  points for an edge of 28 km, and scaling the island and lake limits with
+  distance took the World view past its vertex limit. The World view itself
+  draws the same under every rule, since all are finer than a pixel there.
 - **No route needed tightening.** All 76 alignments of the 74 buildable routes
   lie on the drawn land at 0.003 degrees.
 - **Lakes are holes, by the even-odd rule.** The land fill is a fan of triangles
@@ -307,7 +313,7 @@ build follows that code. Where it differs from the text above:
   tolerance the World view drew 45,849 land vertices against a guard of 22,000
   (`TestWorldViewGeometryStaysNearScreenResolution`), because the finer coast has
   more to show. Each point now carries a rank computed once at load, and the map
-  draws the points whose rank exceeds one pixel at the current zoom: 21,749
+  draws the points whose rank exceeds one pixel at the current zoom: 21,794
   vertices at the World view. The choice does not depend on where the camera is,
   so the coast does not shimmer when dragged. An outline with no shape at the
   current zoom is drawn as a sliver when it is at least three pixels long and
@@ -338,12 +344,14 @@ seconds (land redraw mean, 95th percentile, footprint at the end):
 
 | View | Before | After |
 |---|---|---|
-| World | 9.9 ms, 10.6 ms, 2.6 GB | 3.1 ms, 3.5 ms, 2.5 GB |
-| Japan | 3.0 ms, 3.1 ms, 1.2 GB | 0.5 ms, 0.6 ms, 1.2 GB |
+| World | 9.9 ms, 10.6 ms, 2.6 GB | 2.9 ms, 3.5 ms, 1.9 GB |
+| Japan | 3.0 ms, 3.1 ms, 1.2 GB | 0.6 ms, 0.7 ms, 1.2 GB |
 
 The After figures are the final build, with the flip fill; with Ebitengine's fill
 and the coast in runs they were 7.4 ms and 1.5 ms at the same footprints. The
-tool takes about 7 seconds and 613 MB. `world-land.json` is 1.69 MB, up from
+tool takes about 7 seconds and 613 MB. The World view's footprint varied
+between 1.9 and 2.5 GB across runs of the same build. `world-land.json` is
+1.90 MB, up from
 1.05 MB; the regional file it retires was 345 KB.
 
 A fresh review of the whole branch found the streaks, an outline that rounding
