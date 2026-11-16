@@ -256,3 +256,12 @@ func TestLandscapeRegionsOpenOnTheirOwnFit(t *testing.T) {
 		}
 	}
 }
+
+func TestUnprojectReversesProject(t *testing.T) {
+	for _, place := range [][2]float64{{0, 0}, {42.8, 140.8}, {6.2, -75.6}, {-59, 30}, {80, -170}, {-85, 179}} {
+		lat, lon := Unproject(Project(place[0], place[1]))
+		if math.Abs(lat-place[0]) > 1e-9 || math.Abs(lon-place[1]) > 1e-9 {
+			t.Errorf("%v came back as %v, %v", place, lat, lon)
+		}
+	}
+}

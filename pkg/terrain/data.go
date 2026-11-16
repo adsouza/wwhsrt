@@ -2,35 +2,41 @@
 package terrain
 
 import (
-	"bytes"
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"image"
-	_ "image/png"
 	"io/fs"
-	"math"
-	"wwhsrt/pkg/mapview"
 )
+
+// Kind says what a tile holds.
+type Kind uint8
+
+const (
+	// Land tiles are land in every pixel and have only a colour image.
+	Land Kind = iota
+	// Coast tiles are part land and carry a one-bit mask beside their colour image.
+	Coast
+	// Sea tiles have no land and no files. They are listed so that a line over open water is known to
+	// be covered, and so that nothing coarser is drawn in their place.
+	Sea
+)
+
+func (k Kind) String() string { return [...]string{"land", "coast", "sea"}[k] }
+
+// Tile is one listed tile: its kind and the SHA-256 of its files.
+type Tile struct {
+	Kind         Kind
+	SHA, MaskSHA string
+}
 
 type Contour struct {
 	Metres int          `json:"metres"`
-	Points [][2]float64 `json:"points"`
+	Points [][2]float64 `json:"points"` // latitude, longitude
 }
+
+// Region is one of the two areas of Japan that keep contour lines.
 type Region struct {
-	ID       string      `json:"id"`
-	File     string      `json:"file"`
-	SHA      string      `json:"sha256"`
-	Zoom     int         `json:"zoom"`
-	X0       int         `json:"x0"`
-	Y0       int         `json:"y0"`
-	TilesX   int         `json:"tiles_x"`
-	TilesY   int         `json:"tiles_y"`
-	Width    int         `json:"width"`
-	Height   int         `json:"height"`
-	Contours []Contour   `json:"contours"`
-	Image    image.Image `json:"-"`
+	ID       string    `json:"id"`
+	Contours []Contour `json:"contours"`
 }
 type Feature struct {
 	Key    string  `json:"key"`
@@ -39,95 +45,119 @@ type Feature struct {
 	Lon    float64 `json:"lon"`
 	Region string  `json:"region"`
 }
-type Lake struct {
-	Key    string       `json:"key"`
-	Points [][2]float64 `json:"points"`
-}
-type Data struct {
-	Regions  []Region `json:"regions"`
+
+// Set is the relief the game ships: which tiles exist, and the hand-made context for Japan.
+type Set struct {
+	Tiles map[Address]Tile
+	// BasemapSHA is the SHA-256 of the land outline the tiles were cut to.
+	BasemapSHA string
+	// Complete is false for a sample that covers only some lines.
+	Complete bool
+	Regions  []Region
 	Features []Feature
-	Lakes    []Lake
 }
 
-// GeographicPixel converts a source pixel position to geographic coordinates.
-// The renderer then applies Equal Earth; source tile projection is never a camera.
-func GeographicPixel(r Region, x, y float64) (lat, lon float64) {
-	n := math.Exp2(float64(r.Zoom))
-	lon = (float64(r.X0)+x/256)/n*360 - 180
-	lat = math.Atan(math.Sinh(math.Pi*(1-2*(float64(r.Y0)+y/256)/n))) * 180 / math.Pi
-	return
-}
-func Load(files fs.FS) (Data, error) {
-	var d Data
+// Load reads the manifest and the features. It reads and decodes no tile.
+func Load(files fs.FS) (*Set, error) {
 	b, e := fs.ReadFile(files, "terrain/terrain.json")
 	if e != nil {
-		return d, e
+		return nil, e
 	}
 	var manifest struct {
-		Schema  int      `json:"schema_version"`
-		Regions []Region `json:"regions"`
+		Schema   int      `json:"schema_version"`
+		Basemap  string   `json:"basemap_sha256"`
+		Complete bool     `json:"complete"`
+		Tiles    [][]any  `json:"tiles"`
+		Regions  []Region `json:"regions"`
 	}
 	if e = json.Unmarshal(b, &manifest); e != nil {
-		return d, e
+		return nil, e
 	}
-	if manifest.Schema != 1 || len(manifest.Regions) != 2 {
-		return d, fmt.Errorf("invalid terrain manifest")
+	if manifest.Schema != 2 || manifest.Basemap == "" {
+		return nil, fmt.Errorf("invalid terrain manifest")
 	}
-	d.Regions = manifest.Regions
-	for i := range d.Regions {
-		r := &d.Regions[i]
-		if r.Zoom != 8 || r.TilesX < 1 || r.TilesX > 4 || r.TilesY < 1 || r.TilesY > 4 || r.Width != r.TilesX*256 ||
-			r.Height != r.TilesY*256 {
-			return d, fmt.Errorf("invalid terrain dimensions")
-		}
-		b, e = fs.ReadFile(files, "terrain/"+r.File)
+	s := &Set{
+		Tiles:      make(map[Address]Tile, len(manifest.Tiles)),
+		BasemapSHA: manifest.Basemap,
+		Complete:   manifest.Complete,
+		Regions:    manifest.Regions,
+	}
+	for _, entry := range manifest.Tiles {
+		a, tile, e := listed(entry)
 		if e != nil {
-			return d, e
+			return nil, e
 		}
-		sum := sha256.Sum256(b)
-		if hex.EncodeToString(sum[:]) != r.SHA {
-			return d, fmt.Errorf("terrain image checksum mismatch")
+		if s.has(a) {
+			return nil, fmt.Errorf("terrain tile %v is listed twice", a)
 		}
-		r.Image, _, e = image.Decode(bytes.NewReader(b))
-		if e != nil {
-			return d, e
-		}
-		if r.Image.Bounds().Dx() != r.Width || r.Image.Bounds().Dy() != r.Height {
-			return d, fmt.Errorf("terrain image size mismatch")
-		}
+		s.Tiles[a] = tile
+	}
+	for _, r := range s.Regions {
 		for _, line := range r.Contours {
 			if len(line.Points) < 2 {
-				return d, fmt.Errorf("invalid contour")
+				return nil, fmt.Errorf("invalid contour")
 			}
 			for _, p := range line.Points {
 				if !valid(p[0], p[1]) {
-					return d, fmt.Errorf("invalid contour coordinate")
+					return nil, fmt.Errorf("invalid contour coordinate")
 				}
 			}
 		}
 	}
 	b, e = fs.ReadFile(files, "terrain/features.json")
 	if e != nil {
-		return d, e
+		return nil, e
 	}
 	var features struct {
 		Features []Feature `json:"features"`
-		Lakes    []Lake    `json:"lakes"`
 	}
 	if e = json.Unmarshal(b, &features); e != nil {
-		return d, e
+		return nil, e
 	}
-	d.Features = features.Features
-	d.Lakes = features.Lakes
-	for _, f := range d.Features {
+	s.Features = features.Features
+	for _, f := range s.Features {
 		if !valid(f.Lat, f.Lon) {
-			return d, fmt.Errorf("invalid terrain feature")
+			return nil, fmt.Errorf("invalid terrain feature")
 		}
 	}
-	return d, nil
+	return s, nil
 }
+
+// listed reads one manifest entry: [level, column, row, kind], then the colour image's hash unless the
+// tile is sea, then the mask's hash if it is a coast tile.
+func listed(entry []any) (Address, Tile, error) {
+	bad := func() (Address, Tile, error) { return Address{}, Tile{}, fmt.Errorf("invalid terrain tile %v", entry) }
+	if len(entry) < 4 {
+		return bad()
+	}
+	var n [3]int
+	for i := range n {
+		f, ok := entry[i].(float64)
+		if !ok || f != float64(int(f)) {
+			return bad()
+		}
+		n[i] = int(f)
+	}
+	a := Address{n[0], n[1], n[2]}
+	if a.Z < MinLevel || a.Z > MaxLevel || a.X < 0 || a.Y < 0 || a.X >= 1<<a.Z || a.Y >= 1<<a.Z {
+		return bad()
+	}
+	text := make([]string, len(entry)-3)
+	for i := range text {
+		var ok bool
+		if text[i], ok = entry[i+3].(string); !ok || text[i] == "" {
+			return bad()
+		}
+	}
+	switch {
+	case text[0] == "sea" && len(text) == 1:
+		return a, Tile{Kind: Sea}, nil
+	case text[0] == "land" && len(text) == 2:
+		return a, Tile{Kind: Land, SHA: text[1]}, nil
+	case text[0] == "coast" && len(text) == 3:
+		return a, Tile{Kind: Coast, SHA: text[1], MaskSHA: text[2]}, nil
+	}
+	return bad()
+}
+
 func valid(lat, lon float64) bool { return lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180 }
-func ProjectedPixel(r Region, x, y float64) mapview.Point {
-	lat, lon := GeographicPixel(r, x, y)
-	return mapview.Project(lat, lon)
-}

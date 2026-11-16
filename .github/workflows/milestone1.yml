@@ -84,7 +84,7 @@ jobs:
           python-version: '3.12'
           cache: pip
           cache-dependency-path: tools/requirements-*.txt
-      - run: python -m pip install -r tools/requirements-geography.txt -r tools/requirements-public-network.txt
+      - run: python -m pip install -r tools/requirements-geography.txt -r tools/requirements-public-network.txt -r tools/requirements-terrain.txt
       - name: Geography and public-network checks
         # The checks only read committed data, so they run in three lanes balanced by measured time:
         # launch prospects alone (~40 s locally), the two preparation checks (~35 s), and the rest (~6 s).
@@ -104,7 +104,8 @@ jobs:
             tools/test-basemap.py 'tools/prepare-basemap.py --check' &
           pids+=($!)
           lane network tools/check-route-geography.py 'tools/import-public-network.py --check' \
-            tools/check-regional-network.py tools/test-network-coverage.py 'tools/audit-public-network.py --check --strict' &
+            tools/check-regional-network.py tools/test-network-coverage.py 'tools/audit-public-network.py --check --strict' \
+            tools/test-terrain.py &
           pids+=($!)
           status=0
           for i in "${!names[@]}"; do
