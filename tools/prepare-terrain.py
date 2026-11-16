@@ -42,7 +42,6 @@ PINS = ROOT / "data/terrain/sources.v1.json"
 BASEMAP = OUT / "world-land.json"
 ATTRIBUTION = OUT / "ATTRIBUTION.md"
 SOURCE = "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{}/{}/{}.png"
-DEFAULT_SOURCES = "srtm, gmted, etopo1"  # for a pinned tile cached before its headers were kept
 
 
 def basemap_tool():
@@ -154,23 +153,36 @@ def fetch(levels):
     print(f"{len(tiles)} source tiles cached and pinned, {size / 1e6:.0f} MB")
 
 
+def credit_gaps(citations, attribution_text):
+    """Count the datasets the citations name, and return what has no credit.
+
+    A source with no dataset header is a gap too: it cannot be shown to be credited.
+    """
+    counts, unknown = collections.Counter(), 0
+    for cited in citations:
+        names = T.datasets(cited or "")
+        unknown += not names
+        counts.update(names)
+    gaps = T.uncredited(set(counts), attribution_text)
+    if unknown:
+        gaps.add("a source tile with no dataset header")
+    return dict(counts), gaps
+
+
 def survey(levels):
-    """Print each cited dataset with its tile count. Returns the uncredited names."""
-    pins, counts, unknown = load_pins(), collections.Counter(), 0
+    """Print each cited dataset with its tile count. Returns what has no credit."""
+    pins, citations = load_pins(), []
     for tile in tiles_of(levels):
         cited = headers(*tile).get("x-amz-meta-x-imagery-sources") or pins.get(key(*tile), {}).get("imagery_sources")
         if cited is None:
             raise SystemExit(f"Source tile {key(*tile)} is not cached; run --fetch")
-        unknown += not cited
-        counts.update(T.datasets(cited or DEFAULT_SOURCES))
-    for name, count in counts.most_common():
+        citations.append(cited)
+    counts, gaps = credit_gaps(citations, ATTRIBUTION.read_text())
+    for name, count in sorted(counts.items(), key=lambda item: -item[1]):
         print(f"{name}: {count} tiles")
-    if unknown:
-        print(f"{unknown} tiles carry no source header")
-    missing = T.uncredited(set(counts), ATTRIBUTION.read_text())
-    if missing:
-        print("uncredited:", ", ".join(sorted(missing)))
-    return missing
+    if gaps:
+        print("uncredited:", ", ".join(sorted(gaps)))
+    return gaps
 
 
 def write_tile(out, z, x, y, rgb, mask):
@@ -265,17 +277,34 @@ def remove_unlisted(out, entries):
 def write(levels, complete):
     pins, land = load_pins(), T.densified(drawn_land())
     tiles_out = OUT / "tiles"
-    entries, counts = [], collections.Counter()
+    entries, counts, above = [], collections.Counter(), {}
     for z in sorted(levels):
-        heights = {(x, y): decode(z, x, y, pins) for x, y in sorted(levels[z])}
+        # A level's own heights, and how far the level above lies over them (see terrain_rule.ice_weight).
+        own = {(x, y): decode(z, x, y, pins) for x, y in sorted(levels[z])}
+        gaps = {
+            (x, y): (np.maximum(T.from_parent(above[(x >> 1, y >> 1)], x, y), 0) - np.maximum(tile, 0)).astype(np.float32)
+            for (x, y), tile in own.items()
+            if (x >> 1, y >> 1) in above
+        }
+        heights, iced = {}, []
+        for (x, y), tile in own.items():
+            heights[(x, y)] = tile
+            if (x, y) in gaps:
+                weight = T.ice_weight(with_halo(gaps, z, x, y, T.ICE_WINDOW // 2))
+                if weight.any():
+                    heights[(x, y)] = (np.maximum(tile, 0) + weight * gaps[(x, y)]).astype(np.float32)
+                    iced.append(f"{x}/{y} ({100 * weight.mean():.0f}%)")
+        del own, gaps
         for x, y in sorted(heights):
             samples = T.overlapped(with_halo(heights, z, x, y))
-            mask = T.land_mask(samples[1:-1, 1:-1], land, z, x, y)
+            mask = T.land_mask(land, z, x, y)
             rgb = T.shade(samples, z, y)
             entry = write_tile(tiles_out, z, x, y, rgb, mask)
             entries.append(entry)
             counts[(z, entry[3])] += 1
-        print(f"level {z}: " + ", ".join(f"{counts[(z, k)]} {k}" for k in ("land", "coast", "sea")), flush=True)
+        under_ice = f"; {len(iced)} take some surface from level {z - 1}: {' '.join(iced)}" if iced else ""
+        print(f"level {z}: " + ", ".join(f"{counts[(z, k)]} {k}" for k in ("land", "coast", "sea")) + under_ice, flush=True)
+        above = heights
     remove_unlisted(tiles_out, entries)
     manifest = {
         "schema_version": 2,

@@ -150,19 +150,75 @@ def test_high_ground_is_not_all_one_tone():
     assert int(high[0, 0, 2]) - int(low[0, 0, 2]) > 90  # Bogota's plateau and a 4,800 m peak differ
 
 
-def test_mask_needs_both_height_and_drawn_land():
+def test_a_parents_quarter_is_enlarged_in_place():
+    rows, cols = np.mgrid[0:256, 0:256].astype(np.float64)
+    parent = 10 * cols + 1000 * rows  # parent pixel j is centred j + 0.5 from its edge
+    child = T.from_parent(parent, 5, 4)  # odd column, even row: the north-east quarter
+    assert child.shape == (256, 256)
+    # Child pixel j is centred (j + 0.5) / 2 parent pixels into the quarter, which starts at column 128.
+    assert np.isclose(child[100, 100], 10 * (128 + 50.25 - 0.5) + 1000 * (50.25 - 0.5))
+    assert np.isclose(child[0, 255], 10 * 255) and np.isclose(child[255, 0], 10 * (128 - 0.25) + 1000 * 127.25)
+
+
+def test_ground_under_ice_takes_the_surface_from_the_level_above():
+    # The level-5 source is a bedrock grid. Under Greenland's ice it lies up to 2.8 km below the surface
+    # the level above shows. The gap between the two, averaged over about 160 km, says where the ice is.
+    half = T.ICE_WINDOW // 2
+    size = 256 + 2 * half
+    assert np.allclose(T.ice_weight(np.full((size, size), 2000.0)), 1)  # deep under the ice sheet
+    assert np.allclose(T.ice_weight(np.zeros((size, size))), 0)  # ordinary ground
+    # Mountains are not ice: valleys lie far below the coarse level's average and peaks far above it, but
+    # the gap averages out, so nothing is filled in.
+    rows, cols = np.mgrid[0:size, 0:size]
+    ranges = 900 * np.sin(cols / 3.0) * np.cos(rows / 2.0)
+    assert np.abs(ranges).max() > 800 and np.allclose(T.ice_weight(ranges), 0)
+    # A lake's surface above the lake bed the coarser level shows is a negative gap: left alone.
+    assert np.allclose(T.ice_weight(np.full((size, size), -300.0)), 0)
+    # Across the ice margin the weight rises smoothly, with no step for the shading to catch.
+    margin = np.tile(np.clip((np.arange(size) - 60) * 20.0, 0, 3000), (size, 1))
+    weight = T.ice_weight(margin)
+    assert weight.shape == (256, 256) and weight[100, 0] == 0 and weight[100, 255] == 1
+    assert (np.diff(weight[100]) >= 0).all() and np.diff(weight[100]).max() < 0.1
+
+
+def test_the_ice_margin_does_not_step_at_a_tile_edge():
+    # Two tiles side by side, with ice thickening eastwards across both: the weights at their shared
+    # edge agree, because each tile sees its neighbour's gap.
+    P = tool()
+    half = T.ICE_WINDOW // 2
+    cols = np.arange(512, dtype=np.float64)
+    west, east = np.tile(cols[:256], (256, 1)), np.tile(cols[256:], (256, 1))  # 255 m at the shared edge
+    gaps = {(5, 5): west.astype(np.float32), (6, 5): east.astype(np.float32)}
+    a = T.ice_weight(P.with_halo(gaps, 8, 5, 5, half))
+    b = T.ice_weight(P.with_halo(gaps, 8, 6, 5, half))
+    assert 0 < a[100, 255] < 1 and abs(a[100, 255] - b[100, 0]) < 0.02
+
+
+def test_a_source_with_no_header_is_not_assumed_credited():
+    P = tool()
+    text = "SRTM and GMTED2010 from USGS; ETOPO1 from NOAA."
+    counts, gaps = P.credit_gaps(["srtm/a.tif, etopo1/b.tif", "gmted/c.tif"], text)
+    assert gaps == set() and counts == {"srtm": 1, "etopo1": 1, "gmted": 1}
+    _, gaps = P.credit_gaps(["srtm/a.tif", "", "ned/d.tif"], text)
+    assert gaps == {"ned", "a source tile with no dataset header"}
+
+
+def test_land_is_the_drawn_basemap_whatever_its_height():
+    # Polders, deltas and basins lie at or below sea level and are land all the same. Before tiles were
+    # cut to the basemap, height above 1 m was the only way to tell land from sea; kept as a second
+    # test it left such ground without relief, which showed as dark blotches in the dark palette.
     land = T.densified(shapely.geometry.box(0, 0, 0.7, 1.5))  # tile 8/128/127 spans 0 to 1.40625 E: its western half
-    mask = T.land_mask(np.full((256, 256), 50.0), land, 8, 128, 127)
+    mask = T.land_mask(land, 8, 128, 127)
     assert mask.dtype == bool and mask.shape == (256, 256)
     assert mask[128, 10] and not mask[128, 250]
-    assert not T.land_mask(np.full((256, 256), 0.5), land, 8, 128, 127).any()
+    assert "heights" not in T.land_mask.__code__.co_varnames
 
 
 def test_mask_leaves_lakes_clear_and_keeps_their_islands():
     lake = shapely.geometry.box(0.4, 0.4, 1.0, 1.0)
     island = shapely.geometry.box(0.6, 0.6, 0.8, 0.8)
     land = T.densified(shapely.geometry.box(0, 0, 1.40625, 1.5).difference(lake).union(island))
-    mask = T.land_mask(np.full((256, 256), 50.0), land, 8, 128, 127)
+    mask = T.land_mask(land, 8, 128, 127)
 
     def at(lon, lat):
         return mask[T.texel(8, 128, 127, lon, lat)[::-1]]
@@ -181,7 +237,7 @@ def test_mask_follows_map_straight_edges():
     z = 8
     x, y = T.tile_at(z, lon, lat)
     land = T.densified(shapely.geometry.Polygon([a, b, (105.0, 58.0)]))  # land lies south-east of the edge
-    mask = T.land_mask(np.full((256, 256), 50.0), land, z, x, y)
+    mask = T.land_mask(land, z, x, y)
     col, row = T.texel(z, x, y, lon, lat)
     edge = int(np.argmax(mask[row]))  # the first land pixel in that row
     assert mask[row].any() and not mask[row].all() and abs(edge - col) <= 1, (edge, col)

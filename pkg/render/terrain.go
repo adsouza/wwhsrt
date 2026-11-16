@@ -212,6 +212,7 @@ func (t *relief) draw(dst *ebiten.Image, c mapview.Camera, s ui.State) {
 	level := t.level(c)
 	pieces, wanted := t.set.Cover(level, func(a terrain.Address) bool { return t.visible(c, a) }, t.cache.ready)
 	t.cache.want(wanted)
+	t.cache.beginScene()
 	opacity, dark := reliefOpacity(c), ui.IsDark(s)
 	op := &ebiten.DrawTrianglesOptions{Filter: ebiten.FilterLinear}
 	for _, p := range pieces {

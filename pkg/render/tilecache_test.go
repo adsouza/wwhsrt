@@ -86,11 +86,20 @@ func (c *cacheUnderTest) readyCount(tiles []terrain.Address) int {
 	return n
 }
 
+// scene draws a scene that uses the given tiles, as the map does on a redraw.
+func (c *cacheUnderTest) scene(tiles ...terrain.Address) {
+	c.beginScene()
+	for _, a := range tiles {
+		c.get(a)
+	}
+}
+
 func TestCacheHoldsNoMoreThanItsLimitAndFreesTheRest(t *testing.T) {
 	c := newCacheUnderTest(t, 4)
 	c.want(tiles(0, 10))
-	until(t, "ten tiles are decoded", func() { c.frame() }, func() bool { return c.decodes() == 10 })
-	until(t, "the cache is back within its limit", func() { c.frame() }, func() bool {
+	// Each scene uses none of them: the view has moved on.
+	until(t, "ten tiles are decoded", func() { c.frame(); c.scene() }, func() bool { return c.decodes() == 10 })
+	until(t, "the cache is back within its limit", func() { c.frame(); c.scene() }, func() bool {
 		return c.len() <= 4 && int(c.freed.Load())+c.len() == 10
 	})
 	if c.len() > 4 || c.freed.Load() != int32(10-c.len()) {
@@ -98,50 +107,63 @@ func TestCacheHoldsNoMoreThanItsLimitAndFreesTheRest(t *testing.T) {
 	}
 }
 
-func TestCacheNeverEvictsATileDrawnThisFrame(t *testing.T) {
+// The scene is drawn once and then shown from a cached image for many frames. The tiles it used must
+// stay, or the next redraw would find them gone and show plain land while they load again.
+func TestCacheKeepsWhatTheSceneOnScreenUsed(t *testing.T) {
 	c := newCacheUnderTest(t, 2)
-	drawn := tiles(0, 2)
-	c.want(drawn)
-	until(t, "two tiles are ready", func() { c.frame() }, func() bool { return c.readyCount(drawn) == 2 })
-	others := tiles(1, 3)
-	c.want(others)
-	for i := 0; i < 200 && c.decodes() < 5; i++ {
-		for _, a := range drawn {
-			if c.get(a) == nil {
-				t.Fatalf("a tile drawn every frame was evicted: %+v", a)
-			}
-		}
-		c.frame()
-		time.Sleep(time.Millisecond)
-	}
-	for range 3 { // a few more frames, still drawing the same two
-		for _, a := range drawn {
-			c.get(a)
-		}
+	onScreen := tiles(0, 5) // more than the limit: a very large window
+	c.want(onScreen)
+	until(t, "five tiles are ready", func() { c.frame() }, func() bool { return c.readyCount(onScreen) == 5 })
+	c.scene(onScreen...)
+	for range 50 { // frames with no redraw
 		c.frame()
 	}
-	if c.readyCount(drawn) != 2 {
-		t.Fatal("a tile drawn every frame was evicted")
+	if c.readyCount(onScreen) != 5 || c.freed.Load() != 0 {
+		t.Fatalf("%d of 5 tiles on screen are still held, %d freed, after frames with no redraw", c.readyCount(onScreen), c.freed.Load())
 	}
-	if c.len() > 2 {
-		t.Fatalf("%d tiles held with a limit of 2 and only two in use", c.len())
+	// Tiles that arrive for somewhere else do not push out what is on screen either.
+	c.want(tiles(1, 3))
+	until(t, "three more are decoded", func() { c.frame() }, func() bool { return c.decodes() == 8 })
+	for range 5 {
+		c.frame()
+	}
+	if c.readyCount(onScreen) != 5 {
+		t.Fatal("a tile on screen was freed to make room for one that is not")
+	}
+	// Once a scene no longer uses them, the limit applies again.
+	c.scene(onScreen[:2]...)
+	c.frame()
+	if c.len() != 2 || c.readyCount(onScreen[:2]) != 2 {
+		t.Fatalf("%d tiles held after the view shrank to two, with a limit of 2", c.len())
 	}
 }
 
-func TestCacheKeepsEverythingInUseEvenOverItsLimit(t *testing.T) {
-	c := newCacheUnderTest(t, 2)
-	all := tiles(0, 5)
-	c.want(all)
-	until(t, "five tiles are ready", func() {
-		for _, a := range all {
-			if c.ready(a) {
-				c.get(a)
-			}
-		}
-		c.frame()
-	}, func() bool { return c.readyCount(all) == 5 })
-	if c.freed.Load() != 0 {
-		t.Fatalf("%d tiles were freed while every one was being drawn", c.freed.Load())
+// Memory follows the window: a small view keeps a small cache however far the player has panned.
+func TestCacheLimitFollowsTheView(t *testing.T) {
+	c := newCacheUnderTest(t, 200)
+	seen := tiles(0, 150)
+	c.want(seen)
+	until(t, "150 tiles are ready", func() { c.frame() }, func() bool { return c.readyCount(seen) == 150 })
+	c.scene(seen[:10]...) // a phone-sized view
+	c.frame()
+	if c.len() != tileFloor {
+		t.Fatalf("a view of 10 tiles keeps %d, want the floor of %d", c.len(), tileFloor)
+	}
+	if c.readyCount(seen[:10]) != 10 {
+		t.Fatal("the view's own tiles were freed")
+	}
+	more := tiles(1, 150)
+	c.want(more)
+	until(t, "150 more are decoded", func() { c.frame(); c.scene(more[:90]...) }, func() bool { return c.readyCount(more[:90]) == 90 })
+	c.scene(more[:90]...)
+	c.frame()
+	if c.len() > 180 || c.len() < 90 {
+		t.Fatalf("a view of 90 tiles keeps %d, want at most twice the view", c.len())
+	}
+	c.scene(more[:150]...) // twice this view would pass the cache's own limit
+	c.frame()
+	if c.len() > 200 {
+		t.Fatalf("%d tiles held past the limit of 200 by a view of 150", c.len())
 	}
 }
 

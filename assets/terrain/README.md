@@ -27,7 +27,7 @@ Relief is a pyramid of 256x256 tiles on the Web Mercator grid.
 "A line" is defined under Basemap. Levels 6 and 7 also hold the parents of every
 finer tile. Detail therefore halves in steps away from a line; level 8 alone would
 end against level 5, eight times coarser, along a hard edge. The set is 2,637 tiles
-and 14.6 MB: 12, 44, 135, 415, 365, 626 and 1,040 at levels 2 to 8.
+and 14.4 MB: 12, 44, 135, 415, 365, 626 and 1,040 at levels 2 to 8.
 
 The map draws one level per view, the coarsest whose tiles are at most twice their
 stored width on screen, and where that level has no tile it draws that part of the
@@ -36,11 +36,11 @@ nearest coarser one. Level 8 is the finest and is enlarged at closer zooms.
 ## Files
 
 `tiles/{level}/{column}/{row}.jpg` is a tile's colour at JPEG quality 80. A tile
-that is part sea has a one-bit mask beside it, `{row}.png`. Land is elevation above
-1 m inside the drawn basemap, so relief never shows on sea or on a drawn lake; sea
-pixels carry the lowland colour in the JPEG so compression has no edge to smear. A
-tile with no land has no files and is listed only, so that a line across a strait
-counts as covered.
+that is part sea has a one-bit mask beside it, `{row}.png`. Land is what the
+basemap draws, whatever its height, so relief never shows on sea or on a drawn lake
+and polders and basins below sea level are not left bare; sea pixels carry the
+lowland colour in the JPEG so compression has no edge to smear. A tile with no land
+has no files and is listed only, so that a line across a strait counts as covered.
 
 Only the middle 254 pixels of a tile are its own area. The outermost pixel on each
 side lies in the neighbouring tile, so two tiles side by side hold the same ground
@@ -59,9 +59,13 @@ route-geography tools read; no script generates it.
 Starting the game reads `terrain.json` and decodes no tile. A tile is decoded on a
 worker the first time a view needs it, checked against its hashes, and uploaded a
 few per frame; until it arrives the coarser tile under it is shown, and its arrival
-redraws the map. At most 288 tiles (75 MB) are held on the GPU, the ones drawn
-longest ago are freed explicitly, and nothing is loaded while terrain is hidden
-(`pkg/terrain`, `pkg/render/tilecache.go`, `pkg/render/terrain.go`).
+redraws the map. "The coarser tile" is the level-2 tile, which is asked for first,
+or anything finer that is still held. The cache keeps twice what the scene on screen
+uses, no fewer than 64 tiles and no more than 288 (75 MB), so memory follows the
+window; it frees the tiles whose last scene is oldest, explicitly, and never one the
+scene on screen uses, so a window larger than about 4K can hold more than 288.
+Nothing is loaded while terrain is hidden (`pkg/terrain`,
+`pkg/render/tilecache.go`, `pkg/render/terrain.go`).
 
 Measured on the native app at 3737x2029 on a copy of a real save, gliding between
 eight views on three continents: GPU memory was about 95 MB above the build
@@ -85,8 +89,17 @@ Sources are Terrarium tiles from Mapzen Terrain Tiles on AWS, cached under the
 ignored `build/terrain-source`, with metres decoded as `(R*256 + G + B/256)-32768`.
 A source that no longer matches its pin stops the run; review the change before
 repinning. `--survey` fails if a source cites a dataset `ATTRIBUTION.md` does not
-credit, and `--write` refuses to run while it would; adding a credit is a licence
-decision. Today every source cites only SRTM, GMTED2010 and ETOPO1.
+credit or carries no dataset header, and `--write` refuses to run while it would;
+adding a credit is a licence decision. Today every source cites only SRTM,
+GMTED2010 and ETOPO1.
+
+The level-5 source is a bedrock grid: under Greenland's ice it lies up to 2.8 km
+below the surface that level 4 shows, and it holds lake beds, not lake surfaces.
+Where a tile's heights, averaged over 33 pixels, lie more than 150 m below its
+parent's, the parent's surface is blended in, fully from 400 m. The average tells
+ice from mountains, whose valleys differ from a coarser level as much but in both
+directions. `--write` names the tiles this touches: Greenland, a little of Novaya
+Zemlya, and the deepest lakes.
 
 The rules are in `tools/terrain_rule.py` and tested by `tools/test-terrain.py`,
 which CI runs. Hillshade exaggerates vertical relief 2.5 times. The colour scale

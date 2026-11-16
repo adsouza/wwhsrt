@@ -19,12 +19,16 @@ async function terrain(p, hidden) {
   assert.equal(await p.locator('#terrain-toggle').getAttribute('aria-pressed'), String(!hidden));
 }
 // Relief tiles load after the view that asks for them, so a picture is taken only once the map has stopped
-// changing. This looks at the middle of the map, clear of the legend and the controls, and returns it:
-// relief is the only thing the terrain toggle changes there.
-async function settled(p) {
+// changing. These look at the middle of the map, clear of the legend and the controls: relief is the only
+// thing the terrain toggle changes there.
+async function middle(p) {
   const box = await p.locator('#map-frame').boundingBox(),
-    side = Math.min(300, box.width - 40, box.height - 40),
-    clip = { x: box.x + (box.width - side) / 2, y: box.y + (box.height - side) / 2, width: side, height: side };
+    side = Math.min(300, box.width - 40, box.height - 40);
+  return { x: box.x + (box.width - side) / 2, y: box.y + (box.height - side) / 2, width: side, height: side };
+}
+// settled returns the middle of the map once two looks 250 ms apart agree, or after six seconds.
+async function settled(p) {
+  const clip = await middle(p);
   let last = await p.screenshot({ clip });
   for (let i = 0; i < 24; i++) {
     await p.waitForTimeout(250);
@@ -33,6 +37,13 @@ async function settled(p) {
     last = now;
   }
   return last;
+}
+// changed waits up to five seconds for the middle of the map to differ from an earlier look, then for it
+// to settle. A redraw that has not happened yet would otherwise pass for "no change".
+async function changed(p, before) {
+  const clip = await middle(p);
+  for (let i = 0; i < 20 && (await p.screenshot({ clip })).equals(before); i++) await p.waitForTimeout(250);
+  return settled(p);
 }
 async function shot(p, name) {
   await settled(p);
@@ -170,7 +181,7 @@ async function shot(p, name) {
     const andes = await settled(p);
     await p.screenshot({ path: path.join(out, 'terrain-bogota-medellin-desktop.png') });
     await terrain(p, true);
-    const plain = await settled(p);
+    const plain = await changed(p, andes);
     assert(!andes.equals(plain), 'relief does not change the middle of the Bogotá–Medellín map');
     await terrain(p, false);
     assert.equal((await snap(p)).frame.checkpoint, before.checkpoint);

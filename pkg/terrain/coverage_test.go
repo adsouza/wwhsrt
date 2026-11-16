@@ -72,8 +72,9 @@ func gameLines(t *testing.T) []gameLine {
 	}
 	before := len(lines)
 	add(network.Corridors, map[string]bool{"hokkaido-extension": true, "tsuruga-osaka": true})
-	if len(existing.Lines) != 300 || len(prospects.Corridors) != 72 || len(lines) == before {
-		t.Fatalf("%d existing lines, %d prospects, %d older alignments: the line files are not what this test expects",
+	// A floor, not an exact count: an added line must reach the coverage check and its message.
+	if len(existing.Lines) < 300 || len(prospects.Corridors) < 72 || len(lines)-before < 4 {
+		t.Fatalf("%d existing lines, %d prospects, %d older alignments: a line file has lost lines or changed shape",
 			len(existing.Lines), len(prospects.Corridors), len(lines)-before)
 	}
 	return lines
@@ -136,9 +137,21 @@ func TestFineTilesHaveTheirParents(t *testing.T) {
 			t.Errorf("%v has no parent tile", a)
 		}
 	}
-	// Detail falls away from a line in steps, so each of the two rings below level 8 holds more ground.
-	if counts[8] < 900 || counts[7]*4 <= counts[8] || counts[6]*4 <= counts[7] {
-		t.Errorf("tiles per level are %v: the rings around level 8 are missing", counts)
+	// Detail falls away from a line in steps: levels 7 and 6 each reach beyond the parents of the level
+	// above. Without those rings sharp relief would end against relief eight times coarser.
+	for z := MaxLevel - 1; z > CompleteLevel; z-- {
+		parents := map[Address]bool{}
+		for a := range s.Tiles {
+			if a.Z == z+1 {
+				parents[a.Parent()] = true
+			}
+		}
+		if ring := counts[z] - len(parents); ring < len(parents)/4 {
+			t.Errorf("level %d has %d tiles of which %d are parents: its wider ring is missing", z, counts[z], len(parents))
+		}
+	}
+	if counts[MaxLevel] < 900 {
+		t.Errorf("only %d level-8 tiles", counts[MaxLevel])
 	}
 }
 
@@ -158,41 +171,105 @@ func TestEveryLandTileCanBeReached(t *testing.T) {
 	}
 }
 
-func TestCoarseLevelsCoverAllDrawnLand(t *testing.T) {
-	s := committed(t)
+// drawnLand answers whether a place is on the land the basemap draws. The renderer fills by the
+// even-odd rule over every outline (land, lakes, islands in lakes), and so does this.
+type drawnLand struct {
+	rings [][][2]float64
+	boxes [][4]float64 // west, south, east, north
+}
+
+func loadDrawnLand(t *testing.T) *drawnLand {
+	t.Helper()
 	raw, err := assets.Terrain.ReadFile("terrain/world-land.json")
 	if err != nil {
 		t.Fatal(err)
 	}
 	var basemap struct {
 		Land    [][][2]float64 `json:"land"`
+		Lakes   [][][2]float64 `json:"lakes"`
 		Islands [][][2]float64 `json:"lake_islands"`
 	}
 	if err = json.Unmarshal(raw, &basemap); err != nil {
 		t.Fatal(err)
 	}
-	checked := 0
-	for _, ring := range append(basemap.Land, basemap.Islands...) {
+	d := &drawnLand{}
+	for _, ring := range append(append(basemap.Land, basemap.Lakes...), basemap.Islands...) {
+		box := [4]float64{math.Inf(1), math.Inf(1), math.Inf(-1), math.Inf(-1)}
 		for _, p := range ring {
-			if p[1] <= -60 || p[1] >= 85 {
-				continue
+			box[0], box[1] = math.Min(box[0], p[0]), math.Min(box[1], p[1])
+			box[2], box[3] = math.Max(box[2], p[0]), math.Max(box[3], p[1])
+		}
+		d.rings, d.boxes = append(d.rings, ring), append(d.boxes, box)
+	}
+	return d
+}
+
+func (d *drawnLand) holds(lon, lat float64) bool {
+	inside := false
+	for i, ring := range d.rings {
+		if box := d.boxes[i]; lon < box[0] || lon > box[2] || lat < box[1] || lat > box[3] {
+			continue
+		}
+		for j, k := 0, len(ring)-1; j < len(ring); k, j = j, j+1 {
+			a, b := ring[j], ring[k]
+			if (a[1] > lat) != (b[1] > lat) && lon < (b[0]-a[0])*(lat-a[1])/(b[1]-a[1])+a[0] {
+				inside = !inside
 			}
-			for z := MinLevel; z <= CompleteLevel; z++ {
-				at := At(z, p[1], p[0])
-				north, west := Corner(at, 0, 0)
-				south, east := Corner(at, 1, 1)
-				if p[0] == west || p[0] == east || p[1] == north || p[1] == south {
-					continue // a point exactly on a tile's edge may belong to the tile beside it
+		}
+	}
+	return inside
+}
+
+// Levels 2 to 5 must list every tile that holds drawn land, or that land is flat at wide views. Each
+// level-5 tile is probed at 64 places, and a place on land needs its tile at all four levels.
+func TestCoarseLevelsCoverAllDrawnLand(t *testing.T) {
+	s, land := committed(t), loadDrawnLand(t)
+	if !land.holds(-74.07, 4.71) || land.holds(-30, 30) || land.holds(136.1, 35.3) {
+		t.Fatal("the land test is wrong for Bogota, the mid-Atlantic or Lake Biwa")
+	}
+	n, onLand := 1<<CompleteLevel, 0
+	for x := range n {
+		for y := range n {
+			for i := range 64 {
+				lat, lon := Corner(Address{CompleteLevel, x, y}, (float64(i%8)+.5)/8, (float64(i/8)+.5)/8)
+				if lat <= -60 || !land.holds(lon, lat) {
+					continue
 				}
-				checked++
-				if !s.has(at) {
-					t.Fatalf("drawn land at %.4f N, %.4f E has no level-%d tile %v", p[1], p[0], z, at)
+				onLand++
+				for z := MinLevel; z <= CompleteLevel; z++ {
+					if at := At(z, lat, lon); !s.has(at) {
+						t.Fatalf("drawn land at %.3f N, %.3f E has no level-%d tile %v", lat, lon, z, at)
+					}
 				}
 			}
 		}
 	}
-	if checked < 250000 {
-		t.Fatalf("only %d outline points were checked", checked)
+	if onLand < 10000 {
+		t.Fatalf("only %d probes fell on land", onLand)
+	}
+}
+
+// Every committed tile opens: its files match the manifest's hashes and decode to a full tile. The
+// game checks this only when a tile is first shown, which for most of the world is never in a test.
+func TestEveryCommittedTileDecodes(t *testing.T) {
+	s := committed(t)
+	for a, tile := range s.Tiles {
+		if tile.Kind == Sea {
+			continue
+		}
+		img, err := s.Decode(assets.Terrain, a)
+		if err != nil {
+			t.Fatalf("%v: %v", a, err)
+		}
+		land := 0
+		for i := 3; i < len(img.Pix); i += 4 {
+			if img.Pix[i] != 0 {
+				land++
+			}
+		}
+		if land == 0 || (tile.Kind == Land && land != TileSize*TileSize) {
+			t.Fatalf("%v is listed as %v but %d of its pixels are land", a, tile.Kind, land)
+		}
 	}
 }
 
@@ -222,13 +299,15 @@ func TestEveryListedTileHasItsFiles(t *testing.T) {
 			want[Path(a)+".png"] = true
 		}
 	}
-	found := 0
+	found, unlisted := 0, 0
 	err := fs.WalkDir(assets.Terrain, "terrain/tiles", func(path string, d fs.DirEntry, err error) error {
 		if err != nil || d.IsDir() {
 			return err
 		}
 		if !want[path] {
-			t.Errorf("%s is not listed in the manifest", path)
+			if unlisted++; unlisted <= 10 {
+				t.Errorf("%s is not listed in the manifest", path)
+			}
 		}
 		if !strings.HasSuffix(path, ".jpg") && !strings.HasSuffix(path, ".png") {
 			t.Errorf("%s is not a tile file", path)

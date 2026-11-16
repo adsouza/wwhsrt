@@ -364,7 +364,7 @@ What differs from the text above, and what was measured:
   400 km, in addition to holding the parents of finer tiles. The distances are
   the builder's.
 - **Counts and size.** 2,637 tiles: 12, 44, 135, 415, 365, 626 and 1,040 at
-  levels 2 to 8, of which 86 are all sea and have no files. 14.6 MB of tile
+  levels 2 to 8, of which 82 are all sea and have no files. 14.4 MB of tile
   files against the 21 to 23 MB estimated; coast tiles and coarse levels
   compress better than the all-land sample did. Levels 4 and 5 hold 135 and
   415 tiles, more than the 102 and 338 counted here, because the refined
@@ -386,13 +386,28 @@ What differs from the text above, and what was measured:
   (75 MB), least recently drawn freed first; one worker goroutine on both
   targets and at most 8 uploads a frame; levels 6 and 7 fetched from the
   source; ground distance per pixel taken row by row for the shading.
+- **Land is the drawn basemap, whatever its height.** Behaviour 4 also asked
+  for elevation above 1 m, as before. With tiles cut to the basemap that test
+  only removed real land: 3.3% of it at level 5, including Dutch polders and the
+  Jiangsu plain, which showed as darker blotches in the dark palette. It is
+  gone (the builder's call after the branch review, confirmed by screenshot).
+- **Ice and lake beds.** The level-5 source is a bedrock grid. Greenland came
+  out as ice-free lowland with its interior masked away. Where a tile lies, on
+  a 33-pixel average, more than 150 m below its parent, the parent's surface is
+  blended in. Only Greenland, a little of Novaya Zemlya and the deepest lakes
+  are touched.
+- **The cache follows the view.** It keeps twice what the scene on screen uses,
+  between 64 and 288 tiles, and never frees a tile that scene uses, so a
+  window above about 4K can hold more than 288. The first version protected
+  only tiles drawn in the current frame, which lapsed as soon as the cached
+  scene was shown.
 - **Wide views are not flat.** The shading method was kept as it is and levels
   2 to 5 show clear relief.
 - **`features.json` is unchanged.** Its Lake Biwa outline is no longer drawn by
   the terrain layer, but the route-geography tools read it and pin the file.
 - **Decode time on native:** 0.75 ms for a coast tile.
-- **Size:** the native binary went from 39.6 MB to 54.2 MB and `web/main.wasm`
-  from 41.0 MB to 55.4 MB: 14.6 and 14.4 MB more, against a goal of 25.
+- **Size:** the native binary went from 39.6 MB to 53.9 MB and `web/main.wasm`
+  from 41.0 MB to 55.1 MB: 14.3 and 14.1 MB more, against a goal of 25.
 - **Memory, measured on native at the saved window size (3737x2029) on a copy
   of a real save.** A scripted camera glided between eight views on three
   continents, holding each for two seconds, on `main` and on this build.
@@ -402,7 +417,8 @@ What differs from the text above, and what was measured:
   in the first lap and 965 MB from the second lap on, level for three more
   laps. That is about 95 MB for terrain against the "about 80 MB" goal: 75 MB
   is the 288 tiles, and the rest was not traced. The cache never held more
-  than 288 tiles.
+  than 288 tiles. (Measured before the cache was changed to follow the view;
+  at this window size the two behave the same.)
 - **Frame time.** Frames more than 33 ms apart: 1 to 4 per four-second glide
   on both builds (mean 2.1 on `main`, 1.9 here), with a worst gap of about
   600 ms on both. That gap is a map redraw that takes about 600 ms once or

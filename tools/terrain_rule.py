@@ -8,6 +8,7 @@ import math
 
 import numpy as np
 from PIL import Image, ImageDraw
+from scipy.ndimage import uniform_filter
 import shapely
 from shapely.geometry import MultiPolygon, Polygon, box
 
@@ -175,6 +176,38 @@ def elevation(rgb):
     return rgb[..., 0] * 256 + rgb[..., 1] + rgb[..., 2] / 256 - 32768
 
 
+# The level-5 source is a bedrock grid: under Greenland's ice it lies up to 2.8 km below the surface
+# the level above shows. Where a tile's heights, averaged over ICE_WINDOW pixels, lie more than
+# ICE_FROM_M below its parent's, the parent's surface is blended in, fully from ICE_FULL_M. The average
+# is what tells ice from mountains, whose valleys and peaks differ from a coarser level by as much but
+# in both directions. Everywhere but Greenland the averaged gap stays far under the threshold.
+ICE_FROM_M, ICE_FULL_M, ICE_WINDOW = 150, 400, 33
+
+
+def ice_weight(padded_gap):
+    """How much of the parent's surface each pixel takes: 0 for ordinary ground to 1 under an ice sheet.
+
+    padded_gap is the parent's surface minus the tile's own heights, with ICE_WINDOW // 2 pixels around
+    the tile (from its neighbours, so the weight does not step at tile edges). Returns 256x256.
+    """
+    half = ICE_WINDOW // 2
+    assert padded_gap.shape == (256 + 2 * half, 256 + 2 * half), padded_gap.shape
+    smooth = uniform_filter(padded_gap.astype(np.float64), size=ICE_WINDOW, mode="nearest")[half:-half, half:-half]
+    return np.clip((smooth - ICE_FROM_M) / (ICE_FULL_M - ICE_FROM_M), 0, 1)
+
+
+def from_parent(parent, x, y):
+    """The quarter of a parent tile's heights that covers child column x, row y, enlarged to 256x256."""
+    at = (np.arange(256) + 0.5) / 2 - 0.5
+    cols, rows = np.clip(at + 128 * (x & 1), 0, 255), np.clip(at + 128 * (y & 1), 0, 255)
+    c0, r0 = np.floor(cols).astype(int), np.floor(rows).astype(int)
+    c1, r1 = np.minimum(c0 + 1, 255), np.minimum(r0 + 1, 255)
+    fc, fr = (cols - c0)[None, :], (rows - r0)[:, None]
+    top = parent[r0][:, c0] * (1 - fc) + parent[r0][:, c1] * fc
+    bottom = parent[r1][:, c0] * (1 - fc) + parent[r1][:, c1] * fc
+    return top * (1 - fr) + bottom * fr
+
+
 def shade(heights, z, y):
     """Colour and hillshade one written tile of row y at level z.
 
@@ -223,10 +256,11 @@ def densified(geometry, step_km=EDGE_KM):
     )
 
 
-def land_mask(heights, geometry, z, x, y):
-    """Which pixels of the written tile z/x/y are land: above 1 m and inside the geometry (already densified).
+def land_mask(geometry, z, x, y):
+    """Which pixels of the written tile z/x/y are land: those inside the geometry (already densified).
 
-    heights is the tile's 256x256 written pixels, border included.
+    The geometry is the land the basemap draws. Height plays no part: ground at or below sea level is
+    land where the basemap draws it, and sea floor is not where it does not.
     """
     west, south, east, north = rule.tile_bounds(z, x, y, x, y)
     margin = (east - west) / 32
@@ -248,7 +282,7 @@ def land_mask(heights, geometry, z, x, y):
         for hole in polygon.interiors:
             part &= ~filled(hole.coords)
         inside |= part
-    return inside & (heights > 1)
+    return inside
 
 
 def kind(mask):
