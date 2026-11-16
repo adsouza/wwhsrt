@@ -15,7 +15,7 @@ func TestSceneCacheTracksVisibleStateAndExcludesReplayClock(t *testing.T) {
 	for _, change := range []func(*ui.State){
 		func(s *ui.State) { s.Selected = "beijing" },
 		func(s *ui.State) { s.SourceStation = "node/1" },
-		func(s *ui.State) { s.Region = "china" },
+		func(s *ui.State) { s.Region = "europe" },
 		func(s *ui.State) { s.Locale = "zh-Hans" },
 		func(s *ui.State) { s.Dark = true },
 		func(s *ui.State) { s.HideTerrain = true },

@@ -143,6 +143,9 @@ func (h *host) init(g *Game) {
 	}
 	ui.NormalizeHelp(&g.State)
 	g.State.Locale = ui.Locale(g.State.Locale)
+	if !mapview.KnownRegion(g.State.Region) {
+		g.State.Region = "" // the default, East Asia
+	}
 	if g.State.TextSize != 0 {
 		// Unset stays unset, so preference files written before the setting existed load unchanged.
 		g.State.TextSize = ui.TextStep(g.State.TextSize)

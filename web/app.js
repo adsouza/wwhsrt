@@ -511,6 +511,8 @@ async function syncUI() {
       dark: prefs.appearance === 'dark' || (prefs.appearance === 'system' && systemAppearance.matches),
     });
     texts = s.texts;
+    // Go drops a saved region that no longer exists, so follow its state.
+    prefs.region = s.state.region || 'east-asia';
     selectOptions(
       $('region-select'),
       (s.regions || []).map((r) => [r.id, prefs.locale === 'zh-Hans' ? r.chinese : r.name]),

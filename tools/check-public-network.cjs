@@ -83,9 +83,9 @@ function point(c, lat, lon) {
     };
     assert(s.frame.routes.some((r) => r.id === 'route_beijing__shanghai' && r.open));
     const checkpoint = s.frame.checkpoint;
-    console.log('Selecting China');
-    await (await control(p, '#region-select')).selectOption('china');
-    await p.waitForFunction(async () => (await railSnapshot()).state.region === 'china');
+    console.log('Selecting East Asia');
+    await (await control(p, '#region-select')).selectOption('east-asia');
+    await p.waitForFunction(async () => (await railSnapshot()).state.region === 'east-asia');
     await p.waitForTimeout(300);
     s = await snap(p);
     const samples = s.frame.corridors
@@ -130,8 +130,13 @@ function point(c, lat, lon) {
     console.log('Rail pixels', result.rail_pixels);
     assert(result.rail_pixels.hits > 30);
     assert.equal((await snap(p)).frame.checkpoint, checkpoint);
-    // Ordinary intermediate stops are deliberately hidden at overview zoom.
+    // Ordinary intermediate stops are deliberately hidden at overview zoom. East Asia's centre is the
+    // Yellow Sea, so frame a Chinese trunk line and zoom in on its middle.
+    await (await control(p, '#tab-services')).click();
+    await p.locator('#service-corridor').selectOption('route_beijing__shanghai');
+    await (await control(p, '#focus-route')).click();
     for (let i = 0; i < 3; i++) await (await control(p, '#zoom-in')).click();
+    await (await control(p, '#tab-map')).click();
     if (await p.locator('#dock-map-tools').evaluate((e) => e.open)) await p.locator('#dock-map-tools>summary').click();
     s = await snap(p);
     const mappedStops = new Set(JSON.parse(fs.readFileSync('assets/scenario/playable-rail-map.json')).station_ids);
@@ -227,15 +232,18 @@ function point(c, lat, lon) {
     assert(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
     await p.screenshot({ path: path.join(out, 'public-network-service-phone-zh.png') });
     await (await control(p, '#tab-map')).click();
-    await (await control(p, '#region-select')).selectOption('china');
+    await (await control(p, '#region-select')).selectOption('east-asia');
     await p.waitForTimeout(200);
     await p.screenshot({ path: path.join(out, 'public-network-china-phone-zh.png') });
+    // East Asia is the default, so the reload below checks that another chosen region survives.
+    await (await control(p, '#region-select')).selectOption('south-east-asia');
+    await p.waitForFunction(async () => (await railSnapshot()).state.region === 'south-east-asia');
     assert.equal((await snap(p)).frame.checkpoint, s.frame.checkpoint);
     const saved = s.frame.checkpoint;
     await p.reload();
     await p.waitForFunction(() => !!window.railSnapshot, null, { timeout: 60000 });
     assert.equal((await snap(p)).frame.checkpoint, saved);
-    assert.equal((await snap(p)).state.region, 'china');
+    assert.equal((await snap(p)).state.region, 'south-east-asia');
     await p.evaluate(() => navigator.serviceWorker.ready);
     await p.waitForFunction(() => !!navigator.serviceWorker.controller);
     await ctx.setOffline(true);

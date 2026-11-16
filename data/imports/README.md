@@ -20,7 +20,7 @@ The deterministic compiler writes `assets/scenario/public-network.json`,
 `assets/scenario/rail-display-paths.json`, and
 `assets/scenario/playable-rail-map.json`. The first file records the exact input SHA-256.
 `assets/scenario/regions.json` is an authored orientation-aware camera projection
-of the existing manifests, with additional China/Japan/Korea views. Camera changes
+of the existing manifests, with an additional World view. Camera changes
 do not alter the network graph or save identity.
 
 ## Map and operating model

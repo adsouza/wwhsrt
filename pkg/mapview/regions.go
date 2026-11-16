@@ -29,6 +29,17 @@ var Regions = func() []Region {
 	return rows
 }()
 
+// KnownRegion reports whether id names a region of the picker. Saved
+// preferences can still name one that has since been removed.
+func KnownRegion(id string) bool {
+	for _, r := range Regions {
+		if r.ID == id {
+			return true
+		}
+	}
+	return false
+}
+
 // RegionCamera frames a region for a w x h map. In landscape it is limited by
 // the World view (see LimitToWorld); in portrait by its own frame.
 func RegionCamera(w, h float64, id string, portrait bool) Camera {

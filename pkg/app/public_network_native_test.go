@@ -43,7 +43,7 @@ func TestNativePublicNetworkSearchAndRegionRotation(t *testing.T) {
 			State: ui.State{
 				Locale:          locale,
 				View:            "services",
-				Region:          "china",
+				Region:          "europe",
 				ServiceCorridor: "route_beijing__shanghai",
 				Frequency:       2,
 				Fare:            16000,
@@ -61,7 +61,7 @@ func TestNativePublicNetworkSearchAndRegionRotation(t *testing.T) {
 		g.Camera = g.regionCamera(false)
 		g.State.Portrait = false
 		g.host.layout(g)
-		expected := mapview.RegionCamera(g.Camera.Width, g.Camera.Height, "china", true)
+		expected := mapview.RegionCamera(g.Camera.Width, g.Camera.Height, "europe", true)
 		if g.Camera.Min != expected.Min || g.Camera.Max != expected.Max {
 			t.Fatal("rotation lost chosen region")
 		}

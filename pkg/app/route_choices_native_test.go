@@ -86,20 +86,15 @@ func TestRegionFrameIsWhatTheMapWouldShow(t *testing.T) {
 	small := &Game{Map: m, Camera: mapview.New(390, 260)}
 	large := &Game{Map: m, Camera: mapview.New(1920, 1080)}
 	for _, portrait := range []bool{true, false} {
-		frame := small.regionFrame("japan", portrait)
-		if frame != large.regionFrame("japan", portrait) {
+		frame := small.regionFrame("europe", portrait)
+		if frame != large.regionFrame("europe", portrait) {
 			t.Fatal("a region's frame must not depend on the window", portrait)
 		}
-		c := mapview.RegionCamera(100, 100, "japan", portrait)
+		c := mapview.RegionCamera(100, 100, "europe", portrait)
 		if !frame.Contains(ui.Box{MinX: c.Min.X, MinY: c.Min.Y, MaxX: c.Max.X, MaxY: c.Max.Y}) {
 			t.Fatal("the frame must cover the region's defining points", portrait)
 		}
-		// The projection narrows the bounding box of a region's corner points (Japan needed Tokyo and
-		// Fukuoka added), so the frame has to be what the map actually shows.
-		if !frame.Contains(boxes["tokyo-nagoya"]) {
-			t.Fatal("Japan's frame must cover Tokyo–Nagoya", portrait, frame, boxes["tokyo-nagoya"])
-		}
-		if small.regionFrame("china", portrait) == frame {
+		if small.regionFrame("east-asia", portrait) == frame {
 			t.Fatal("different regions need different frames")
 		}
 		if small.regionFrame("", portrait) != small.regionFrame("east-asia", portrait) ||
@@ -207,17 +202,17 @@ func TestNativeServiceRoutesFollowTheMapView(t *testing.T) {
 }
 
 func TestNativeServiceRoutesFollowTheRegionWithoutAMap(t *testing.T) {
-	g := servicesGame(t, 390, 844, "japan")
+	g := servicesGame(t, 390, 844, "east-asia")
 	if !g.host.workspace.Map.Empty() || len(g.host.combos) != 1 {
 		t.Fatal("phone Services hides the map and keeps the ordinary plan to one dropdown", len(g.host.combos))
 	}
-	japan := listedRouteIDs(g)
+	eastAsia := listedRouteIDs(g)
 	choices := g.host.routeChoices
-	if !choices.InView || len(japan) < 2 || len(japan) > ui.RouteChoiceLimit+1 || choices.Matching <= ui.RouteChoiceLimit {
-		t.Fatal("want a capped list for the region", choices.InView, len(japan), choices.Matching)
+	if !choices.InView || len(eastAsia) < 2 || len(eastAsia) > ui.RouteChoiceLimit+1 || choices.Matching <= ui.RouteChoiceLimit {
+		t.Fatal("want a capped list for the region", choices.InView, len(eastAsia), choices.Matching)
 	}
-	boxes, frame := g.host.boxesFor(g.Frame), g.regionFrame("japan", true)
-	for _, id := range japan {
+	boxes, frame := g.host.boxesFor(g.Frame), g.regionFrame("east-asia", true)
+	for _, id := range eastAsia {
 		if id != "tokyo-nagoya" && !frame.Contains(boxes[id]) {
 			t.Fatal("listed route does not fit in the region", id)
 		}
@@ -241,13 +236,13 @@ func TestNativeServiceRoutesFollowTheRegionWithoutAMap(t *testing.T) {
 	if !strings.Contains(strings.Join(strings.Fields(title), " "), ui.Text("en", "narrowRoutes")) {
 		t.Fatal("with no map the disclosure is about narrowing the list", title)
 	}
-	if current := g.host.combos[0].SelectedEntry(); current == nil || current.(choice).ID != "japan" {
+	if current := g.host.combos[0].SelectedEntry(); current == nil || current.(choice).ID != "east-asia" {
 		t.Fatal("region dropdown must show the current region", current)
 	}
-	g.State.Region = "china"
+	g.State.Region = "europe"
 	g.host.build(g)
-	if china := listedRouteIDs(g); strings.Join(china, " ") == strings.Join(japan, " ") {
-		t.Fatal("another region must list other routes", china)
+	if europe := listedRouteIDs(g); strings.Join(europe, " ") == strings.Join(eastAsia, " ") {
+		t.Fatal("another region must list other routes", europe)
 	}
 	g.State.Region = "south-asia"
 	g.host.build(g)
@@ -327,7 +322,7 @@ func TestNativeServiceRouteListRefreshesAfterTheViewSettles(t *testing.T) {
 }
 
 func TestNativeRouteListIgnoresTheCameraWithoutAMap(t *testing.T) {
-	g := servicesGame(t, 390, 844, "japan")
+	g := servicesGame(t, 390, 844, "east-asia")
 	g.Camera.ZoomAt(2, mapview.Point{X: g.Camera.Width / 2, Y: g.Camera.Height / 2})
 	for i := 0; i < 30; i++ {
 		if g.host.routeListStale(g) {
@@ -363,31 +358,23 @@ func TestNativeMapToolButtonsRefreshTheRouteListAtOnce(t *testing.T) {
 // Review fix: on a phone the region list must match what the Map panel shows
 // for that region, not a tall stand-in shape that clips cities near the edge.
 func TestRegionFrameMatchesTheMapPanelOnAPhone(t *testing.T) {
-	g := servicesGame(t, 390, 844, "korea")
+	g := servicesGame(t, 390, 844, "europe")
 	panel := ui.Workspace(390, 844, ui.State{View: "map"}).Map
-	want := viewBox(mapview.RegionCamera(float64(panel.Dx()), float64(panel.Dy()), "korea", true))
-	frame := g.regionFrame("korea", true)
+	portrait := g.State.Portrait
+	want := viewBox(mapview.RegionCamera(float64(panel.Dx()), float64(panel.Dy()), "europe", portrait))
+	frame := g.regionFrame("europe", portrait)
 	if panel.Empty() || frame != want {
 		t.Fatal("the frame must be the Map panel's view of the region", panel, frame, want)
 	}
-	boxes, found := g.host.boxesFor(g.Frame), false
+	// The list counts exactly the open routes the Map panel's view holds.
+	boxes, fitting := g.host.boxesFor(g.Frame), 0
 	for _, r := range g.Frame.Routes {
-		ends := string(r.Cities[0]) + ">" + string(r.Cities[len(r.Cities)-1])
-		if r.Open && (ends == "seoul>busan" || ends == "busan>seoul") {
-			found = true
-			if !frame.Contains(boxes[r.ID]) {
-				t.Fatal("Korea's frame must cover Seoul–Busan", r.ID, frame, boxes[r.ID])
-			}
+		if box, ok := boxes[r.ID]; ok && r.Open && want.Contains(box) {
+			fitting++
 		}
 	}
-	listsSeoul := false
-	for _, r := range g.host.routeChoices.Routes {
-		for _, city := range r.Cities {
-			listsSeoul = listsSeoul || city == "seoul"
-		}
-	}
-	if !found || !listsSeoul {
-		t.Fatal("the Korea list must reach Seoul", found, listedRouteIDs(g))
+	if fitting == 0 || g.host.routeChoices.Matching != fitting {
+		t.Fatal("the list must count the routes in the Map panel's view", fitting, g.host.routeChoices.Matching)
 	}
 }
 
@@ -424,14 +411,14 @@ func TestNativeServiceDropdownsHoldOnlyTheChosenEntries(t *testing.T) {
 			t.Fatal("the dropdown must list exactly the chosen routes in order", i, routes[i].ID, id)
 		}
 	}
-	g = servicesGame(t, 390, 844, "japan")
+	g = servicesGame(t, 390, 844, "east-asia")
 	ui.SetDisclosure(&g.State, "route-search", true)
 	g.host.build(g)
 	offered := map[string]bool{}
 	for _, c := range g.host.comboChoices[0] {
 		offered[c.ID] = true
 	}
-	if !offered["japan"] || !offered["china"] || offered["south-asia"] || offered["south-america"] {
+	if !offered["east-asia"] || !offered["europe"] || offered["south-asia"] || offered["south-america"] {
 		t.Fatal("the region dropdown offers the current region and regions with routes only", offered)
 	}
 }

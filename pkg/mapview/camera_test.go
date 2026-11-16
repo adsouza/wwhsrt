@@ -74,7 +74,7 @@ func TestPanLimitDoesNotShrinkWithZoom(t *testing.T) {
 	for _, tc := range []struct {
 		id       string
 		portrait bool
-	}{{"world", false}, {"east-asia", false}, {"japan", false}, {"south-america", true}, {"japan", true}} {
+	}{{"world", false}, {"east-asia", false}, {"europe", false}, {"south-america", true}, {"europe", true}} {
 		c := RegionCamera(2929, 1861, tc.id, tc.portrait)
 		base := edgeReach(c, 1)
 		for _, zoom := range []float64{2, 8, 32} {
@@ -170,7 +170,7 @@ func TestLandscapeRegionsReachWhatTheWorldViewReaches(t *testing.T) {
 	const w, h = 1472, 912
 	world := RegionCamera(w, h, "world", false)
 	want := edgeReach(world, 1)
-	for _, id := range []string{"south-america", "japan", "mashreq", "australia", "north-america"} {
+	for _, id := range []string{"south-america", "europe", "mashreq", "australia", "north-america"} {
 		c := RegionCamera(w, h, id, false)
 		out := c
 		out.ZoomAt(1e-6, Point{X: w / 2, Y: h / 2})
