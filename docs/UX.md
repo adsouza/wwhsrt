@@ -164,6 +164,10 @@ one representative alignment per corridor until selected. Use a contrasting,
 thicker highlight for the selected alternative and a text legend identifying the
 dots as available construction prospects. Existing public rail, accepted projects
 and operating lines retain their own styles; none is advertised as a new prospect.
+Station marks are drawn over the dots, so space the dots evenly, 8–12 px apart,
+along the stretch of line clear of both end marks. A line with no clear stretch,
+such as Béziers–Perpignan at the Frangistan zoom, gets one dot midway between its
+stations, so every prospect stays visible at every region zoom.
 
 Click or tap the line to select the whole corridor and open Build → Plan. Hit-test
 the continuous path, including the gaps between dots, with a forgiving screen-pixel
