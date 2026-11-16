@@ -114,11 +114,9 @@ async function pixels(p, qa, coast) {
     const checks = [];
     for (const country of ['Japan', 'China']) {
       if (country === 'Japan') {
-        await (await control(p, '#region-select')).selectOption('japan');
         await prospect(p, 'hokkaido-extension');
         await (await control(p, '#focus-route')).click();
       } else {
-        await (await control(p, '#region-select')).selectOption('china');
         await (await control(p, '#tab-services')).click();
         await p.locator('#service-corridor').selectOption('public_hangzhou__shanghai');
         await (await control(p, '#focus-route')).click();

@@ -427,7 +427,7 @@ func TestLandFillPaintsExactlyTheLand(t *testing.T) {
 		"North America at two times": zoomed(40, -95, 2),
 		"the Great Lakes at eight":   zoomed(45, -84, 8),
 		"Norway's fjords at sixteen": zoomed(62, 6, 16),
-		"the Japan region":           mapview.RegionCamera(w, h, "japan", false),
+		"Japan at ten times":         zoomed(37.34, 137.09, 10),
 	} {
 		outlines := b.visible(c)
 		vertices, indices := landFan(cells(outlines), color.NRGBA{R: 1, G: 2, B: 3, A: 255})

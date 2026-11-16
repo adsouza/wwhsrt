@@ -89,7 +89,7 @@ async function dots(p, points, ink) {
     assert.equal(prospects.length, PROSPECTS);
     await (await control(p, '#tab-build')).click();
     assert.equal(await p.locator('#prospect-picker option').count(), PROSPECTS + 1); // plus the placeholder
-    await (await control(p, '#region-select')).selectOption('japan');
+    await (await control(p, '#region-select')).selectOption('east-asia');
     await closeTools(p);
     await p.screenshot({ path: 'docs/validation/prospects-overview.png' });
     // Each prospect can be found, clicked and reviewed without selecting cities.

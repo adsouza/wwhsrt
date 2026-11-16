@@ -71,14 +71,14 @@ func faceSize(t *testing.T, f text.Face) float64 {
 }
 
 func TestNativePanelTextUsesTheDesktopLadder(t *testing.T) {
-	g := servicesGame(t, 1280, 850, "japan")
+	g := servicesGame(t, 1280, 850, "")
 	if want := (ui.TextScale{Ladder: "desktop", Step: 100}); g.host.text != want {
 		t.Fatalf("a 1280 px window uses the desktop ladder, got %+v", g.host.text)
 	}
 	if small, body := faceSize(t, g.host.face(g, 13)), faceSize(t, g.host.face(g, 14)); small != 14 || body != 16 {
 		t.Fatal("desktop: 13 px becomes 14 and 14 px becomes 16, got", small, body)
 	}
-	g = servicesGame(t, 390, 844, "japan")
+	g = servicesGame(t, 390, 844, "")
 	if g.host.text.Ladder != "phone" || faceSize(t, g.host.face(g, 13)) != 13 {
 		t.Fatalf("a phone-width window keeps its panel sizes, got %+v", g.host.text)
 	}
@@ -87,7 +87,7 @@ func TestNativePanelTextUsesTheDesktopLadder(t *testing.T) {
 func TestNativeTextFieldGrowsWithItsFont(t *testing.T) {
 	const name = "晨曦国际高速铁路"
 	for _, chosen := range []int{0, 200} {
-		g := servicesGame(t, 3840, 2160, "japan")
+		g := servicesGame(t, 3840, 2160, "")
 		g.State.View, g.State.CompanyPane, g.State.DraftName, g.State.TextSize = "company", "identity", name, chosen
 		g.host.layout(g)
 		g.host.build(g)

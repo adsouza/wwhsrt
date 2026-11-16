@@ -229,6 +229,9 @@ func (h *host) run(g *Game) {
 				s.Locale = ui.Locale(s.Locale)
 				s.Appearance = ui.AppearanceMode(s.Appearance)
 				s.Dark = ui.IsDark(s)
+				if !mapview.KnownRegion(s.Region) {
+					s.Region = "" // the default, East Asia
+				}
 				if !h.helpLoaded || s.Portrait != g.State.Portrait {
 					previous := g.State.Region
 					g.State.Region = s.Region
