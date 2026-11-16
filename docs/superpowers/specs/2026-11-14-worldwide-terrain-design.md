@@ -419,11 +419,14 @@ What differs from the text above, and what was measured:
   is the 288 tiles, and the rest was not traced. The cache never held more
   than 288 tiles. (Measured before the cache was changed to follow the view;
   at this window size the two behave the same.)
-- **Frame time.** Frames more than 33 ms apart: 1 to 4 per four-second glide
-  on both builds (mean 2.1 on `main`, 1.9 here), with a worst gap of about
-  600 ms on both. That gap is a map redraw that takes about 600 ms once or
-  twice a glide on `main` too, so it is not tile loading; it was not
-  investigated here. No difference attributable to tiles was measured.
+- **Frame time.** Over 16 four-second glides with nothing else touching the
+  process, `main` had one frame more than 33 ms after the last (42 ms) and
+  this build had two (34 and 42 ms). All three are a map redraw of 27 to 34 ms
+  on the same glide, East Asia to Kansai, so no difference is attributable to
+  tiles. An earlier version of this entry reported gaps of about 600 ms on
+  both builds and called them a map redraw. They were the measuring script:
+  it sampled memory with `vmmap` every three seconds, and `vmmap` suspends
+  the process for about half a second each time.
 - **Time to sharp.** After an instant jump to a view with nothing cached, no
   tile was wanted or in hand after 25 to 250 ms (worst: Europe, 67 new tiles),
   against a goal of one second. After a glide the view was already sharp.
