@@ -103,6 +103,7 @@ type host struct {
 	replaySlider           *widget.Slider
 	scroll                 *widget.ScrollContainer
 	scrollbar              *widget.Slider
+	prospectScroll         *widget.ScrollContainer
 	lastView               string
 	loanInput              *widget.TextInput
 	// scrollMask and inputMask outlive rebuilds: see shareMaskBuffer. The loan field is drawn inside
@@ -711,6 +712,7 @@ func (h *host) build(g *Game) {
 	h.configureSidebarScroll(g, root)
 	if !g.State.Expanded {
 		h.addCommandDock(g, root)
+		h.addProspectBoard(g, root)
 	}
 	if g.State.Expanded {
 		root = widget.NewContainer(widget.ContainerOpts.Layout(placed{}))

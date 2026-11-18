@@ -43,6 +43,7 @@ async function command(p, id, trace, c) {
     await command(p, 'borrow', trace, { kind: 'take_loan', amount: 300000000000 });
     await (await control(p, '#tab-build')).click();
     await (await control(p, '[data-corridor=tsuruga-osaka]')).click();
+    await p.locator('#alignments button').filter({ hasText: 'Tunnel route' }).click();
     await command(p, 'build-line', trace, {
       kind: 'build_line',
       corridor_id: 'tsuruga-osaka',

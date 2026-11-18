@@ -3,8 +3,15 @@ const assert = require('node:assert/strict'),
   crypto = require('node:crypto');
 const { chromium } = require('playwright'),
   { control, language, prospect } = require('./ui-helpers.cjs');
-const snap = (p) => p.evaluate(() => railSnapshot()),
-  url = process.argv[2] || 'http://127.0.0.1:8765/';
+async function snap(p) {
+  return p.evaluate(async () => {
+    const { camera, state, palette, frame } = await railSnapshot();
+    const { revision, checkpoint, projects } = frame;
+    const corridors = frame.corridors.filter((c) => !c.existing);
+    return { camera, state, palette, frame: { revision, checkpoint, projects, corridors } };
+  });
+}
+const url = process.argv[2] || 'http://127.0.0.1:8765/';
 // Construction prospects in the catalog; pkg/app and pkg/render tests pin the same count.
 const PROSPECTS = 74;
 function screen(c, q) {
@@ -87,8 +94,12 @@ async function dots(p, points, ink) {
       (c) => !c.existing && !initial.frame.projects.some((v) => v.corridor_id === c.id),
     );
     assert.equal(prospects.length, PROSPECTS);
+    const cashNeeded = (c) => Math.min(...c.alignments.map((a) => a.cost - a.grant));
+    const expected = [...prospects].sort((a, b) => cashNeeded(a) - cashNeeded(b)).map((c) => c.id);
+    assert.deepEqual(await p.locator('#opportunities button').evaluateAll((rows) => rows.map((row) => row.dataset.corridor)), expected);
+    assert(await p.locator('#opportunities').evaluate((list) => list.scrollHeight > list.clientHeight));
     await (await control(p, '#tab-build')).click();
-    assert.equal(await p.locator('#prospect-picker option').count(), PROSPECTS + 1); // plus the placeholder
+    assert.equal(await p.locator('#opportunities button').count(), PROSPECTS);
     await (await control(p, '#region-select')).selectOption('east-asia');
     await closeTools(p);
     await p.screenshot({ path: 'docs/validation/prospects-overview.png' });
@@ -126,7 +137,8 @@ async function dots(p, points, ink) {
       }, co.id);
       const selected = await snap(p);
       assert.equal(selected.state.to_city, co.to_city);
-      assert.equal(selected.state.alignment_id, co.alignments[0].id);
+      const cheapest = co.alignments.reduce((a, b) => (b.cost - b.grant < a.cost - a.grant ? b : a));
+      assert.equal(selected.state.alignment_id, cheapest.id);
       assert(await p.locator('#build-package').isVisible());
       assert.equal(await p.locator('#from-city,#to-city,#choose-from,#choose-to').count(), 0);
       assert.equal(selected.frame.checkpoint, before.frame.checkpoint);
@@ -140,7 +152,7 @@ async function dots(p, points, ink) {
     await language(p, 'zh-Hans');
     await p.setViewportSize({ width: 390, height: 844 });
     await p.locator('#tab-build').click();
-    assert.equal(await p.locator('#opportunities button').count(), 2);
+    assert.equal(await p.locator('#opportunities button').count(), PROSPECTS);
     await p.locator('[data-corridor=tsuruga-osaka]').click();
     assert(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
     await p.screenshot({ path: 'docs/validation/prospects-phone-zh.png' });
@@ -163,9 +175,7 @@ async function dots(p, points, ink) {
     await p.locator('#build-line').click();
     await p.waitForFunction(async (r) => (await railSnapshot()).frame.revision > r, rev);
     assert.equal(await p.locator('[data-corridor=tsuruga-osaka]').count(), 0);
-    assert.equal(await p.locator('#opportunities button').count(), 2);
-    assert.equal(await p.locator('#prospect-picker option').count(), PROSPECTS); // one built, plus the placeholder
-    assert.equal(await p.locator('#prospect-picker option[value=tsuruga-osaka]').count(), 0);
+    assert.equal(await p.locator('#opportunities button').count(), PROSPECTS - 1);
     await (await control(p, '#focus-route')).click();
     await closeTools(p);
     await p.locator('#tab-map').click();
@@ -188,7 +198,7 @@ async function dots(p, points, ink) {
       wasm_sha256: crypto.createHash('sha256').update(fs.readFileSync('web/main.wasm')).digest('hex'),
       checks,
       verified: [
-        'All ' + PROSPECTS + ' prospects are available in the bounded picker; ' +
+        'All ' + PROSPECTS + ' prospects are available in the cash-ranked scrollable list; ' +
           'the two Japanese sample prospects have actual dotted map pixels and can be selected by their curved paths; ' +
           'drag does not select',
         'Selection opens the complete project and preserves the campaign; no arbitrary endpoint controls',

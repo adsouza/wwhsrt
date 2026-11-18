@@ -80,6 +80,7 @@ async function shot(p, name) {
     );
     await (await control(p, '#tab-build')).click();
     await prospect(p, 'hokkaido-extension');
+    await p.locator('#alignments button').filter({ hasText: 'Tunnel route' }).click();
     assert.match(await (await control(p, '#terrain-explanation')).innerText(), /170 km/);
     await (
       await control(p, '#alignments button')

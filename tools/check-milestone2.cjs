@@ -103,6 +103,7 @@ async function hint(p, text) {
 
     await (await control(p, '#tab-build')).click();
     await prospect(p, 'hokkaido-extension');
+    await p.locator('#alignments button').filter({ hasText: 'Tunnel route' }).click();
     f = (await snap(p)).frame;
     const c = f.corridors.find((c) => c.id === 'hokkaido-extension'),
       a = c.alignments.find((a) => a.id === 'mountain');

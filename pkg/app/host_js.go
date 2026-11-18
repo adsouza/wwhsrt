@@ -108,6 +108,8 @@ func (h *host) snapshot(g *Game, full bool) map[string]any {
 	}
 	if full || !h.sentFrame || h.sentRevision != g.Frame.Revision {
 		v["frame"] = g.Frame
+		v["prospects"] = ui.RankedProspects(g.Frame)
+		v["next_service"] = ui.NextService(g.Frame)
 		h.sentFrame, h.sentRevision = true, g.Frame.Revision
 	}
 	return v
@@ -152,6 +154,12 @@ func (h *host) run(g *Game) {
 		}
 		g.mu.Lock()
 		switch r.kind {
+		case "best_frequency":
+			var q gameapi.ForecastRequest
+			_ = json.Unmarshal([]byte(r.body), &q)
+			n, ok := ui.BestFrequency(g.Frame, q, g.Port.Forecast)
+			b, _ := json.Marshal(map[string]any{"frequency": n, "available": ok})
+			r.resolve.Invoke(string(b))
 		case "forecast":
 			var q gameapi.ForecastRequest
 			var forecast gameapi.Forecast

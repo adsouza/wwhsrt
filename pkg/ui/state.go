@@ -5,8 +5,6 @@ import (
 	"bytes"
 	_ "embed"
 	"encoding/json"
-	"math"
-	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -280,7 +278,7 @@ func SelectProspect(s *State, f gameapi.Frame, id string) bool {
 			continue
 		}
 		s.FromCity, s.ToCity = co.FromCity, co.ToCity
-		s.AlignmentID = co.Alignments[0].ID
+		s.AlignmentID = cheapestAlignment(co).ID
 		s.Selected, s.SourceStation = "", ""
 		s.View, s.BuildPane = "build", "plan"
 		return true
@@ -452,31 +450,4 @@ func FundingBreakdown(f gameapi.Frame, s State) (ConstructionFunding, bool) {
 		}
 	}
 	return ConstructionFunding{}, false
-}
-
-// Keep the primary plan compact while the bounded dropdown and dotted map
-// expose the complete catalog. Sort quick choices near the selected project.
-func QuickProspects(f gameapi.Frame, s State) []gameapi.Corridor {
-	rows := ConstructionOpportunities(f)
-	var origin gameapi.City
-	found := false
-	for _, c := range f.Cities {
-		if c.ID == s.FromCity {
-			origin = c
-			found = true
-			break
-		}
-	}
-	if found {
-		city := map[gameapi.CityID]gameapi.City{}
-		for _, c := range f.Cities {
-			city[c.ID] = c
-		}
-		score := func(co gameapi.Corridor) float64 {
-			c := city[co.FromCity]
-			return math.Abs(c.Lat-origin.Lat) + math.Abs(c.Lon-origin.Lon)*math.Cos(origin.Lat*math.Pi/180)
-		}
-		sort.SliceStable(rows, func(i, j int) bool { return score(rows[i]) < score(rows[j]) })
-	}
-	return rows[:min(2, len(rows))]
 }

@@ -159,6 +159,9 @@ type CashFlows struct {
 	Borrowed     Money `json:"borrowed"`
 	Repaid       Money `json:"repaid"`
 }
+
+const MaxFrequency = 16
+
 type ForecastRequest struct {
 	ReplaceServiceID string `json:"replace_service_id"`
 	CorridorID       string `json:"corridor_id"`

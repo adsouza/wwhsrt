@@ -45,50 +45,9 @@ func (h *host) buildPlanner(g *Game, t func(string) string, label nativeLabel, b
 		return
 	}
 	if pane == "plan" {
-		label(t("prospectHint"), 14)
-		b := button(t("browseProspects"), func() { g.State.Expanded = true; h.layout(g); g.dirty = true })
-		h.actions["browse-prospects"] = b
-		opportunities := ui.ConstructionOpportunities(g.Frame)
-		if len(opportunities) == 0 {
-			label(t("noProspects"), 14)
-		}
-		options := []choice{}
-		selected := ""
-		if co, ok := ui.Pair(g.Frame, g.State.FromCity, g.State.ToCity); ok {
-			for _, candidate := range opportunities {
-				if candidate.ID == co.ID {
-					selected = co.ID
-				}
-			}
-		}
-		for _, co := range opportunities {
-			options = append(options, choice{co.ID, t(string(co.FromCity)) + " – " + t(string(co.ToCity))})
-		}
-		label(fmt.Sprintf(t("allProspectsCount"), len(opportunities)), 14)
-		h.selectChoice(g, selected, options, func(id string) {
-			if ui.SelectProspect(&g.State, g.Frame, id) {
-				h.workspaceChanged(g)
-			}
-		}, t("chooseProspect"))
-		for _, co := range ui.QuickProspects(g.Frame, g.State) {
-			co := co
-			b := button(t(string(co.FromCity))+" – "+t(string(co.ToCity)), func() {
-				if ui.SelectProspect(&g.State, g.Frame, co.ID) {
-					h.workspaceChanged(g)
-				}
-			})
-			h.actions["prospect-"+co.ID] = b
-			if selected, ok := ui.Pair(g.Frame, g.State.FromCity, g.State.ToCity); ok && selected.ID == co.ID {
-				p := ui.PaletteFor(g.State)
-				b.SetImage(
-					&widget.ButtonImage{
-						Idle:    uimage.NewBorderedNineSliceColor(p.Selected, p.Accent, 1),
-						Hover:   uimage.NewNineSliceColor(p.Hover),
-						Pressed: uimage.NewNineSliceColor(p.Pressed),
-					},
-				)
-			}
-		}
+		defer func() {
+			h.actions["browse-prospects"] = button(t("browseProspects"), func() { g.State.Expanded = true; h.layout(g); g.dirty = true })
+		}()
 	}
 	co, ok := ui.Pair(g.Frame, g.State.FromCity, g.State.ToCity)
 	if !ok {
@@ -96,6 +55,7 @@ func (h *host) buildPlanner(g *Game, t func(string) string, label nativeLabel, b
 		h.helpSlot(g, "endpoints", label, button)
 		return
 	}
+	label(t(string(co.FromCity))+" – "+t(string(co.ToCity)), 18)
 	for _, project := range g.Frame.Projects {
 		if project.CorridorID != co.ID {
 			continue
@@ -135,7 +95,6 @@ func (h *host) buildPlanner(g *Game, t func(string) string, label nativeLabel, b
 		h.actions["plan-existing-service"] = b
 		return
 	}
-	label(t(string(co.FromCity))+" – "+t(string(co.ToCity)), 18)
 	if co.ConstructionKind != "" {
 		label(t("constructionScope_"+co.ConstructionKind), 14)
 	}
@@ -174,6 +133,9 @@ func (h *host) buildPlanner(g *Game, t func(string) string, label nativeLabel, b
 			return
 		}
 		label(t("contribution")+" · "+ui.Cash(q.Contribution), 17)
+		b := button(t("commitBuild"), func() { h.send(g, gameapi.BuildLine) })
+		h.primaryAction = b
+		b.GetWidget().Disabled = h.busy || q.Shortfall > 0
 		if q.Shortfall > 0 {
 			label(t("fundingGap")+" · "+ui.Cash(q.Shortfall), 14)
 			b := button(
@@ -196,16 +158,12 @@ func (h *host) buildPlanner(g *Game, t func(string) string, label nativeLabel, b
 			label(t("operatingContribution")+"\n"+ui.Cash(forecast.Contribution), 14)
 			label(fmt.Sprintf(t("previewServicePlan"), frequency, ui.Cash(fare)), 12)
 		}
-		b := button(t("commitBuild"), func() { h.send(g, gameapi.BuildLine) })
-		h.primaryAction = b
-		b.GetWidget().Disabled = h.busy || q.Shortfall > 0
 		h.helpSlot(g, "endpoints", label, button)
 		h.helpSlot(g, "alignments", label, button)
 		h.helpSlot(g, "funding", label, button)
 	}
 }
 func (h *host) buildServices(g *Game, t func(string) string, label nativeLabel, button nativeButton) {
-	label(t("services"), 20)
 	h.taskTabs(g, "services", []string{"plan", "fleet", "analysis"}, button)
 	// A query narrows the list whether or not its field is on screen, so the
 	// disclosure stays open while one is active.
@@ -262,7 +220,7 @@ func (h *host) buildServices(g *Game, t func(string) string, label nativeLabel, 
 		label(hint, 13)
 	}
 	r, routeOK := ui.ServiceRoute(g.Frame, g.State.ServiceCorridor)
-	if routeOK {
+	if routeOK && ui.ServicePane(g.State) != "plan" {
 		label(fmt.Sprintf("%d km · %d min", r.KM, r.Minutes), 13)
 	}
 	f, e := g.Port.Forecast(
@@ -392,7 +350,7 @@ func (h *host) buildServices(g *Game, t func(string) string, label nativeLabel, 
 			t("frequency"),
 			fmt.Sprint(g.State.Frequency),
 			func() { g.State.Frequency = max(0, g.State.Frequency-1); change() },
-			func() { g.State.Frequency = min(16, g.State.Frequency+1); change() },
+			func() { g.State.Frequency = min(gameapi.MaxFrequency, g.State.Frequency+1); change() },
 		)
 		h.stepper(
 			g,
@@ -403,6 +361,22 @@ func (h *host) buildServices(g *Game, t func(string) string, label nativeLabel, 
 			func() { g.State.Fare = min(30000, g.State.Fare+1000); change() },
 		)
 	})
+	b := button(t("optimizeFrequency"), func() {
+		q := gameapi.ForecastRequest{CorridorID: g.State.ServiceCorridor, Fare: g.State.Fare, ReplaceServiceID: g.State.ReplaceServiceID}
+		if n, ok := ui.BestFrequency(g.Frame, q, g.Port.Forecast); ok {
+			g.State.Frequency = n
+			change()
+			h.message = "frequencyOptimized"
+			if n == 0 {
+				h.message = "zeroBestFrequency"
+			}
+		} else {
+			h.message = "noFeasibleFrequency"
+			g.dirty = true
+		}
+	})
+	h.actions["optimize-frequency"] = b
+	b.GetWidget().Disabled = h.busy || !routeOK || !r.Open
 	h.helpSlot(g, "fares", label, button)
 	if e != nil && len(f.CapacityUsage) == 0 {
 		label(t(e.Error()), 14)
@@ -429,36 +403,20 @@ func (h *host) buildServices(g *Game, t func(string) string, label nativeLabel, 
 			}
 		}
 	}
-
 	h.helpSlot(g, "capacity", label, button)
-	label(
-		fmt.Sprintf(
-			"%s: %d / %d · %s%s",
-			t("fleetShort"),
-			f.FleetAvailable,
-			f.FleetNeeded,
-			ui.Cash(g.Frame.TrainFamily.LeaseMonthly),
-			t("monthlyUnit"),
-		),
-		13,
-	)
-	h.row(2, func() {
-		b := button(t("leaseShort"), func() { h.send(g, gameapi.LeaseTrain) })
-		b.GetWidget().Disabled = h.busy
-		b = button(t("returnShort"), func() { h.send(g, gameapi.ReturnTrain) })
-		b.GetWidget().Disabled = h.busy
-	})
+	if e == nil && f.FleetNeeded > f.FleetAvailable && g.State.ReplaceServiceID == "" {
+		b := button(fmt.Sprintf(t("leaseForPlan"), f.FleetNeeded-f.FleetAvailable), func() { h.send(g, gameapi.LeaseTrain) })
+		b.GetWidget().Disabled = h.busy || g.Frame.Player.Cash < 0
+	}
 	h.helpSlot(g, "fleet-plan", label, button)
 	if e == nil {
 		h.row(3, func() {
-			label(t("forecastRevenue")+"\n"+ui.Cash(f.Revenue), 13)
+			label(t("profitChange")+"\n"+ui.Cash(f.CompanyChange), 13)
 			label(t("forecastContribution")+"\n"+ui.Cash(f.Contribution), 13)
 			label(t("ridersBreakEven")+"\n"+ui.BreakEvenTarget(f), 13)
 		})
 	}
-	if ui.ServiceDirty(g.State, g.Frame) {
-		label(t("draftChanges"), 13)
-	}
+
 	title := t("applyService")
 	kind := gameapi.SetService
 	if g.State.ReplaceServiceID != "" {

@@ -73,6 +73,13 @@
             </div>
           </div>
         </section>
+        <section id="prospect-board" aria-labelledby="prospect-heading">
+          <div class="prospect-header">
+            <h2 id="prospect-heading" data-t="rankedProspects"></h2>
+            <button id="next-investment" class="primary"></button>
+          </div>
+          <div id="opportunities" tabindex="0" role="region" aria-labelledby="prospect-heading"></div>
+        </section>
         <aside id="inspector">
           <div class="section-head">
             <span class="pill" data-t="offline"></span><span class="eyebrow" data-t="scope"></span>
@@ -111,12 +118,10 @@
           </section>
           <section id="view-build" class="view" hidden aria-labelledby="build-heading">
             <h1 id="build-heading" data-t="build"></h1>
-            <p data-t="prospectHint"></p>
             <button id="browse-prospects" data-t="browseProspects"></button>
             <p id="selected-prospect"></p>
             <div data-help-anchor="endpoints"></div>
             <h2 data-t="plans"></h2>
-            <div id="opportunities" class="city-list"></div>
             <div id="build-status" role="status"></div>
             <progress id="project-progress" hidden></progress
             ><button id="project-service" class="primary" hidden data-t="services"></button>

@@ -115,8 +115,8 @@ async function clickCommand(p, id, trace, command) {
     assert.equal(f.projects.length, 1);
     assert.equal(f.projects[0].ready, 49);
     assert(f.pending.grants > 0 && f.pending.construction > f.pending.grants);
-    assert.equal(await p.locator('#prospect-picker option[value=tsuruga-osaka]').count(), 0);
-    assert.equal(await p.locator('#prospect-picker option[value=hokkaido-extension]').count(), 1);
+    assert.equal(await p.locator('#opportunities button[data-corridor=tsuruga-osaka]').count(), 0);
+    assert.equal(await p.locator('#opportunities button[data-corridor=hokkaido-extension]').count(), 1);
     assert(await p.locator('#project-progress').isVisible());
     assert.equal(f.idle_lines.length, 0);
     assert(await p.locator('#review-idle').isHidden());
@@ -130,7 +130,7 @@ async function clickCommand(p, id, trace, command) {
         .innerText()
         .then((s) => s.includes('ready for services')),
     );
-    assert.equal(await p.locator('#prospect-picker option[value=tsuruga-osaka]').count(), 0);
+    assert.equal(await p.locator('#opportunities button[data-corridor=tsuruga-osaka]').count(), 0);
     assert.equal(f.idle_lines.length, 1);
     assert.equal(f.idle_lines[0].maintenance, 193890000);
     assert.equal(f.idle_lines[0].needs_trains, true);
@@ -294,7 +294,7 @@ async function clickCommand(p, id, trace, command) {
     await p.waitForFunction(() => !!window.railSnapshot);
     assert.equal((await snap(p)).frame.checkpoint, before);
     assert.equal(await p.locator('#company-name').inputValue(), '保留此草稿');
-    assert.equal(await p.locator('#prospect-picker option[value=tsuruga-osaka]').count(), 0);
+    assert.equal(await p.locator('#opportunities button[data-corridor=tsuruga-osaka]').count(), 0);
     await p.evaluate(() => navigator.serviceWorker.ready);
     await p.waitForFunction(() => !!navigator.serviceWorker.controller);
     await p.close();

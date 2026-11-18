@@ -17,16 +17,21 @@ import (
 const sidebarScrollSteps = 10000
 
 func (h *host) configureSidebarScroll(g *Game, root *widget.Container) {
-	p := ui.PaletteFor(g.State)
 	scroll := h.scroll
+	h.scrollbar = h.addScrollBar(g, root, scroll, func() bool { return h.scroll == scroll })
+}
+
+func (h *host) addScrollBar(g *Game, root *widget.Container, scroll *widget.ScrollContainer, current func() bool) *widget.Slider {
+	p := ui.PaletteFor(g.State)
 	r := scroll.ViewRect()
 	_, height := scroll.PreferredSize()
 	barRect := image.Rect(r.Max.X+h.px(3), r.Min.Y+h.px(4), r.Max.X+h.px(17), r.Max.Y-h.px(4))
-	bar := widget.NewSlider(
+	var bar *widget.Slider
+	bar = widget.NewSlider(
 		widget.SliderOpts.WidgetOpts(widget.WidgetOpts.LayoutData(barRect)),
 		widget.SliderOpts.Direction(widget.DirectionVertical),
 		widget.SliderOpts.MinMax(0, sidebarScrollSteps),
-		widget.SliderOpts.FixedHandleSize(max(h.px(44), r.Dy()*r.Dy()/max(1, height))),
+		widget.SliderOpts.FixedHandleSize(max(min(h.px(44), barRect.Dy()/2), r.Dy()*r.Dy()/max(1, height))),
 		widget.SliderOpts.PageSizeFunc(func() int {
 			_, ch := scroll.PreferredSize()
 			return max(1, int(float64(sidebarScrollSteps)*float64(r.Dy())*.9/float64(max(1, ch-r.Dy()))))
@@ -40,36 +45,42 @@ func (h *host) configureSidebarScroll(g *Game, root *widget.Container) {
 			},
 		),
 		widget.SliderOpts.ChangedHandler(func(a *widget.SliderChangedEventArgs) {
-			if h.scroll == scroll && !g.dirty && !g.State.Expanded {
-				h.setSidebarScroll(float64(a.Current) / sidebarScrollSteps)
+			if current() && !g.dirty && !g.State.Expanded {
+				setScroll(scroll, bar, float64(a.Current)/sidebarScrollSteps)
 			}
 		}))
 	// ScrollContainer only clips/positions content; it supplies no wheel policy.
 	// Keep fractional trackpad deltas and scroll a fixed pixel distance per notch.
 	scroll.GetWidget().ScrolledEvent.AddHandler(func(args interface{}) {
-		if a, ok := args.(*widget.WidgetScrolledEventArgs); ok && h.scroll == scroll && !g.dirty && !g.State.Expanded {
-			h.scrollSidebar(-a.Y * float64(h.px(48)))
+		if a, ok := args.(*widget.WidgetScrolledEventArgs); ok && current() && !g.dirty && !g.State.Expanded {
+			if overflow := height - r.Dy(); overflow > 0 {
+				setScroll(scroll, bar, scroll.ScrollTop-a.Y*float64(h.px(48))/float64(overflow))
+			}
 		}
 	})
-	h.scrollbar = bar
 	bar.SetLocation(barRect)
 	if height <= r.Dy() {
 		bar.GetWidget().SetVisibility(widget.Visibility_Hide)
 	}
-	h.setSidebarScroll(scroll.ScrollTop)
+	setScroll(scroll, bar, scroll.ScrollTop)
 	root.AddChild(bar)
+	return bar
 }
 
 func (h *host) setSidebarScroll(value float64) {
-	_, height := h.scroll.PreferredSize()
-	if height <= h.scroll.ViewRect().Dy() {
+	setScroll(h.scroll, h.scrollbar, value)
+}
+func setScroll(scroll *widget.ScrollContainer, bar *widget.Slider, value float64) {
+	_, height := scroll.PreferredSize()
+	if height <= scroll.ViewRect().Dy() {
 		value = 0
 	}
-	h.scroll.ScrollTop = math.Max(0, math.Min(1, value))
-	if h.scrollbar != nil {
-		h.scrollbar.Current = int(math.Round(h.scroll.ScrollTop * sidebarScrollSteps))
+	scroll.ScrollTop = math.Max(0, math.Min(1, value))
+	if bar != nil {
+		bar.Current = int(math.Round(scroll.ScrollTop * sidebarScrollSteps))
 	}
 }
+
 func (h *host) scrollSidebar(pixels float64) {
 	_, height := h.scroll.PreferredSize()
 	if overflow := height - h.scroll.ViewRect().Dy(); overflow > 0 {

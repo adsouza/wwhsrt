@@ -15,7 +15,7 @@ const stationPerJourney gameapi.Money = 50
 // Service limits shared by command validation, forecasts and save restoration.
 // Change them here only. Fleet size is deliberately unlimited: a lease needs
 // only nonnegative cash, and each train then costs its monthly lease.
-const MaxFrequency = 16
+const MaxFrequency = gameapi.MaxFrequency
 const MinFare gameapi.Money = 1000
 const MaxFare gameapi.Money = 30000
 

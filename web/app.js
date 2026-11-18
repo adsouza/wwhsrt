@@ -137,6 +137,7 @@ function setupWorkspace() {
   const path = details('service-path-details', 'calledStops', 'service-path', anchor('services', 'through'));
   plan.append(path);
   move(plan, 'extension-choice', 'extension-price');
+  labelFor('fare').dataset.t = 'fareShort';
   const fields = el('div', 'service-fields');
   fields.className = 'two-fields';
   for (const id of ['frequency', 'fare']) {
@@ -156,16 +157,19 @@ function setupWorkspace() {
   capacity.setAttribute('aria-labelledby', 'capacity-summary');
   plan.append(capacity);
   move(plan, 'fleet-count', document.querySelector('#view-services .service-actions'));
+  plan.querySelector('.service-actions').prepend(el('button', 'optimize-frequency', 'optimizeFrequency'));
   $('lease-train').dataset.t = 'leaseShort';
   $('return-train').dataset.t = 'returnShort';
   const forecast = el('div', 'plan-forecast');
   forecast.className = 'plan-forecast';
   const forecastLabel = el('h2', null, 'serviceSummary');
+  forecastLabel.className = 'sr-only';
   forecast.append(forecastLabel);
   plan.append(forecast);
   move(forecast, 'forecast-status', 'forecast-values');
   const apply = el('div', 'service-commit');
   apply.className = 'task-commit';
+  $('service-draft-note').classList.add('sr-only');
   move(apply, 'service-draft-note', 'restore-plan', 'apply-service');
   plan.append(apply);
   for (const id of ['service-plan', 'fleet', 'fares', 'capacity', 'idle']) move(plan, anchor('services', id));
@@ -217,18 +221,11 @@ function setupWorkspace() {
   build.append(bp, bc, bj);
   move(
     bp,
-    build.querySelector('[data-t=prospectHint]'),
-    'browse-prospects',
     'selected-prospect',
     anchor('build', 'endpoints'),
   );
-  const pickerLabel = el('label', 'prospect-picker-label'),
-    prospectPicker = el('select', 'prospect-picker');
-  pickerLabel.htmlFor = 'prospect-picker';
-  bp.append(pickerLabel, prospectPicker);
   move(
     bp,
-    'opportunities',
     'build-status',
     'project-progress',
     'project-service',
@@ -251,7 +248,8 @@ function setupWorkspace() {
   const funding = details('build-funding-details', 'fundingPlan', 'quote', 'funding-gap', 'finance-link');
   $('borrow-shortfall-build').before(funding); // quote details live by the exact-gap action
   const quoteCompact = el('p', 'build-cost-summary');
-  $('build-line').before(quoteCompact);
+  $('build-package').prepend(quoteCompact, $('alignments'), $('build-line'));
+  bp.append($('browse-prospects'));
   // Accounts retain full ledger without making it the default report.
   const report = $('view-report'),
     rt = tabs('report', ['overview', 'accounts', 'network', 'markets']);
@@ -490,11 +488,14 @@ window.railStorageCommit = (value) =>
   });
 // The host sends the frame only when its revision changes. Snapshot-shaped
 // replies (the ones carrying a camera) reuse the last frame received.
-let lastFrame;
+let lastFrame, rankedProspects = [], nextService = '';
 function withFrame(s) {
   if (s && typeof s === 'object' && 'camera' in s) {
-    if (s.frame) lastFrame = s.frame;
-    else if (lastFrame) s.frame = lastFrame;
+    if (s.frame) {
+      rankedProspects = s.prospects;
+      nextService = s.next_service;
+      lastFrame = s.frame;
+    } else if (lastFrame) s.frame = lastFrame;
   }
   return s;
 }
@@ -1097,48 +1098,70 @@ function renderBusiness() {
   renderBuild();
   renderServices();
 }
-function renderBuild() {
-  const opportunities = frame.corridors.filter(
-    (c) => !c.existing && !frame.projects.some((p) => p.corridor_id === c.id),
-  );
-  $('prospect-picker-label').textContent = label('allProspectsCount').replace('%d', opportunities.length);
-  selectOptions(
-    $('prospect-picker'),
-    [['', label('chooseProspect')], ...opportunities.map((c) => [c.id, corridorName(c)])],
-    opportunities.some((c) => c.id === chosenPair()?.id) ? chosenPair().id : '',
-  );
-  const origin = frame.cities.find((c) => c.id === prefs.from_city),
-    cityByID = new Map(frame.cities.map((c) => [c.id, c]));
-  const quick = [...opportunities];
-  if (origin) {
-    const score = (c) => {
-      const p = cityByID.get(c.from_city);
-      return Math.abs(p.lat - origin.lat) + Math.abs(p.lon - origin.lon) * Math.cos((origin.lat * Math.PI) / 180);
-    };
-    quick.sort((a, b) => score(a) - score(b));
-  }
+async function chooseProspect(row) {
+  prefs.from_city = row.from;
+  prefs.to_city = row.to;
+  prefs.alignment_id = row.alignment;
+  prefs.build_pane = 'plan';
+  await showView('build');
+  await call('focus_route');
+}
+
+let boardKey = '';
+function renderProspectBoard() {
+  const rows = rankedProspects;
+  const affordable = rows.length && rows[0].cash <= frame.player.cash;
+  const finished = frame.months_resolved >= frame.campaign_months;
+  const next = $('next-investment');
+  next.textContent = label(finished ? 'campaignEndTitle' : affordable ? 'reviewCheapest' : nextService ? 'earnWithService' : 'finance');
+  next.disabled = busy || finished;
+  next.onclick = async () => {
+    if (affordable) return chooseProspect(rows[0]);
+    if (!nextService) {
+      prefs.company_pane = 'finance';
+      return showView('company');
+    }
+    prefs.service_pane = 'plan';
+    prefs.service_query = '';
+    if (prefs.service_corridor !== nextService) loadService(nextService);
+    await showView('services');
+    await call('focus_route');
+  };
+  const selected = prefs.view === 'build' ? chosenPair()?.id : '';
+  const key = JSON.stringify([frame.checkpoint, prefs.locale, selected]);
+  if (boardKey === key) return;
+  boardKey = key;
   const list = $('opportunities');
-  list.replaceChildren();
-  for (const c of quick.slice(0, 2)) {
+  const fragment = new DocumentFragment();
+  for (const row of rows) {
     const b = document.createElement('button');
-    b.textContent = corridorName(c);
-    b.dataset.corridor = c.id;
-    b.setAttribute('aria-pressed', String(chosenPair()?.id === c.id));
-    b.onclick = async () => {
-      prefs.from_city = c.from_city;
-      prefs.to_city = c.to_city;
-      prefs.alignment_id = c.alignments[0].id;
-      savePreferences();
-      await syncUI();
-      renderBuild();
-      renderGuidance();
-    };
-    list.append(b);
+    const name = document.createElement('span');
+    name.textContent = label(row.from) + ' – ' + label(row.to);
+    const price = document.createElement('span');
+    price.className = 'prospect-price';
+    price.textContent = money(row.cash);
+    if (row === rows[0] || row.cash <= frame.player.cash) {
+      const ready = document.createElement('small');
+      ready.className = row.cash <= frame.player.cash ? 'affordable' : '';
+      ready.textContent = row.cash <= frame.player.cash ? label('withinBudget') :
+        label('saveForLine').replace('%s', money(row.cash - frame.player.cash));
+      price.append(ready);
+    }
+    b.dataset.corridor = row.id;
+    b.setAttribute('aria-pressed', String(selected === row.id));
+    b.onclick = () => chooseProspect(row);
+    b.append(name, price);
+    fragment.append(b);
   }
+  list.replaceChildren(fragment);
+  if (!rows.length) list.textContent = label('noProspects');
+}
+
+function renderBuild() {
+  renderProspectBoard();
   const co = chosenPair(),
     project = co && frame.projects.find((p) => p.corridor_id === co.id);
   $('selected-prospect').textContent = co ? corridorName(co) : label('chooseProspect');
-  if (!list.children.length) list.textContent = label('noProspects');
   $('build-cost-summary').textContent = '';
   $('build-package').hidden = true;
   $('alignments').replaceChildren();
@@ -1206,14 +1229,8 @@ function renderBuild() {
   }
   const a = co.alignments.find((a) => a.id === prefs.alignment_id),
     net = a.cost - a.grant;
-  $('build-cost-summary').textContent =
-    label('contribution') +
-    ': ' +
-    money(net) +
-    ' · ' +
-    label('fundingGap') +
-    ': ' +
-    money(Math.max(0, net - frame.player.cash));
+  $('build-cost-summary').textContent = label('contribution') + ' · ' + money(net) + ' · ' +
+    (net <= frame.player.cash ? label('withinBudget') : label('fundingGap') + ' ' + money(net - frame.player.cash));
   const e = a.estimate;
   ledgerRows($('engineering-values'), [
     ...(a.cost_intervals || []).map((p) => [
@@ -1310,6 +1327,7 @@ function renderServices() {
   $('restore-plan').hidden = !serviceDirty();
   const route = frame.routes.find((r) => r.id === prefs.service_corridor);
   $('service-path-details').hidden = !route || route.stops.length <= 2;
+  $('service-distance').hidden = paneFor('services') === 'plan';
   $('service-distance').textContent = route ? route.km + ' km · ' + route.minutes + ' min' : '';
   $('connector-note').textContent = route?.connector_km
     ? label('conventionalConnectors') + ': ' + route.connector_km + ' km. ' + label('connectorHint')
@@ -1328,6 +1346,7 @@ function renderServices() {
     target = frame.services.some((s) => s.corridor_id === 'tokyo-osaka' && s.frequency > 0);
   $('extension-choice').hidden = prefs.service_corridor !== 'tokyo-osaka' || !starter || target;
   $('extend-starter').checked = !!prefs.replace_service_id;
+  $('optimize-frequency').disabled = busy || !route?.open;
   $('lease-train').disabled = busy;
   $('return-train').disabled = busy;
   renderIdleLines();
@@ -1451,7 +1470,7 @@ function queueForecast() {
     }
     if (!result.error) {
       ledgerRows($('forecast-values'), [
-        [label('forecastRevenue'), money(f.revenue)],
+        [label('profitChange'), money(f.company_change)],
         [label('forecastContribution'), money(f.contribution)],
         [label('ridersBreakEven'), f.break_even_available ? String(f.break_even_passengers) : '—'],
       ]);
@@ -1526,17 +1545,6 @@ $('finance-link').onclick = () => {
   prefs.company_pane = 'finance';
   showView('company');
 };
-$('prospect-picker').onchange = async (e) => {
-  const c = frame.corridors.find((c) => c.id === e.target.value && !c.existing);
-  if (!c) return;
-  prefs.from_city = c.from_city;
-  prefs.to_city = c.to_city;
-  prefs.alignment_id = c.alignments[0].id;
-  savePreferences();
-  await syncUI();
-  renderBuild();
-  renderGuidance();
-};
 $('build-line').onclick = () => {
   const co = chosenPair();
   if (co) command('build_line', { corridor_id: co.id, alignment_id: prefs.alignment_id });
@@ -1582,6 +1590,31 @@ $('fare').oninput = (e) => {
   queueForecast();
   renderGuidance();
 };
+$('optimize-frequency').onclick = async () => {
+  const ticket = forecastTicket;
+  const button = $('optimize-frequency');
+  button.disabled = true;
+  try {
+    const result = await call('best_frequency', {
+      corridor_id: prefs.service_corridor,
+      fare: prefs.fare,
+      replace_service_id: prefs.replace_service_id,
+    });
+    if (ticket !== forecastTicket || prefs.view !== 'services') return;
+    if (result.available) {
+      prefs.frequency = result.frequency;
+      $('frequency').value = result.frequency;
+      savePreferences();
+      updateDraftGuard();
+      await syncUI();
+      queueForecast();
+    }
+    message = result.available ? (result.frequency ? 'frequencyOptimized' : 'zeroBestFrequency') : 'noFeasibleFrequency';
+    $('status').textContent = label(message);
+  } finally {
+    button.disabled = busy;
+  }
+};
 $('apply-service').onclick = () =>
   prefs.replace_service_id
     ? command('extend_service', {
@@ -1617,6 +1650,9 @@ function draftStatusChanged() {
       'build_line',
       'rename_company',
       'new_game',
+      'frequencyOptimized',
+      'zeroBestFrequency',
+      'noFeasibleFrequency',
     ].includes(message)
   )
     message = 'draft_not_applied';
@@ -2282,6 +2318,7 @@ function saveDisclosure(id, open) {
 }
 function applyWorkspace(layout) {
   if (!layout) return;
+  document.documentElement.style.setProperty('--prospect-height', (layout.Prospects.Max.Y - layout.Prospects.Min.Y) + 'px');
   document.body.dataset.commandDock = layout.DockLeft ? 'left' : 'top';
   document.documentElement.style.setProperty('--inspector-width', layout.PanelWidth + 'px');
   document.documentElement.style.setProperty(

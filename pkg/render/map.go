@@ -179,54 +179,7 @@ func (m *Map) drawScene(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s 
 	if f.PublicNetwork {
 		m.public.draw(dst, c, s)
 	}
-	// The static source network is cached; only active selections need a second
-	// stroke. Resolve the route once, rather than searching it for every section.
-	draftSections := map[string]bool{}
-	if s.View == "services" {
-		if route, ok := ui.ServiceRoute(f, s.ServiceCorridor); ok {
-			for _, id := range route.Sections {
-				draftSections[id] = true
-			}
-		}
-	}
-	// Track styles reflect authoritative infrastructure and construction state.
-	for _, co := range f.Corridors {
-		if f.PublicNetwork && co.Existing && !draftSections[co.ID] &&
-			!(s.View == "build" && (co.FromCity == s.FromCity && co.ToCity == s.ToCity ||
-				co.FromCity == s.ToCity && co.ToCity == s.FromCity)) {
-			continue
-		}
-		var chosen *gameapi.Alignment
-		stroke := pal.Existing
-		dashed := false
-		if co.Existing {
-			chosen = &co.Alignments[0]
-		} else {
-			for _, project := range f.Projects {
-				if project.CorridorID != co.ID {
-					continue
-				}
-				for i := range co.Alignments {
-					if co.Alignments[i].ID == project.AlignmentID {
-						chosen = &co.Alignments[i]
-					}
-				}
-				if project.Ready > f.MonthsResolved {
-					stroke = pal.Construction
-					dashed = true
-				} else {
-					stroke = pal.Accent
-				}
-			}
-		}
-		if draftSections[co.ID] && chosen != nil {
-			stroke = pal.Draft
-		}
-		if chosen != nil {
-			m.route(dst, c, chosen.Path, stroke, pal.Outline, dashed)
-		}
-
-	}
+	m.drawTracks(dst, c, f, s, pal)
 	m.drawProspects(dst, c, f, s)
 	idle := []ui.IdleHighlight{}
 	if s.View == "services" {
@@ -339,22 +292,24 @@ func (m *Map) drawScene(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s 
 	if !s.HideTerrain {
 		m.terrain.labels(m, dst, c, s, occupied)
 	}
-	title := ui.Text(s.Locale, "east_asia")
-	for _, r := range mapview.VisibleRegions(s.Portrait) {
-		if r.ID == s.Region {
-			title = r.Name
-			if s.Locale == "zh-Hans" {
-				title = r.Chinese
-			}
-		}
-	}
-	m.Label(dst, title, m.by(20, 20), m.by(20, 18), 20, pal.Text)
 	if stop := m.PublicStop(s.SourceStation); stop != nil {
 		p := c.Screen(mapview.Project(stop.Lat, stop.Lon))
 		vector.StrokeCircle(dst, float32(p.X), float32(p.Y), 9, 2, pal.Accent, true)
 		m.Label(dst, stop.Name, m.by(14, 12), c.Height-m.by(14, 28), 14, pal.Text)
 	}
 	m.Label(dst, ui.Text(s.Locale, "stationLegend"), m.by(11, 20), m.by(20, 18)+m.by(20, 22), 11, pal.Muted)
+	x, y := m.by(11, 20), m.by(20, 18)
+	for _, key := range []string{"serviceRunning", "serviceAvailable"} {
+		ink := pal.Existing
+		if key == "serviceRunning" {
+			ink = pal.Operating
+		}
+		vector.StrokeLine(dst, float32(x), float32(y+m.by(11, 7)), float32(x+m.by(11, 16)), float32(y+m.by(11, 7)), float32(m.by(11, 3)), ink, true)
+		label := ui.Text(s.Locale, key)
+		x += m.by(11, 20)
+		m.Label(dst, label, x, y, 11, pal.Text)
+		x += text.Advance(label, m.face(11)) + m.by(11, 12)
+	}
 	for _, row := range legend {
 		y := float32(row.box.y)
 		if row.key == "prospect" {
@@ -376,6 +331,65 @@ func (m *Map) drawScene(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s 
 		m.Label(dst, row.label, row.textX, row.box.y+m.by(12, 4), row.size, pal.WarningText)
 	}
 
+}
+
+func (m *Map) drawTracks(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s ui.State, pal ui.Palette) {
+	// The cached public layer already contains all unserved public track.
+	draftSections := map[string]bool{}
+	if s.View == "services" {
+		if route, ok := ui.ServiceRoute(f, s.ServiceCorridor); ok {
+			for _, id := range route.Sections {
+				draftSections[id] = true
+			}
+		}
+	}
+	// Track styles reflect authoritative infrastructure and construction state.
+	running := ui.OperatingSections(f)
+	// Where two catalog lines share geometry, the operating line stays visible.
+	for _, operating := range []bool{false, true} {
+		for _, co := range f.Corridors {
+			if running[co.ID] != operating {
+				continue
+			}
+			if f.PublicNetwork && !operating && co.Existing && !draftSections[co.ID] &&
+				!(s.View == "build" && (co.FromCity == s.FromCity && co.ToCity == s.ToCity ||
+					co.FromCity == s.ToCity && co.ToCity == s.FromCity)) {
+				continue
+			}
+			var chosen *gameapi.Alignment
+			stroke := pal.Existing
+			dashed := false
+			if co.Existing {
+				chosen = &co.Alignments[0]
+			} else {
+				for _, project := range f.Projects {
+					if project.CorridorID != co.ID {
+						continue
+					}
+					for i := range co.Alignments {
+						if co.Alignments[i].ID == project.AlignmentID {
+							chosen = &co.Alignments[i]
+						}
+					}
+					if project.Ready > f.MonthsResolved {
+						stroke = pal.Construction
+						dashed = true
+					}
+				}
+			}
+			if operating {
+				stroke = pal.Operating
+			}
+			if draftSections[co.ID] && chosen != nil {
+				m.routeWidth(dst, c, chosen.Path, stroke, pal.Draft, false, 8, 4)
+				continue
+			}
+			if chosen != nil {
+				m.route(dst, c, chosen.Path, stroke, pal.Outline, dashed)
+			}
+
+		}
+	}
 }
 
 // drawIdleLines strokes the idle-line warnings. Fleet overlays go first so a physical idle-line warning remains

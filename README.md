@@ -61,8 +61,11 @@ The [map and widget validation report](docs/validation/README.md) contains Equal
 
 
 All [74 launch projects](docs/LAUNCH_CORRIDORS.md) are now construction prospects:
-choose a dotted route or use **Build a line → All 74 construction prospects**.
-The picker keeps the ordinary plan compact. Regional costs use the researched
+the scrollable construction list ranks them by the cash your company pays after grants.
+Choose a row to review its cheapest alignment. When cash is short, choose **Earn cash with service**.
+Green track carries your service, and gray track is open for service. In the service plan,
+**Maximize profit at this fare** compares daily return trips at your chosen fare. Review
+the monthly profit change, lease any required trains, apply the plan and advance the month. Regional costs use the researched
 2024-USD profiles and authored terrain quantities; detailed costs show country
 splits. Future through-services become available when every required section
 opens, including Tokyo–Sapporo after the Hokkaido extension.

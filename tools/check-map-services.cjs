@@ -75,7 +75,7 @@ async function mapClick(p, id, stay = false) {
   console.error({ box, camera: s.camera, points: points.length });
   throw Error('No service-selectable track body for ' + id);
 }
-async function throughPixels(p, id = 'nagoya-osaka') {
+async function trackPixels(p, id, paletteKey = 'draft') {
   const s = await snap(p),
     path = s.frame.corridors.find((c) => c.id === id).alignments[0].path;
   const points = path
@@ -109,7 +109,7 @@ async function throughPixels(p, id = 'nagoya-osaka') {
       }
       return hits;
     },
-    { png: png.toString('base64'), points, ink: [s.palette.draft.R, s.palette.draft.G, s.palette.draft.B] },
+    { png: png.toString('base64'), points, ink: ['R', 'G', 'B'].map((channel) => s.palette[paletteKey][channel]) },
   );
 }
 (async () => {
@@ -167,7 +167,9 @@ async function throughPixels(p, id = 'nagoya-osaka') {
     });
     await (await control(p, '#focus-route')).click();
     await closeTools(p);
-    const throughHits = await throughPixels(p);
+    const throughHits = await trackPixels(p, 'nagoya-osaka');
+    assert(await trackPixels(p, 'tokyo-nagoya', 'operating') > 3, 'starter service keeps its operating color');
+    assert(await trackPixels(p, 'nagoya-osaka', 'existing') > 3, 'draft extension keeps its unserved color');
     assert(throughHits > 3, 'through route highlights beyond clicked section');
     await p.screenshot({ path: 'docs/validation/map-services-through.png' });
     assert.equal((await snap(p)).frame.checkpoint, initial.frame.checkpoint);
@@ -200,7 +202,7 @@ async function throughPixels(p, id = 'nagoya-osaka') {
     const phoneBox = await p.locator('#map-frame').boundingBox();
     assert(phoneBox.height > 100);
     await p.waitForFunction(async (h) => Math.abs((await railSnapshot()).camera.Height - h) < 2, phoneBox.height);
-    const phoneHits = await throughPixels(p, 'public_beijing__tianjin');
+    const phoneHits = await trackPixels(p, 'public_beijing__tianjin');
     await p.screenshot({ path: 'docs/validation/map-services-phone-zh.png' });
     assert.equal((await snap(p)).state.service_corridor, 'public_beijing__tianjin');
     assert(phoneHits > 2, 'clicked railway remains visibly highlighted after phone inspector opens');

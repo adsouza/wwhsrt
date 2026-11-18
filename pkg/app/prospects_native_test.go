@@ -64,14 +64,14 @@ func TestNativeProspectsMapListDragAndCommittedAvailability(t *testing.T) {
 			if w, _ := g.host.scroll.PreferredSize(); w > g.host.scroll.ViewRect().Dx() {
 				t.Fatal("prospect list overflow")
 			}
-			other := ui.QuickProspects(f, g.State)[1]
+			other := ui.RankedProspects(f)[1]
 			b := g.host.actions["prospect-"+other.ID]
 			if b == nil {
 				t.Fatal("missing named prospect")
 			}
 			b.ClickedEvent.Fire(&widget.ButtonClickedEventArgs{Button: b})
 			event.ExecuteDeferred()
-			if g.State.FromCity != other.FromCity || g.State.ToCity != other.ToCity {
+			if g.State.FromCity != other.From || g.State.ToCity != other.To {
 				t.Fatal("list did not select prospect")
 			}
 			browse := g.host.actions["browse-prospects"]
@@ -83,7 +83,7 @@ func TestNativeProspectsMapListDragAndCommittedAvailability(t *testing.T) {
 			g.State.Expanded = false
 			g.Frame.Projects = append(
 				append([]gameapi.Project{}, f.Projects...),
-				gameapi.Project{CorridorID: other.ID, Ready: 100, AlignmentID: other.Alignments[0].ID},
+				gameapi.Project{CorridorID: other.ID, Ready: 100, AlignmentID: other.Alignment},
 			)
 			g.host.build(g)
 			if g.host.actions["prospect-"+other.ID] != nil {
@@ -139,16 +139,11 @@ func TestNativeWorldwideProspectPickerFitsAndSelectsDedicatedHSR(t *testing.T) {
 				}
 				g.host.layout(g)
 				g.host.build(g)
-				if len(g.host.combos) == 0 {
-					t.Fatal("missing complete-catalog picker")
+				b := g.host.actions["prospect-"+target]
+				if b == nil {
+					t.Fatal("missing construction prospect", target)
 				}
-				// Initial control events run at the end of a normal UI update,
-				// before the player can open the dropdown.
-				event.ExecuteDeferred()
-				stale := g.host.combos[0]
-				stale.SetSelectedEntry(choice{ID: target, Name: target})
-				event.ExecuteDeferred()
-				stale.SetSelectedEntry(choice{ID: "launch_31_cairo__alexandria", Name: "stale event"})
+				b.ClickedEvent.Fire(&widget.ButtonClickedEventArgs{Button: b})
 				event.ExecuteDeferred()
 				co, ok := ui.Pair(g.Frame, g.State.FromCity, g.State.ToCity)
 				if !ok || co.ID != target || g.State.AlignmentID != "launch" {
@@ -157,8 +152,8 @@ func TestNativeWorldwideProspectPickerFitsAndSelectsDedicatedHSR(t *testing.T) {
 				if w, _ := g.host.scroll.PreferredSize(); w > g.host.scroll.ViewRect().Dx() {
 					t.Fatal("worldwide picker overflow")
 				}
-				if len(ui.QuickProspects(g.Frame, g.State)) > 2 {
-					t.Fatal("full catalog crowds the ordinary plan")
+				if w, h := g.host.prospectScroll.PreferredSize(); w > g.host.prospectScroll.ViewRect().Dx() || h <= g.host.prospectScroll.ViewRect().Dy() {
+					t.Fatal("full catalog should scroll vertically within its panel")
 				}
 			}
 		}

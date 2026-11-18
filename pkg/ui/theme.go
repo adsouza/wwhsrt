@@ -44,6 +44,7 @@ type Palette struct {
 	Water        color.NRGBA `json:"water"`
 	Land         color.NRGBA `json:"land"`
 	Coast        color.NRGBA `json:"coast"`
+	Operating    color.NRGBA `json:"operating"`
 	Existing     color.NRGBA `json:"existing"`
 	Construction color.NRGBA `json:"construction"`
 	Draft        color.NRGBA `json:"draft"`
@@ -80,7 +81,8 @@ func PaletteFor(s State) Palette {
 			Water:        rgb(0x0c2438),
 			Land:         rgb(0x263e35),
 			Coast:        rgb(0x658a80),
-			Existing:     rgb(0x4edab0),
+			Existing:     rgb(0xa5b1c4),
+			Operating:    rgb(0x4edab0),
 			Construction: rgb(0xffc257),
 			Draft:        rgb(0xff849d),
 			Outline:      rgb(0x07121f),
@@ -110,7 +112,8 @@ func PaletteFor(s State) Palette {
 		Water:        rgb(0xcdeeff),
 		Land:         rgb(0xe7f4cc),
 		Coast:        rgb(0x6b8ba6),
-		Existing:     rgb(0x006e53),
+		Existing:     rgb(0x59687b),
+		Operating:    rgb(0x006e53),
 		Construction: rgb(0xb97400),
 		Draft:        rgb(0xb52d49),
 		Outline:      rgb(0x143252),

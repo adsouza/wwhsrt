@@ -35,14 +35,10 @@ async function city(p, id) {
   if (!(await p.locator('#city-browser').evaluate((d) => d.open))) await summary.click();
   return control(p, `[data-city=${id}]`);
 }
-// Only the two prospects nearest the chosen origin get a button. The picker lists every prospect and does the
-// same thing as those buttons, so choose there and wait until the Build panel shows the choice.
 async function prospect(p, id) {
-  await (await control(p, '#prospect-picker')).selectOption(id);
-  await p.waitForFunction(() => {
-    const picker = document.getElementById('prospect-picker');
-    return document.getElementById('selected-prospect').textContent === picker.selectedOptions[0]?.textContent;
-  });
+  const row = await control(p, '#opportunities button[data-corridor="' + id + '"]');
+  await row.click();
+  await p.waitForFunction((id) => document.querySelector('#opportunities [aria-pressed=true]')?.dataset.corridor === id, id);
 }
 // A city picked on the map is saved and shown in the city details panel, whether or not the City browser is open.
 async function selected(p, id) {

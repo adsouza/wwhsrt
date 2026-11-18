@@ -1884,3 +1884,74 @@ body.expanded-learning .illustration {
     flex: 0 0 116px;
   }
 }
+
+#prospect-board {
+  grid-area: 2 / 1;
+  align-self: end;
+  min-width: 0;
+  height: var(--prospect-height);
+  background: var(--surface);
+  border-top: 2px solid var(--border);
+  display: flex;
+  flex-direction: column;
+}
+body[data-command-dock='left'] #prospect-board { grid-area: 1 / 2; }
+body:not(.expanded) #map-panel { margin-bottom: var(--prospect-height); }
+body.expanded #prospect-board, body.help-open #prospect-board { display: none; }
+.prospect-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 3px 8px;
+}
+.prospect-header h2 { font-size: 0.95rem; margin: 0; }
+.prospect-header button { font-size: 0.8rem; padding: 4px 10px; min-height: 38px; }
+#opportunities {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  min-height: 0;
+  padding: 0 4px;
+}
+#opportunities button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  text-align: start;
+  width: 100%;
+  min-height: 44px;
+  border: 0;
+  border-top: 1px solid var(--border);
+  border-radius: 0;
+  padding: 4px 8px;
+}
+#opportunities button[aria-pressed=true] { background: var(--selected); }
+.prospect-price { text-align: end; font-variant-numeric: tabular-nums; }
+.prospect-price small { display: block; color: var(--muted); }
+.prospect-price .affordable { color: var(--operating); }
+@media (max-width: 799px) {
+  #prospect-board { grid-area: 3 / 1; align-self: start; }
+  body:not(.expanded) #map-panel { margin-bottom: 0; }
+  #inspector { margin-top: var(--prospect-height); }
+  .prospect-header h2 { font-size: 0.83rem; }
+  #opportunities button { font-size: 0.82rem; }
+}
+#services-heading {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+#services-section-plan .service-actions { grid-template-columns: 2fr 1fr 1fr; }
+#extension-price:empty, #forecast-status:empty { display: none; }
+#selected-prospect { font-size: 1.15rem; font-weight: 650; }
+#build-status { margin: 4px 0; }
+#build-cost-summary { margin: 8px 0; }
+#service-commit { grid-template-columns: auto 1fr; }
+#restore-plan { grid-column: 1; }
+#apply-service { grid-column: 2; grid-row: 1; }
+#restore-plan[hidden] + #apply-service { grid-column: 1/-1; }
+#service-draft-note { grid-column: 1/-1; grid-row: 2; }

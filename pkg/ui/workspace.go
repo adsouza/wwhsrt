@@ -5,9 +5,9 @@ import "image"
 const DefaultPanelWidth = 440
 
 type WorkspaceLayout struct {
-	Header, Dock, Map, Inspector, Divider, Footer image.Rectangle
-	DockLeft, Compact                             bool
-	PanelWidth                                    int
+	Header, Dock, Map, Prospects, Inspector, Divider, Footer image.Rectangle
+	DockLeft, Compact                                        bool
+	PanelWidth                                               int
 	// Step is the applied text step in percent. Rectangles and PanelWidth are in window pixels.
 	Step int
 }
@@ -37,7 +37,7 @@ func Workspace(w, h int, s State) WorkspaceLayout {
 		}
 		return (n*step + 50) / 100
 	}
-	for _, r := range []*image.Rectangle{&l.Header, &l.Dock, &l.Map, &l.Inspector, &l.Divider, &l.Footer} {
+	for _, r := range []*image.Rectangle{&l.Header, &l.Dock, &l.Map, &l.Prospects, &l.Inspector, &l.Divider, &l.Footer} {
 		if r.Empty() {
 			*r = image.Rectangle{}
 			continue
@@ -94,6 +94,22 @@ func workspaceAt100(w, h int, s State) WorkspaceLayout {
 		l.Inspector = image.Rect(w-pw, top, w, l.Footer.Min.Y)
 		l.Divider = image.Rect(w-pw-8, top, w-pw, l.Footer.Min.Y)
 		l.Map = image.Rect(left, top, w-pw-8, l.Footer.Min.Y)
+	}
+	// Give the prospect list its own viewport so reviewing a plan never
+	// scrolls the player's next construction goal out of sight.
+	if !s.Help.Open {
+		if l.Compact {
+			height := min(119, max(98, (l.Footer.Min.Y-top)/6))
+			if !l.Map.Empty() {
+				l.Map.Max.Y = min(l.Map.Max.Y, max(l.Map.Min.Y+80, l.Footer.Min.Y-height-120))
+			}
+			l.Prospects = image.Rect(0, l.Map.Max.Y, w, l.Map.Max.Y+height)
+			l.Inspector.Min.Y = l.Prospects.Max.Y
+		} else {
+			height := min(202, max(108, l.Map.Dy()/4))
+			l.Prospects = image.Rect(l.Map.Min.X, l.Map.Max.Y-height, l.Map.Max.X, l.Map.Max.Y)
+			l.Map.Max.Y = l.Prospects.Min.Y
+		}
 	}
 	return l
 }
