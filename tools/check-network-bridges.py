@@ -20,7 +20,8 @@ def main():
     rows = {r["id"]: r for r in c["corridors"]}
     old = {r["id"]: r for r in prior["corridors"]}
     cities = {r["id"]: r for r in c["cities"]}
-    assert set(cities) == {r["id"] for r in prior["cities"]} | {"maibara", "camp_de_tarragona", "figueres"}
+    rhine_markets = {"antwerp", "rotterdam", "schiphol", "liege", "aachen", "duisburg", "arnhem", "utrecht"}
+    assert set(cities) == rhine_markets | {r["id"] for r in prior["cities"]} | {"maibara", "camp_de_tarragona", "figueres"}
     assert set(old) <= set(rows), "An accepted corridor disappeared"
     for id, r in old.items():
         assert (r["from_city"], r["to_city"], r["existing"]) == (

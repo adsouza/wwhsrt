@@ -157,13 +157,13 @@ func TestPublicNetworkLegacyUpgradeAtomicAndPinned(t *testing.T) {
 	}
 	var env envelope
 	json.Unmarshal(s.b, &env)
-	if env.Version != 10 {
+	if env.Version != 11 {
 		t.Fatal("wrong save version")
 	}
 	if openPublic(t, s).Snapshot().Checkpoint != f.Checkpoint {
 		t.Fatal("upgraded reload")
 	}
-	var p connectorPayload
+	var p rhinePayload
 	json.Unmarshal(env.Payload, &p)
 	p.PublicSHA = "different catalog"
 	env.Payload, _ = json.Marshal(p)
@@ -188,7 +188,7 @@ func TestPublicNetworkSourceAndPhysicalCapacity(t *testing.T) {
 	if e := json.Unmarshal(assets.PublicNetwork, &raw); e != nil {
 		t.Fatal(e)
 	}
-	if len(raw.Stations) != 4333 || len(raw.Lines) != 2397 || len(raw.SourceSHA) != 64 {
+	if len(raw.Stations) != 4338 || len(raw.Lines) != 2397 || len(raw.SourceSHA) != 64 {
 		t.Fatal("prototype inventory missing")
 	}
 	g := openPublic(t, nil)

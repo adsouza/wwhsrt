@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"slices"
 	"sort"
 	"wwhsrt/pkg/gameapi"
 )
@@ -104,6 +105,12 @@ func (c Catalog) WithNetwork(r gameapi.NetworkRules) (Catalog, error) {
 			return c, errCode("invalid_scenario")
 		}
 	}
+	for _, id := range r.SupersededRoutes {
+		if _, corridor := c.find(id); !ids[id] || corridor {
+			return c, errCode("invalid_scenario")
+		}
+	}
+	r.SupersededRoutes = slices.Clone(r.SupersededRoutes)
 	r.Cities = append([]gameapi.MarketCity{}, r.Cities...)
 	r.DistanceKM = append([]uint16{}, r.DistanceKM...)
 	r.Distances = append([]gameapi.MarketDistance{}, r.Distances...)
@@ -220,7 +227,12 @@ func (w World) Routes() []gameapi.Route {
 		result = append(result, r)
 	}
 	for i := range w.catalog.network.Routes {
-		r := w.resolveRoute(w.catalog.network.Routes[i])
+		pattern := w.catalog.network.Routes[i]
+		if slices.Contains(w.catalog.network.SupersededRoutes, pattern.ID) && w.FleetCount(pattern.ID) == 0 &&
+			!slices.ContainsFunc(w.services, func(s gameapi.Service) bool { return s.CorridorID == pattern.ID }) {
+			continue
+		}
+		r := w.resolveRoute(pattern)
 		w.suggest(&r)
 		result = append(result, r)
 	}
@@ -318,6 +330,9 @@ func (w World) UpgradeConnectivity(c Catalog) (World, error) {
 	)
 }
 func (w World) atMonth(month int) World {
+	if w.catalog.rhinePrior != nil && month < w.rhineSince {
+		w.catalog = *w.catalog.rhinePrior
+	}
 	if w.catalog.connectorPrior != nil && month < w.connectorSince {
 		w.catalog = *w.catalog.connectorPrior
 	}
@@ -420,6 +435,14 @@ func connectorCutover(c Catalog, month int) int {
 	}
 	return 0
 }
+func (c Catalog) WithRhinePrior(prior Catalog) Catalog { c.rhinePrior = &prior; return c }
+func (w World) RhineSince() int                        { return w.rhineSince }
+func (w World) UpgradeRhine(c Catalog) (World, error) {
+	at := w.cutovers()
+	at.Rhine = w.months
+	return Restore(c, w.revision, w.months, w.company, w.reports, w.projects, w.services, w.fleet, w.debt, w.pending, w.nextTrain, at)
+}
+
 func (w World) UpgradeConnectors(c Catalog) (World, error) {
 	at := w.cutovers()
 	at.Connector = w.months

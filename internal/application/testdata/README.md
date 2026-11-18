@@ -61,3 +61,7 @@ world with three completed Texas projects and an active Houston–Dallas–Austi
 Antonio service, plus an operating pre-fix Busan–Ulsan service. They qualify
 v8→v9 historical account/asset retention, failed-commit atomicity and reload;
 no user company data is included.
+
+`rhine-v10.json` is a test company saved by the v10 executable after one
+month operating the former Brussels–Düsseldorf itinerary via France. It
+exercises historical accounts, leased trains and service retention on upgrade.

@@ -31,6 +31,7 @@ type Catalog struct {
 	constructionPrior   *Catalog
 	regionalPrior       *Catalog
 	connectorPrior      *Catalog
+	rhinePrior          *Catalog
 }
 
 func NewCatalog(rows []gameapi.Corridor) (Catalog, error) {
@@ -187,6 +188,7 @@ type World struct {
 	constructionSince int
 	regionalSince     int
 	connectorSince    int
+	rhineSince        int
 }
 
 func New(c Catalog) World {
@@ -599,9 +601,9 @@ func ValidName(name string) bool {
 // Months before an epoch's cutover replay against that epoch's archived
 // catalog. Named fields replace a positional list that compiled when transposed.
 type Cutovers struct {
-	Network, Catalog, Economy         int
-	Topology, Connectivity            int
-	Construction, Regional, Connector int
+	Network, Catalog, Economy                int
+	Topology, Connectivity                   int
+	Construction, Regional, Connector, Rhine int
 }
 
 func (w World) cutovers() Cutovers {
@@ -614,6 +616,7 @@ func (w World) cutovers() Cutovers {
 		Construction: w.constructionSince,
 		Regional:     w.regionalSince,
 		Connector:    w.connectorSince,
+		Rhine:        w.rhineSince,
 	}
 }
 
@@ -699,6 +702,11 @@ func Restore(
 	w.connectorSince = at.Connector
 	if w.connectorSince < 0 || w.connectorSince > months || (w.connectorSince > 0 && c.connectorPrior == nil) ||
 		(c.connectorPrior != nil && w.connectorSince < w.regionalSince) {
+		return fail()
+	}
+	w.rhineSince = at.Rhine
+	if w.rhineSince < 0 || w.rhineSince > months || (w.rhineSince > 0 && c.rhinePrior == nil) ||
+		(c.rhinePrior != nil && w.rhineSince < w.connectorSince) {
 		return fail()
 	}
 	// Validate referenced infrastructure before any historical network replay.

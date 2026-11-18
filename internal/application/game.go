@@ -95,6 +95,12 @@ type connectorPayload struct {
 	ConnectorPriorSHA string `json:"connector_prior_sha256"`
 }
 
+type rhinePayload struct {
+	connectorPayload
+	RhineSince    int    `json:"rhine_since"`
+	RhinePriorSHA string `json:"rhine_prior_sha256"`
+}
+
 type envelope struct {
 	Format  string          `json:"format"`
 	Version int             `json:"version"`
@@ -286,7 +292,7 @@ func openMode(store Store, log *slog.Logger, expanded bool) (*Game, error) {
 			_ = json.Unmarshal(b, &header)
 			targetVersion := 3
 			if expanded {
-				targetVersion = 10
+				targetVersion = 11
 			}
 			if header.Version < targetVersion {
 				log.Info(
@@ -308,7 +314,7 @@ func openMode(store Store, log *slog.Logger, expanded bool) (*Game, error) {
 	}
 	rules := "network-v3"
 	if expanded {
-		rules = "network-v10"
+		rules = "network-v11"
 	}
 	log.Info(
 		"world.opened",
@@ -351,8 +357,8 @@ func data(w domain.World) payload {
 func stateData(w domain.World) any {
 	p := data(w)
 	if w.Expanded() {
-		p.Rules = "network-v10"
-		return connectorPayload{
+		p.Rules = "network-v11"
+		return rhinePayload{connectorPayload{
 			regionalPayload{
 				constructionPayload{
 					connectivityPayload{
@@ -376,7 +382,7 @@ func stateData(w domain.World) any {
 			},
 			w.ConnectorSince(),
 			connectorPriorSHA,
-		}
+		}, w.RhineSince(), rhinePriorSHA}
 	}
 	return p
 }
@@ -387,7 +393,7 @@ func encode(w domain.World) ([]byte, error) {
 	}
 	version := 3
 	if w.Expanded() {
-		version = 10
+		version = 11
 	}
 	return json.Marshal(envelope{"wwhsrt-first-business", version, hash(b), b})
 }

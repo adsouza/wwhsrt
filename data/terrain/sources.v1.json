@@ -10129,6 +10129,18 @@
    "imagery_sources": "srtm/N06E003.tif, srtm/N06E004.tif, srtm/N06E002.tif, srtm/N07E003.tif, srtm/N07E004.tif, srtm/N07E002.tif, gmted/10S000E_20101117_gmted_mea075.tif, etopo1/ETOPO1_Bed_g.tif",
    "last_modified": "Wed, 15 Nov 2017 19:11:05 GMT"
   },
+  "8/130/83": {
+   "url": "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/8/130/83.png",
+   "sha256": "d386f07a4a4ad17352742adeca6ad4d8cea5b68b5f34c99daf359410378a2a36",
+   "imagery_sources": "gmted/50N000E_20101117_gmted_mea075.tif, etopo1/ETOPO1_Bed_g.tif",
+   "last_modified": "Wed, 15 Nov 2017 18:38:39 GMT"
+  },
+  "8/130/84": {
+   "url": "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/8/130/84.png",
+   "sha256": "6f6dc68e9f3f2b1074303c72f2adc8808f61d463ddaa44c5e0a674c4acb31ad7",
+   "imagery_sources": "srtm/N51E003.tif, srtm/N51E004.tif, srtm/N52E004.tif, gmted/50N000E_20101117_gmted_mea075.tif, etopo1/ETOPO1_Bed_g.tif",
+   "last_modified": "Wed, 15 Nov 2017 18:24:15 GMT"
+  },
   "8/130/85": {
    "url": "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/8/130/85.png",
    "sha256": "b56fc1794e85c7cf9bf4ad4be9d275a239a551d8f2c6ae2ca09e41ad034758ec",
@@ -10212,6 +10224,18 @@
    "sha256": "0a0ae730aacd9ccb7ec5c44864e8050affae37bf0d8ea6d69f8d883bc4ccdd69",
    "imagery_sources": "srtm/N05E004.tif, srtm/N06E004.tif, srtm/N06E005.tif, srtm/N05E005.tif, srtm/N07E004.tif, srtm/N07E005.tif, gmted/10S000E_20101117_gmted_mea075.tif, etopo1/ETOPO1_Bed_g.tif",
    "last_modified": "Wed, 15 Nov 2017 19:04:53 GMT"
+  },
+  "8/131/83": {
+   "url": "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/8/131/83.png",
+   "sha256": "c3464db84332061ee21394740fd471ba17fa168b0fcc466839c824f0cfb8361c",
+   "imagery_sources": "srtm/N53E004.tif, srtm/N52E004.tif, srtm/N52E005.tif, srtm/N53E005.tif, gmted/50N000E_20101117_gmted_mea075.tif, etopo1/ETOPO1_Bed_g.tif",
+   "last_modified": "Wed, 15 Nov 2017 18:32:34 GMT"
+  },
+  "8/131/84": {
+   "url": "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/8/131/84.png",
+   "sha256": "c8d54280099d619430c4680fff99c6b33511cd53d57c8bafee165715f126d87c",
+   "imagery_sources": "srtm/N52E004.tif, srtm/N51E004.tif, srtm/N52E005.tif, srtm/N51E005.tif, gmted/50N000E_20101117_gmted_mea075.tif, etopo1/ETOPO1_Bed_g.tif",
+   "last_modified": "Wed, 15 Nov 2017 18:29:37 GMT"
   },
   "8/131/85": {
    "url": "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/8/131/85.png",

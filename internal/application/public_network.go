@@ -30,6 +30,10 @@ var priorLaunchCatalog domain.Catalog
 var priorRegionalCatalog domain.Catalog
 var priorConnectorCatalog domain.Catalog
 
+var priorRhineCatalog domain.Catalog
+
+const rhinePriorSHA = "df6df65b2f9a9be5f26cb416d174025652b3bd76c5655f3b49e44a2b4e302a1a"
+
 const connectorPriorSHA = "f4d94ee8afa0239270975e78033cad2458de90fa012f3037e5adc39b07acdad1"
 
 const regionalPriorSHA = "0d74a64753d4ec70d353decfd80584cc17c6fc49adfb7c4bd640864d331ba5e9"
@@ -155,11 +159,19 @@ func publicHistoryCatalog() (domain.Catalog, error) {
 			WithConnectivityPrior(previousRepairCatalog).
 			WithConstructionPrior(priorLaunchCatalog).
 			WithRegionalPrior(priorRegionalCatalog)
-		historyCatalog = importedCatalog.WithPrevious(previousPublicCatalog).
-			WithConnectivityPrior(previousRepairCatalog).
-			WithConstructionPrior(priorLaunchCatalog).
-			WithRegionalPrior(priorRegionalCatalog).
-			WithConnectorPrior(priorConnectorCatalog)
+		if priorRhineCatalog, e = archived(assets.PublicNetworkV6Compressed, rhinePriorSHA); e != nil {
+			historyError = e
+			return
+		}
+		withHistory := func(c domain.Catalog) domain.Catalog {
+			return c.WithPrevious(previousPublicCatalog).
+				WithConnectivityPrior(previousRepairCatalog).
+				WithConstructionPrior(priorLaunchCatalog).
+				WithRegionalPrior(priorRegionalCatalog).
+				WithConnectorPrior(priorConnectorCatalog)
+		}
+		priorRhineCatalog = withHistory(priorRhineCatalog)
+		historyCatalog = withHistory(importedCatalog).WithRhinePrior(priorRhineCatalog)
 	})
 	return historyCatalog, historyError
 }
@@ -172,6 +184,25 @@ func decodeExpanded(b []byte, c domain.Catalog) (domain.World, error) {
 	if strict(b, &env) != nil || env.Format != "wwhsrt-first-business" || hash(env.Payload) != env.SHA {
 		return bad()
 	}
+	if env.Version >= 2 && env.Version <= 10 {
+		current, e := publicHistoryCatalog()
+		if e != nil {
+			return bad()
+		}
+		previous, e := decodeNetworkVersion(b, env, priorRhineCatalog)
+		if e != nil {
+			return bad()
+		}
+		return previous.UpgradeRhine(current)
+	}
+	if env.Version != 11 {
+		return bad()
+	}
+	return decodeNetworkVersion(b, env, c)
+}
+
+func decodeNetworkVersion(b []byte, env envelope, c domain.Catalog) (domain.World, error) {
+	bad := func() (domain.World, error) { return domain.World{}, &gameapi.Error{Code: "invalid_save"} }
 	if env.Version == 2 || env.Version == 3 {
 		old, e := decode(b)
 		if e != nil {
@@ -179,11 +210,7 @@ func decodeExpanded(b []byte, c domain.Catalog) (domain.World, error) {
 		}
 		return old.UpgradeCatalog(c)
 	}
-	if env.Version != 4 && env.Version != 5 && env.Version != 6 && env.Version != 7 && env.Version != 8 &&
-		env.Version != 9 &&
-		env.Version != 10 {
-		return bad()
-	}
+
 	var p expandedPayload
 	economySince := -1
 	topologySince := 0
@@ -191,16 +218,25 @@ func decodeExpanded(b []byte, c domain.Catalog) (domain.World, error) {
 	constructionSince := 0
 	regionalSince := 0
 	connectorSince := 0
-	if env.Version == 10 {
+	rhineSince := 0
+	if env.Version >= 10 {
 		var modern connectorPayload
-		if strict(env.Payload, &modern) != nil || !complete(env.Payload, reflect.TypeOf(modern)) ||
-			modern.ConnectorPriorSHA != connectorPriorSHA ||
+		if env.Version == 11 {
+			var latest rhinePayload
+			if strict(env.Payload, &latest) != nil || !complete(env.Payload, reflect.TypeOf(latest)) ||
+				latest.RhinePriorSHA != rhinePriorSHA || latest.Rules != "network-v11" {
+				return bad()
+			}
+			modern, rhineSince = latest.connectorPayload, latest.RhineSince
+		} else if strict(env.Payload, &modern) != nil || !complete(env.Payload, reflect.TypeOf(modern)) || modern.Rules != "network-v10" {
+			return bad()
+		}
+		if modern.ConnectorPriorSHA != connectorPriorSHA ||
 			modern.RegionalPriorSHA != regionalPriorSHA ||
 			modern.LaunchPriorSHA != launchPriorSHA ||
 			modern.EconomySHA != economySHA ||
 			modern.PriorPublicSHA != publicV1SHA ||
-			modern.PreviousRepairSHA != previousRepairSHA ||
-			modern.Rules != "network-v10" {
+			modern.PreviousRepairSHA != previousRepairSHA {
 			return bad()
 		}
 		p = modern.expandedPayload
@@ -277,6 +313,9 @@ func decodeExpanded(b []byte, c domain.Catalog) (domain.World, error) {
 		economySince = p.Months
 	}
 	expectedPublic := publicSHA
+	if env.Version == 10 {
+		expectedPublic = rhinePriorSHA
+	}
 	if env.Version == 9 {
 		expectedPublic = connectorPriorSHA
 	}
@@ -296,8 +335,7 @@ func decodeExpanded(b []byte, c domain.Catalog) (domain.World, error) {
 		p.NetworkSHA != networkSHA {
 		return bad()
 	}
-	if env.Version < 10 || topologySince > 0 || connectivitySince > 0 || constructionSince > 0 || regionalSince > 0 ||
-		connectorSince > 0 {
+	if env.Version == 11 && (rhineSince != 0 || topologySince != 0 || connectivitySince != 0 || constructionSince != 0 || regionalSince != 0 || connectorSince != 0) {
 		var e error
 		c, e = publicHistoryCatalog()
 		if e != nil {
@@ -314,6 +352,7 @@ func decodeExpanded(b []byte, c domain.Catalog) (domain.World, error) {
 		Construction: constructionSince,
 		Regional:     regionalSince,
 		Connector:    connectorSince,
+		Rhine:        rhineSince,
 	}
 	if env.Version == 9 {
 		w, e := domain.Restore(

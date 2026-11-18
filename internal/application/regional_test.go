@@ -73,20 +73,20 @@ func TestRegionalV8UpgradePreservesHistoricalAccountsAndAssets(t *testing.T) {
 				openPublic(t, store).Snapshot().Checkpoint != f.Checkpoint {
 				t.Fatal("historical/new demand epochs cannot reload")
 			}
-			var next connectorPayload
+			var next rhinePayload
 			json.Unmarshal(store.b, &env)
 			json.Unmarshal(env.Payload, &next)
-			if env.Version != 10 || next.Rules != "network-v10" || next.RegionalSince != old.Months ||
+			if env.Version != 11 || next.Rules != "network-v11" || next.RegionalSince != old.Months ||
 				next.RegionalPriorSHA != regionalPriorSHA ||
 				next.PublicSHA != hash(assets.PublicNetwork) ||
 				next.ConstructionSince != old.ConstructionSince {
 				t.Fatal("migration catalog identity/epochs incorrect")
 			}
-			for _, mutate := range []func(*connectorPayload){
-				func(p *connectorPayload) { p.RegionalPriorSHA = "unknown" },
-				func(p *connectorPayload) { p.RegionalSince = -1 },
-				func(p *connectorPayload) { p.RegionalSince = p.Months + 1 },
-				func(p *connectorPayload) { p.RegionalSince = 0; p.ConstructionSince = p.Months },
+			for _, mutate := range []func(*rhinePayload){
+				func(p *rhinePayload) { p.RegionalPriorSHA = "unknown" },
+				func(p *rhinePayload) { p.RegionalSince = -1 },
+				func(p *rhinePayload) { p.RegionalSince = p.Months + 1 },
+				func(p *rhinePayload) { p.RegionalSince = 0; p.ConstructionSince = p.Months },
 			} {
 				bad := next
 				mutate(&bad)

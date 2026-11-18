@@ -64,17 +64,17 @@ func TestLaunchV7UpgradeAndConventionalMoroccoWithdrawal(t *testing.T) {
 				openPublic(t, store).Snapshot().Checkpoint != f.Checkpoint {
 				t.Fatal("historical/new interval cannot reload")
 			}
-			var next connectorPayload
+			var next rhinePayload
 			json.Unmarshal(store.b, &env)
 			json.Unmarshal(env.Payload, &next)
-			if env.Version != 10 || next.LaunchPriorSHA != launchPriorSHA || next.ConstructionSince != old.Months ||
+			if env.Version != 11 || next.LaunchPriorSHA != launchPriorSHA || next.ConstructionSince != old.Months ||
 				next.PublicSHA != hash(assets.PublicNetwork) {
 				t.Fatal("catalog identity not pinned")
 			}
-			for _, mutate := range []func(*connectorPayload){
-				func(p *connectorPayload) { p.LaunchPriorSHA = "unknown" },
-				func(p *connectorPayload) { p.ConstructionSince = -1 },
-				func(p *connectorPayload) { p.ConstructionSince = p.Months + 1 },
+			for _, mutate := range []func(*rhinePayload){
+				func(p *rhinePayload) { p.LaunchPriorSHA = "unknown" },
+				func(p *rhinePayload) { p.ConstructionSince = -1 },
+				func(p *rhinePayload) { p.ConstructionSince = p.Months + 1 },
 			} {
 				bad := next
 				mutate(&bad)

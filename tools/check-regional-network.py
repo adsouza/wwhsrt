@@ -34,7 +34,8 @@ def main():
     rows = {c["id"]: c for c in catalog["corridors"]}
     cities = {c["id"]: c for c in catalog["cities"]}
     prior = json.loads(gzip.decompress((ROOT / "assets/scenario/public-network-v4.json.gz").read_bytes()))
-    assert set(cities) == {c["id"] for c in prior["cities"]} | {"taipei", "maibara", "camp_de_tarragona", "figueres"}
+    rhine_markets = {"antwerp", "rotterdam", "schiphol", "liege", "aachen", "duisburg", "arnhem", "utrecht"}
+    assert set(cities) == rhine_markets | {c["id"] for c in prior["cities"]} | {"taipei", "maibara", "camp_de_tarragona", "figueres"}
     old = {c["id"]: c for c in prior["corridors"]}
     assert set(old) | {"public_taichung__taipei", "launch_71_houston__austin"} <= set(rows)
     for id, co in old.items():

@@ -172,3 +172,19 @@ func TestRouteChoiceHint(t *testing.T) {
 		seen[zh] = true
 	}
 }
+
+func TestRouteChoicesSearchIntermediateStopsOnLongServices(t *testing.T) {
+	f := gameapi.Frame{Routes: []gameapi.Route{
+		choiceRoute("direct", true, "brussels", "liege", "aachen", "koln", "stop_node_1880180223"),
+		choiceRoute("randstad", true, "brussels", "antwerp", "rotterdam", "schiphol", "randstad"),
+	}}
+	for _, c := range []struct{ locale, query, want string }{
+		{"en", "Brussels Aachen", "direct"},
+		{"zh-Hans", "布鲁塞尔 鹿特丹", "randstad"},
+	} {
+		got := choiceIDs(ServiceRouteChoices(f, State{Locale: c.locale, ServiceQuery: c.query}, nil, nil))
+		if len(got) != 1 || got[0] != c.want {
+			t.Fatalf("%q: got %v", c.query, got)
+		}
+	}
+}

@@ -48,3 +48,15 @@ IDs. Infrastructure scope references: [FS Turin–Milan history](https://www.fsi
 [French ministry Perpignan–Figueres](https://www.ecologie.gouv.fr/sites/default/files/documents/CP_-_LVG_Perpignan-Figueras_-_21-12-2016.pdf),
 [JR Central route map](https://global.jr-central.co.jp/en/info/route-map/) and
 [Adif Barcelona–French border](https://www.adifaltavelocidad.es/w/lav-madrid-barcelona-frontera-francesa-tramo).
+
+The Brussels, Düsseldorf and Randstad services use Amsterdam Centraal as the
+Randstad terminal. Their operating itineraries follow
+[Eurostar Brussels–Amsterdam](https://www.eurostar.com/be-en/train/brussels-to-amsterdam),
+[NS International Amsterdam–Düsseldorf](https://www.nsinternational.com/en/germany/train-dusseldorf)
+and the [Eurostar Brussels–Düsseldorf timetable](https://www.eurostar.com/be-en/reiseinformationen/fahrplanauskunft/8814001/8008094/brussel-midi-zuid/dusseldorf-hbf).
+The pinned section geometry in `data/imports/rhine-randstad.v1.json` was
+routed with the BRouter rail profile on 2026-11-17 from
+[OpenStreetMap contributors' data (ODbL)](https://www.openstreetmap.org/copyright).
+Each section includes its source query. Running minutes are game estimates and
+station dwell is added by the simulation. The Brussels service shares the existing Cologne–Düsseldorf
+track. The Randstad service uses the existing Düsseldorf airport approach.

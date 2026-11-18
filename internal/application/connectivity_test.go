@@ -46,10 +46,10 @@ func TestConnectivityV6MigrationPreservesAccountsPlansFleetAndAtomicity(t *testi
 	if !reflect.DeepEqual(f.Reports[:prior.Months], prior.Reports) {
 		t.Fatal("past reports rewritten")
 	}
-	var next connectorPayload
+	var next rhinePayload
 	json.Unmarshal(store.b, &env)
 	json.Unmarshal(env.Payload, &next)
-	if env.Version != 10 || next.Rules != "network-v10" || next.ConnectivitySince != prior.Months ||
+	if env.Version != 11 || next.Rules != "network-v11" || next.ConnectivitySince != prior.Months ||
 		next.PreviousRepairSHA != previousRepairSHA ||
 		next.PublicSHA != hash(assets.PublicNetwork) {
 		t.Fatal("new topology identity/cutover missing")
@@ -63,12 +63,12 @@ func TestConnectivityV6MigrationPreservesAccountsPlansFleetAndAtomicity(t *testi
 	if a.Checkpoint != b.Checkpoint || !reflect.DeepEqual(a.Reports, b.Reports) {
 		t.Fatal("reloaded continuation diverged")
 	}
-	for _, change := range []func(*connectorPayload){
-		func(p *connectorPayload) { p.PreviousRepairSHA = "unknown" },
-		func(p *connectorPayload) { p.ConnectivitySince = -1 },
-		func(p *connectorPayload) { p.ConnectivitySince = p.Months + 1 },
-		func(p *connectorPayload) { p.ConnectivitySince = 0 },
-		func(p *connectorPayload) { p.PublicSHA = previousRepairSHA },
+	for _, change := range []func(*rhinePayload){
+		func(p *rhinePayload) { p.PreviousRepairSHA = "unknown" },
+		func(p *rhinePayload) { p.ConnectivitySince = -1 },
+		func(p *rhinePayload) { p.ConnectivitySince = p.Months + 1 },
+		func(p *rhinePayload) { p.ConnectivitySince = 0 },
+		func(p *rhinePayload) { p.PublicSHA = previousRepairSHA },
 	} {
 		bad := next
 		change(&bad)

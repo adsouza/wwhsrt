@@ -727,6 +727,10 @@ def main(audit=False):
             sections.append(co["id"])
         assert service["id"] not in by_pattern, "Duplicate authored connector service"
         patterns.append(dict(id=service["id"], sections=sections, cities=path, stops=path))
+    from rhine_randstad import add_services
+
+    rhine_source = "data/imports/rhine-randstad.v1.json"
+    superseded = add_services(read(rhine_source), cities, market, stations, rows, patterns)
     assert len(patterns) <= 8192, "Future service catalog exceeds route bound"
     ms = list(market.values())
     matrix = []
@@ -737,6 +741,7 @@ def main(audit=False):
         id="prototype-world-network-v1",
         cities=ms,
         routes=patterns,
+        superseded_routes=superseded,
         conventional_pairs=read("assets/scenario/network.json")["conventional_pairs"],
         public_paths=16,
         private_paths=12,
@@ -755,7 +760,8 @@ def main(audit=False):
         launch_authoring_sha256=launch["authoring_sha256"],
         launch_land_mask_sha256=launch["land_mask_sha256"],
         construction_cost_ledger_sha256=launch["cost_ledger_sha256"],
-        id="prototype-world-v6",
+        rhine_randstad_sha256=output_hash(rhine_source),
+        id="prototype-world-v7",
         cities=cities,
         network=rules,
         corridors=rows,

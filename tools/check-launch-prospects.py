@@ -40,7 +40,8 @@ def main():
     profiles = {p["id"]: p for p in read("data/costs/construction_costs.v1.json")["profiles"]}
     prior = json.loads(gzip.decompress((ROOT / "assets/scenario/public-network-v3.json.gz").read_bytes()))
     old_markets = {c["id"]: c for c in prior["network"]["cities"]}
-    assert set(cities) == set(old_markets) | {
+    rhine_markets = {"antwerp", "rotterdam", "schiphol", "liege", "aachen", "duisburg", "arnhem", "utrecht"}
+    assert set(cities) == rhine_markets | set(old_markets) | {
         "taipei",
         "maibara",
         "camp_de_tarragona",
@@ -48,7 +49,7 @@ def main():
     }, "Unexpected city roster change"
     assert cities["taipei"]["station_name"] == "Taipei"
     for c in catalog["network"]["cities"]:
-        if c["id"] in {"maibara", "camp_de_tarragona", "figueres"}:
+        if c["id"] in rhine_markets | {"maibara", "camp_de_tarragona", "figueres"}:
             assert c["daily_trips"] == c["attraction"] == 500
         elif c["id"] == "taipei":
             assert c["daily_trips"] == 7000 and c["attraction"] == 7000 and c["road_region"] == "taiwan"

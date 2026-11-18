@@ -45,19 +45,19 @@ func TestEconomyV4MigrationPreservesHistoryAndCommitsAtomically(t *testing.T) {
 		t.Fatal("cutover rewrote history or failed to apply new rates")
 	}
 	var env envelope
-	var p connectorPayload
+	var p rhinePayload
 	json.Unmarshal(store.b, &env)
 	json.Unmarshal(env.Payload, &p)
-	if env.Version != 10 || p.Rules != "network-v10" || p.EconomySince != 2 || p.EconomySHA != hash(assets.Economy) {
+	if env.Version != 11 || p.Rules != "network-v11" || p.EconomySince != 2 || p.EconomySHA != hash(assets.Economy) {
 		t.Fatal("economy identity/cutover missing")
 	}
 	if openPublic(t, store).Snapshot().Checkpoint != f.Checkpoint {
 		t.Fatal("mixed-rule save cannot continue")
 	}
-	for _, mutate := range []func(*connectorPayload){
-		func(p *connectorPayload) { p.EconomySHA = "unknown" },
-		func(p *connectorPayload) { p.EconomySince = 0 },
-		func(p *connectorPayload) { p.EconomySince = 4 },
+	for _, mutate := range []func(*rhinePayload){
+		func(p *rhinePayload) { p.EconomySHA = "unknown" },
+		func(p *rhinePayload) { p.EconomySince = 0 },
+		func(p *rhinePayload) { p.EconomySince = 4 },
 	} {
 		bad := p
 		mutate(&bad)

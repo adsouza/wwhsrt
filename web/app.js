@@ -1316,7 +1316,11 @@ function renderServices() {
   selectOptions(
     $('service-corridor'),
     available
-      .filter((r) => r.id === prefs.service_corridor || words.every((w) => routeName(r).toLowerCase().includes(w)))
+      .filter((r) => {
+        if (!words.length || r.id === prefs.service_corridor) return true;
+        const searchable = (routeName(r) + ' ' + r.stops.map(label).join(' ')).toLowerCase();
+        return words.every((word) => searchable.includes(word));
+      })
       .map((r) => [r.id, routeName(r)]),
     prefs.service_corridor,
   );

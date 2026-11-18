@@ -23,6 +23,7 @@ type MarketCity struct {
 	RoadRegion string `json:"road_region"`
 }
 type NetworkRules struct {
+	SupersededRoutes  []string         `json:"superseded_routes,omitempty"`
 	ID                string           `json:"id"`
 	Cities            []MarketCity     `json:"cities"`
 	Routes            []Route          `json:"routes"`

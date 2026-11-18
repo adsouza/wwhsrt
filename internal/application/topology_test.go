@@ -105,20 +105,20 @@ func TestTopologyV5UpgradePreservesHistoricalEconomyAndFleet(t *testing.T) {
 	if !reflect.DeepEqual(f.Reports[:2], prior.Reports) {
 		t.Fatal("historical reports rewritten")
 	}
-	var next connectorPayload
+	var next rhinePayload
 	json.Unmarshal(store.b, &env)
 	json.Unmarshal(env.Payload, &next)
-	if env.Version != 10 || next.TopologySince != 2 || next.PriorPublicSHA != hash(assets.PublicNetworkV1) ||
+	if env.Version != 11 || next.TopologySince != 2 || next.PriorPublicSHA != hash(assets.PublicNetworkV1) ||
 		next.PublicSHA != hash(assets.PublicNetwork) ||
-		next.Rules != "network-v10" {
+		next.Rules != "network-v11" {
 		t.Fatal("topology identity/cutover not pinned")
 	}
 	if openPublic(t, store).Snapshot().Checkpoint != f.Checkpoint {
 		t.Fatal("mixed topology history does not restore")
 	}
-	for _, change := range []func(*connectorPayload){
-		func(p *connectorPayload) { p.PriorPublicSHA = "unknown" },
-		func(p *connectorPayload) { p.TopologySince = 4 },
+	for _, change := range []func(*rhinePayload){
+		func(p *rhinePayload) { p.PriorPublicSHA = "unknown" },
+		func(p *rhinePayload) { p.TopologySince = 4 },
 	} {
 		bad := next
 		change(&bad)
