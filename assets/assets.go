@@ -48,6 +48,15 @@ var PublicNetworkV5Compressed []byte
 //go:embed scenario/public-network-v6.json.gz
 var PublicNetworkV6Compressed []byte
 
+//go:embed scenario/public-network-v7.json.gz
+var PublicNetworkV7Compressed []byte
+
+//go:embed scenario/public-network-v8.json.gz
+var PublicNetworkV8Compressed []byte
+
+//go:embed scenario/public-network-v9.json.gz
+var PublicNetworkV9Compressed []byte
+
 // RailDisplayPaths corrects legacy drawing/animation without changing save inputs.
 //
 //go:embed scenario/rail-display-paths.json

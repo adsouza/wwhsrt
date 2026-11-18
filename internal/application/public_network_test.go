@@ -157,13 +157,13 @@ func TestPublicNetworkLegacyUpgradeAtomicAndPinned(t *testing.T) {
 	}
 	var env envelope
 	json.Unmarshal(s.b, &env)
-	if env.Version != 11 {
+	if env.Version != 14 {
 		t.Fatal("wrong save version")
 	}
 	if openPublic(t, s).Snapshot().Checkpoint != f.Checkpoint {
 		t.Fatal("upgraded reload")
 	}
-	var p rhinePayload
+	var p serbiaPayload
 	json.Unmarshal(env.Payload, &p)
 	p.PublicSHA = "different catalog"
 	env.Payload, _ = json.Marshal(p)

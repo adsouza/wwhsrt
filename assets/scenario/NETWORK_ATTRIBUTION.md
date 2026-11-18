@@ -60,3 +60,20 @@ routed with the BRouter rail profile on 2026-11-17 from
 Each section includes its source query. Running minutes are game estimates and
 station dwell is added by the simulation. The Brussels service shares the existing Cologne–Düsseldorf
 track. The Randstad service uses the existing Düsseldorf airport approach.
+
+German track profiles are derived from DB InfraGO AG, “Infrastrukturdaten der DB InfraGO”,
+May 2026, M1 Streckennetz. The game matches sections to its map and assigns track classes.
+[Source and licence](https://data.gov.de/suche/daten/infrastrukturdaten-der-db-infrago?ids=b88d0ec0-dbab-4990-8539-6461f32df53b) · [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
+
+The existing Toulouse–Carcassonne–Narbonne–Béziers railway is derived from SNCF Réseau’s
+[Fichier de formes des lignes du Réseau Ferré National](https://ressources.data.sncf.com/explore/dataset/formes-des-lignes-du-rfn/),
+operating line 640000. Geometry has been clipped and simplified. [SNCF Open Data licence (ODbL)](https://data.sncf.com/pages/licence)
+The hypothetical Toulouse–Narbonne high-speed alignment, price and timetable are game designs.
+The Hamburg–Hamm alignment follows BRouter's rail routing on OpenStreetMap through Bremen, Osnabrück
+and Münster and is surveyed against the DB InfraGO data credited above.
+
+Beograd Centar–Petrovaradin–Vrbas Nova uses the BRouter rail profile on
+[OpenStreetMap contributors’ data (ODbL)](https://www.openstreetmap.org/copyright).
+The two rail paths and source queries are pinned in `data/imports/belgrade-vrbas.v1.json`.
+The 69-minute game service includes the intermediate stop and follows the IC 12540 elapsed time
+in the [Srbija Voz timetable](https://www.srbvoz.rs/wp-content/redvoznje/bgcent_ns_su.pdf).

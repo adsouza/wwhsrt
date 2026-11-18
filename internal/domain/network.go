@@ -359,6 +359,9 @@ func (w World) NetworkReport() gameapi.NetworkReport {
 }
 
 func (w World) networkForecast(q gameapi.ForecastRequest) (gameapi.Forecast, error) {
+	if !w.offered(q.CorridorID) {
+		return gameapi.Forecast{}, errCode("no_route")
+	}
 	r, ok := w.route(q.CorridorID)
 	if !ok {
 		return gameapi.Forecast{}, errCode("no_route")
@@ -391,7 +394,7 @@ func (w World) networkForecast(q gameapi.ForecastRequest) (gameapi.Forecast, err
 		// Independent construction preview: include the proposed line/stations
 		// only in the counterfactual, never mutate the accepted world.
 		co, found := w.catalog.find(q.CorridorID)
-		if !found {
+		if !found || co.PartOf != "" {
 			return result, errCode("line_not_open")
 		}
 		a, found := alternative(co, q.AlignmentID)
@@ -457,10 +460,13 @@ func (w World) networkForecast(q gameapi.ForecastRequest) (gameapi.Forecast, err
 	}
 	result.LeaseCosts = gameapi.Money(max(result.FleetNeeded, result.FleetAvailable)) * w.leaseMonthly()
 	result.Costs += result.LeaseCosts
+	contracts := map[string]bool{}
 	for _, id := range r.Sections {
 		co, _ := w.catalog.find(id)
-		if !co.Existing {
-			a, _ := hypothesis.alignment(co, "")
+		if !co.Existing && !contracts[co.ProjectID()] {
+			contracts[co.ProjectID()] = true
+			parent, _ := w.catalog.find(co.ProjectID())
+			a, _ := hypothesis.alignment(parent, "")
 			result.MaintenanceCosts += a.Cost / maintenanceDivisor
 			result.Costs += a.Cost / maintenanceDivisor
 		}

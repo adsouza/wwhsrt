@@ -30,6 +30,18 @@ var priorLaunchCatalog domain.Catalog
 var priorRegionalCatalog domain.Catalog
 var priorConnectorCatalog domain.Catalog
 
+var priorSerbiaCatalog domain.Catalog
+
+const serbiaPriorSHA = "50409815e0ed33fd9636969dfde1cbc4e3bdf3dd71b94b1efab3d8885c39b44b"
+
+var priorOccitanieCatalog domain.Catalog
+
+const occitaniePriorSHA = "6e1aa71d35426789f42dfaa2f72c6f887a64f66c202412ccda6e6aa03b141dd1"
+
+var priorGermanCatalog domain.Catalog
+
+const germanPriorSHA = "4bce8d7884cea0c93ae23243f4b22ba0fec4be0db591b08b0cdc9ca85dc14cca"
+
 var priorRhineCatalog domain.Catalog
 
 const rhinePriorSHA = "df6df65b2f9a9be5f26cb416d174025652b3bd76c5655f3b49e44a2b4e302a1a"
@@ -171,7 +183,25 @@ func publicHistoryCatalog() (domain.Catalog, error) {
 				WithConnectorPrior(priorConnectorCatalog)
 		}
 		priorRhineCatalog = withHistory(priorRhineCatalog)
-		historyCatalog = withHistory(importedCatalog).WithRhinePrior(priorRhineCatalog)
+		if priorGermanCatalog, e = archived(assets.PublicNetworkV7Compressed, germanPriorSHA); e != nil {
+			historyError = e
+			return
+		}
+		priorGermanCatalog = withHistory(priorGermanCatalog).WithRhinePrior(priorRhineCatalog)
+		if priorOccitanieCatalog, e = archived(assets.PublicNetworkV8Compressed, occitaniePriorSHA); e != nil {
+			historyError = e
+			return
+		}
+		priorOccitanieCatalog = withHistory(priorOccitanieCatalog).WithRhinePrior(priorRhineCatalog).WithGermanPrior(priorGermanCatalog)
+		if priorSerbiaCatalog, e = archived(assets.PublicNetworkV9Compressed, serbiaPriorSHA); e != nil {
+			historyError = e
+			return
+		}
+		withOccitanie := func(c domain.Catalog) domain.Catalog {
+			return withHistory(c).WithRhinePrior(priorRhineCatalog).WithGermanPrior(priorGermanCatalog).WithOccitaniePrior(priorOccitanieCatalog)
+		}
+		priorSerbiaCatalog = withOccitanie(priorSerbiaCatalog)
+		historyCatalog = withOccitanie(importedCatalog).WithSerbiaPrior(priorSerbiaCatalog)
 	})
 	return historyCatalog, historyError
 }
@@ -184,21 +214,40 @@ func decodeExpanded(b []byte, c domain.Catalog) (domain.World, error) {
 	if strict(b, &env) != nil || env.Format != "wwhsrt-first-business" || hash(env.Payload) != env.SHA {
 		return bad()
 	}
-	if env.Version >= 2 && env.Version <= 10 {
-		current, e := publicHistoryCatalog()
-		if e != nil {
-			return bad()
-		}
-		previous, e := decodeNetworkVersion(b, env, priorRhineCatalog)
-		if e != nil {
-			return bad()
-		}
-		return previous.UpgradeRhine(current)
+	if env.Version == 14 {
+		return decodeNetworkVersion(b, env, c)
 	}
-	if env.Version != 11 {
+	if env.Version < 2 || env.Version > 13 {
 		return bad()
 	}
-	return decodeNetworkVersion(b, env, c)
+	current, e := publicHistoryCatalog()
+	if e != nil {
+		return bad()
+	}
+	var previous domain.World
+	switch {
+	case env.Version == 13:
+		previous, e = decodeNetworkVersion(b, env, priorSerbiaCatalog)
+	case env.Version == 12:
+		previous, e = decodeNetworkVersion(b, env, priorOccitanieCatalog)
+	case env.Version == 11:
+		previous, e = decodeNetworkVersion(b, env, priorGermanCatalog)
+	default:
+		previous, e = decodeNetworkVersion(b, env, priorRhineCatalog)
+		if e == nil {
+			previous, e = previous.UpgradeRhine(priorGermanCatalog)
+		}
+	}
+	if e == nil && env.Version < 12 {
+		previous, e = previous.UpgradeGerman(priorOccitanieCatalog)
+	}
+	if e == nil && env.Version < 13 {
+		previous, e = previous.UpgradeOccitanie(priorSerbiaCatalog)
+	}
+	if e != nil {
+		return bad()
+	}
+	return previous.UpgradeSerbia(current)
 }
 
 func decodeNetworkVersion(b []byte, env envelope, c domain.Catalog) (domain.World, error) {
@@ -218,10 +267,32 @@ func decodeNetworkVersion(b []byte, env envelope, c domain.Catalog) (domain.Worl
 	constructionSince := 0
 	regionalSince := 0
 	connectorSince := 0
-	rhineSince := 0
+	rhineSince, germanSince, occitanieSince, serbiaSince := 0, 0, 0, 0
 	if env.Version >= 10 {
 		var modern connectorPayload
-		if env.Version == 11 {
+		if env.Version >= 13 {
+			var latest occitaniePayload
+			if env.Version == 14 {
+				var next serbiaPayload
+				if strict(env.Payload, &next) != nil || !complete(env.Payload, reflect.TypeOf(next)) || next.SerbiaPriorSHA != serbiaPriorSHA || next.Rules != "network-v14" {
+					return bad()
+				}
+				latest, serbiaSince = next.occitaniePayload, next.SerbiaSince
+			} else if strict(env.Payload, &latest) != nil || !complete(env.Payload, reflect.TypeOf(latest)) || latest.Rules != "network-v13" {
+				return bad()
+			}
+			if latest.OccitaniePriorSHA != occitaniePriorSHA || latest.GermanPriorSHA != germanPriorSHA || latest.RhinePriorSHA != rhinePriorSHA {
+				return bad()
+			}
+			modern, rhineSince, germanSince, occitanieSince = latest.connectorPayload, latest.RhineSince, latest.GermanSince, latest.OccitanieSince
+		} else if env.Version == 12 {
+			var latest germanPayload
+			if strict(env.Payload, &latest) != nil || !complete(env.Payload, reflect.TypeOf(latest)) ||
+				latest.GermanPriorSHA != germanPriorSHA || latest.RhinePriorSHA != rhinePriorSHA || latest.Rules != "network-v12" {
+				return bad()
+			}
+			modern, rhineSince, germanSince = latest.connectorPayload, latest.RhineSince, latest.GermanSince
+		} else if env.Version == 11 {
 			var latest rhinePayload
 			if strict(env.Payload, &latest) != nil || !complete(env.Payload, reflect.TypeOf(latest)) ||
 				latest.RhinePriorSHA != rhinePriorSHA || latest.Rules != "network-v11" {
@@ -313,6 +384,15 @@ func decodeNetworkVersion(b []byte, env envelope, c domain.Catalog) (domain.Worl
 		economySince = p.Months
 	}
 	expectedPublic := publicSHA
+	if env.Version == 13 {
+		expectedPublic = serbiaPriorSHA
+	}
+	if env.Version == 12 {
+		expectedPublic = occitaniePriorSHA
+	}
+	if env.Version == 11 {
+		expectedPublic = germanPriorSHA
+	}
 	if env.Version == 10 {
 		expectedPublic = rhinePriorSHA
 	}
@@ -335,7 +415,7 @@ func decodeNetworkVersion(b []byte, env envelope, c domain.Catalog) (domain.Worl
 		p.NetworkSHA != networkSHA {
 		return bad()
 	}
-	if env.Version == 11 && (rhineSince != 0 || topologySince != 0 || connectivitySince != 0 || constructionSince != 0 || regionalSince != 0 || connectorSince != 0) {
+	if env.Version == 14 && (serbiaSince != 0 || occitanieSince != 0 || germanSince != 0 || rhineSince != 0 || topologySince != 0 || connectivitySince != 0 || constructionSince != 0 || regionalSince != 0 || connectorSince != 0) {
 		var e error
 		c, e = publicHistoryCatalog()
 		if e != nil {
@@ -353,6 +433,9 @@ func decodeNetworkVersion(b []byte, env envelope, c domain.Catalog) (domain.Worl
 		Regional:     regionalSince,
 		Connector:    connectorSince,
 		Rhine:        rhineSince,
+		German:       germanSince,
+		Occitanie:    occitanieSince,
+		Serbia:       serbiaSince,
 	}
 	if env.Version == 9 {
 		w, e := domain.Restore(
@@ -492,7 +575,7 @@ func (g *Game) InspectMarket(from, to gameapi.CityID, class string) (gameapi.Mar
 // The authoritative catalog keeps historical prices/times and save identities.
 // Its frame projection uses source track for legacy drawings and train movement.
 func (g *Game) displayCorridors() []gameapi.Corridor {
-	rows := g.catalog.Corridors()
+	rows := g.w.DisplayCorridors()
 	if g.expanded {
 		for i, co := range rows {
 			for j, a := range co.Alignments {

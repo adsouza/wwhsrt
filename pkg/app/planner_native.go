@@ -220,6 +220,9 @@ func (h *host) buildServices(g *Game, t func(string) string, label nativeLabel, 
 		label(hint, 13)
 	}
 	r, routeOK := ui.ServiceRoute(g.Frame, g.State.ServiceCorridor)
+	if len(r.Via) > 0 {
+		label(t("viaPlaces")+" "+strings.Join(r.Via, " → "), 13)
+	}
 	if routeOK && ui.ServicePane(g.State) != "plan" {
 		label(fmt.Sprintf("%d km · %d min", r.KM, r.Minutes), 13)
 	}
@@ -252,7 +255,7 @@ func (h *host) buildServices(g *Game, t func(string) string, label nativeLabel, 
 		return
 	}
 	if pane == "analysis" {
-		if r.ConnectorKM > 0 {
+		if r.ConnectorKM > 0 && r.InfrastructureKind != "hsr" {
 			label(fmt.Sprintf("%s: %d km. %s", t("conventionalConnectors"), r.ConnectorKM, t("connectorHint")), 13)
 		}
 		if e != nil {

@@ -35,13 +35,14 @@ func PickServiceSections(c mapview.Camera, f gameapi.Frame, at mapview.Point) []
 		distance float64
 	}
 	var hits []hit
+	running := ui.OperatingSections(f)
 	for _, co := range f.Corridors {
-		if !ui.Open(f, co.ID) || len(co.Alignments) == 0 {
+		if (co.Retired && !running[co.ID]) || (!running[co.ID] && !ui.Open(f, co.ID)) || len(co.Alignments) == 0 {
 			continue
 		}
 		a := co.Alignments[0]
 		for _, p := range f.Projects {
-			if p.CorridorID == co.ID {
+			if p.CorridorID == co.ProjectID() {
 				for _, candidate := range co.Alignments {
 					if candidate.ID == p.AlignmentID {
 						a = candidate

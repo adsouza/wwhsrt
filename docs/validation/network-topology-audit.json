@@ -60,13 +60,21 @@
     {
       "id": "german-ice",
       "source": "https://www.bahn.de/service/ueber-uns/zugtypen/ice",
+      "scope": "majority-HSR corridors",
       "cities": [
-        "rhine_ruhr",
-        "koln",
-        "frankfurt_am_main",
         "berlin",
-        "munich",
-        "hamburg"
+        "frankfurt_am_main",
+        "hamburg",
+        "koln",
+        "stop_node_2146217850",
+        "stop_node_2453992382"
+      ],
+      "required_corridors": [
+        "public_berlin__hamburg",
+        "public_hamburg__stop_node_2146217850",
+        "public_frankfurt_am_main__koln",
+        "public_frankfurt_am_main__stop_node_2453992382",
+        "public_koln__stop_node_2453992382"
       ],
       "missing": [],
       "connected": true
@@ -197,7 +205,7 @@
       "ordered_service": true
     }
   ],
-  "playable_catalog_sha256": "4bce8d7884cea0c93ae23243f4b22ba0fec4be0db591b08b0cdc9ca85dc14cca",
+  "playable_catalog_sha256": "5df44a3b17107ff9dd09379c9ba3d207d0a8976b8c7aeffe9813b60375fb9044",
   "expectations_sha256": "75ff762c7c97725e0eae8949a889911e6141c88615ac38e51881a515bdd43c80",
   "scope": {
     "polylines": 2397,

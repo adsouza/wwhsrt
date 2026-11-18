@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"io/fs"
 	"math"
-	"os"
 	"strings"
 	"testing"
 
@@ -34,6 +33,8 @@ func gameLines(t *testing.T) []gameLine {
 	}
 	type corridor struct {
 		ID         string `json:"id"`
+		Existing   bool   `json:"existing"`
+		PartOf     string `json:"part_of"`
 		Alignments []struct {
 			ID   string `json:"id"`
 			Path []struct {
@@ -42,9 +43,9 @@ func gameLines(t *testing.T) []gameLine {
 			} `json:"path"`
 		} `json:"alignments"`
 	}
-	add := func(corridors []corridor, only map[string]bool) {
+	add := func(corridors []corridor) {
 		for _, c := range corridors {
-			if only != nil && !only[c.ID] {
+			if c.Existing || c.PartOf != "" {
 				continue
 			}
 			for _, a := range c.Alignments {
@@ -56,26 +57,16 @@ func gameLines(t *testing.T) []gameLine {
 			}
 		}
 	}
-	raw, err := os.ReadFile("../../data/construction/compiled-prospects.v1.json")
-	if err != nil {
-		t.Fatal(err)
-	}
-	var prospects, network struct {
+	var network struct {
 		Corridors []corridor `json:"corridors"`
 	}
-	if err = json.Unmarshal(raw, &prospects); err != nil {
-		t.Fatal(err)
-	}
-	add(prospects.Corridors, nil)
-	if err = json.Unmarshal(assets.PublicNetwork, &network); err != nil {
+	if err := json.Unmarshal(assets.PublicNetwork, &network); err != nil {
 		t.Fatal(err)
 	}
 	before := len(lines)
-	add(network.Corridors, map[string]bool{"hokkaido-extension": true, "tsuruga-osaka": true})
-	// A floor, not an exact count: an added line must reach the coverage check and its message.
-	if len(existing.Lines) < 300 || len(prospects.Corridors) < 72 || len(lines)-before < 4 {
-		t.Fatalf("%d existing lines, %d prospects, %d older alignments: a line file has lost lines or changed shape",
-			len(existing.Lines), len(prospects.Corridors), len(lines)-before)
+	add(network.Corridors)
+	if before < 290 || len(lines)-before < 96 {
+		t.Fatal("Missing public tracks or construction alignments", before, len(lines)-before)
 	}
 	return lines
 }

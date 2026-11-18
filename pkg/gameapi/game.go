@@ -57,6 +57,7 @@ type GeoPoint struct {
 	Lon float64 `json:"lon"`
 }
 type Alignment struct {
+	RetainedKM    int                    `json:"retained_km,omitempty"`
 	CostIntervals []ConstructionInterval `json:"cost_intervals,omitempty"`
 	ConnectorKM   int                    `json:"connector_km,omitempty"`
 	ID            string                 `json:"id"`
@@ -116,6 +117,10 @@ type TrainFamily struct {
 	RoundTripTurnaround int    `json:"round_trip_turnaround"`
 }
 type Corridor struct {
+	Via                []string    `json:"via,omitempty"`
+	ThroughOnly        bool        `json:"through_only,omitempty"`
+	Retired            bool        `json:"retired,omitempty"`
+	PartOf             string      `json:"part_of,omitempty"`
 	ParallelTo         []string    `json:"parallel_to,omitempty"`
 	ConstructionKind   string      `json:"construction_kind,omitempty"`
 	ConstructionNote   string      `json:"construction_note,omitempty"`
@@ -129,6 +134,15 @@ type Corridor struct {
 	OutsideCost        Money       `json:"outside_cost"`
 	Alignments         []Alignment `json:"alignments"`
 }
+
+// ProjectID resolves a service section to its construction contract.
+func (c Corridor) ProjectID() string {
+	if c.PartOf != "" {
+		return c.PartOf
+	}
+	return c.ID
+}
+
 type Project struct {
 	CorridorID  string    `json:"corridor_id"`
 	AlignmentID string    `json:"alignment_id"`

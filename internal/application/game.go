@@ -95,6 +95,22 @@ type connectorPayload struct {
 	ConnectorPriorSHA string `json:"connector_prior_sha256"`
 }
 
+type serbiaPayload struct {
+	occitaniePayload
+	SerbiaSince    int    `json:"serbia_since"`
+	SerbiaPriorSHA string `json:"serbia_prior_sha256"`
+}
+type occitaniePayload struct {
+	germanPayload
+	OccitanieSince    int    `json:"occitanie_since"`
+	OccitaniePriorSHA string `json:"occitanie_prior_sha256"`
+}
+type germanPayload struct {
+	rhinePayload
+	GermanSince    int    `json:"german_since"`
+	GermanPriorSHA string `json:"german_prior_sha256"`
+}
+
 type rhinePayload struct {
 	connectorPayload
 	RhineSince    int    `json:"rhine_since"`
@@ -292,7 +308,7 @@ func openMode(store Store, log *slog.Logger, expanded bool) (*Game, error) {
 			_ = json.Unmarshal(b, &header)
 			targetVersion := 3
 			if expanded {
-				targetVersion = 11
+				targetVersion = 14
 			}
 			if header.Version < targetVersion {
 				log.Info(
@@ -314,7 +330,7 @@ func openMode(store Store, log *slog.Logger, expanded bool) (*Game, error) {
 	}
 	rules := "network-v3"
 	if expanded {
-		rules = "network-v11"
+		rules = "network-v14"
 	}
 	log.Info(
 		"world.opened",
@@ -357,8 +373,8 @@ func data(w domain.World) payload {
 func stateData(w domain.World) any {
 	p := data(w)
 	if w.Expanded() {
-		p.Rules = "network-v11"
-		return rhinePayload{connectorPayload{
+		p.Rules = "network-v14"
+		return serbiaPayload{occitaniePayload{germanPayload{rhinePayload{connectorPayload{
 			regionalPayload{
 				constructionPayload{
 					connectivityPayload{
@@ -382,7 +398,7 @@ func stateData(w domain.World) any {
 			},
 			w.ConnectorSince(),
 			connectorPriorSHA,
-		}, w.RhineSince(), rhinePriorSHA}
+		}, w.RhineSince(), rhinePriorSHA}, w.GermanSince(), germanPriorSHA}, w.OccitanieSince(), occitaniePriorSHA}, w.SerbiaSince(), serbiaPriorSHA}
 	}
 	return p
 }
@@ -393,7 +409,7 @@ func encode(w domain.World) ([]byte, error) {
 	}
 	version := 3
 	if w.Expanded() {
-		version = 11
+		version = 14
 	}
 	return json.Marshal(envelope{"wwhsrt-first-business", version, hash(b), b})
 }

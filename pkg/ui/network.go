@@ -14,7 +14,7 @@ func ServiceRoute(f gameapi.Frame, id string) (gameapi.Route, bool) {
 	}
 	// Older fixture frames can still inspect a direct service.
 	for _, c := range f.Corridors {
-		if c.ID == id {
+		if c.ID == id && !c.Retired {
 			return gameapi.Route{
 				ID:       id,
 				Sections: []string{id},

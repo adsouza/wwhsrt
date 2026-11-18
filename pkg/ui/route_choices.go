@@ -36,6 +36,12 @@ type RouteChoices struct {
 // inside view. A nil view lets every open route compete.
 func ServiceRouteChoices(f gameapi.Frame, s State, boxes map[string]Box, view *Box) RouteChoices {
 	words := strings.Fields(strings.ToLower(s.ServiceQuery))
+	stationNames := make(map[gameapi.CityID]string)
+	if len(words) > 0 {
+		for _, city := range f.Cities {
+			stationNames[city.ID] = city.StationName
+		}
+	}
 	out := RouteChoices{InView: view != nil && len(words) == 0 && len(s.ServiceMapSections) == 0}
 	kept := []gameapi.Route{}
 	var selected *gameapi.Route
@@ -50,7 +56,11 @@ func ServiceRouteChoices(f gameapi.Frame, s State, boxes map[string]Box, view *B
 			continue
 		}
 		if len(words) > 0 {
-			name := strings.ToLower(RouteName(r, s.Locale) + " " + StopNames(r.Stops, s.Locale))
+			names := []string{RouteName(r, s.Locale), StopNames(r.Stops, s.Locale), strings.Join(r.Via, " ")}
+			for _, stop := range r.Stops {
+				names = append(names, stationNames[stop])
+			}
+			name := strings.ToLower(strings.Join(names, " "))
 			matches := true
 			for _, word := range words {
 				matches = matches && strings.Contains(name, word)

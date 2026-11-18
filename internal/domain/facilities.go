@@ -39,7 +39,7 @@ func TrainFamily() gameapi.TrainFamily {
 func (w World) Stations() []gameapi.Station {
 	byCity := map[gameapi.CityID]gameapi.Station{}
 	for _, c := range w.catalog.corridors {
-		if !c.Existing {
+		if !c.Existing || (c.Retired && !c.ThroughOnly && !w.offered(c.ID)) {
 			continue
 		}
 		for _, id := range []gameapi.CityID{c.FromCity, c.ToCity} {

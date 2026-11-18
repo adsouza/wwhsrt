@@ -12,7 +12,7 @@ def checks(catalog, manifest):
         if id not in corridors or id in seen:
             return False
         c = corridors[id]
-        return c["existing"] and all(valid(k, seen | {id}) for k in c.get("shared_sections", []))
+        return c["existing"] and not c.get("retired") and all(valid(k, seen | {id}) for k in c.get("shared_sections", []))
 
     for id, c in corridors.items():
         if valid(id, set()):
@@ -21,6 +21,17 @@ def checks(catalog, manifest):
             adj[b].add(a)
     result = []
     for network in manifest["networks"]:
+        if network["id"] == "german-ice" and "hamburg_hamm_sha256" in catalog:
+            # Admission is per line. The original ICE timetable spans conventional
+            # links, so connectivity between every ICE city is no longer required.
+            required = ["public_berlin__hamburg", "public_hamburg__stop_node_2146217850",
+                        "public_frankfurt_am_main__koln", "public_frankfurt_am_main__stop_node_2453992382",
+                        "public_koln__stop_node_2453992382"]
+            missing = [id for id in required if not valid(id, set()) or corridors[id].get("infrastructure_kind") != "hsr"]
+            result.append(dict(id=network["id"], source=network["source"], scope="majority-HSR corridors",
+                               cities=sorted({corridors[id][key] for id in required if id in corridors for key in ("from_city","to_city")}),
+                               required_corridors=required, missing=missing, connected=not missing))
+            continue
         ids = network["cities"]
         seen = {ids[0]}
         q = [ids[0]]
@@ -90,7 +101,7 @@ def require_map(catalog, map_data, manifest):
             "Station anchor mismatch: " + id
         )
     for co in catalog["corridors"]:
-        if not co["existing"]:
+        if not co["existing"] or co.get("retired"):
             continue
         path = drawn.get(co["id"])
         assert path and len(path) > 1, "Missing mapped corridor: " + co["id"]

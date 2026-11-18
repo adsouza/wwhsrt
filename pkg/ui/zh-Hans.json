@@ -1,4 +1,11 @@
 {
+  "viaPlaces": "途经",
+  "petrovaradin": "彼得罗瓦拉丁",
+  "carcassonne": "卡尔卡松",
+  "narbonne": "纳博讷",
+  "trackKind_hsr": "高速铁路",
+  "trackKind_conventional": "普速铁路",
+  "constructionScope_hypothetical_hsr": "经卡尔卡松建设设想中的高速线路。",
   "koln": "科隆",
   "brussels": "布鲁塞尔",
   "randstad": "兰斯塔德（阿姆斯特丹－鹿特丹）",

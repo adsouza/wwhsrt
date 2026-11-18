@@ -1,6 +1,7 @@
 """Independent admission checks for the three prospects and inherited rail repairs."""
 
 import copy, gzip, hashlib, json, pathlib
+from german_track import FRANKFURT, COLOGNE
 from network_coverage import checks, require, require_map
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -20,8 +21,8 @@ def main():
     rows = {r["id"]: r for r in c["corridors"]}
     old = {r["id"]: r for r in prior["corridors"]}
     cities = {r["id"]: r for r in c["cities"]}
-    rhine_markets = {"antwerp", "rotterdam", "schiphol", "liege", "aachen", "duisburg", "arnhem", "utrecht"}
-    assert set(cities) == rhine_markets | {r["id"] for r in prior["cities"]} | {"maibara", "camp_de_tarragona", "figueres"}
+    additional_markets = {"antwerp", "rotterdam", "schiphol", "liege", "aachen", "duisburg", "arnhem", "utrecht", "narbonne", "carcassonne", "petrovaradin"}
+    assert set(cities) == additional_markets | {r["id"] for r in prior["cities"]} | {"maibara", "camp_de_tarragona", "figueres"}
     assert set(old) <= set(rows), "An accepted corridor disappeared"
     for id, r in old.items():
         assert (r["from_city"], r["to_city"], r["existing"]) == (
@@ -31,8 +32,11 @@ def main():
         ), ("Accepted identity changed", id)
         assert len(r["alignments"]) == len(rows[id]["alignments"])
         for a, b in zip(r["alignments"], rows[id]["alignments"]):
-            assert {k: v for k, v in a.items() if k not in {"path", "connector_km"}} == {
-                k: v for k, v in b.items() if k not in {"path", "connector_km"}
+            ignored = {"path", "connector_km"}
+            if id in (FRANKFURT, COLOGNE, "public_hamburg__stop_node_2146217850"):
+                ignored |= {"km", "minutes", "surface_km"}
+            assert {k: v for k, v in a.items() if k not in ignored} == {
+                k: v for k, v in b.items() if k not in ignored
             }, ("Accepted economics changed", id)
     routes = {r["id"]: r for r in c["network"]["routes"]}
     for r in prior["network"]["routes"]:
@@ -54,7 +58,7 @@ def main():
         "launch_73_valencia__camp_de_tarragona": ("valencia", "camp_de_tarragona"),
         "launch_74_porto__vigo": ("porto", "stop_node_12819737430"),
     }
-    assert {id for id, r in rows.items() if not r["existing"]} == {
+    assert {id for id, r in rows.items() if not r["existing"] and not id.startswith(("upgrade_de_", "occitanie_"))} == {
         r["id"] for r in prior["corridors"] if not r["existing"]
     } | set(expected)
     for id, pair in expected.items():

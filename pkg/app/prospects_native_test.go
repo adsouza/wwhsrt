@@ -110,7 +110,7 @@ func TestNativeWorldwideProspectPickerFitsAndSelectsDedicatedHSR(t *testing.T) {
 		t.Fatal(e)
 	}
 	f := port.Snapshot()
-	if len(ui.ConstructionOpportunities(f)) != 74 {
+	if len(ui.ConstructionOpportunities(f)) != 96 {
 		t.Fatal("catalog incomplete")
 	}
 	for _, target := range []string{

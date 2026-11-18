@@ -14,20 +14,27 @@ func (w World) ownedCapacityUsage(plans []gameapi.Service, draftID string) ([]ga
 		if !ok || !r.Open {
 			return nil, errCode("line_not_open")
 		}
-		for _, id := range r.Sections {
-			if s.CorridorID == draftID {
-				draftSections[id] = true
-			}
-			if s.Frequency > 0 {
-				sections[id] = append(
-					sections[id],
-					gameapi.CapacityService{
-						ServiceID: s.CorridorID,
-						Frequency: s.Frequency,
-						Usage:     s.Frequency,
-						Draft:     s.CorridorID == draftID,
-					},
-				)
+		used := map[string]bool{}
+		for _, section := range r.Sections {
+			for _, id := range w.catalog.resources(section) {
+				if used[id] {
+					continue
+				}
+				used[id] = true
+				if s.CorridorID == draftID {
+					draftSections[id] = true
+				}
+				if s.Frequency > 0 {
+					sections[id] = append(
+						sections[id],
+						gameapi.CapacityService{
+							ServiceID: s.CorridorID,
+							Frequency: s.Frequency,
+							Usage:     s.Frequency,
+							Draft:     s.CorridorID == draftID,
+						},
+					)
+				}
 			}
 		}
 		for _, city := range r.Stops {

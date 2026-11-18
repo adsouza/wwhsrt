@@ -225,6 +225,9 @@ func Select(s *State, id gameapi.CityID) {
 func Pair(f gameapi.Frame, a, b gameapi.CityID) (gameapi.Corridor, bool) {
 	var public gameapi.Corridor
 	for _, c := range f.Corridors {
+		if c.PartOf != "" || c.Retired {
+			continue
+		}
 		if c.FromCity == a && c.ToCity == b || c.FromCity == b && c.ToCity == a {
 			if !c.Existing {
 				return c, true
@@ -241,7 +244,7 @@ func Open(f gameapi.Frame, id string) bool {
 		}
 	}
 	for _, c := range f.Corridors {
-		if c.ID == id && c.Existing {
+		if c.ID == id && c.Existing && !c.Retired {
 			return true
 		}
 	}
@@ -262,7 +265,7 @@ func ConstructionOpportunities(f gameapi.Frame) []gameapi.Corridor {
 	}
 	var result []gameapi.Corridor
 	for _, c := range f.Corridors {
-		if !c.Existing && !committed[c.ID] {
+		if !c.Existing && c.PartOf == "" && !committed[c.ID] {
 			result = append(result, c)
 		}
 	}

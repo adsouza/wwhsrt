@@ -1325,8 +1325,8 @@
       "tunnel_percent": 12,
       "via": [
         [
-          3.01,
-          43.18
+          3.005409,
+          43.190277
         ],
         [
           2.97,
@@ -6737,6 +6737,12 @@
   ],
   "terminals": [
     {
+      "id": "belgrade",
+      "station_name": "Beograd Centar",
+      "station_lon": 20.45304,
+      "station_lat": 44.79358
+    },
+    {
       "id": "mombasa",
       "station_name": "Mombasa / Miritini (planned HSR terminal)",
       "station_lon": 39.5875,
@@ -6753,6 +6759,18 @@
       "station_name": "Casa Voyageurs (planned HSR connection)",
       "station_lat": 33.59036,
       "station_lon": -7.58967
+    },
+    {
+      "id": "beziers",
+      "station_name": "Béziers",
+      "station_lon": 3.218972,
+      "station_lat": 43.336097
+    },
+    {
+      "id": "toulouse",
+      "station_name": "Toulouse Matabiau",
+      "station_lon": 1.454246,
+      "station_lat": 43.611255
     }
   ],
   "services": [

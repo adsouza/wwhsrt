@@ -348,6 +348,9 @@ func (m *Map) drawTracks(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s
 	// Where two catalog lines share geometry, the operating line stays visible.
 	for _, operating := range []bool{false, true} {
 		for _, co := range f.Corridors {
+			if co.Retired && !operating && !draftSections[co.ID] {
+				continue
+			}
 			if running[co.ID] != operating {
 				continue
 			}
@@ -363,7 +366,7 @@ func (m *Map) drawTracks(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s
 				chosen = &co.Alignments[0]
 			} else {
 				for _, project := range f.Projects {
-					if project.CorridorID != co.ID {
+					if project.CorridorID != co.ProjectID() {
 						continue
 					}
 					for i := range co.Alignments {

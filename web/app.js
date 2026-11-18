@@ -127,7 +127,7 @@ function setupWorkspace() {
   serviceHeader.append(findRoute);
   svc.querySelector(':scope>h2[data-t=forecast]')?.remove();
   const distance = el('p', 'service-distance');
-  serviceHeader.append(distance);
+  serviceHeader.append(distance, el('p', 'service-via'));
   const plan = pane('services', 'plan'),
     fleet = pane('services', 'fleet'),
     analysis = pane('services', 'analysis');
@@ -1050,13 +1050,13 @@ function renderIdleLines() {
   }
 }
 function isOpen(c) {
-  return c.existing || frame.projects.some((p) => p.corridor_id === c.id && p.ready <= frame.months_resolved);
+  return (c.existing && !c.retired) || frame.projects.some((p) => p.corridor_id === (c.part_of || c.id) && p.ready <= frame.months_resolved);
 }
 function chosenPair() {
   const pairs = frame.corridors.filter(
     (c) =>
-      (c.from_city === prefs.from_city && c.to_city === prefs.to_city) ||
-      (c.to_city === prefs.from_city && c.from_city === prefs.to_city),
+      !c.part_of && !c.retired && ((c.from_city === prefs.from_city && c.to_city === prefs.to_city) ||
+      (c.to_city === prefs.from_city && c.from_city === prefs.to_city)),
   );
   return pairs.find((c) => !c.existing) || pairs[0];
 }
@@ -1312,13 +1312,14 @@ function renderServices() {
   document.querySelector('label[for=service-corridor]').title = label('mapServiceHint');
   $('route-query').setAttribute('aria-label', label('routeSearch'));
   const words = (prefs.service_query || '').toLowerCase().trim().split(/\s+/).filter(Boolean);
+  const stationNames = new Map(words.length ? frame.cities.map((c) => [c.id, c.station_name]) : []);
   $('route-query').value = prefs.service_query || '';
   selectOptions(
     $('service-corridor'),
     available
       .filter((r) => {
         if (!words.length || r.id === prefs.service_corridor) return true;
-        const searchable = (routeName(r) + ' ' + r.stops.map(label).join(' ')).toLowerCase();
+        const searchable = [routeName(r), ...r.stops.map(label), ...r.stops.map((id) => stationNames.get(id)), ...(r.via || [])].join(' ').toLowerCase();
         return words.every((word) => searchable.includes(word));
       })
       .map((r) => [r.id, routeName(r)]),
@@ -1333,7 +1334,9 @@ function renderServices() {
   $('service-path-details').hidden = !route || route.stops.length <= 2;
   $('service-distance').hidden = paneFor('services') === 'plan';
   $('service-distance').textContent = route ? route.km + ' km · ' + route.minutes + ' min' : '';
-  $('connector-note').textContent = route?.connector_km
+  $('service-via').hidden = !route?.via?.length;
+  $('service-via').textContent = route?.via?.length ? label('viaPlaces') + ' ' + route.via.join(' → ') : '';
+  $('connector-note').textContent = route?.connector_km && route.infrastructure_kind !== 'hsr'
     ? label('conventionalConnectors') + ': ' + route.connector_km + ' km. ' + label('connectorHint')
     : '';
   $('service-path').textContent = route

@@ -32,6 +32,10 @@ type Catalog struct {
 	regionalPrior       *Catalog
 	connectorPrior      *Catalog
 	rhinePrior          *Catalog
+	germanPrior         *Catalog
+	occitaniePrior      *Catalog
+	serbiaPrior         *Catalog
+	retired             map[string]bool
 }
 
 func NewCatalog(rows []gameapi.Corridor) (Catalog, error) {
@@ -62,7 +66,7 @@ func NewCatalog(rows []gameapi.Corridor) (Catalog, error) {
 			for _, id := range prospect.ParallelTo {
 				linked = linked || id == public.ID
 			}
-			if r.Existing == prior.Existing || !linked || prospect.ConstructionKind != "dedicated_hsr" {
+			if r.Existing == prior.Existing || !linked || (prospect.ConstructionKind != "dedicated_hsr" && !(prospect.ConstructionKind == "upgrade" && public.Retired)) {
 				return c, errCode("invalid_scenario")
 			}
 		}
@@ -74,6 +78,9 @@ func NewCatalog(rows []gameapi.Corridor) (Catalog, error) {
 		for i, a := range r.Alignments {
 			maxPoints := 64
 			maxKM, maxMinutes := 6000, 2400
+			if r.ConstructionKind == "upgrade" {
+				maxPoints = 2048
+			}
 			if r.Existing {
 				maxPoints = 2048
 				maxKM, maxMinutes = 2000, 1000
@@ -85,7 +92,7 @@ func NewCatalog(rows []gameapi.Corridor) (Catalog, error) {
 				a.TunnelKM < 0 ||
 				a.ConnectorKM < 0 ||
 				a.ConnectorKM > a.KM ||
-				a.SurfaceKM+a.HillKM+a.ViaductKM+a.TunnelKM != a.KM ||
+				a.RetainedKM < 0 || (a.RetainedKM > 0 && r.ConstructionKind != "upgrade") || a.SurfaceKM+a.HillKM+a.ViaductKM+a.TunnelKM+a.RetainedKM != a.KM ||
 				len(a.Path) < 2 ||
 				len(a.Path) > maxPoints ||
 				(!r.Existing && (a.Months < 1 || a.Months > 120)) {
@@ -122,9 +129,15 @@ func NewCatalog(rows []gameapi.Corridor) (Catalog, error) {
 		c.corridors = append(c.corridors, r)
 	}
 	for _, co := range c.corridors {
+		if co.PartOf != "" {
+			parent, ok := c.find(co.PartOf)
+			if !ok || co.Existing || parent.Existing || parent.PartOf != "" || (co.FromCity != parent.FromCity && co.ToCity != parent.ToCity) {
+				return c, errCode("invalid_scenario")
+			}
+		}
 		for _, id := range co.ParallelTo {
 			linked, ok := c.find(id)
-			if !ok || co.Existing || !linked.Existing || co.ConstructionKind != "dedicated_hsr" {
+			if !ok || co.Existing || !linked.Existing || (co.ConstructionKind != "dedicated_hsr" && !(co.ConstructionKind == "upgrade" && linked.Retired)) {
 				return c, errCode("invalid_scenario")
 			}
 		}
@@ -140,6 +153,7 @@ func NewCatalog(rows []gameapi.Corridor) (Catalog, error) {
 func (c Catalog) Corridors() []gameapi.Corridor {
 	out := append([]gameapi.Corridor{}, c.corridors...)
 	for i := range out {
+		out[i].Via = append([]string(nil), out[i].Via...)
 		out[i].ParallelTo = append([]string(nil), out[i].ParallelTo...)
 		out[i].SharedSections = append([]string{}, out[i].SharedSections...)
 		out[i].Alignments = append([]gameapi.Alignment{}, out[i].Alignments...)
@@ -189,6 +203,9 @@ type World struct {
 	regionalSince     int
 	connectorSince    int
 	rhineSince        int
+	germanSince       int
+	occitanieSince    int
+	serbiaSince       int
 }
 
 func New(c Catalog) World {
@@ -229,6 +246,9 @@ func (w World) clone() World {
 	return w
 }
 func (w World) project(id string) (gameapi.Project, bool) {
+	if co, ok := w.catalog.find(id); ok {
+		id = co.ProjectID()
+	}
 	for _, p := range w.projects {
 		if p.CorridorID == id {
 			return p, true
@@ -343,6 +363,9 @@ func (w World) Change(c gameapi.Command) (World, error) {
 	return next, nil
 }
 func (w *World) change(c gameapi.Command) error {
+	if (c.Kind == gameapi.LeaseTrain || c.Kind == gameapi.SetService) && !w.offered(c.CorridorID) {
+		return errCode("no_route")
+	}
 	switch c.Kind {
 	case gameapi.NewGame:
 		// Keep the command revision monotonic across campaigns so queued commands
@@ -377,6 +400,9 @@ func (w *World) change(c gameapi.Command) error {
 	case gameapi.BuildLine:
 		corridor, ok := w.catalog.find(c.CorridorID)
 		if !ok {
+			return errCode("no_route")
+		}
+		if corridor.PartOf != "" {
 			return errCode("no_route")
 		}
 		if corridor.Existing {
@@ -601,9 +627,9 @@ func ValidName(name string) bool {
 // Months before an epoch's cutover replay against that epoch's archived
 // catalog. Named fields replace a positional list that compiled when transposed.
 type Cutovers struct {
-	Network, Catalog, Economy                int
-	Topology, Connectivity                   int
-	Construction, Regional, Connector, Rhine int
+	Network, Catalog, Economy                                           int
+	Topology, Connectivity                                              int
+	Construction, Regional, Connector, Rhine, German, Occitanie, Serbia int
 }
 
 func (w World) cutovers() Cutovers {
@@ -617,6 +643,9 @@ func (w World) cutovers() Cutovers {
 		Regional:     w.regionalSince,
 		Connector:    w.connectorSince,
 		Rhine:        w.rhineSince,
+		German:       w.germanSince,
+		Occitanie:    w.occitanieSince,
+		Serbia:       w.serbiaSince,
 	}
 }
 
@@ -709,13 +738,27 @@ func Restore(
 		(c.rhinePrior != nil && w.rhineSince < w.connectorSince) {
 		return fail()
 	}
+	w.germanSince = at.German
+	if w.germanSince < 0 || w.germanSince > months || (w.germanSince > 0 && c.germanPrior == nil) ||
+		(c.germanPrior != nil && w.germanSince < w.rhineSince) {
+		return fail()
+	}
+	w.occitanieSince = at.Occitanie
+	if w.occitanieSince < 0 || w.occitanieSince > months || (w.occitanieSince > 0 && c.occitaniePrior == nil) || (c.occitaniePrior != nil && w.occitanieSince < w.germanSince) {
+		return fail()
+	}
+	w.serbiaSince = at.Serbia
+	if w.serbiaSince < 0 || w.serbiaSince > months || (w.serbiaSince > 0 && c.serbiaPrior == nil) ||
+		(c.serbiaPrior != nil && w.serbiaSince < w.occitanieSince) {
+		return fail()
+	}
 	// Validate referenced infrastructure before any historical network replay.
 	seen := map[string]bool{}
 	var committed, awarded gameapi.Money
 	for _, p := range projects {
 		co, ok := c.find(p.CorridorID)
 		a, found := alternative(co, p.AlignmentID)
-		if !ok || !found || co.Existing || seen[p.CorridorID] || p.Owner != company.ID || p.Started < 0 ||
+		if !ok || !found || co.Existing || co.PartOf != "" || seen[p.CorridorID] || p.Owner != company.ID || p.Started < 0 ||
 			p.Started > months ||
 			p.Ready != p.Started+a.Months {
 			return fail()

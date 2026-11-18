@@ -1,4 +1,10 @@
 {
+  "viaPlaces": "Via",
+  "carcassonne": "Carcassonne",
+  "narbonne": "Narbonne",
+  "trackKind_hsr": "HSR",
+  "trackKind_conventional": "conventional",
+  "constructionScope_hypothetical_hsr": "Build a hypothetical high-speed line via Carcassonne.",
   "koln": "Cologne (Köln)",
   "antwerp": "Antwerp",
   "rotterdam": "Rotterdam",

@@ -40,8 +40,8 @@ def main():
     profiles = {p["id"]: p for p in read("data/costs/construction_costs.v1.json")["profiles"]}
     prior = json.loads(gzip.decompress((ROOT / "assets/scenario/public-network-v3.json.gz").read_bytes()))
     old_markets = {c["id"]: c for c in prior["network"]["cities"]}
-    rhine_markets = {"antwerp", "rotterdam", "schiphol", "liege", "aachen", "duisburg", "arnhem", "utrecht"}
-    assert set(cities) == rhine_markets | set(old_markets) | {
+    additional_markets = {"antwerp", "rotterdam", "schiphol", "liege", "aachen", "duisburg", "arnhem", "utrecht", "narbonne", "carcassonne", "petrovaradin"}
+    assert set(cities) == additional_markets | set(old_markets) | {
         "taipei",
         "maibara",
         "camp_de_tarragona",
@@ -49,7 +49,7 @@ def main():
     }, "Unexpected city roster change"
     assert cities["taipei"]["station_name"] == "Taipei"
     for c in catalog["network"]["cities"]:
-        if c["id"] in rhine_markets | {"maibara", "camp_de_tarragona", "figueres"}:
+        if c["id"] in additional_markets | {"maibara", "camp_de_tarragona", "figueres"}:
             assert c["daily_trips"] == c["attraction"] == 500
         elif c["id"] == "taipei":
             assert c["daily_trips"] == 7000 and c["attraction"] == 7000 and c["road_region"] == "taiwan"
@@ -61,7 +61,7 @@ def main():
     assert [(int(i), n.strip()) for i, n in declared] == [
         (r["number"], r["name"]) for r in source["pairs"]
     ], "Spec/authoring coverage differs"
-    assert len(source["pairs"]) == 74 and len([c for c in byid.values() if not c["existing"]]) == 74
+    assert len(source["pairs"]) == 74 and len([c for c in byid.values() if not c["existing"] and not c.get("part_of")]) == 96
     checks = []
 
     def admit(path, allowed, bridge_km):

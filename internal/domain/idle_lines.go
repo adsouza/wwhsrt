@@ -24,7 +24,7 @@ func (w World) IdleLinesAmong(routes []gameapi.Route) []gameapi.IdleLine {
 		for _, route := range routes {
 			covers := false
 			for _, id := range route.Sections {
-				if id == co.ID {
+				if section, _ := w.catalog.find(id); section.ProjectID() == co.ID {
 					covers = true
 				}
 			}

@@ -5,9 +5,9 @@
   "source_lakes_sha256": "2d036f53dedec578001c5c30c2959ee7d4eebc1306900fa4367c49929ec8f2d9",
   "license": "Natural Earth public domain",
   "line_sources": {
-    "assets/scenario/playable-rail-map.json": "1ed05fead27b7d9ab250c33e2280aba8d53f07df1e43f3565aad19ed2783a8f6",
-    "data/construction/compiled-prospects.v1.json": "72cc59125cfc9a2b9b8427c7337102d99307fb742e4236b8b60f24af6e864c45",
-    "assets/scenario/public-network.json": "4bce8d7884cea0c93ae23243f4b22ba0fec4be0db591b08b0cdc9ca85dc14cca"
+    "assets/scenario/playable-rail-map.json": "1c7a0274431c53b3e1df39d879b13a41568e2b4928b83f43a3d304ca583e14d6",
+    "data/construction/compiled-prospects.v1.json": "5beaee43d5c943442bbf22e95b95c281bafee08e986275a61f90e9027e2da7ef",
+    "assets/scenario/public-network.json": "5df44a3b17107ff9dd09379c9ba3d207d0a8976b8c7aeffe9813b60375fb9044"
   },
   "near_km": 150,
   "fine_degrees": 0.003,
@@ -36,16 +36,16 @@
   "winding": "land and lake_islands counter-clockwise, lakes clockwise",
   "tightened": [],
   "counts": {
-    "land": 1501,
+    "land": 1500,
     "lakes": 292,
     "lake_islands": 205,
-    "points": 84209,
-    "left_out_islands": 2556,
+    "points": 84199,
+    "left_out_islands": 2557,
     "left_out_lakes": 1042
   },
   "existing_line_points_off_land": {
-    "sampled": 49144,
+    "sampled": 48441,
     "off_land": 411
   },
-  "output_sha256": "51db393232f0c8d0cb05c35e925613c4e81dbe6e3e8c5f9a55d899b67dafc2e7"
+  "output_sha256": "28a5ca666f974de57cbfa89a2cd74a71056c82b5c227c080b0d0f55ce3e39437"
 }

@@ -70,7 +70,7 @@ func TestProductionProspectsCoverTheSeventyFourBuildableCorridors(t *testing.T) 
 		for _, path := range paths {
 			got[path.id] = true
 		}
-		if len(paths) != 74 || !got["tsuruga-osaka"] || !got["hokkaido-extension"] {
+		if len(paths) != 96 || !got["tsuruga-osaka"] || !got["hokkaido-extension"] {
 			t.Fatal(got)
 		}
 	}

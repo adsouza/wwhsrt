@@ -727,10 +727,30 @@ def main(audit=False):
             sections.append(co["id"])
         assert service["id"] not in by_pattern, "Duplicate authored connector service"
         patterns.append(dict(id=service["id"], sections=sections, cities=path, stops=path))
-    from rhine_randstad import add_services
+    from pinned_services import add_services
+    from rhine_randstad import repair_station_approaches
 
     rhine_source = "data/imports/rhine-randstad.v1.json"
-    superseded = add_services(read(rhine_source), cities, market, stations, rows, patterns)
+    rhine = read(rhine_source)
+    repair_station_approaches(rhine, rows)
+    superseded = add_services(rhine, cities, market, stations, rows, patterns)
+    from german_track import correct_montabaur, apply_majority_rule, FRANKFURT, COLOGNE
+
+    correct_montabaur(rows, cities, km)
+    profile_file = "data/imports/german-track.v1.json"
+    profiles = read(profile_file)["profiles"]
+    for co in rows:
+        if co["id"] in (FRANKFURT, COLOGNE):
+            co["alignments"][0]["connector_km"] = round(profiles[co["id"]]["meters"].get("conventional", 0) / 1000)
+    rates = {p["id"]: round(p["baseline_million_2024_usd_per_route_km"] * 100_000_000)
+             for p in read("data/costs/construction_costs.v1.json")["profiles"]}
+    hamm_source = "data/imports/hamburg-hamm.v1.json"
+    apply_majority_rule(rows, patterns, profiles, superseded, km, rates, read(hamm_source))
+    from occitanie import add_occitanie
+    occitanie_source = "data/imports/toulouse-beziers.v1.json"
+    add_occitanie(read(occitanie_source), cities, market, stations, rows, patterns, superseded, km, rates)
+    serbia_source = "data/imports/belgrade-vrbas.v1.json"
+    superseded.extend(add_services(read(serbia_source), cities, market, stations, rows, patterns))
     assert len(patterns) <= 8192, "Future service catalog exceeds route bound"
     ms = list(market.values())
     matrix = []
@@ -761,7 +781,11 @@ def main(audit=False):
         launch_land_mask_sha256=launch["land_mask_sha256"],
         construction_cost_ledger_sha256=launch["cost_ledger_sha256"],
         rhine_randstad_sha256=output_hash(rhine_source),
-        id="prototype-world-v7",
+        german_track_sha256=output_hash(profile_file),
+        occitanie_sha256=output_hash(occitanie_source),
+        hamburg_hamm_sha256=output_hash(hamm_source),
+        belgrade_vrbas_sha256=output_hash(serbia_source),
+        id="prototype-world-v10",
         cities=cities,
         network=rules,
         corridors=rows,
@@ -786,7 +810,7 @@ def main(audit=False):
     map_lines = []
     map_ids = []
     for co in rows:
-        if not co["existing"]:
+        if not co["existing"] or co.get("retired"):
             continue
         a = co["alignments"][0]
         path = display.get(co["id"], {}).get(a["id"], a["path"])

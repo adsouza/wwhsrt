@@ -108,17 +108,18 @@ def inputs():
     crossings = {
         r["corridor_id"]: unary_union([shape(c["geometry"]) for c in r["crossings"]]) for r in prospects["review"]
     }
-    routes = [
-        (c["id"], a["id"], [(p["lon"], p["lat"]) for p in a["path"]], crossings.get(c["id"]))
-        for c in prospects["corridors"]
-        for a in c["alignments"]
-    ]
-    older = [c for c in json.loads((ROOT / NETWORK).read_text())["corridors"] if c["id"] in OLDER_ROUTES]
-    assert sorted(c["id"] for c in older) == sorted(OLDER_ROUTES), "An older buildable route is missing"
-    routes += [
-        (c["id"], a["id"], [(p["lon"], p["lat"]) for p in a["path"]], None) for c in older for a in c["alignments"]
-    ]
-    assert len({r[0] for r in routes}) == 74, "Expected 74 buildable routes"
+    catalog = json.loads((ROOT / NETWORK).read_text())["corridors"]
+    routes = []
+    for co in catalog:
+        if co["existing"] or co.get("part_of"):
+            continue
+        for alt in co["alignments"]:
+            path = [(p["lon"], p["lat"]) for p in alt["path"]]
+            if co["id"].startswith("upgrade_de_"):
+                # These works follow existing railway bridges at water crossings.
+                existing.append(path)
+            else:
+                routes.append((co["id"], alt["id"], path, crossings.get(co["id"])))
     return mask, existing, routes
 
 

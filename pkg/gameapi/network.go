@@ -4,6 +4,7 @@ package gameapi
 // Existing corridor_id fields on Service/FleetLease are stable service-pattern
 // IDs for wire/save compatibility. Direct patterns retain their corridor IDs.
 type Route struct {
+	Via                []string `json:"via,omitempty"`
 	InfrastructureKind string   `json:"infrastructure_kind,omitempty"`
 	ConnectorKM        int      `json:"connector_km,omitempty"`
 	SuggestedFare      Money    `json:"suggested_fare,omitempty"`

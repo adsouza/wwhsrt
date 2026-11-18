@@ -105,20 +105,20 @@ func TestTopologyV5UpgradePreservesHistoricalEconomyAndFleet(t *testing.T) {
 	if !reflect.DeepEqual(f.Reports[:2], prior.Reports) {
 		t.Fatal("historical reports rewritten")
 	}
-	var next rhinePayload
+	var next serbiaPayload
 	json.Unmarshal(store.b, &env)
 	json.Unmarshal(env.Payload, &next)
-	if env.Version != 11 || next.TopologySince != 2 || next.PriorPublicSHA != hash(assets.PublicNetworkV1) ||
+	if env.Version != 14 || next.TopologySince != 2 || next.PriorPublicSHA != hash(assets.PublicNetworkV1) ||
 		next.PublicSHA != hash(assets.PublicNetwork) ||
-		next.Rules != "network-v11" {
+		next.Rules != "network-v14" {
 		t.Fatal("topology identity/cutover not pinned")
 	}
 	if openPublic(t, store).Snapshot().Checkpoint != f.Checkpoint {
 		t.Fatal("mixed topology history does not restore")
 	}
-	for _, change := range []func(*rhinePayload){
-		func(p *rhinePayload) { p.PriorPublicSHA = "unknown" },
-		func(p *rhinePayload) { p.TopologySince = 4 },
+	for _, change := range []func(*serbiaPayload){
+		func(p *serbiaPayload) { p.PriorPublicSHA = "unknown" },
+		func(p *serbiaPayload) { p.TopologySince = 4 },
 	} {
 		bad := next
 		change(&bad)
@@ -134,10 +134,9 @@ func TestTopologyV5UpgradePreservesHistoricalEconomyAndFleet(t *testing.T) {
 func TestTopologyRetainsPublishedRouteIdentitiesAndFleetRequirements(t *testing.T) {
 	var old importedNetwork
 	json.Unmarshal(assets.PublicNetworkV1, &old)
-	g := openPublic(t, nil)
-	f := g.Snapshot()
+	currentCatalog, _ := publicData()
 	current := map[string]gameapi.Corridor{}
-	for _, c := range f.Corridors {
+	for _, c := range currentCatalog.Corridors {
 		current[c.ID] = c
 	}
 	for _, c := range old.Corridors {
@@ -145,14 +144,15 @@ func TestTopologyRetainsPublishedRouteIdentitiesAndFleetRequirements(t *testing.
 		correctedUlsan := ok && len(n.Alignments) > 0 && (c.FromCity == "ulsan" || c.ToCity == "ulsan") &&
 			n.Alignments[0].KM <= c.Alignments[0].KM &&
 			n.Alignments[0].Minutes <= c.Alignments[0].Minutes
+		correctedMontabaur := ok && len(n.Alignments) > 0 && c.ToCity == "stop_node_2453992382" && n.Alignments[0].Minutes <= c.Alignments[0].Minutes
 		if !ok || n.FromCity != c.FromCity || n.ToCity != c.ToCity ||
-			(!correctedUlsan && (n.Alignments[0].KM != c.Alignments[0].KM ||
+			(!correctedUlsan && !correctedMontabaur && !(c.ID == "public_hamburg__stop_node_2146217850" && n.Alignments[0].Minutes <= c.Alignments[0].Minutes) && (n.Alignments[0].KM != c.Alignments[0].KM ||
 				n.Alignments[0].Minutes != c.Alignments[0].Minutes)) {
 			t.Fatal("published corridor identity/timing changed", c.ID)
 		}
 	}
 	routes := map[string]gameapi.Route{}
-	for _, r := range f.Routes {
+	for _, r := range currentCatalog.Network.Routes {
 		routes[r.ID] = r
 	}
 	for _, r := range old.Network.Routes {

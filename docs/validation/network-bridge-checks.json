@@ -1,12 +1,12 @@
 {
   "passed": true,
-  "catalog_sha256": "4bce8d7884cea0c93ae23243f4b22ba0fec4be0db591b08b0cdc9ca85dc14cca",
-  "cities": 299,
-  "existing_corridors": 311,
+  "catalog_sha256": "5df44a3b17107ff9dd09379c9ba3d207d0a8976b8c7aeffe9813b60375fb9044",
+  "cities": 302,
+  "existing_corridors": 316,
   "prospects": 74,
-  "service_templates": 3942,
-  "mapped_stations": 2581,
-  "station_inventory": 4338,
+  "service_templates": 4579,
+  "mapped_stations": 2450,
+  "station_inventory": 4344,
   "networks": [
     {
       "id": "nec",
@@ -63,13 +63,21 @@
     {
       "id": "german-ice",
       "source": "https://www.bahn.de/service/ueber-uns/zugtypen/ice",
+      "scope": "majority-HSR corridors",
       "cities": [
-        "rhine_ruhr",
-        "koln",
-        "frankfurt_am_main",
         "berlin",
-        "munich",
-        "hamburg"
+        "frankfurt_am_main",
+        "hamburg",
+        "koln",
+        "stop_node_2146217850",
+        "stop_node_2453992382"
+      ],
+      "required_corridors": [
+        "public_berlin__hamburg",
+        "public_hamburg__stop_node_2146217850",
+        "public_frankfurt_am_main__koln",
+        "public_frankfurt_am_main__stop_node_2453992382",
+        "public_koln__stop_node_2453992382"
       ],
       "missing": [],
       "connected": true

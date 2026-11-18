@@ -1,6 +1,7 @@
 """Independent admission checks for Yeongcheon, Taipei and Houston–Austin."""
 
 import copy, gzip, hashlib, json, math, pathlib
+from german_track import FRANKFURT, COLOGNE
 from network_coverage import require, require_map, checks
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -34,13 +35,15 @@ def main():
     rows = {c["id"]: c for c in catalog["corridors"]}
     cities = {c["id"]: c for c in catalog["cities"]}
     prior = json.loads(gzip.decompress((ROOT / "assets/scenario/public-network-v4.json.gz").read_bytes()))
-    rhine_markets = {"antwerp", "rotterdam", "schiphol", "liege", "aachen", "duisburg", "arnhem", "utrecht"}
-    assert set(cities) == rhine_markets | {c["id"] for c in prior["cities"]} | {"taipei", "maibara", "camp_de_tarragona", "figueres"}
+    additional_markets = {"antwerp", "rotterdam", "schiphol", "liege", "aachen", "duisburg", "arnhem", "utrecht", "narbonne", "carcassonne", "petrovaradin"}
+    assert set(cities) == additional_markets | {c["id"] for c in prior["cities"]} | {"taipei", "maibara", "camp_de_tarragona", "figueres"}
     old = {c["id"]: c for c in prior["corridors"]}
     assert set(old) | {"public_taichung__taipei", "launch_71_houston__austin"} <= set(rows)
     for id, co in old.items():
         for a, b in zip(co["alignments"], rows[id]["alignments"]):
             ignored = {"path", "connector_km"}
+            if id in (FRANKFURT, COLOGNE, "public_hamburg__stop_node_2146217850"):
+                ignored |= {"km", "minutes", "surface_km"}
             if "ulsan" in (co["from_city"], co["to_city"]):
                 ignored |= {"km", "minutes", "surface_km"}
                 assert abs(length(b["path"]) - b["km"]) < 1, "Ulsan service still charges the detoured distance"

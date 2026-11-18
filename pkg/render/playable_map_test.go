@@ -20,7 +20,7 @@ func TestMapShowsEveryPlayablePublicCorridorAndNoExtraSourceFragments(t *testing
 	f := port.Snapshot()
 	byID := map[string][]gameapi.GeoPoint{}
 	for _, co := range f.Corridors {
-		if co.Existing {
+		if co.Existing && !co.Retired {
 			byID[co.ID] = co.Alignments[0].Path
 		}
 	}
