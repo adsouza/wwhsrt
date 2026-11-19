@@ -129,3 +129,44 @@ func TestViennaGrazProspectFollowsBothApproaches(t *testing.T) {
 		}
 	}
 }
+
+func TestWarsawCentralnaAndJaktorowAreDistinctMapEndpoints(t *testing.T) {
+	port, err := application.Open(nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	f := port.Snapshot()
+	const project = "launch_28_warsaw__lodz"
+	var state ui.State
+	if !ui.SelectProspect(&state, f, project) {
+		t.Fatal("Łódź contract missing")
+	}
+	co, _ := ui.Pair(f, state.FromCity, state.ToCity)
+	works := ui.MapForProspect(f, co, co.Alignments[0])
+	if len(works.AlternateStations) != 1 {
+		t.Fatal("expected the named construction terminal", works.AlternateStations)
+	}
+	origin := works.AlternateStations[0]
+	if origin.StationName != "Jaktorów" || origin.ID != "warsaw" || works.Paths[0][0] != (gameapi.GeoPoint{Lat: origin.StationLat, Lon: origin.StationLon}) {
+		t.Fatal("Łódź works detached from Jaktorów", origin)
+	}
+	central := mapview.Project(52.22882, 21.00316)
+	junction := mapview.Project(52.08667, 20.55188)
+	camera := mapview.Fit(900, 600, []mapview.Point{central, junction})
+	track := slices.IndexFunc(f.Corridors, func(c gameapi.Corridor) bool { return c.ID == "public_warsaw__wloszczowa" })
+	if track < 0 {
+		t.Fatal("Warsaw public line missing")
+	}
+	end := f.Corridors[track].Alignments[0].Path[0]
+	i := slices.IndexFunc(f.Cities, func(c gameapi.City) bool { return c.ID == "warsaw" })
+	if i < 0 || f.Cities[i].StationName != "Warszawa Centralna" || mapview.Project(end.Lat, end.Lon) != central || CityPoint(camera, f.Cities[i]) != camera.Screen(central) || Pick(camera, f.Cities, camera.Screen(central)) != "warsaw" {
+		t.Fatal("Warsaw marker detached from public line")
+	}
+	if CityPoint(camera, origin) != camera.Screen(junction) || PickProspect(camera, f, state, camera.Screen(junction)) != project || PickProspect(camera, f, state, camera.Screen(central)) != "" {
+		t.Fatal("incorrect construction endpoints")
+	}
+	f.Projects = append(f.Projects, gameapi.Project{CorridorID: project})
+	if station := ui.ConstructionTerminals(f)["warsaw"]; station != origin {
+		t.Fatal("Jaktorów disappeared once construction started", station)
+	}
+}

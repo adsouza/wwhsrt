@@ -181,7 +181,8 @@ func (m *Map) drawScene(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s 
 		m.public.draw(dst, c, s)
 	}
 	m.drawTracks(dst, c, f, s, pal)
-	prospectStops, alternates := m.drawProspects(dst, c, f, s)
+	prospect, alternates := m.drawProspects(dst, c, f, s)
+	prospectStops := prospect.Stops
 	idle := []ui.IdleHighlight{}
 	if s.View == "services" {
 		idle = ui.IdleHighlights(f)
@@ -216,7 +217,7 @@ func (m *Map) drawScene(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s 
 	}
 	rank := func(city gameapi.City) int {
 		id := city.ID
-		if other, ok := alternates[id]; ok && other.StationName != city.StationName {
+		if other, ok := alternates[id]; ok && other == city {
 			return 3
 		}
 		if id == s.Selected {
@@ -252,16 +253,27 @@ func (m *Map) drawScene(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s 
 		if p.X < 0 || p.Y < 0 || p.X > c.Width || p.Y > c.Height {
 			continue
 		}
-		if idleCities[city.ID] {
+		alternate, hasAlternate := alternates[city.ID]
+		isAlternate := hasAlternate && alternate == city
+		if idleCities[city.ID] && !isAlternate {
 			m.marks.ring(dst, float32(p.X), float32(p.Y), 10, 3, pal.WarningText)
 		}
-		if city.ID == s.Selected {
+		if city.ID == s.Selected && !isAlternate {
 			m.marks.disc(dst, float32(p.X), float32(p.Y), 13, pal.Surface)
 			m.marks.ring(dst, float32(p.X), float32(p.Y), 13, 3, pal.Accent)
 		}
-		m.stationMark(dst, f, city.ID, p, pal)
-		other, hasAlternate := alternates[city.ID]
-		atProspectStation := !hasAlternate || other.StationName == city.StationName
+		if isAlternate {
+			m.marks.disc(dst, float32(p.X), float32(p.Y), 3.5, pal.Existing)
+		} else {
+			m.stationMark(dst, f, city.ID, p, pal)
+		}
+		atProspectStation := !isAlternate
+		for _, station := range prospect.AlternateStations {
+			if station.ID == city.ID {
+				atProspectStation = station == city
+				break
+			}
+		}
 		if s.View == "build" && atProspectStation {
 			tag := ""
 			if city.ID == from {
@@ -280,12 +292,8 @@ func (m *Map) drawScene(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s 
 			}
 		}
 		label := ui.Text(s.Locale, string(city.ID))
-		if hasAlternate {
-			if atProspectStation {
-				label += " · " + city.StationName
-			} else {
-				label = city.StationName
-			}
+		if isAlternate {
+			label = city.StationName
 		}
 		width := text.Advance(label, m.face(15))
 		for _, offset := range []mapview.Point{

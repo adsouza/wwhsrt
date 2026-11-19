@@ -541,6 +541,15 @@ func (g *Game) Forecast(q gameapi.ForecastRequest) (gameapi.Forecast, error) {
 	defer g.mu.Unlock()
 	return g.w.Forecast(q)
 }
+func (g *Game) ServiceForecasts() func(gameapi.ForecastRequest) (gameapi.Forecast, error) {
+	return g.CompareServices().Forecast
+}
+func (g *Game) CompareServices() gameapi.ServiceComparison {
+	g.mu.Lock()
+	w := g.w
+	g.mu.Unlock()
+	return w.CompareServices()
+}
 func (g *Game) Snapshot() gameapi.Frame { g.mu.Lock(); defer g.mu.Unlock(); return g.frame() }
 func (g *Game) Export() ([]byte, error) { g.mu.Lock(); defer g.mu.Unlock(); return encode(g.w) }
 func (g *Game) Apply(c gameapi.Command) (gameapi.Frame, error) {

@@ -9,6 +9,7 @@ import (
 
 	"github.com/ebitenui/ebitenui/event"
 	"github.com/ebitenui/ebitenui/widget"
+	"github.com/hajimehoshi/ebiten/v2"
 	"wwhsrt/internal/application"
 	"wwhsrt/pkg/gameapi"
 	"wwhsrt/pkg/mapview"
@@ -157,5 +158,62 @@ func TestNativeWorldwideProspectPickerFitsAndSelectsDedicatedHSR(t *testing.T) {
 				}
 			}
 		}
+	}
+}
+
+func TestNativeEarnCashOpensForecastedSchedule(t *testing.T) {
+	old := preferencesPath
+	preferencesPath = filepath.Join(t.TempDir(), "ui.json")
+	t.Cleanup(func() { preferencesPath = old })
+	port, err := application.Open(nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	g, err := New(port)
+	if err != nil {
+		t.Fatal(err)
+	}
+	g.width, g.height = 1280, 850
+	g.State.View = "map"
+	g.host.layout(g)
+	// Only presentation affordability is adjusted so this fixture always exposes the service button.
+	g.Frame.Player.Cash = 0
+	g.host.build(g)
+	before := g.Frame.Checkpoint
+	b := g.host.actions["next-investment"]
+	b.ClickedEvent.Fire(&widget.ButtonClickedEventArgs{Button: b})
+	event.ExecuteDeferred()
+	job := g.host.pendingSearch
+	if job == nil {
+		t.Fatal("service button did not start comparison")
+	}
+	g.host.build(g)
+	b = g.host.actions["next-investment"]
+	b.Validate()
+	if !b.GetWidget().Disabled || b.Text().Label != ui.Text(g.State.Locale, "comparingServices") {
+		t.Fatal("service button did not show the pending search")
+	}
+	screen := ebiten.NewImage(g.width, g.height)
+	defer screen.Deallocate()
+	g.host.ui.Draw(screen)
+	center := b.GetWidget().Rect.Min.Add(b.GetWidget().Rect.Size().Div(2))
+	if _, ok := g.host.ui.Container.(*widget.Container).WidgetAt(center.X, center.Y).(*comparingServicesButton); !ok {
+		t.Fatal("the pending search indicator is missing from the button")
+	}
+	<-job.done
+	g.host.finishServiceSearch(g)
+	g.host.build(g)
+	if g.host.actions["next-investment"].GetWidget().Disabled {
+		t.Fatal("service button stayed busy after comparison")
+	}
+	if g.State.View != "services" || g.State.ServicePane != "plan" || g.State.ServiceCorridor != "public_chengdu__chongqing" || g.State.Frequency != job.plan.Frequency || g.State.Fare != job.plan.Fare {
+		t.Fatal("wrong service draft", job.plan, g.State.ServiceCorridor, g.State.Frequency)
+	}
+	preview, err := port.Forecast(job.plan)
+	if err != nil || preview.CompanyChange <= 0 {
+		t.Fatal(preview, err)
+	}
+	if port.Snapshot().Checkpoint != before || g.searchServices() != job {
+		t.Fatal("recommendation changed the company or failed to reuse the completed result")
 	}
 }

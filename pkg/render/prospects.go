@@ -60,16 +60,16 @@ func PickProspect(c mapview.Camera, f gameapi.Frame, s ui.State, at mapview.Poin
 	return id
 }
 
-func (m *Map) drawProspects(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s ui.State) ([]gameapi.CityID, map[gameapi.CityID]gameapi.City) {
-	alternates := map[gameapi.CityID]gameapi.City{}
-	var stops []gameapi.CityID
+func (m *Map) drawProspects(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s ui.State) (ui.ProspectMap, map[gameapi.CityID]gameapi.City) {
+	alternates := ui.ConstructionTerminals(f)
+	var selected ui.ProspectMap
 	p := ui.PaletteFor(s)
 	for _, prospect := range prospectPaths(f, s) {
 		for _, station := range prospect.AlternateStations {
 			alternates[station.ID] = station
 		}
 		if prospect.selected {
-			stops = prospect.Stops
+			selected = prospect.ProspectMap
 		}
 		for _, path := range prospect.Paths {
 			if prospect.selected {
@@ -79,7 +79,7 @@ func (m *Map) drawProspects(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame
 			}
 		}
 	}
-	return stops, alternates
+	return selected, alternates
 }
 
 func (m *Map) drawProspectDots(dst *ebiten.Image, c mapview.Camera, path []gameapi.GeoPoint, p ui.Palette) {

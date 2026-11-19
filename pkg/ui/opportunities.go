@@ -1,6 +1,8 @@
 package ui
 
 import (
+	"context"
+	"slices"
 	"sort"
 
 	"wwhsrt/pkg/gameapi"
@@ -76,39 +78,82 @@ func OperatingSections(f gameapi.Frame) map[string]bool {
 	return sections
 }
 
-// Start with an idle asset already costing the player money, then an unserved
-// direct line. The player can switch to any open pattern in the planner.
-func NextService(f gameapi.Frame) string {
-	if f.Player.Cash < 0 {
-		// A company in deficit can run its leased trains but cannot add leases.
-		for _, train := range f.Fleet {
-			if Open(f, train.CorridorID) {
-				return train.CorridorID
-			}
-		}
-		return ""
+// ServiceCandidates keeps the investment priorities separate. Each open route
+// participates in its highest applicable group only.
+func ServiceCandidates(f gameapi.Frame) [4][]gameapi.Route {
+	var groups [4][]gameapi.Route
+	leased := map[string]bool{}
+	for _, train := range f.Fleet {
+		leased[train.CorridorID] = true
 	}
+	idleTrack, idleFleet := map[string]bool{}, map[string]bool{}
 	for _, line := range f.IdleLines {
-		id := line.CorridorID
-		if !IdleFleetOnly(line) {
-			id = ProjectService(f, id)
-		}
-		if Open(f, id) {
-			return id
+		if IdleFleetOnly(line) {
+			idleFleet[line.CorridorID] = true
+		} else {
+			idleTrack[ProjectService(f, line.CorridorID)] = true
 		}
 	}
 	running := OperatingSections(f)
 	for _, r := range f.Routes {
-		if r.Open && len(r.Sections) == 1 && !running[r.Sections[0]] {
-			return r.ID
+		if !r.Open {
+			continue
+		}
+		group := 3
+		switch {
+		case f.Player.Cash < 0:
+			if !leased[r.ID] {
+				continue
+			}
+			group = 0
+		case idleTrack[r.ID]:
+			group = 0
+		case idleFleet[r.ID]:
+			group = 1
+		case len(r.Sections) == 1 && !running[r.Sections[0]]:
+			group = 2
+		}
+		groups[group] = append(groups[group], r)
+	}
+	return groups
+}
+
+func CanSuggestService(f gameapi.Frame) bool {
+	if f.Player.Cash >= 0 {
+		return slices.ContainsFunc(f.Routes, func(r gameapi.Route) bool { return r.Open })
+	}
+	for _, train := range f.Fleet {
+		if Open(f, train.CorridorID) {
+			return true
 		}
 	}
-	for _, r := range f.Routes {
-		if r.Open {
-			return r.ID
-		}
+	return false
+}
+
+type serviceOption struct {
+	plan   gameapi.ForecastRequest
+	gain   gameapi.Money
+	leases int
+}
+
+func (a serviceOption) betterThan(b serviceOption) bool {
+	switch {
+	case a.gain != b.gain:
+		return a.gain > b.gain
+	case a.leases != b.leases:
+		return a.leases < b.leases
+	case a.plan.Frequency != b.plan.Frequency:
+		return a.plan.Frequency < b.plan.Frequency
+	default:
+		return a.plan.CorridorID < b.plan.CorridorID
 	}
-	return ""
+}
+
+// RecommendService compares every positive frequency at the planner's fare.
+// Only move to a lower priority when the current group cannot improve earnings.
+func RecommendService(ctx context.Context, f gameapi.Frame, forecast func(gameapi.ForecastRequest) (gameapi.Forecast, error)) gameapi.ForecastRequest {
+	plan, _ := (ServiceRanking{}).Recommend(ctx, f, gameapi.ServiceComparison{Forecast: forecast})
+	return plan
 }
 
 // Compare the same company's monthly operating result at a fixed fare. The

@@ -14,24 +14,26 @@ import (
 )
 
 type Game struct {
-	mapOrigin     mapview.Point
-	mu            sync.Mutex
-	Port          gameapi.Game
-	Frame         gameapi.Frame
-	State         ui.State
-	Map           *render.Map
-	Camera        mapview.Camera
-	width, height int
-	tick          float64
-	replayTick    float64
-	dirty         bool
-	drag          bool
-	moved         bool
-	start, last   mapview.Point
-	touch         ebiten.TouchID
-	touching      bool
-	pinch         float64
-	host          host
+	mapOrigin      mapview.Point
+	mu             sync.Mutex
+	Port           gameapi.Game
+	Frame          gameapi.Frame
+	State          ui.State
+	Map            *render.Map
+	Camera         mapview.Camera
+	width, height  int
+	tick           float64
+	replayTick     float64
+	dirty          bool
+	drag           bool
+	moved          bool
+	start, last    mapview.Point
+	touch          ebiten.TouchID
+	touching       bool
+	pinch          float64
+	serviceSearch  *serviceSearch
+	serviceRanking ui.ServiceRanking
+	host           host
 }
 
 func New(port gameapi.Game) (*Game, error) {
@@ -144,6 +146,8 @@ func (g *Game) Update() error {
 }
 
 func (g *Game) newGamePresentation() {
+	g.discardServiceSearch()
+	g.serviceRanking = ui.ServiceRanking{}
 	g.State = ui.NewGameState(g.State, g.Frame)
 	g.Camera = g.regionCamera(g.State.Portrait)
 	g.drag, g.touching, g.moved = false, false, false

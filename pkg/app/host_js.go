@@ -109,7 +109,7 @@ func (h *host) snapshot(g *Game, full bool) map[string]any {
 	if full || !h.sentFrame || h.sentRevision != g.Frame.Revision {
 		v["frame"] = g.Frame
 		v["prospects"] = ui.RankedProspects(g.Frame)
-		v["next_service"] = ui.NextService(g.Frame)
+		v["can_suggest_service"] = g.canSuggestService()
 		h.sentFrame, h.sentRevision = true, g.Frame.Revision
 	}
 	return v
@@ -141,6 +141,9 @@ func (h *host) run(g *Game) {
 				f, e = g.Port.Apply(c)
 			}
 			g.mu.Lock()
+			if g.Frame.Checkpoint != f.Checkpoint {
+				g.discardServiceSearch()
+			}
 			g.Frame = f
 			if e == nil && c.Kind != gameapi.NewGame {
 				ui.RecordHelpAction(&g.State, f, c.Kind)
@@ -154,6 +157,16 @@ func (h *host) run(g *Game) {
 		}
 		g.mu.Lock()
 		switch r.kind {
+		case "recommend_service":
+			job := g.searchServices()
+			go func(resolve js.Value) {
+				<-job.done
+				b, _ := json.Marshal(struct {
+					Plan       gameapi.ForecastRequest `json:"plan"`
+					Checkpoint string                  `json:"checkpoint"`
+				}{job.plan, job.checkpoint})
+				resolve.Invoke(string(b))
+			}(r.resolve)
 		case "best_frequency":
 			var q gameapi.ForecastRequest
 			_ = json.Unmarshal([]byte(r.body), &q)

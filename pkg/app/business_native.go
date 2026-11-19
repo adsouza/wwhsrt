@@ -10,6 +10,9 @@ import (
 )
 
 func (h *host) helpEvent(g *Game, e ui.HelpEvent) {
+	if e.Kind == "open" || e.Kind == "leave" || e.Kind == "task" {
+		h.pendingSearch = nil
+	}
 	if e.Kind == "open" && h.scroll != nil {
 		e.Scroll = h.scroll.ScrollTop
 	}

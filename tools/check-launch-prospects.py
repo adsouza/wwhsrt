@@ -32,6 +32,7 @@ def main():
     catalog = read("assets/scenario/public-network.json")
     byid = {c["id"]: c for c in catalog["corridors"]}
     cities = {c["id"]: c for c in catalog["cities"]}
+    stations = {s["id"]: s for s in catalog["stations"]}
     mask = json.loads(gzip.decompress((ROOT / "data/construction/route-land.v1.json.gz").read_bytes()))
     land = shape(mask["land"])
     projected = transform(geo.project, land)
@@ -96,10 +97,13 @@ def main():
         assert 1 <= a["months"] <= 120 and 1 <= a["km"] <= 6000
         for end, id in [(0, co["from_city"]), (-1, co["to_city"])]:
             c = cities[id]
-            assert path[end] == (
-                c.get("station_lon", c["lon"]),
-                c.get("station_lat", c["lat"]),
-            ), "Detached construction terminal"
+            pin = (c.get("station_lon", c["lon"]), c.get("station_lat", c["lat"]))
+            terminal = co.get("terminal_ids", ["", ""])[end]
+            if terminal:
+                station = stations[terminal]
+                assert station["name"] == co["station_names"][end]
+                pin = (station["lon"], station["lat"])
+            assert path[end] == pin, "Detached construction terminal"
         allowed = unary_union([shape(c["geometry"]) for c in row.get("crossings", [])])
         try:
             water = admit(path, allowed, a["viaduct_km"] + a["tunnel_km"])

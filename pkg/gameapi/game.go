@@ -186,6 +186,15 @@ type ForecastRequest struct {
 	Frequency        int    `json:"frequency"`
 	Fare             Money  `json:"fare"`
 }
+
+// ServiceComparison is a sequential, read-only comparison against one company snapshot.
+type ServiceComparison struct {
+	Forecast func(ForecastRequest) (Forecast, error)
+	// Independent reports whether the absolute change in company profit for this
+	// unserved route equals what it would earn in isolation at every frequency.
+	Independent func(Route) bool
+}
+
 type Forecast struct {
 	RunningCosts             Money `json:"running_costs"`
 	AccessCosts              Money `json:"access_costs"`
@@ -279,4 +288,7 @@ type Game interface {
 	Apply(Command) (Frame, error)
 	Export() ([]byte, error)
 	Forecast(ForecastRequest) (Forecast, error)
+	// ServiceForecasts returns a sequential forecaster pinned to the current company state.
+	ServiceForecasts() func(ForecastRequest) (Forecast, error)
+	CompareServices() ServiceComparison
 }

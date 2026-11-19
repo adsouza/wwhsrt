@@ -48,7 +48,45 @@ type marketRequest struct {
 	alternateChoice    int
 }
 
+// The destination budgets and open stations are fixed while comparing
+// timetables for the same month and infrastructure.
+type monthlyMarkets struct {
+	cities   []gameapi.MarketCity
+	stations []gameapi.Station
+	origins  map[gameapi.CityID][2][]int
+}
+
+func (w World) monthlyMarkets() *monthlyMarkets {
+	cities := append([]gameapi.MarketCity{}, w.catalog.network.Cities...)
+	sort.Slice(cities, func(i, j int) bool { return cities[i].ID < cities[j].ID })
+	return &monthlyMarkets{cities: cities, stations: w.Stations()}
+}
+
+func (m *monthlyMarkets) demand(w World, from gameapi.MarketCity, days int) [2][]int {
+	if cached, ok := m.origins[from.ID]; ok {
+		return cached
+	}
+	weights := make([]weighted, 0, len(m.cities)-1)
+	for _, to := range m.cities {
+		if to.ID != from.ID {
+			weights = append(weights, weighted{string(to.ID), w.destinationWeight(from, to)})
+		}
+	}
+	total := w.dailyTrips(from) * days
+	business := total * 30 / 100
+	budgets := [2][]int{shares(business, weights), shares(total-business, weights)}
+	if m.origins != nil {
+		m.origins[from.ID] = budgets
+	}
+	return budgets
+}
+
 func (w World) simulate(plans []gameapi.Service, month int) gameapi.NetworkReport {
+	w.months = month
+	return w.simulateMarkets(plans, month, w.monthlyMarkets())
+}
+
+func (w World) simulateMarkets(plans []gameapi.Service, month int, markets *monthlyMarkets) gameapi.NetworkReport {
 	w.months = month
 	result := gameapi.NetworkReport{
 		Available: true,
@@ -67,7 +105,7 @@ func (w World) simulate(plans []gameapi.Service, month int) gameapi.NetworkRepor
 	legIndex := map[string][2]int{}
 	sections := map[string]*gameapi.SectionUsage{}
 	stations := map[gameapi.CityID]*gameapi.StationActivity{}
-	for _, station := range w.Stations() {
+	for _, station := range markets.stations {
 		if station.Open {
 			stations[station.CityID] = &gameapi.StationActivity{
 				CityID:   station.CityID,
@@ -129,11 +167,9 @@ func (w World) simulate(plans []gameapi.Service, month int) gameapi.NetworkRepor
 		serviceIndex[route.ID] = len(result.Services)
 		result.Services = append(result.Services, s)
 	}
-	cities := append([]gameapi.MarketCity{}, w.catalog.network.Cities...)
-	sort.Slice(cities, func(i, j int) bool { return cities[i].ID < cities[j].ID })
 	requests := []marketRequest{}
 	primary := []capacityRequest{}
-	for _, from := range cities {
+	for _, from := range markets.cities {
 		// An origin without a company departure cannot offer any rail itinerary.
 		// Preserve its entire finite budget without allocating thousands of empty ODs.
 		if w.catalog.network.Sparse && len(graph[from.ID]) == 0 {
@@ -142,23 +178,17 @@ func (w World) simulate(plans []gameapi.Service, month int) gameapi.NetworkRepor
 			result.UnservedDemand += demand
 			continue
 		}
-		destinations := []gameapi.MarketCity{}
-		weights := []weighted{}
-		for _, to := range cities {
-			if to.ID == from.ID {
-				continue
-			}
-			destinations = append(destinations, to)
-			weights = append(weights, weighted{string(to.ID), w.destinationWeight(from, to)})
-		}
-		for _, class := range []string{"business", "leisure"} {
+		budgets := markets.demand(w, from, d)
+		for k, class := range []string{"business", "leisure"} {
 			itineraries := w.itinerariesFrom(from.ID, class, graph)
-			budget := w.dailyTrips(from) * d * 30 / 100
-			if class == "leisure" {
-				budget = w.dailyTrips(from)*d - budget
-			}
-			demands := shares(budget, weights)
-			for i, to := range destinations {
+			i := -1
+			demands := budgets[k]
+			for _, to := range markets.cities {
+				if to.ID == from.ID {
+					continue
+				}
+				i++
+
 				choices := itineraries[to.ID]
 				if w.catalog.network.Sparse && len(choices) == 0 {
 					result.UnservedDemand += demands[i]
@@ -326,7 +356,7 @@ func (w World) simulate(plans []gameapi.Service, month int) gameapi.NetworkRepor
 			result.Sections = append(result.Sections, *usage)
 		}
 	}
-	for _, city := range cities {
+	for _, city := range markets.cities {
 		if activity := stations[city.ID]; activity != nil && (!w.catalog.network.Sparse || activity.Calls > 0) {
 			result.Stations = append(result.Stations, *activity)
 		}
@@ -359,6 +389,46 @@ func (w World) NetworkReport() gameapi.NetworkReport {
 }
 
 func (w World) networkForecast(q gameapi.ForecastRequest) (gameapi.Forecast, error) {
+	return w.forecastAgainst(q, nil, nil)
+}
+
+// CompareServices reuses the accepted timetable and monthly demand across
+// forecasts. Both are initialized on demand, after checking for cached scores.
+func (w World) CompareServices() gameapi.ServiceComparison {
+	if w.catalog.network.ID == "" {
+		return gameapi.ServiceComparison{Forecast: w.Forecast}
+	}
+	var markets *monthlyMarkets
+	var base gameapi.NetworkReport
+	prepare := func() {
+		if markets != nil {
+			return
+		}
+		markets = w.monthlyMarkets()
+		markets.origins = make(map[gameapi.CityID][2][]int)
+		base = w.simulateMarkets(w.services, w.months, markets)
+	}
+	return gameapi.ServiceComparison{
+		Forecast: func(q gameapi.ForecastRequest) (gameapi.Forecast, error) {
+			prepare()
+			return w.forecastAgainst(q, &base, markets)
+		},
+		Independent: w.independentServiceCheck(func() bool {
+			prepare()
+			if base.Rejected != 0 || base.AlternateServed != 0 {
+				return false
+			}
+			for _, s := range base.Services {
+				if s.Requested != s.Delivered {
+					return false
+				}
+			}
+			return true
+		}),
+	}
+}
+
+func (w World) forecastAgainst(q gameapi.ForecastRequest, base *gameapi.NetworkReport, markets *monthlyMarkets) (gameapi.Forecast, error) {
 	// Construction previews price the selected contract and operate its passenger itinerary.
 	projectID := q.CorridorID
 	if co, ok := w.catalog.find(projectID); ok && q.AlignmentID != "" && !co.Retired && co.OpeningService != "" {
@@ -381,7 +451,10 @@ func (w World) networkForecast(q gameapi.ForecastRequest) (gameapi.Forecast, err
 		KM:             r.KM,
 		Minutes:        r.Minutes,
 	}
-	base := w.simulate(w.services, w.months)
+	if base == nil {
+		b := w.simulate(w.services, w.months)
+		base = &b
+	}
 	plans := append([]gameapi.Service{}, w.services...)
 	if q.ReplaceServiceID != "" {
 		if !w.validExtension(r.ID, q.ReplaceServiceID) {
@@ -425,7 +498,10 @@ func (w World) networkForecast(q gameapi.ForecastRequest) (gameapi.Forecast, err
 		result.FleetNeeded = required(q.Frequency, r.Minutes)
 	}
 	plans = withService(plans, gameapi.Service{CorridorID: q.CorridorID, Frequency: q.Frequency, Fare: q.Fare})
-	usage, err := hypothesis.ownedCapacityUsage(plans, q.CorridorID)
+	if markets == nil || !result.Open {
+		markets = hypothesis.monthlyMarkets()
+	}
+	usage, err := hypothesis.capacityUsageAtStations(plans, q.CorridorID, markets.stations)
 	if err != nil {
 		return result, err
 	}
@@ -438,7 +514,7 @@ func (w World) networkForecast(q gameapi.ForecastRequest) (gameapi.Forecast, err
 	if err := capacityError(usage); err != nil {
 		return result, err
 	}
-	next := hypothesis.simulate(plans, w.months)
+	next := hypothesis.simulateMarkets(plans, w.months, markets)
 	var nextVariable, baseVariable, baseOther, nextOther gameapi.Money
 	for _, s := range base.Services {
 		baseVariable += s.Running + s.Access + s.Handling

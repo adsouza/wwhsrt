@@ -95,6 +95,7 @@ type host struct {
 	ui                     *ebitenui.UI
 	message                string
 	busy                   bool
+	pendingSearch          *serviceSearch
 	result                 chan commandResult
 	field                  textinput.Field
 	nameInput              *nameInput
@@ -186,7 +187,7 @@ func (h *host) persist(g *Game) {
 		h.windowDirty = false
 	}
 }
-func (h *host) changed(g *Game) { h.persist(g) }
+func (h *host) changed(g *Game) { h.pendingSearch = nil; h.persist(g) }
 
 // face is the only place the native panels make a font: base is the size at the call site, and the
 // window's ladder and text step decide what is drawn.
@@ -306,6 +307,10 @@ func (h *host) update(g *Game) {
 	select {
 	case r := <-h.result:
 		h.busy = false
+		if g.Frame.Checkpoint != r.frame.Checkpoint {
+			g.discardServiceSearch()
+			h.pendingSearch = nil
+		}
 		g.Frame = r.frame
 		if g.State.ReviewMap && len(g.Frame.IdleLines) == 0 && len(g.State.ServiceMapSections) == 0 {
 			g.State.ReviewMap = false
@@ -346,6 +351,7 @@ func (h *host) update(g *Game) {
 		g.dirty = true
 	default:
 	}
+	h.finishServiceSearch(g)
 	if g.dirty && g.width > 0 {
 		h.build(g)
 		g.dirty = false

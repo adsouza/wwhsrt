@@ -30,8 +30,9 @@ def add_operating_hsr(source, cities, market, stations, rows, patterns, supersed
         names, ids = [], []
         for end, key in zip(ends, keys):
             loc = (end["lon"], end["lat"])
-            if loc == (city[key]["station_lon"], city[key]["station_lat"]):
-                names.append(city[key]["station_name"])
+            hub = city[key]
+            if loc == (hub.get("station_lon", hub["lon"]), hub.get("station_lat", hub["lat"])):
+                names.append(hub.get("station_name", hub["name"]))
                 ids.append("")
             else:
                 st = station_index[loc]
@@ -43,6 +44,12 @@ def add_operating_hsr(source, cities, market, stations, rows, patterns, supersed
 
     def distance(path):
         return sum(km(a, b) for a, b in zip(path, path[1:]))
+
+    # Centralna is the Warsaw city pin. The Łódź works still begin at the
+    # mapped Jaktorów station, so publish that terminal on the contract.
+    warsaw = hubs["warsaw"]
+    station_index[(warsaw["lon"], warsaw["lat"])]["name"] = warsaw["station"]
+    mark_stations(old["launch_28_warsaw__lodz"])
 
     # Move the two San'yō approaches with Fukuoka's existing market.
     lead = points(source["hakata_approach"][::-1])

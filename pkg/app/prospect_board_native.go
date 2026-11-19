@@ -6,12 +6,32 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"math"
 
 	uimage "github.com/ebitenui/ebitenui/image"
 	"github.com/ebitenui/ebitenui/widget"
+	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
+	"github.com/hajimehoshi/ebiten/v2/vector"
 	"wwhsrt/pkg/ui"
 )
+
+type comparingServicesButton struct {
+	*widget.Button
+	game *Game
+}
+
+func (b *comparingServicesButton) Render(screen *ebiten.Image) {
+	b.Button.Render(screen)
+	r := b.GetWidget().Rect
+	position := 0.5
+	if b.game.State.Motion {
+		position = (1 - math.Cos(b.game.tick*math.Pi/48)) / 2
+	}
+	x := float64(r.Min.X) + float64(r.Dx())*(0.05+0.6*position)
+	height := b.game.host.px(3)
+	vector.FillRect(screen, float32(x), float32(r.Max.Y-2*height), float32(r.Dx())*0.3, float32(height), ui.PaletteFor(b.game.State).Accent, false)
+}
 
 func (h *host) addProspectBoard(g *Game, root *widget.Container) {
 	r := h.workspace.Prospects
@@ -46,12 +66,15 @@ func (h *host) addProspectBoard(g *Game, root *widget.Container) {
 	))
 	next := "earnWithService"
 	canBuild := len(rows) > 0 && rows[0].Cash <= g.Frame.Player.Cash
-	service := ui.NextService(g.Frame)
-	if !canBuild && service == "" {
+	canSuggest := g.canSuggestService()
+	if !canBuild && !canSuggest {
 		next = "finance"
 	}
 	if canBuild {
 		next = "reviewCheapest"
+	}
+	if h.pendingSearch != nil {
+		next = "comparingServices"
 	}
 	if ui.CampaignFinished(g.Frame) {
 		next = "campaignEndTitle"
@@ -61,29 +84,26 @@ func (h *host) addProspectBoard(g *Game, root *widget.Container) {
 			choose(rows[0].ID)
 			return
 		}
-		if service != "" {
-			if g.State.ServiceCorridor != service {
-				ui.DraftService(&g.State, g.Frame, service)
-			}
-			g.State.View, g.State.ServicePane = "services", "plan"
-			g.State.ServiceQuery = ""
-			if h.scroll != nil {
-				h.setSidebarScroll(0)
-			}
-			h.workspaceChanged(g)
-			g.focusSelected()
+		if canSuggest {
+			h.pendingSearch = g.searchServices()
+			g.dirty = true
 		} else {
 			g.State.View, g.State.CompanyPane = "company", "finance"
 			h.workspaceChanged(g)
 		}
 	})
-	b.GetWidget().Disabled = h.busy || ui.CampaignFinished(g.Frame)
+	b.GetWidget().Disabled = h.busy || h.pendingSearch != nil || ui.CampaignFinished(g.Frame)
 	b.SetImage(&widget.ButtonImage{
 		Idle:    uimage.NewBorderedNineSliceColor(p.Selected, p.Accent, 1),
 		Hover:   uimage.NewNineSliceColor(p.Hover),
 		Pressed: uimage.NewNineSliceColor(p.Pressed),
 	})
-	head.AddChild(b)
+	if h.pendingSearch != nil {
+		head.AddChild(&comparingServicesButton{Button: b, game: g})
+	} else {
+		head.AddChild(b)
+	}
+	h.actions["next-investment"] = b
 
 	layout := widget.NewRowLayout(
 		widget.RowLayoutOpts.Direction(widget.DirectionVertical),
@@ -136,4 +156,38 @@ func (h *host) addProspectBoard(g *Game, root *widget.Container) {
 	h.prospectScroll = scroll
 	root.AddChild(scroll)
 	h.addScrollBar(g, root, scroll, func() bool { return h.prospectScroll == scroll })
+}
+
+func (h *host) finishServiceSearch(g *Game) {
+	job := h.pendingSearch
+	if job == nil {
+		return
+	}
+	select {
+	case <-job.done:
+		h.pendingSearch = nil
+		g.dirty = true
+	default:
+		return
+	}
+	if h.busy || h.confirmNewGame || job.checkpoint != g.Frame.Checkpoint {
+		return
+	}
+	plan := job.plan
+	if plan.CorridorID == "" {
+		g.State.View, g.State.CompanyPane = "company", "finance"
+		h.message = "noImprovingService"
+	} else {
+		h.message = "frequencyOptimized"
+		ui.DraftService(&g.State, g.Frame, plan.CorridorID)
+		g.State.Frequency, g.State.Fare, g.State.ReplaceServiceID = plan.Frequency, plan.Fare, plan.ReplaceServiceID
+		g.State.View, g.State.ServicePane, g.State.ServiceQuery = "services", "plan", ""
+		if h.scroll != nil {
+			h.setSidebarScroll(0)
+		}
+	}
+	h.workspaceChanged(g)
+	if plan.CorridorID != "" {
+		g.focusSelected()
+	}
 }

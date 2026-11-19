@@ -647,6 +647,8 @@
   "zeroBestFrequency": "按当前票价，零班次的预测收益最高。可尝试其他票价或线路。",
   "rankedProspects": "建设项目 · 所需资金",
   "reviewCheapest": "查看最低价项目",
+  "comparingServices": "正在比较列车服务…",
+  "noImprovingService": "目前没有可提高月利润的可行列车服务调整。",
   "earnWithService": "开行列车赚取收入",
   "saveForLine": "还需 %s",
   "withinBudget": "资金充足",

@@ -290,29 +290,36 @@ func SelectProspect(s *State, f gameapi.Frame, id string) bool {
 }
 
 func DraftService(s *State, f gameapi.Frame, id string) {
-	if r, ok := ServiceRoute(f, id); !ok || !routeUsesSections(r, s.ServiceMapSections) {
+	route, ok := ServiceRoute(f, id)
+	if !ok || !routeUsesSections(route, s.ServiceMapSections) {
 		s.ServiceMapSections = nil
 	}
+	route.ID = id
+	draftServiceRoute(s, f.Services, route)
+}
+
+func draftServiceRoute(s *State, services []gameapi.Service, route gameapi.Route) {
+	id := route.ID
 	s.ServiceCorridor = id
 	s.ReplaceServiceID = ""
 	s.Frequency = 4
 	s.Fare = 9000
-	if route, ok := ServiceRoute(f, id); ok && len(route.Sections) > 1 {
+	if len(route.Sections) > 1 {
 		s.Fare = gameapi.Money(min(30000, max(1000, route.KM*25)))
 	}
-	if route, ok := ServiceRoute(f, id); ok && route.SuggestedFrequency > 0 {
+	if route.SuggestedFrequency > 0 {
 		s.Frequency = route.SuggestedFrequency
 		s.Fare = route.SuggestedFare
 	}
 	if id == "tokyo-osaka" {
-		for _, p := range f.Services {
+		for _, p := range services {
 			if p.CorridorID == "tokyo-nagoya" && p.Frequency > 0 {
 				s.ReplaceServiceID = p.CorridorID
 				s.Frequency = p.Frequency
 			}
 		}
 	}
-	for _, p := range f.Services {
+	for _, p := range services {
 		if p.CorridorID == id {
 			s.ReplaceServiceID = ""
 			s.Frequency = p.Frequency

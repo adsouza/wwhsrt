@@ -488,12 +488,13 @@ window.railStorageCommit = (value) =>
   });
 // The host sends the frame only when its revision changes. Snapshot-shaped
 // replies (the ones carrying a camera) reuse the last frame received.
-let lastFrame, rankedProspects = [], nextService = '';
+let lastFrame, rankedProspects = [], canSuggestService = false;
+let searchingServices = false, viewChange = 0;
 function withFrame(s) {
   if (s && typeof s === 'object' && 'camera' in s) {
     if (s.frame) {
       rankedProspects = s.prospects;
-      nextService = s.next_service;
+      canSuggestService = s.can_suggest_service;
       lastFrame = s.frame;
     } else if (lastFrame) s.frame = lastFrame;
   }
@@ -876,6 +877,7 @@ $('export').onclick = async () => {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 };
 window.railMapChanged = (s) => {
+  viewChange++;
   const snapshot = withFrame(JSON.parse(s)),
     sameService = snapshot.state.service_corridor === prefs.service_corridor;
   Object.assign(prefs, {
@@ -1084,6 +1086,7 @@ function ledgerRows(element, rows) {
   }
 }
 async function showView(view) {
+  viewChange++;
   $('dock-map-tools').open = false;
   $('phone-map-tools').open = false;
   await helpEvent({ kind: 'leave', value: view }, true);
@@ -1114,19 +1117,46 @@ function renderProspectBoard() {
   const affordable = rows.length && rows[0].cash <= frame.player.cash;
   const finished = frame.months_resolved >= frame.campaign_months;
   const next = $('next-investment');
-  next.textContent = label(finished ? 'campaignEndTitle' : affordable ? 'reviewCheapest' : nextService ? 'earnWithService' : 'finance');
-  next.disabled = busy || finished;
+  next.textContent = label(finished ? 'campaignEndTitle' : affordable ? 'reviewCheapest' :
+    searchingServices ? 'comparingServices' : canSuggestService ? 'earnWithService' : 'finance');
+  next.disabled = busy || finished || searchingServices;
+  next.setAttribute('aria-busy', String(searchingServices));
+  const status = $('service-search-status');
+  const searchLabel = searchingServices ? label('comparingServices') : '';
+  if (status.textContent !== searchLabel) status.textContent = searchLabel;
   next.onclick = async () => {
     if (affordable) return chooseProspect(rows[0]);
-    if (!nextService) {
-      prefs.company_pane = 'finance';
-      return showView('company');
+    if (canSuggestService) {
+      const viewAtClick = viewChange;
+      const draftKey = () => JSON.stringify([prefs.view, prefs.service_pane, prefs.service_corridor,
+        prefs.frequency, prefs.fare, prefs.replace_service_id, prefs.help.open]);
+      const draftAtClick = draftKey();
+      searchingServices = true;
+      renderProspectBoard();
+      try {
+        const { plan, checkpoint } = await call('recommend_service');
+        if (busy || $('new-game-dialog').open || frame.checkpoint !== checkpoint || viewChange !== viewAtClick || draftAtClick !== draftKey()) return;
+        if (plan.corridor_id) {
+          prefs.service_pane = 'plan';
+          prefs.service_query = '';
+          loadService(plan.corridor_id);
+          prefs.frequency = plan.frequency;
+          prefs.fare = plan.fare;
+          prefs.replace_service_id = plan.replace_service_id;
+          message = 'frequencyOptimized';
+          await showView('services');
+          await call('focus_route');
+          return;
+        }
+        canSuggestService = false;
+        message = 'noImprovingService';
+      } finally {
+        searchingServices = false;
+        renderProspectBoard();
+      }
     }
-    prefs.service_pane = 'plan';
-    prefs.service_query = '';
-    if (prefs.service_corridor !== nextService) loadService(nextService);
-    await showView('services');
-    await call('focus_route');
+    prefs.company_pane = 'finance';
+    await showView('company');
   };
   const selected = prefs.view === 'build' ? chosenPair()?.id : '';
   const key = JSON.stringify([frame.checkpoint, prefs.locale, selected]);

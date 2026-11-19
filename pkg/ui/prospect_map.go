@@ -15,6 +15,7 @@ func MapForProspect(f gameapi.Frame, co gameapi.Corridor, alignment gameapi.Alig
 		Paths: [][]gameapi.GeoPoint{alignment.Path},
 		Stops: []gameapi.CityID{co.FromCity, co.ToCity},
 	}
+	works.addTerminalStations(f, co, alignment.Path)
 	if co.ConstructionKind != "base_tunnel" || co.OpeningService == "" {
 		return works
 	}
@@ -32,7 +33,7 @@ func MapForProspect(f gameapi.Frame, co gameapi.Corridor, alignment gameapi.Alig
 		for _, section := range f.Corridors {
 			if section.ID == id && section.Existing && len(section.Alignments) > 0 {
 				approach = section.Alignments[0].Path
-				line.addApproachStations(f, section, approach)
+				line.addTerminalStations(f, section, approach)
 				break
 			}
 		}
@@ -44,8 +45,24 @@ func MapForProspect(f gameapi.Frame, co gameapi.Corridor, alignment gameapi.Alig
 	return line
 }
 
-// Some approaches use a different passenger station from the city's primary map pin.
-func (line *ProspectMap) addApproachStations(f gameapi.Frame, section gameapi.Corridor, path []gameapi.GeoPoint) {
+// Keep named construction terminals visible even after the contract is built.
+func ConstructionTerminals(f gameapi.Frame) map[gameapi.CityID]gameapi.City {
+	terminals := map[gameapi.CityID]gameapi.City{}
+	for _, co := range f.Corridors {
+		if co.Existing || co.Retired || len(co.Alignments) == 0 || len(co.StationNames) != 2 {
+			continue
+		}
+		var line ProspectMap
+		line.addTerminalStations(f, co, co.Alignments[0].Path)
+		for _, station := range line.AlternateStations {
+			terminals[station.ID] = station
+		}
+	}
+	return terminals
+}
+
+// Some works and approaches end at a different station from the city marker.
+func (line *ProspectMap) addTerminalStations(f gameapi.Frame, section gameapi.Corridor, path []gameapi.GeoPoint) {
 	if len(path) < 2 || len(section.StationNames) != 2 {
 		return
 	}
@@ -60,7 +77,11 @@ func (line *ProspectMap) addApproachStations(f gameapi.Frame, section gameapi.Co
 		default:
 			continue
 		}
-		if name != "" && city.StationName != name {
+		lat, lon := city.StationLat, city.StationLon
+		if city.StationName == "" {
+			lat, lon = city.Lat, city.Lon
+		}
+		if name != "" && (lat != point.Lat || lon != point.Lon) {
 			city.StationName, city.StationLat, city.StationLon = name, point.Lat, point.Lon
 			line.AlternateStations = append(line.AlternateStations, city)
 		}

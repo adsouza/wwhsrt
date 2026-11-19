@@ -575,6 +575,8 @@
   "zeroBestFrequency": "Zero trips gives the best forecast at this fare. Try another fare or line.",
   "rankedProspects": "Construction · cash needed",
   "reviewCheapest": "Review cheapest build",
+  "comparingServices": "Comparing services…",
+  "noImprovingService": "No feasible service change increases monthly profit.",
   "earnWithService": "Earn cash with service",
   "saveForLine": "Save %s more",
   "withinBudget": "Within budget",

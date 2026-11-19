@@ -248,3 +248,29 @@ func TestNetworkRationCompleteJourneysAndRounding(t *testing.T) {
 		t.Fatal("largest remainder tie depends on input order")
 	}
 }
+
+func TestServiceComparisonRequiresIndependentStopsAndTrack(t *testing.T) {
+	w := networkWorld(t)
+	w.services = []gameapi.Service{{CorridorID: "tokyo-nagoya", Frequency: 4, Fare: 9000}}
+	direct, _ := w.route("tokyo-nagoya")
+	separate := w.independentServiceCheck(func() bool { t.Fatal("simple network should not require a baseline"); return false })
+	if separate(direct) {
+		t.Fatal("accepted plan reused as an isolated new service")
+	}
+	detached := gameapi.Route{Stops: []gameapi.CityID{"other-a", "other-b"}, Sections: []string{"nagoya-osaka"}}
+	if !separate(detached) {
+		t.Fatal("detached track was treated as a competing service")
+	}
+	w.catalog.corridors[w.catalog.byID["nagoya-osaka"]].SharedSections = direct.Sections
+	if separate(detached) {
+		t.Fatal("shared physical track treated as independent")
+	}
+	w.services[0].CorridorID = "tokyo-osaka"
+	detached.Sections = []string{"hokkaido-extension"}
+	if w.independentServiceCheck(func() bool { return false })(detached) {
+		t.Fatal("reused isolated score against a congested through service")
+	}
+	if !w.independentServiceCheck(func() bool { return true })(detached) {
+		t.Fatal("unconstrained through service prevented reuse on detached track")
+	}
+}

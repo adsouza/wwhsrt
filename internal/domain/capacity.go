@@ -5,6 +5,10 @@ import "wwhsrt/pkg/gameapi"
 // Count requested paths/calls, not passenger seats or last month's allocation.
 // This is also the validator's input, so explanations cannot drift from its rule.
 func (w World) ownedCapacityUsage(plans []gameapi.Service, draftID string) ([]gameapi.CapacityUsage, error) {
+	return w.capacityUsageAtStations(plans, draftID, w.Stations())
+}
+
+func (w World) capacityUsageAtStations(plans []gameapi.Service, draftID string, facilities []gameapi.Station) ([]gameapi.CapacityUsage, error) {
 	sections := map[string][]gameapi.CapacityService{}
 	stations := map[gameapi.CityID][]gameapi.CapacityService{}
 	draftSections := map[string]bool{}
@@ -82,7 +86,7 @@ func (w World) ownedCapacityUsage(plans []gameapi.Service, draftID string) ([]ga
 			)
 		}
 	}
-	for _, station := range w.Stations() {
+	for _, station := range facilities {
 		if !station.Public && (len(stations[station.CityID]) > 0 || draftStations[station.CityID]) {
 			finish(
 				gameapi.CapacityUsage{

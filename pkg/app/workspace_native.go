@@ -16,7 +16,13 @@ import (
 	"wwhsrt/pkg/ui"
 )
 
-func (h *host) workspaceChanged(g *Game) { h.blurName(); h.layout(g); g.dirty = true; h.persist(g) }
+func (h *host) workspaceChanged(g *Game) {
+	h.pendingSearch = nil
+	h.blurName()
+	h.layout(g)
+	g.dirty = true
+	h.persist(g)
+}
 func (h *host) row(cols int, fn func()) {
 	if h.content == nil {
 		fn()

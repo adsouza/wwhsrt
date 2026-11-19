@@ -3,7 +3,7 @@
   "source_topology_sha256": "ff3a1ace4f58b79879cc31c0cc3e1f610591dc011eab3304391f2074cc72ed40",
   "source_sha256": "c4468a0d23cf3ff6a53ba63fb15ce246152a757bb672037d1fbe95c9f5cced28",
   "connector_source_sha256": "0c78da68031c6bd03e33eb81fa7eb9a2a9d68715dca2c3092ffce2f5cd477743",
-  "operating_additions_sha256": "e75db3666bb1f9c866a736cb5e9ec40b71a00ca1da96f36e87ffa9e3ea06d3a7",
+  "operating_additions_sha256": "92ffb58d62a9bfbbdd3ddbdbfe4b76c8be8369461c5c9cf7d5a7d5342b7755ec",
   "network_manifest_sha256": "bcd3b76094642d0149a8bd3b9cabb7c0cc66d706389d51c03f536460e8b326a5",
   "operating_network_checks": [
     {
@@ -1000,7 +1000,7 @@
       "connected": true
     }
   ],
-  "playable_catalog_sha256": "23c1e1d0119f1fd62deb517a02d588f4be1aa098ef704b70394fb0ffef7adc18",
+  "playable_catalog_sha256": "f83d63f7f10ddbe662718409f8704caf7644a56a1fd81c02d96ea43e9c4f5905",
   "expectations_sha256": "75ff762c7c97725e0eae8949a889911e6141c88615ac38e51881a515bdd43c80",
   "scope": {
     "polylines": 2397,

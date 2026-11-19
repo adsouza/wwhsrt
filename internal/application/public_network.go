@@ -32,6 +32,9 @@ const (
 // route that could have been scheduled before the two-stop service was added.
 const beforeSemmeringStopsSHA = "6fe558152307c3adeb4bfe7f5e944acca7481e5010913d4701a5a60bd358bf10"
 
+// The Warsaw marker correction only changes display coordinates and station names.
+const beforeWarsawCentralnaSHA = "23c1e1d0119f1fd62deb517a02d588f4be1aa098ef704b70394fb0ffef7adc18"
+
 var publicOnce sync.Once
 var imported importedNetwork
 var importedCatalog domain.Catalog
@@ -547,6 +550,9 @@ func decodeNetworkVersion(b []byte, env envelope, c domain.Catalog) (domain.Worl
 	}
 	if env.Version == 17 && p.PublicSHA == beforeSemmeringStopsSHA {
 		expectedPublic = beforeSemmeringStopsSHA
+	}
+	if env.Version == 18 && p.PublicSHA == beforeWarsawCentralnaSHA {
+		expectedPublic = beforeWarsawCentralnaSHA
 	}
 	if p.PublicSHA != expectedPublic || p.ScenarioSHA != scenarioSHA || p.BusinessSHA != businessSHA ||
 		p.NetworkSHA != networkSHA {

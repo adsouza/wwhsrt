@@ -1907,6 +1907,30 @@ body.expanded #prospect-board, body.help-open #prospect-board { display: none; }
 }
 .prospect-header h2 { font-size: 0.95rem; margin: 0; }
 .prospect-header button { font-size: 0.8rem; padding: 4px 10px; min-height: 38px; }
+#next-investment[aria-busy=true] {
+  position: relative;
+  opacity: 1;
+  cursor: progress;
+}
+#next-investment[aria-busy=true]::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 5%;
+  width: 30%;
+  height: 3px;
+  background: currentColor;
+  transform: translateX(100%);
+}
+@media (prefers-reduced-motion: no-preference) {
+  body:has(#motion:checked) #next-investment[aria-busy=true]::after {
+    animation: service-search 0.8s ease-in-out infinite alternate;
+  }
+}
+@keyframes service-search {
+  from { transform: translateX(0); }
+  to { transform: translateX(200%); }
+}
 #opportunities {
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -1938,7 +1962,7 @@ body.expanded #prospect-board, body.help-open #prospect-board { display: none; }
   .prospect-header h2 { font-size: 0.83rem; }
   #opportunities button { font-size: 0.82rem; }
 }
-#services-heading {
+#services-heading, #service-search-status {
   position: absolute;
   width: 1px;
   height: 1px;

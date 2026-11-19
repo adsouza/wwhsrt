@@ -318,3 +318,59 @@ func TestExistingChineseConnectionsRejectDuplicateConstruction(t *testing.T) {
 		}
 	}
 }
+
+func TestServiceForecastsMatchPlannerAndRemainPinned(t *testing.T) {
+	g := openPublic(t, nil)
+	q := gameapi.ForecastRequest{CorridorID: "route_beijing__shanghai", Frequency: 2, Fare: 16000}
+	before := g.ServiceForecasts()
+	first, err := before(q)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i := 0; i < first.FleetNeeded; i++ {
+		publicCommand(t, g, gameapi.Command{Kind: gameapi.LeaseTrain, CorridorID: q.CorridorID})
+	}
+	publicCommand(t, g, gameapi.Command{Kind: gameapi.SetService, CorridorID: q.CorridorID, Frequency: q.Frequency, Fare: q.Fare})
+	again, err := before(q)
+	if err != nil || !reflect.DeepEqual(first, again) {
+		t.Fatal("forecast followed a subsequent company change", err)
+	}
+	batch := g.ServiceForecasts()
+	for _, id := range []string{q.CorridorID, "public_chengdu__chongqing", "tsuruga-osaka"} {
+		for _, n := range []int{0, 1, 4, 16} {
+			q.CorridorID, q.Frequency = id, n
+			got, err := batch(q)
+			want, plannerErr := g.Forecast(q)
+			if !reflect.DeepEqual(err, plannerErr) || !reflect.DeepEqual(got, want) {
+				t.Fatalf("batch and planner diverged for %+v: %v, %v", q, err, plannerErr)
+			}
+		}
+	}
+}
+
+func TestWarsawMarkerCorrectionResumesV18Service(t *testing.T) {
+	g := openPublic(t, nil)
+	const line = "public_warsaw__wloszczowa"
+	publicCommand(t, g, gameapi.Command{Kind: gameapi.LeaseTrain, CorridorID: line})
+	publicCommand(t, g, gameapi.Command{Kind: gameapi.SetService, CorridorID: line, Frequency: 1, Fare: 5000})
+	before := publicCommand(t, g, gameapi.Command{Kind: gameapi.AdvanceMonth})
+	p := stateData(g.w).(viennaPayload)
+	p.PublicSHA = beforeWarsawCentralnaSHA
+	b, err := json.Marshal(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	store := &memoryStore{}
+	store.b, err = json.Marshal(envelope{"wwhsrt-first-business", 18, hash(b), b})
+	if err != nil {
+		t.Fatal(err)
+	}
+	resumed := openPublic(t, store)
+	if got := resumed.Snapshot(); got.Checkpoint != before.Checkpoint {
+		t.Fatal("saved company changed during station correction")
+	}
+	next := publicCommand(t, resumed, gameapi.Command{Kind: gameapi.AdvanceMonth})
+	if openPublic(t, store).Snapshot().Checkpoint != next.Checkpoint {
+		t.Fatal("continued Warsaw service failed to reload")
+	}
+}

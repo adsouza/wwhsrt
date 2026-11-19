@@ -9,9 +9,9 @@
   "license": "Natural Earth public domain",
   "local_shoreline_license": "OpenStreetMap contributors, ODbL 1.0",
   "line_sources": {
-    "assets/scenario/playable-rail-map.json": "e246156512b0bd0b174c60af02bf41ae10aaee4744847bd365e1b64f0b9d9cd5",
+    "assets/scenario/playable-rail-map.json": "72eb69292170d23fbe94b7e3bf06d4745d4a3630b3e8c0c91aa1b0a9b84da9a1",
     "data/construction/compiled-prospects.v1.json": "5beaee43d5c943442bbf22e95b95c281bafee08e986275a61f90e9027e2da7ef",
-    "assets/scenario/public-network.json": "23c1e1d0119f1fd62deb517a02d588f4be1aa098ef704b70394fb0ffef7adc18"
+    "assets/scenario/public-network.json": "f83d63f7f10ddbe662718409f8704caf7644a56a1fd81c02d96ea43e9c4f5905"
   },
   "near_km": 150,
   "fine_degrees": 0.003,
