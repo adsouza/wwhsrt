@@ -1,13 +1,17 @@
 {
   "role": "Single worldwide land outline with lakes cut out; display only, no political boundaries",
   "source_mask_sha256": "4ce8321410e45877cdf11c8d28e49eb0eb46b77d6662f883df7efdf2b008f91a",
+  "local_shorelines": {
+    "data/terrain/oresund-harbors.v1.geojson": "d7568056333c0d6caafd2ae9ce851ecf2c28786d1694cb3a850212e625cc63a0"
+  },
   "source_countries_sha256": "239eec57ac17f100a11e2536cffc56752c318b50ae765b0918ff7aab4ce8f255",
   "source_lakes_sha256": "2d036f53dedec578001c5c30c2959ee7d4eebc1306900fa4367c49929ec8f2d9",
   "license": "Natural Earth public domain",
+  "local_shoreline_license": "OpenStreetMap contributors, ODbL 1.0",
   "line_sources": {
-    "assets/scenario/playable-rail-map.json": "1c7a0274431c53b3e1df39d879b13a41568e2b4928b83f43a3d304ca583e14d6",
+    "assets/scenario/playable-rail-map.json": "e246156512b0bd0b174c60af02bf41ae10aaee4744847bd365e1b64f0b9d9cd5",
     "data/construction/compiled-prospects.v1.json": "5beaee43d5c943442bbf22e95b95c281bafee08e986275a61f90e9027e2da7ef",
-    "assets/scenario/public-network.json": "5df44a3b17107ff9dd09379c9ba3d207d0a8976b8c7aeffe9813b60375fb9044"
+    "assets/scenario/public-network.json": "23c1e1d0119f1fd62deb517a02d588f4be1aa098ef704b70394fb0ffef7adc18"
   },
   "near_km": 150,
   "fine_degrees": 0.003,
@@ -36,16 +40,16 @@
   "winding": "land and lake_islands counter-clockwise, lakes clockwise",
   "tightened": [],
   "counts": {
-    "land": 1500,
-    "lakes": 292,
+    "land": 1575,
+    "lakes": 331,
     "lake_islands": 205,
-    "points": 84199,
-    "left_out_islands": 2557,
-    "left_out_lakes": 1042
+    "points": 92466,
+    "left_out_islands": 2493,
+    "left_out_lakes": 1014
   },
   "existing_line_points_off_land": {
-    "sampled": 48441,
-    "off_land": 411
+    "sampled": 52168,
+    "off_land": 409
   },
-  "output_sha256": "28a5ca666f974de57cbfa89a2cd74a71056c82b5c227c080b0d0f55ce3e39437"
+  "output_sha256": "a9d94d8d71b5be263e15a109c8f02af93d550606834903e9db2b950642daa9b8"
 }

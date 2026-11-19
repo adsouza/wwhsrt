@@ -81,7 +81,7 @@ func TestEveryLaunchProspectBuildsAndOpensAtItsBoundary(t *testing.T) {
 	}
 	n := 0
 	for _, co := range c.Corridors() {
-		if co.Existing || co.PartOf != "" {
+		if co.Existing || co.Retired || co.PartOf != "" {
 			continue
 		}
 		n++
@@ -114,7 +114,7 @@ func TestEveryLaunchProspectBuildsAndOpensAtItsBoundary(t *testing.T) {
 			t.Fatal("failed to open", co.ID)
 		}
 	}
-	if n != 96 {
+	if n != 101 {
 		t.Fatal("missing spec prospects", n)
 	}
 }

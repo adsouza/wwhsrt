@@ -2,6 +2,7 @@
 package domain
 
 import (
+	"slices"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -35,6 +36,10 @@ type Catalog struct {
 	germanPrior         *Catalog
 	occitaniePrior      *Catalog
 	serbiaPrior         *Catalog
+	operatingPrior      *Catalog
+	branchPrior         *Catalog
+	expansionPrior      *Catalog
+	viennaPrior         *Catalog
 	retired             map[string]bool
 }
 
@@ -56,6 +61,9 @@ func NewCatalog(rows []gameapi.Corridor) (Catalog, error) {
 		}
 		seen[r.ID] = true
 		for _, prior := range pairs[pair] {
+			if r.Existing && prior.Existing && ((prior.Retired && r.ReplacesCorridor == prior.ID) || (r.Retired && prior.ReplacesCorridor == r.ID)) {
+				continue
+			}
 			// A distinct dedicated line may share a city pair with inherited
 			// conventional rail. Ordinary duplicate construction stays invalid.
 			prospect, public := r, prior
@@ -64,14 +72,15 @@ func NewCatalog(rows []gameapi.Corridor) (Catalog, error) {
 			}
 			linked := false
 			for _, id := range prospect.ParallelTo {
-				linked = linked || id == public.ID
+				linked = linked || id == public.ID || (prospect.Retired && id == public.ReplacesCorridor)
 			}
-			if r.Existing == prior.Existing || !linked || (prospect.ConstructionKind != "dedicated_hsr" && !(prospect.ConstructionKind == "upgrade" && public.Retired)) {
+			if r.Existing == prior.Existing || !linked || (prospect.ConstructionKind != "dedicated_hsr" && !(prospect.ConstructionKind == "upgrade" && (public.Retired || prospect.Retired))) {
 				return c, errCode("invalid_scenario")
 			}
 		}
 		pairs[pair] = append(pairs[pair], r)
 		ids := map[string]bool{}
+		r.StationNames = append([]string(nil), r.StationNames...)
 		r.ParallelTo = append([]string(nil), r.ParallelTo...)
 		r.SharedSections = append([]string(nil), r.SharedSections...)
 		r.Alignments = append([]gameapi.Alignment{}, r.Alignments...)
@@ -92,7 +101,7 @@ func NewCatalog(rows []gameapi.Corridor) (Catalog, error) {
 				a.TunnelKM < 0 ||
 				a.ConnectorKM < 0 ||
 				a.ConnectorKM > a.KM ||
-				a.RetainedKM < 0 || (a.RetainedKM > 0 && r.ConstructionKind != "upgrade") || a.SurfaceKM+a.HillKM+a.ViaductKM+a.TunnelKM+a.RetainedKM != a.KM ||
+				a.RetainedKM < 0 || (a.RetainedKM > 0 && r.ConstructionKind != "upgrade" && r.ConstructionKind != "hypothetical_hsr") || a.SurfaceKM+a.HillKM+a.ViaductKM+a.TunnelKM+a.RetainedKM != a.KM ||
 				len(a.Path) < 2 ||
 				len(a.Path) > maxPoints ||
 				(!r.Existing && (a.Months < 1 || a.Months > 120)) {
@@ -129,15 +138,36 @@ func NewCatalog(rows []gameapi.Corridor) (Catalog, error) {
 		c.corridors = append(c.corridors, r)
 	}
 	for _, co := range c.corridors {
+		if co.ReplacesCorridor != "" {
+			prior, ok := c.find(co.ReplacesCorridor)
+			if !ok || !co.Existing || !prior.Existing || !prior.Retired || co.Retired ||
+				!((prior.FromCity == co.FromCity && prior.ToCity == co.ToCity) || (prior.FromCity == co.ToCity && prior.ToCity == co.FromCity)) {
+				return c, errCode("invalid_scenario")
+			}
+		}
 		if co.PartOf != "" {
 			parent, ok := c.find(co.PartOf)
-			if !ok || co.Existing || parent.Existing || parent.PartOf != "" || (co.FromCity != parent.FromCity && co.ToCity != parent.ToCity) {
+			if !ok || co.Existing || parent.Existing || parent.PartOf != "" {
 				return c, errCode("invalid_scenario")
+			}
+			// Interior contract sections (for example beyond an existing bridge)
+			// must occupy an ordered span of the purchased alignment.
+			if co.FromCity != parent.FromCity && co.ToCity != parent.ToCity {
+				for _, a := range co.Alignments {
+					main, found := alternative(parent, a.ID)
+					if !found {
+						return c, errCode("invalid_scenario")
+					}
+					start := slices.Index(main.Path, a.Path[0])
+					if start < 0 || start+len(a.Path) > len(main.Path) || !slices.Equal(main.Path[start:start+len(a.Path)], a.Path) {
+						return c, errCode("invalid_scenario")
+					}
+				}
 			}
 		}
 		for _, id := range co.ParallelTo {
 			linked, ok := c.find(id)
-			if !ok || co.Existing || !linked.Existing || (co.ConstructionKind != "dedicated_hsr" && !(co.ConstructionKind == "upgrade" && linked.Retired)) {
+			if !ok || co.Existing || !linked.Existing || (co.ConstructionKind != "dedicated_hsr" && !(co.ConstructionKind == "upgrade" && (linked.Retired || co.Retired))) {
 				return c, errCode("invalid_scenario")
 			}
 		}
@@ -153,6 +183,7 @@ func NewCatalog(rows []gameapi.Corridor) (Catalog, error) {
 func (c Catalog) Corridors() []gameapi.Corridor {
 	out := append([]gameapi.Corridor{}, c.corridors...)
 	for i := range out {
+		out[i].StationNames = append([]string(nil), out[i].StationNames...)
 		out[i].Via = append([]string(nil), out[i].Via...)
 		out[i].ParallelTo = append([]string(nil), out[i].ParallelTo...)
 		out[i].SharedSections = append([]string{}, out[i].SharedSections...)
@@ -206,6 +237,10 @@ type World struct {
 	germanSince       int
 	occitanieSince    int
 	serbiaSince       int
+	operatingSince    int
+	branchSince       int
+	expansionSince    int
+	viennaSince       int
 }
 
 func New(c Catalog) World {
@@ -402,7 +437,7 @@ func (w *World) change(c gameapi.Command) error {
 		if !ok {
 			return errCode("no_route")
 		}
-		if corridor.PartOf != "" {
+		if corridor.PartOf != "" || corridor.Retired {
 			return errCode("no_route")
 		}
 		if corridor.Existing {
@@ -627,9 +662,9 @@ func ValidName(name string) bool {
 // Months before an epoch's cutover replay against that epoch's archived
 // catalog. Named fields replace a positional list that compiled when transposed.
 type Cutovers struct {
-	Network, Catalog, Economy                                           int
-	Topology, Connectivity                                              int
-	Construction, Regional, Connector, Rhine, German, Occitanie, Serbia int
+	Network, Catalog, Economy                                                                                 int
+	Topology, Connectivity                                                                                    int
+	Construction, Regional, Connector, Rhine, German, Occitanie, Serbia, Operating, Branch, Expansion, Vienna int
 }
 
 func (w World) cutovers() Cutovers {
@@ -646,6 +681,10 @@ func (w World) cutovers() Cutovers {
 		German:       w.germanSince,
 		Occitanie:    w.occitanieSince,
 		Serbia:       w.serbiaSince,
+		Operating:    w.operatingSince,
+		Branch:       w.branchSince,
+		Expansion:    w.expansionSince,
+		Vienna:       w.viennaSince,
 	}
 }
 
@@ -750,6 +789,26 @@ func Restore(
 	w.serbiaSince = at.Serbia
 	if w.serbiaSince < 0 || w.serbiaSince > months || (w.serbiaSince > 0 && c.serbiaPrior == nil) ||
 		(c.serbiaPrior != nil && w.serbiaSince < w.occitanieSince) {
+		return fail()
+	}
+	w.operatingSince = at.Operating
+	if w.operatingSince < 0 || w.operatingSince > months || (w.operatingSince > 0 && c.operatingPrior == nil) ||
+		(c.operatingPrior != nil && w.operatingSince < w.serbiaSince) {
+		return fail()
+	}
+	w.branchSince = at.Branch
+	if w.branchSince < 0 || w.branchSince > months || (w.branchSince > 0 && c.branchPrior == nil) ||
+		(c.branchPrior != nil && w.branchSince < w.operatingSince) {
+		return fail()
+	}
+	w.expansionSince = at.Expansion
+	if w.expansionSince < 0 || w.expansionSince > months || (w.expansionSince > 0 && c.expansionPrior == nil) ||
+		(c.expansionPrior != nil && w.expansionSince < w.branchSince) {
+		return fail()
+	}
+	w.viennaSince = at.Vienna
+	if w.viennaSince < 0 || w.viennaSince > months || (w.viennaSince > 0 && c.viennaPrior == nil) ||
+		(c.viennaPrior != nil && w.viennaSince < w.expansionSince) {
 		return fail()
 	}
 	// Validate referenced infrastructure before any historical network replay.

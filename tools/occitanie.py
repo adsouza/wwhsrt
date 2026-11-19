@@ -17,6 +17,7 @@ def works(
     hill=0.1,
     viaduct=0.08,
     tunnel=0.03,
+    country=None,
 ):
     build_km = length - retained
     h, v, t = (round(build_km * fraction) for fraction in (hill, viaduct, tunnel))
@@ -24,7 +25,7 @@ def works(
         surface_km=build_km - h - v - t, hill_km=h, viaduct_km=v, tunnel_km=t
     )
     interval = dict(
-        country="Germany" if profile == "central_europe" else "France",
+        country=country or ("Germany" if profile == "central_europe" else "France"),
         profile_id=profile,
         base_per_km=base,
         hill_factor_percent=150,

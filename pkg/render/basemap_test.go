@@ -110,8 +110,8 @@ func TestBasemapMatchesItsMetadata(t *testing.T) {
 		}
 	}
 	t.Logf("%d points in %d outlines", points, len(b.rings))
-	if points > 88000 || len(b.rings) > 2200 {
-		t.Fatalf("basemap has %d points in %d outlines; the budget is 88000 and 2200", points, len(b.rings))
+	if points > 93000 || len(b.rings) > 2200 {
+		t.Fatalf("basemap has %d points in %d outlines; the budget is 93000 and 2200", points, len(b.rings))
 	}
 }
 
@@ -155,6 +155,8 @@ func TestBasemapKnownPoints(t *testing.T) {
 		{"Istanbul, Asian shore", 29.06, 41.00, "land"},
 		{"Tangier", -5.80, 35.76, "land"},
 		{"Folkestone", 1.15, 51.10, "land"},
+		{"Copenhagen inner harbour", 12.575, 55.6675, "sea"},
+		{"Helsingborg ferry basin", 12.6867, 56.041, "sea"},
 		{"Bogota", -74.07, 4.71, "land"},
 		{"Manitoulin Island", -82.2, 45.75, "land"},
 		{"San Francisco Bay", -122.25, 37.70, "sea"},

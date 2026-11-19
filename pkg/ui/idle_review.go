@@ -58,16 +58,20 @@ func ReviewIdle(s *State, f gameapi.Frame, id string) bool {
 		id = f.IdleLines[0].CorridorID
 	}
 	found := false
+	serviceID := id
 	for _, line := range f.IdleLines {
 		if line.CorridorID == id {
 			found = true
+			if !IdleFleetOnly(line) {
+				serviceID = ProjectService(f, id)
+			}
 			break
 		}
 	}
 	if !found {
 		return false
 	}
-	DraftService(s, f, id)
+	DraftService(s, f, serviceID)
 	s.View = "services"
 	s.ServicePane = "plan"
 	s.ReviewMap = true

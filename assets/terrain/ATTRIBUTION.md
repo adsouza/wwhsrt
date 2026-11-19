@@ -32,3 +32,11 @@ The worldwide land outline is derived from the pinned mask in
 into land, with Natural Earth 1:10m lakes cut out (public domain). It is screened
 against every buildable route; its sources and hashes are in
 `world-land.metadata.json`.
+
+The shorelines around København H and Helsingborg C use the 15 November 2026
+OpenFreeMap water layer. The local land polygons are the complement of mapped
+water within each harbour window, simplified to approximately 25 metres.
+The windows, source tile addresses and SHA-256 digests are pinned in
+`data/terrain/oresund-harbors.v1.geojson`.
+[OpenFreeMap](https://openfreemap.org/) · [© OpenMapTiles](https://openmaptiles.org/) ·
+[© OpenStreetMap contributors, ODbL 1.0](https://www.openstreetmap.org/copyright).

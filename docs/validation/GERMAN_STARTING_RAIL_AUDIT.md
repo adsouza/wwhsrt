@@ -4,7 +4,15 @@
 
 ### Playable map update
 
-The starting map classifies whole domestic lines. It admits 15 when confirmed dedicated and upgraded track together exceed half of the mapped distance. The 21 lines with some confirmed fast track below the threshold are upgrade prospects. Their construction quotes cover the remaining distance. Three wholly conventional lines have no standalone offer. The denominator includes unresolved track. The domestic rule covers paths with at least 99% of their drawn length in the German survey. International through services retain the approaches they require. Company service status uses the ordinary map colours.
+The November 17 starting map classified whole domestic lines. It admitted 15 when confirmed dedicated and upgraded track together exceed half of the mapped distance. The 21 lines with some confirmed fast track below the threshold initially became upgrade prospects. Their construction quotes cover the remaining distance. Three wholly conventional lines have no standalone offer. The denominator includes unresolved track. The domestic rule covers paths with at least 99% of their drawn length in the German survey. International through services retain the approaches they require. Company service status uses the ordinary map colours.
+
+On November 18 the operator review restored Augsburg–Munich, Munich–Ingolstadt–Nuremberg,
+and Berlin–Wolfsburg–Hannover to the starting network. Of the 39 original domestic
+corridors, 18 now start open, 18 remain upgrade prospects, and three are omitted.
+The new stopping patterns and express services share the same physical sections.
+[DB Augsburg–Munich completion](https://ir.deutschebahn.com/fileadmin/Deutsch/2011/Berichte/2011_gb_dbnetz_de.pdf) ·
+[DB Nuremberg–Ingolstadt–Munich opening](https://ir.deutschebahn.com/fileadmin/Deutsch/2006/Berichte/2006_zb_dbkonzern_de.pdf) ·
+[DB Berlin–Hannover opening](https://ir.deutschebahn.com/fileadmin/Deutsch/vor_2000/1998_gb_dbkonzern_de.pdf)
 
 **Hamburg–Hamm runs via Bremen Hbf, Osnabrück Hbf and Münster (Westf) Hbf.** The corrected 322 km railway has 222 km of confirmed upgraded track, 82 km of conventional track and 18 km unresolved. At 69% upgraded it qualifies for starting service. The Oldenburg–Leer alignment in the original audit below has been withdrawn. The two Montabaur services share the Cologne–Frankfurt high-speed line. [DB InfraGO track data](https://data.gov.de/suche/daten/infrastrukturdaten-der-db-infrago) · [DB Hamburg departures](https://www.bahnhof.de/downloads/schedule/Regeltafel_2514.pdf)
 

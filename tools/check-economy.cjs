@@ -195,8 +195,8 @@ const sha = (file) => crypto.createHash('sha256').update(fs.readFileSync(file)).
     assert.equal(f.reports[2].lease_costs, 24000000);
     ledger(f);
     const saved = JSON.parse(await p.evaluate(() => railStorageLoad()));
-    // Expanded worlds save as version 14 (internal/application/game.go; pinned by economy_test.go).
-    assert.equal(saved.version, 14);
+    // Expanded worlds save as version 17 (internal/application/game.go; pinned by economy_test.go).
+    assert.equal(saved.version, 18);
     assert.equal(saved.payload.economy_since, 2);
     assert.equal(saved.payload.economy_sha256, result.economy_sha256);
     await p.evaluate(() => navigator.serviceWorker.ready);

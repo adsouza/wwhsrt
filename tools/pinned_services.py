@@ -5,7 +5,7 @@ from math import hypot
 from shapely.geometry import LineString
 
 
-def add_services(source, cities, market, stations, rows, patterns):
+def add_hubs(source, cities, market, stations):
     by_city = {c["id"]: c for c in cities}
     by_station = {s["id"]: s for s in stations}
     for city_id, hub in source["hubs"].items():
@@ -21,9 +21,13 @@ def add_services(source, cities, market, stations, rows, patterns):
             cities.append(city)
             by_city[city_id] = city
             market[city_id] = dict(daily_trips=500, attraction=500, road_region=hub["region"])
+        if hub.get("alternate_terminal"):
+            continue
         by_city[city_id].update(station_name=hub["station"], station_lon=lon, station_lat=lat)
         market[city_id].update(by_city[city_id])
 
+
+def add_sections(source, rows):
     def points(coords):
         return [dict(lon=x, lat=y) for x, y in coords]
 
@@ -58,9 +62,13 @@ def add_services(source, cities, market, stations, rows, patterns):
                 outside_cost=15000,
                 alignments=[alignment],
                 **kind,
+                **({"via": section["via"]} if section.get("via") else {}),
             )
         )
 
+
+def add_patterns(source, rows, patterns):
+    kind = {"infrastructure_kind": source["infrastructure_kind"]} if "infrastructure_kind" in source else {}
     sections = {frozenset((c["from_city"], c["to_city"])): c["id"] for c in rows if c["existing"]}
     superseded = []
     for service in source["services"]:
@@ -79,3 +87,9 @@ def add_services(source, cities, market, stations, rows, patterns):
             )
         )
     return superseded
+
+
+def add_services(source, cities, market, stations, rows, patterns):
+    add_hubs(source, cities, market, stations)
+    add_sections(source, rows)
+    return add_patterns(source, rows, patterns)

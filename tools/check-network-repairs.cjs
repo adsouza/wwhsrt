@@ -266,7 +266,7 @@ async function pixels(p, r) {
       f = (await snap(p)).frame;
       assert.deepEqual(f.reports.slice(0, 2), old.reports);
       const save = JSON.parse(await p.evaluate(() => railStorageLoad()));
-      assert.equal(save.version, 14);
+      assert.equal(save.version, 18);
       assert.equal(save.payload.topology_since, 2);
       assert.equal(save.payload.prior_public_sha256, sha('assets/scenario/public-network-v1.json'));
       await p.evaluate(() => navigator.serviceWorker.ready);

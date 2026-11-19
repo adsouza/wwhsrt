@@ -78,6 +78,43 @@ def checks(catalog, manifest):
     return result
 
 
+def operating_service_checks(catalog, manifest):
+    """Compare every pinned operating service and section with the playable graph."""
+    rows = {c["id"]: c for c in catalog["corridors"]}
+    sections = {frozenset((c["from_city"], c["to_city"])): c for c in rows.values()
+                if c["existing"] and not c.get("retired")}
+    withdrawn = set(catalog["network"]["superseded_routes"])
+    patterns = {r["id"]: r for r in catalog["network"]["routes"] if r["id"] not in withdrawn}
+    results = []
+    for entry in manifest["sections"] + manifest["services"]:
+        cities = entry["cities"]
+        if len(cities) == 2:
+            row = sections.get(frozenset(cities), {})
+            id = row.get("id", "public_" + "__".join(cities))
+            track = [id]
+        else:
+            id = entry["id"]
+            route = patterns.get(id, {})
+            expected = [c for c in cities if c not in entry.get("skip_stops", [])]
+            track = route.get("sections", []) if route.get("stops") == expected and route.get("cities") == cities else []
+        previous = None
+        connected = len(track) == len(cities) - 1
+        for a, b, leg in zip(cities, cities[1:], track):
+            row = rows.get(leg, {})
+            if not row.get("existing") or row.get("retired") or {row.get("from_city"), row.get("to_city")} != {a, b}:
+                connected = False
+                break
+            path = row["alignments"][0]["path"]
+            first, last = (path[0], path[-1]) if row["from_city"] == a else (path[-1], path[0])
+            if previous is not None and previous != first:
+                connected = False
+            previous = last
+        hub = next(manifest["hubs"][city] for city in cities if city in manifest["hubs"])
+        source = manifest["sources"][hub["region"]]
+        results.append(dict(id=id, cities=cities, source=source, connected=connected))
+    return results
+
+
 def require(catalog, manifest):
     result = checks(catalog, manifest)
     failed = [r for r in result if not r["connected"]]
@@ -107,5 +144,10 @@ def require_map(catalog, map_data, manifest):
         assert path and len(path) > 1, "Missing mapped corridor: " + co["id"]
         for end, id in [(0, co["from_city"]), (-1, co["to_city"])]:
             c = city[id]
-            assert path[end] == [c["station_lon"], c["station_lat"]], "Detached track endpoint: " + co["id"]
+            terminal = co.get("terminal_ids", ["", ""])[end]
+            pin = [c["station_lon"], c["station_lat"]]
+            if terminal:
+                assert terminal in visible, "Alternate terminal missing from map: " + terminal
+                pin = [stations[terminal]["lon"], stations[terminal]["lat"]]
+            assert path[end] == pin, "Detached track endpoint: " + co["id"]
     return dict(required_station_markers=len(manifest["hubs"]), drawn_corridors=len(drawn))

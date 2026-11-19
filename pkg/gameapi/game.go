@@ -117,12 +117,15 @@ type TrainFamily struct {
 	RoundTripTurnaround int    `json:"round_trip_turnaround"`
 }
 type Corridor struct {
+	ReplacesCorridor   string      `json:"replaces_corridor,omitempty"`
+	StationNames       []string    `json:"station_names,omitempty"`
 	Via                []string    `json:"via,omitempty"`
 	ThroughOnly        bool        `json:"through_only,omitempty"`
 	Retired            bool        `json:"retired,omitempty"`
 	PartOf             string      `json:"part_of,omitempty"`
 	ParallelTo         []string    `json:"parallel_to,omitempty"`
 	ConstructionKind   string      `json:"construction_kind,omitempty"`
+	OpeningService     string      `json:"opening_service,omitempty"`
 	ConstructionNote   string      `json:"construction_note,omitempty"`
 	InfrastructureKind string      `json:"infrastructure_kind,omitempty"`
 	SharedSections     []string    `json:"shared_sections,omitempty"`

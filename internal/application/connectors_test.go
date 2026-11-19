@@ -48,20 +48,20 @@ func TestConnectorsV9MigrationPreservesPlansAssetsAndHistory(t *testing.T) {
 				openPublic(t, store).Snapshot().Checkpoint != f.Checkpoint {
 				t.Fatal("nested historical epochs do not reload")
 			}
-			var next serbiaPayload
+			var next viennaPayload
 			json.Unmarshal(store.b, &env)
 			json.Unmarshal(env.Payload, &next)
-			if env.Version != 14 || next.Rules != "network-v14" || next.ConnectorSince != old.Months ||
+			if env.Version != 18 || next.Rules != "network-v18" || next.ConnectorSince != old.Months ||
 				next.ConnectorPriorSHA != connectorPriorSHA ||
 				next.PublicSHA != hash(assets.PublicNetwork) ||
 				next.RegionalSince != old.RegionalSince {
 				t.Fatal("wrong connector save metadata")
 			}
-			for _, mutate := range []func(*serbiaPayload){
-				func(p *serbiaPayload) { p.ConnectorPriorSHA = "unknown" },
-				func(p *serbiaPayload) { p.ConnectorSince = -1 },
-				func(p *serbiaPayload) { p.ConnectorSince = p.Months + 1 },
-				func(p *serbiaPayload) { p.ConnectorSince = 0; p.RegionalSince = p.Months },
+			for _, mutate := range []func(*viennaPayload){
+				func(p *viennaPayload) { p.ConnectorPriorSHA = "unknown" },
+				func(p *viennaPayload) { p.ConnectorSince = -1 },
+				func(p *viennaPayload) { p.ConnectorSince = p.Months + 1 },
+				func(p *viennaPayload) { p.ConnectorSince = 0; p.RegionalSince = p.Months },
 			} {
 				bad := next
 				mutate(&bad)

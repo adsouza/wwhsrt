@@ -972,7 +972,7 @@ addEventListener('pageshow', (e) => {
 let forecastTicket = 0,
   forecastTimer;
 function corridorName(c) {
-  return label(c.from_city) + ' – ' + label(c.to_city);
+  return texts['projectName_' + c.id] || (label(c.from_city) + ' – ' + label(c.to_city));
 }
 let idleReviewTicket = 0;
 async function reviewIdleLine(id) {
@@ -980,12 +980,13 @@ async function reviewIdleLine(id) {
   if (!lines.length || (id && !lines.some((l) => l.corridor_id === id))) return;
   if (document.body.classList.contains('expanded')) $('expand').click();
   const ticket = ++idleReviewTicket,
-    selected = id || lines[0].corridor_id;
+    selected = lines.find((l) => l.corridor_id === id) || lines[0],
+    service = (selected.maintenance && frame.corridors.find((c) => c.id === selected.corridor_id)?.opening_service) || selected.corridor_id;
   delete $('map-panel').dataset.idleFocus;
   prefs.service_pane = 'plan';
   prefs.review_map = true;
   saveDisclosure('idle', true);
-  loadService(selected);
+  loadService(service);
   await showView('services');
   // Give the now-visible phone map its real viewport before fitting the paths.
   await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
@@ -993,7 +994,7 @@ async function reviewIdleLine(id) {
     ticket !== idleReviewTicket ||
     prefs.view !== 'services' ||
     prefs.help.open ||
-    prefs.service_corridor !== selected
+    prefs.service_corridor !== service
   )
     return;
   await call('focus_idle', { corridor_id: id || '' });
@@ -1055,7 +1056,7 @@ function isOpen(c) {
 function chosenPair() {
   const pairs = frame.corridors.filter(
     (c) =>
-      !c.part_of && !c.retired && ((c.from_city === prefs.from_city && c.to_city === prefs.to_city) ||
+      !c.part_of && !c.retired && !(c.existing && c.through_only) && ((c.from_city === prefs.from_city && c.to_city === prefs.to_city) ||
       (c.to_city === prefs.from_city && c.from_city === prefs.to_city)),
   );
   return pairs.find((c) => !c.existing) || pairs[0];
@@ -1136,7 +1137,7 @@ function renderProspectBoard() {
   for (const row of rows) {
     const b = document.createElement('button');
     const name = document.createElement('span');
-    name.textContent = label(row.from) + ' – ' + label(row.to);
+    name.textContent = corridorName({ id: row.id, from_city: row.from, to_city: row.to });
     const price = document.createElement('span');
     price.className = 'prospect-price';
     price.textContent = money(row.cash);
@@ -1193,7 +1194,7 @@ function renderBuild() {
     $('project-progress').value = Math.min(frame.months_resolved - project.started, project.ready - project.started);
     $('project-service').hidden = project.ready > frame.months_resolved;
     $('project-service').onclick = () => {
-      loadService(co.id);
+      loadService(co.opening_service || co.id);
       prefs.service_pane = 'plan';
       showView('services');
     };
@@ -1212,7 +1213,8 @@ function renderBuild() {
     return;
   }
   $('build-package').hidden = false;
-  $('build-status').textContent = co.construction_kind ? label('constructionScope_' + co.construction_kind) : '';
+  $('build-status').textContent = co.opening_service ? label('projectScope_' + co.id) :
+    co.construction_kind ? label('constructionScope_' + co.construction_kind) : '';
   if (!co.alignments.some((a) => a.id === prefs.alignment_id)) prefs.alignment_id = co.alignments[0].id;
   for (const a of co.alignments) {
     const b = document.createElement('button');
@@ -1248,20 +1250,20 @@ function renderBuild() {
   $('station-package').hidden = false;
   $('terrain-explanation').textContent = co.construction_note
     ? co.construction_note + ' · ' + label('authoredAlignmentNote')
-    : label(
+    : co.opening_service ? label('projectScope_' + co.id) : label(
         (co.id === 'hokkaido-extension' ? 'hokkaido' : 'kansai') + (a.id === 'mountain' ? 'MountainWhy' : 'ValleyWhy'),
       );
   const quoteID = co.id,
-    variant = a.id;
+    variant = a.id,
+    plan = frame.routes.find((r) => r.id === (co.opening_service || co.id));
   call('forecast', {
     corridor_id: co.id,
     alignment_id: a.id,
-    frequency: frame.routes.find((r) => r.id === co.id)?.suggested_frequency || 6,
-    fare: frame.routes.find((r) => r.id === co.id)?.suggested_fare || 9000,
+    frequency: plan?.suggested_frequency || 6,
+    fare: plan?.suggested_fare || 9000,
   })
     .then((result) => {
       if (chosenPair()?.id === quoteID && prefs.alignment_id === variant && !result.error) {
-        const plan = frame.routes.find((r) => r.id === co.id);
         ledgerRows($('build-preview'), [
           [label('potential'), money(result.forecast.contribution)],
           [label('previewPlan'), (plan?.suggested_frequency || 6) + ' · ' + money(plan?.suggested_fare || 9000)],
@@ -1319,7 +1321,7 @@ function renderServices() {
     available
       .filter((r) => {
         if (!words.length || r.id === prefs.service_corridor) return true;
-        const searchable = [routeName(r), ...r.stops.map(label), ...r.stops.map((id) => stationNames.get(id)), ...(r.via || [])].join(' ').toLowerCase();
+        const searchable = [routeName(r), ...r.stops.map(label), ...(r.station_names || r.stops.map((id) => stationNames.get(id))), ...(r.via || [])].join(' ').toLowerCase();
         return words.every((word) => searchable.includes(word));
       })
       .map((r) => [r.id, routeName(r)]),
@@ -1331,7 +1333,7 @@ function renderServices() {
   $('service-draft-note').textContent = label('draftChanges');
   $('restore-plan').hidden = !serviceDirty();
   const route = frame.routes.find((r) => r.id === prefs.service_corridor);
-  $('service-path-details').hidden = !route || route.stops.length <= 2;
+  $('service-path-details').hidden = !route || (route.stops.length <= 2 && !route.station_names?.length);
   $('service-distance').hidden = paneFor('services') === 'plan';
   $('service-distance').textContent = route ? route.km + ' km · ' + route.minutes + ' min' : '';
   $('service-via').hidden = !route?.via?.length;
@@ -1342,7 +1344,7 @@ function renderServices() {
   $('service-path').textContent = route
     ? label('calledStops') +
       ': ' +
-      route.stops.map(label).join(' → ') +
+      (route.station_names || route.stops.map(label)).join(' → ') +
       ' · ' +
       route.km +
       ' km · ' +
@@ -1361,14 +1363,15 @@ function renderServices() {
 }
 function routeName(r) {
   if (!r || r.cities.length < 2) return label('retiredService');
+  const stops = r.stops?.length >= 2 ? r.stops : r.cities;
   return (
-    (r.cities.length > 4
+    (stops.length > 4
       ? label(r.cities[0]) +
         ' → ' +
         label(r.cities.at(-1)) +
         ' · ' +
         label('routeStopCount').replace('%d', r.stops.length)
-      : r.cities.map(label).join(' → ')) +
+      : stops.map(label).join(' → ')) +
     (r.stops.length < r.cities.length ? ' · ' + label('express') : '') +
     (r.infrastructure_kind ? ' · ' + label('trackKind_' + r.infrastructure_kind) : '')
   );

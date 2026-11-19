@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"testing"
 	"wwhsrt/assets"
+	"wwhsrt/internal/domain"
 	"wwhsrt/pkg/gameapi"
 )
 
@@ -33,6 +34,39 @@ func publicCommand(t *testing.T, g *Game, c gameapi.Command) gameapi.Frame {
 	}
 	return f
 }
+func TestOsloStationCorrectionResumesV16AirportService(t *testing.T) {
+	store := &memoryStore{}
+	if _, err := publicHistoryCatalog(); err != nil {
+		t.Fatal(err)
+	}
+	g := openPublic(t, nil)
+	g.w = domain.New(priorExpansionCatalog)
+	const line = "public_oslo__gardermoen"
+	publicCommand(t, g, gameapi.Command{Kind: gameapi.LeaseTrain, CorridorID: line})
+	publicCommand(t, g, gameapi.Command{Kind: gameapi.SetService, CorridorID: line, Frequency: 1, Fare: 5000})
+	before := publicCommand(t, g, gameapi.Command{Kind: gameapi.AdvanceMonth})
+
+	p := stateData(g.w).(viennaPayload).branchPayload
+	p.Rules = "network-v16"
+	p.PublicSHA = osloAirportPinSHA
+	b, err := json.Marshal(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	store.b, err = json.Marshal(envelope{"wwhsrt-first-business", 16, hash(b), b})
+	if err != nil {
+		t.Fatal(err)
+	}
+	resumed := openPublic(t, store)
+	if got := resumed.Snapshot(); got.Player != before.Player || !reflect.DeepEqual(got.Reports, before.Reports) || !reflect.DeepEqual(got.Fleet, before.Fleet) {
+		t.Fatal("station correction changed the saved company")
+	}
+	next := publicCommand(t, resumed, gameapi.Command{Kind: gameapi.AdvanceMonth})
+	if openPublic(t, store).Snapshot().Checkpoint != next.Checkpoint {
+		t.Fatal("continued airport service failed to reload")
+	}
+}
+
 func TestPublicNetworkChinaServiceAndContinuation(t *testing.T) {
 	s := &memoryStore{}
 	g := openPublic(t, s)
@@ -157,13 +191,13 @@ func TestPublicNetworkLegacyUpgradeAtomicAndPinned(t *testing.T) {
 	}
 	var env envelope
 	json.Unmarshal(s.b, &env)
-	if env.Version != 14 {
+	if env.Version != 18 {
 		t.Fatal("wrong save version")
 	}
 	if openPublic(t, s).Snapshot().Checkpoint != f.Checkpoint {
 		t.Fatal("upgraded reload")
 	}
-	var p serbiaPayload
+	var p viennaPayload
 	json.Unmarshal(env.Payload, &p)
 	p.PublicSHA = "different catalog"
 	env.Payload, _ = json.Marshal(p)
@@ -188,7 +222,7 @@ func TestPublicNetworkSourceAndPhysicalCapacity(t *testing.T) {
 	if e := json.Unmarshal(assets.PublicNetwork, &raw); e != nil {
 		t.Fatal(e)
 	}
-	if len(raw.Stations) != 4338 || len(raw.Lines) != 2397 || len(raw.SourceSHA) != 64 {
+	if len(raw.Stations) != 4380 || len(raw.Lines) != 2397 || len(raw.SourceSHA) != 64 {
 		t.Fatal("prototype inventory missing")
 	}
 	g := openPublic(t, nil)

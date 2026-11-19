@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"image/color"
 	"math"
+	"slices"
 	"sort"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -180,7 +181,7 @@ func (m *Map) drawScene(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s 
 		m.public.draw(dst, c, s)
 	}
 	m.drawTracks(dst, c, f, s, pal)
-	m.drawProspects(dst, c, f, s)
+	prospectStops, alternates := m.drawProspects(dst, c, f, s)
 	idle := []ui.IdleHighlight{}
 	if s.View == "services" {
 		idle = ui.IdleHighlights(f)
@@ -208,16 +209,25 @@ func (m *Map) drawScene(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s 
 	}
 	// Selected labels take precedence; remaining labels avoid collisions.
 	cities := append([]gameapi.City{}, f.Cities...)
-	rank := func(id gameapi.CityID) int {
+	for _, city := range f.Cities {
+		if other, ok := alternates[city.ID]; ok {
+			cities = append(cities, other)
+		}
+	}
+	rank := func(city gameapi.City) int {
+		id := city.ID
+		if other, ok := alternates[id]; ok && other.StationName != city.StationName {
+			return 3
+		}
 		if id == s.Selected {
 			return 0
 		}
-		if idleCities[id] {
+		if idleCities[id] || slices.Contains(prospectStops, id) {
 			return 1
 		}
 		return 2
 	}
-	sort.SliceStable(cities, func(i, j int) bool { return rank(cities[i].ID) < rank(cities[j].ID) })
+	sort.SliceStable(cities, func(i, j int) bool { return rank(cities[i]) < rank(cities[j]) })
 	occupied := []labelRect{}
 	// City labels keep clear of the legend. Both blocks are reserved from the top, as they always were.
 	legend := m.legendRows(c, s, hasIdleLine, hasIdleFleet)
@@ -233,6 +243,10 @@ func (m *Map) drawScene(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s 
 	if len(idle) > 0 {
 		occupied = append(occupied, labelRect{m.by(12, 12), m.legendTop(), idleWidth, float64(idleRows) * m.by(12, 24)})
 	}
+	from, to := s.FromCity, s.ToCity
+	if len(prospectStops) >= 2 {
+		from, to = prospectStops[0], prospectStops[len(prospectStops)-1]
+	}
 	for _, city := range cities {
 		p := CityPoint(c, city)
 		if p.X < 0 || p.Y < 0 || p.X > c.Width || p.Y > c.Height {
@@ -246,12 +260,14 @@ func (m *Map) drawScene(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s 
 			m.marks.ring(dst, float32(p.X), float32(p.Y), 13, 3, pal.Accent)
 		}
 		m.stationMark(dst, f, city.ID, p, pal)
-		if s.View == "build" {
+		other, hasAlternate := alternates[city.ID]
+		atProspectStation := !hasAlternate || other.StationName == city.StationName
+		if s.View == "build" && atProspectStation {
 			tag := ""
-			if city.ID == s.FromCity {
+			if city.ID == from {
 				tag = "A"
 			}
-			if city.ID == s.ToCity {
+			if city.ID == to {
 				tag = "B"
 			}
 			if tag != "" {
@@ -264,6 +280,13 @@ func (m *Map) drawScene(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s 
 			}
 		}
 		label := ui.Text(s.Locale, string(city.ID))
+		if hasAlternate {
+			if atProspectStation {
+				label += " · " + city.StationName
+			} else {
+				label = city.StationName
+			}
+		}
 		width := text.Advance(label, m.face(15))
 		for _, offset := range []mapview.Point{
 			{X: m.by(15, 12), Y: m.by(15, -10)},

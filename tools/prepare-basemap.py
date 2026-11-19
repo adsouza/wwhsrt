@@ -26,6 +26,7 @@ import basemap_rule as rule  # noqa: E402
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 MASK = "data/construction/route-land.v1.json.gz"
+LOCAL_SHORES = "data/terrain/oresund-harbors.v1.geojson"
 EXISTING = "assets/scenario/playable-rail-map.json"
 PROSPECTS = "data/construction/compiled-prospects.v1.json"
 NETWORK = "assets/scenario/public-network.json"
@@ -108,6 +109,12 @@ def inputs():
     crossings = {
         r["corridor_id"]: unary_union([shape(c["geometry"]) for c in r["crossings"]]) for r in prospects["review"]
     }
+    expansion = json.loads((ROOT / "data/imports/network-expansion.v1.json").read_bytes())
+    for project in expansion["projects"]:
+        # Allow only the surveyed deck of an existing bridge in this contract.
+        decks = [LineString(leg["path"]).buffer(.0005) for leg in project["legs"] if leg.get("public")]
+        if decks:
+            crossings[project["id"]] = unary_union(decks)
     catalog = json.loads((ROOT / NETWORK).read_text())["corridors"]
     routes = []
     for co in catalog:
@@ -133,6 +140,7 @@ def main():
     index = rule.NearIndex(existing + [r[2] for r in routes], boxes)
     composed, tightened = fit(mask["land"]["coordinates"], index, routes)
     basemap = {k: composed[k] for k in ("land", "lakes", "lake_islands")}
+    rule.apply_local_shores(basemap, json.loads((ROOT / LOCAL_SHORES).read_bytes())["features"])
     counts = {k: len(v) for k, v in basemap.items()}
     counts["points"] = sum(len(r) for v in basemap.values() for r in v)
     counts["left_out_islands"] = composed["sources"]["left_out_islands"]
@@ -151,9 +159,11 @@ def main():
     metadata = {
         "role": "Single worldwide land outline with lakes cut out; display only, no political boundaries",
         "source_mask_sha256": sha(MASK),
+        "local_shorelines": {LOCAL_SHORES: sha(LOCAL_SHORES)},
         "source_countries_sha256": mask["source_countries_sha256"],
         "source_lakes_sha256": mask["source_lakes_sha256"],
         "license": mask["license"],
+        "local_shoreline_license": "OpenStreetMap contributors, ODbL 1.0",
         "line_sources": {p: sha(p) for p in (EXISTING, PROSPECTS, NETWORK)},
         "near_km": rule.NEAR_KM,
         "fine_degrees": rule.FINE,

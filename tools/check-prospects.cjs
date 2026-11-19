@@ -13,7 +13,7 @@ async function snap(p) {
 }
 const url = process.argv[2] || 'http://127.0.0.1:8765/';
 // Construction prospects in the catalog; pkg/app and pkg/render tests pin the same count.
-const PROSPECTS = 74;
+const PROSPECTS = 101;
 function screen(c, q) {
   const t = Math.asin((Math.sqrt(3) / 2) * Math.sin((q.lat * Math.PI) / 180)),
     t2 = t * t,
@@ -91,7 +91,7 @@ async function dots(p, points, ink) {
     const initial = await snap(p),
       saved = await p.evaluate(() => railStorageLoad());
     const prospects = initial.frame.corridors.filter(
-      (c) => !c.existing && !initial.frame.projects.some((v) => v.corridor_id === c.id),
+      (c) => !c.existing && !c.part_of && !c.retired && !initial.frame.projects.some((v) => v.corridor_id === c.id),
     );
     assert.equal(prospects.length, PROSPECTS);
     const cashNeeded = (c) => Math.min(...c.alignments.map((a) => a.cost - a.grant));

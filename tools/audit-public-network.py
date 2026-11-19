@@ -145,11 +145,13 @@ def audit():
         )
         row["selected_stations"] = {id: cities.get(id, {}).get("station_name") for id in (pair["from"], pair["to"])}
         checks.append(row)
-    from network_coverage import checks as network_checks
+    from network_coverage import checks as network_checks, operating_service_checks
 
     operating_checks = network_checks(
         catalog, json.loads((ROOT / "data/imports/operating-networks.v2.json").read_bytes())
     )
+    additions = "data/imports/operating-hsr-additions.v1.json"
+    operating_checks.extend(operating_service_checks(catalog, json.loads((ROOT / additions).read_bytes())))
     raw_source = json.loads((ROOT / "data/imports/hsr-prototype.v1.json").read_text())
     admitted = {s["id"] for s in graph["stations"]}
     excluded = [
@@ -162,6 +164,7 @@ def audit():
         source_topology_sha256=sha("data/imports/rail-topology-source.v1.jsonl.gz"),
         source_sha256=sha("data/imports/hsr-prototype.v1.json"),
         connector_source_sha256=sha("data/imports/rail-connectors.v2.jsonl.gz"),
+        operating_additions_sha256=sha(additions),
         network_manifest_sha256=sha("data/imports/operating-networks.v2.json"),
         operating_network_checks=operating_checks,
         playable_catalog_sha256=sha("assets/scenario/public-network.json"),

@@ -65,7 +65,7 @@ func gameLines(t *testing.T) []gameLine {
 	}
 	before := len(lines)
 	add(network.Corridors)
-	if before < 290 || len(lines)-before < 96 {
+	if before < 290 || len(lines)-before < 101 {
 		t.Fatal("Missing public tracks or construction alignments", before, len(lines)-before)
 	}
 	return lines

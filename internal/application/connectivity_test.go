@@ -46,10 +46,10 @@ func TestConnectivityV6MigrationPreservesAccountsPlansFleetAndAtomicity(t *testi
 	if !reflect.DeepEqual(f.Reports[:prior.Months], prior.Reports) {
 		t.Fatal("past reports rewritten")
 	}
-	var next serbiaPayload
+	var next viennaPayload
 	json.Unmarshal(store.b, &env)
 	json.Unmarshal(env.Payload, &next)
-	if env.Version != 14 || next.Rules != "network-v14" || next.ConnectivitySince != prior.Months ||
+	if env.Version != 18 || next.Rules != "network-v18" || next.ConnectivitySince != prior.Months ||
 		next.PreviousRepairSHA != previousRepairSHA ||
 		next.PublicSHA != hash(assets.PublicNetwork) {
 		t.Fatal("new topology identity/cutover missing")
@@ -63,12 +63,12 @@ func TestConnectivityV6MigrationPreservesAccountsPlansFleetAndAtomicity(t *testi
 	if a.Checkpoint != b.Checkpoint || !reflect.DeepEqual(a.Reports, b.Reports) {
 		t.Fatal("reloaded continuation diverged")
 	}
-	for _, change := range []func(*serbiaPayload){
-		func(p *serbiaPayload) { p.PreviousRepairSHA = "unknown" },
-		func(p *serbiaPayload) { p.ConnectivitySince = -1 },
-		func(p *serbiaPayload) { p.ConnectivitySince = p.Months + 1 },
-		func(p *serbiaPayload) { p.ConnectivitySince = 0 },
-		func(p *serbiaPayload) { p.PublicSHA = previousRepairSHA },
+	for _, change := range []func(*viennaPayload){
+		func(p *viennaPayload) { p.PreviousRepairSHA = "unknown" },
+		func(p *viennaPayload) { p.ConnectivitySince = -1 },
+		func(p *viennaPayload) { p.ConnectivitySince = p.Months + 1 },
+		func(p *viennaPayload) { p.ConnectivitySince = 0 },
+		func(p *viennaPayload) { p.PublicSHA = previousRepairSHA },
 	} {
 		bad := next
 		change(&bad)

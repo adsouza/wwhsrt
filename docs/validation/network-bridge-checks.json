@@ -1,12 +1,12 @@
 {
   "passed": true,
-  "catalog_sha256": "5df44a3b17107ff9dd09379c9ba3d207d0a8976b8c7aeffe9813b60375fb9044",
-  "cities": 302,
-  "existing_corridors": 316,
+  "catalog_sha256": "23c1e1d0119f1fd62deb517a02d588f4be1aa098ef704b70394fb0ffef7adc18",
+  "cities": 365,
+  "existing_corridors": 385,
   "prospects": 74,
-  "service_templates": 4579,
-  "mapped_stations": 2450,
-  "station_inventory": 4344,
+  "service_templates": 4666,
+  "mapped_stations": 2770,
+  "station_inventory": 4380,
   "networks": [
     {
       "id": "nec",

@@ -77,3 +77,32 @@ Beograd Centar–Petrovaradin–Vrbas Nova uses the BRouter rail profile on
 The two rail paths and source queries are pinned in `data/imports/belgrade-vrbas.v1.json`.
 The 69-minute game service includes the intermediate stop and follows the IC 12540 elapsed time
 in the [Srbija Voz timetable](https://www.srbvoz.rs/wp-content/redvoznje/bgcent_ns_su.pdf).
+
+The November 2026 operating-line additions are pinned in
+`data/imports/operating-hsr-additions.v1.json`. Its regional source lists
+identify the railway operators and infrastructure managers. The alignments
+follow the existing OpenStreetMap high-speed extract and BRouter rail-profile
+station approaches, simplified for the strategic map.
+[OpenStreetMap contributors (ODbL)](https://www.openstreetmap.org/copyright).
+Running minutes and demand are gameplay estimates. Separate terminals in the
+same metropolitan market share demand. The service planner shows the stations
+used by each added service.
+
+The Psary–Kraków prospect follows the existing railway via Starzyny, Kozłów and Miechów.
+The game extends the scope of [PKP PLK’s CMK junction works](https://www.plk-sa.pl/o-spolce/biuro-prasowe/informacje-prasowe/szczegoly/krakow-zyska-lepsze-polaczenie-z-centralna-magistrala-kolejowa-10612)
+to a high-speed upgrade into Kraków. The [ÖBB Semmering Base Tunnel](https://infrastruktur.oebb.at/en/projects-for-austria/railway-lines/southern-line-vienna-villach/semmering-base-tunnel/about-the-project)
+uses a schematic tunnel alignment between Gloggnitz and Mürzzuschlag. Existing approaches use OpenStreetMap
+railway geometry via BRouter. Project costs, construction durations and running times are game estimates.
+
+The Swiss upgrades and Swedish starting lines in `data/imports/network-expansion.v1.json`
+follow OpenStreetMap railway alignments routed with BRouter. The proposed lines in
+Angola, the DRC, India and Bangladesh use strategic game alignments. The existing
+[Padma rail deck](https://www.openstreetmap.org/way/821981466) has a separate running
+time and public track capacity. Its construction cost is excluded from the contract.
+The source file records the project references, engineering assumptions and country
+cost intervals used for these estimates.
+
+The Tullnerfeld–Wien Hauptbahnhof railway follows the OpenStreetMap rail alignment
+via Wien Meidling, routed with BRouter and pinned in `data/imports/network-expansion.v1.json`.
+The [ÖBB network statement](https://infrastruktur.oebb.at/geschaeftspartner/schienennetz/snnb/snnb-2026/snnb-2026-anhaenge/streckenbeschreibung)
+documents the Wienerwald and Lainzer tunnels. The 22-minute game journey is an estimate.

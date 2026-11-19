@@ -57,8 +57,12 @@ func ServiceRouteChoices(f gameapi.Frame, s State, boxes map[string]Box, view *B
 		}
 		if len(words) > 0 {
 			names := []string{RouteName(r, s.Locale), StopNames(r.Stops, s.Locale), strings.Join(r.Via, " ")}
-			for _, stop := range r.Stops {
-				names = append(names, stationNames[stop])
+			if len(r.StationNames) > 0 {
+				names = append(names, r.StationNames...)
+			} else {
+				for _, stop := range r.Stops {
+					names = append(names, stationNames[stop])
+				}
 			}
 			name := strings.ToLower(strings.Join(names, " "))
 			matches := true

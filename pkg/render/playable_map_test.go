@@ -8,6 +8,30 @@ import (
 	"wwhsrt/pkg/mapview"
 )
 
+func TestOsloAirportLineHasTwoSelectableCityEndpoints(t *testing.T) {
+	g, err := application.Open(nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	f := g.Snapshot()
+	for _, co := range f.Corridors {
+		if co.ID != "public_oslo__gardermoen" {
+			continue
+		}
+		path := co.Alignments[0].Path
+		central := mapview.Project(path[0].Lat, path[0].Lon)
+		airport := mapview.Project(path[len(path)-1].Lat, path[len(path)-1].Lon)
+		camera := mapview.Fit(900, 600, []mapview.Point{central, airport})
+		for id, point := range map[gameapi.CityID]mapview.Point{"oslo": central, "gardermoen": airport} {
+			if got := Pick(camera, f.Cities, camera.Screen(point)); got != id {
+				t.Errorf("at the %s end of the airport line, picked %q", id, got)
+			}
+		}
+		return
+	}
+	t.Fatal("Oslo airport line missing")
+}
+
 func TestMapShowsEveryPlayablePublicCorridorAndNoExtraSourceFragments(t *testing.T) {
 	layer, e := newPublicLayer()
 	if e != nil {

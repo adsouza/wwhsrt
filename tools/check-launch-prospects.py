@@ -41,6 +41,9 @@ def main():
     prior = json.loads(gzip.decompress((ROOT / "assets/scenario/public-network-v3.json.gz").read_bytes()))
     old_markets = {c["id"]: c for c in prior["network"]["cities"]}
     additional_markets = {"antwerp", "rotterdam", "schiphol", "liege", "aachen", "duisburg", "arnhem", "utrecht", "narbonne", "carcassonne", "petrovaradin"}
+    additional_markets |= set(read("data/imports/network-expansion.v1.json")["hubs"]) - {c["id"] for c in prior["cities"]}
+    additional_markets |= set(read("data/imports/branch-projects.v1.json")["hubs"]) - {c["id"] for c in prior["cities"]}
+    additional_markets |= set(read("data/imports/operating-hsr-additions.v1.json")["hubs"]) - {c["id"] for c in prior["cities"]}
     assert set(cities) == additional_markets | set(old_markets) | {
         "taipei",
         "maibara",
@@ -61,7 +64,7 @@ def main():
     assert [(int(i), n.strip()) for i, n in declared] == [
         (r["number"], r["name"]) for r in source["pairs"]
     ], "Spec/authoring coverage differs"
-    assert len(source["pairs"]) == 74 and len([c for c in byid.values() if not c["existing"] and not c.get("part_of")]) == 96
+    assert len(source["pairs"]) == 74 and len([c for c in byid.values() if not c["existing"] and not c.get("part_of") and not c.get("retired")]) == 101
     checks = []
 
     def admit(path, allowed, bridge_km):

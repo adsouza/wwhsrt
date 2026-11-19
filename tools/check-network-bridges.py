@@ -22,6 +22,9 @@ def main():
     old = {r["id"]: r for r in prior["corridors"]}
     cities = {r["id"]: r for r in c["cities"]}
     additional_markets = {"antwerp", "rotterdam", "schiphol", "liege", "aachen", "duisburg", "arnhem", "utrecht", "narbonne", "carcassonne", "petrovaradin"}
+    additional_markets |= set(read("data/imports/network-expansion.v1.json")["hubs"]) - {c["id"] for c in prior["cities"]}
+    additional_markets |= set(read("data/imports/branch-projects.v1.json")["hubs"]) - {c["id"] for c in prior["cities"]}
+    additional_markets |= set(read("data/imports/operating-hsr-additions.v1.json")["hubs"]) - {c["id"] for c in prior["cities"]}
     assert set(cities) == additional_markets | {r["id"] for r in prior["cities"]} | {"maibara", "camp_de_tarragona", "figueres"}
     assert set(old) <= set(rows), "An accepted corridor disappeared"
     for id, r in old.items():
@@ -58,9 +61,9 @@ def main():
         "launch_73_valencia__camp_de_tarragona": ("valencia", "camp_de_tarragona"),
         "launch_74_porto__vigo": ("porto", "stop_node_12819737430"),
     }
-    assert {id for id, r in rows.items() if not r["existing"] and not id.startswith(("upgrade_de_", "occitanie_"))} == {
+    assert {id for id, r in rows.items() if not r["existing"] and not r.get("part_of") and not id.startswith(("upgrade_de_", "occitanie_"))} == {
         r["id"] for r in prior["corridors"] if not r["existing"]
-    } | set(expected)
+    } | set(expected) | {p["id"] for p in read("data/imports/network-expansion.v1.json")["projects"]} | {p["id"] for p in read("data/imports/branch-projects.v1.json")["projects"]}
     for id, pair in expected.items():
         r = rows[id]
         assert not r["existing"] and (r["from_city"], r["to_city"]) == pair

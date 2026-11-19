@@ -36,6 +36,9 @@ def main():
     cities = {c["id"]: c for c in catalog["cities"]}
     prior = json.loads(gzip.decompress((ROOT / "assets/scenario/public-network-v4.json.gz").read_bytes()))
     additional_markets = {"antwerp", "rotterdam", "schiphol", "liege", "aachen", "duisburg", "arnhem", "utrecht", "narbonne", "carcassonne", "petrovaradin"}
+    additional_markets |= set(read("data/imports/network-expansion.v1.json")["hubs"]) - {c["id"] for c in prior["cities"]}
+    additional_markets |= set(read("data/imports/branch-projects.v1.json")["hubs"]) - {c["id"] for c in prior["cities"]}
+    additional_markets |= set(read("data/imports/operating-hsr-additions.v1.json")["hubs"]) - {c["id"] for c in prior["cities"]}
     assert set(cities) == additional_markets | {c["id"] for c in prior["cities"]} | {"taipei", "maibara", "camp_de_tarragona", "figueres"}
     old = {c["id"]: c for c in prior["corridors"]}
     assert set(old) | {"public_taichung__taipei", "launch_71_houston__austin"} <= set(rows)

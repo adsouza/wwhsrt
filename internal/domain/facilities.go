@@ -46,8 +46,15 @@ func (w World) Stations() []gameapi.Station {
 			byCity[id] = gameapi.Station{CityID: id, Public: true, Open: true}
 		}
 	}
+	contracts := make(map[string]gameapi.Project, len(w.projects))
 	for _, p := range w.projects {
-		c, _ := w.catalog.find(p.CorridorID)
+		contracts[p.CorridorID] = p
+	}
+	for _, c := range w.catalog.corridors {
+		p, owned := contracts[c.ProjectID()]
+		if !owned {
+			continue
+		}
 		for _, id := range []gameapi.CityID{c.FromCity, c.ToCity} {
 			old, exists := byCity[id]
 			if exists && (old.Public || old.Ready <= p.Ready) {

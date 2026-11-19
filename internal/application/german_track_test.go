@@ -77,18 +77,18 @@ func TestGermanTrackMigrationWithOperatingMontabaurServices(t *testing.T) {
 	if !reflect.DeepEqual(f.Reports[:old.Months], old.Reports) || openPublic(t, store).Snapshot().Checkpoint != f.Checkpoint {
 		t.Fatal("settlement lost historical accounts")
 	}
-	if json.Unmarshal(store.b, &env) != nil || env.Version != 14 {
+	if json.Unmarshal(store.b, &env) != nil || env.Version != 18 {
 		t.Fatal("migration did not persist")
 	}
 
-	var next serbiaPayload
+	var next viennaPayload
 	if err := json.Unmarshal(env.Payload, &next); err != nil {
 		t.Fatal(err)
 	}
-	for _, mutate := range []func(*serbiaPayload){
-		func(p *serbiaPayload) { p.GermanPriorSHA = "unknown" },
-		func(p *serbiaPayload) { p.GermanSince = -1 },
-		func(p *serbiaPayload) { p.GermanSince = p.Months + 1 },
+	for _, mutate := range []func(*viennaPayload){
+		func(p *viennaPayload) { p.GermanPriorSHA = "unknown" },
+		func(p *viennaPayload) { p.GermanSince = -1 },
+		func(p *viennaPayload) { p.GermanSince = p.Months + 1 },
 	} {
 		bad := next
 		mutate(&bad)

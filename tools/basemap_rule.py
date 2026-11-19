@@ -11,7 +11,7 @@ import numpy as np
 import shapely
 from scipy.spatial import cKDTree
 from shapely import STRtree
-from shapely.geometry import LineString, Polygon
+from shapely.geometry import LineString, Polygon, box, shape
 from shapely.ops import transform, unary_union
 
 NEAR_KM = 150
@@ -28,7 +28,7 @@ NEAR_LAKE_KM = 5
 FAR_LAKE_KM = 100
 # Tolerances tried in turn where FINE would put a buildable route offshore.
 LADDER = [0.003, 0.001, 0.0003, 0.0001, 0]
-MAX_POINTS = 88000
+MAX_POINTS = 93000
 MAX_OUTLINES = 2200
 # The Hokkaido and Kansai relief boxes (zoom, x0, y0, x1, y1). Relief there is detailed, so the coast is too.
 JAPAN_BOXES = [(8, 227, 93, 228, 95), (8, 224, 100, 225, 101)]
@@ -373,6 +373,32 @@ def compose(polygons, index, fine_for=None):
         "lake_islands": islands,
         "sources": {"land": source_land, "left_out_islands": left_out_islands, "left_out_lakes": left_out_lakes},
     }
+
+
+def apply_local_shores(basemap, features):
+    """Replace the generalised shoreline within the surveyed harbour windows."""
+    for feature in features:
+        window = box(*feature["properties"]["bounds"])
+        rings = basemap["land"]
+        polygons = [Polygon(ring) for ring in rings]
+        touched = sorted(STRtree(polygons).query(window, predicate="intersects"))
+        # These coastal windows contain no lake features from the global basemap.
+        assert touched and all(not window.intersects(Polygon(ring)) for layer in ("lakes", "lake_islands")
+                               for ring in basemap[layer])
+        outside = unary_union([polygons[i] for i in touched]).difference(window)
+        shoreline = outside.union(shape(feature["geometry"]))
+        parts = sorted(_polygons(shoreline), key=lambda p: (-p.area, p.bounds))
+        holes = [Polygon(h) for part in parts for h in part.interiors]
+        land = []
+        for part in parts:
+            layer = basemap["lake_islands"] if any(h.covers(part) for h in holes) else land
+            layer.extend(_emitted(part.exterior.coords, True))
+            for hole in part.interiors:
+                basemap["lakes"].extend(_emitted(hole.coords, False))
+        # Retain the order of the other outlines, including the major continents.
+        for i in reversed(touched[1:]):
+            del rings[i]
+        rings[touched[0] : touched[0] + 1] = land
 
 
 def drawn_geometry(basemap):

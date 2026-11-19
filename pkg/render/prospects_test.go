@@ -1,6 +1,7 @@
 package render
 
 import (
+	"slices"
 	"testing"
 
 	"wwhsrt/internal/application"
@@ -70,11 +71,61 @@ func TestProductionProspectsCoverTheSeventyFourBuildableCorridors(t *testing.T) 
 		for _, path := range paths {
 			got[path.id] = true
 		}
-		if len(paths) != 96 || !got["tsuruga-osaka"] || !got["hokkaido-extension"] {
+		if len(paths) != 101 || !got["tsuruga-osaka"] || !got["hokkaido-extension"] {
 			t.Fatal(got)
 		}
 	}
 	if len(prospectPaths(f, ui.State{View: "services"})) != 0 {
 		t.Fatal("construction cluttered service planning")
+	}
+}
+
+func TestViennaGrazProspectFollowsBothApproaches(t *testing.T) {
+	game, err := application.Open(nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	frame := game.Snapshot()
+	const tunnel = "semmering_base_tunnel"
+	state := ui.State{View: "map"}
+	for _, view := range []string{"map", "build"} {
+		if view == "build" && !ui.SelectProspect(&state, frame, tunnel) {
+			t.Fatal("Semmering contract missing from the construction list")
+		}
+		found := false
+		for _, line := range prospectPaths(frame, state) {
+			if line.id != tunnel {
+				continue
+			}
+			found = true
+			if line.selected != (view == "build") || len(line.Paths) != 3 ||
+				!slices.Equal(line.Stops, []gameapi.CityID{"vienna", "gloggnitz", "muerzzuschlag", "graz"}) {
+				t.Fatalf("%s has incorrect sections or stops", view)
+			}
+			at := slices.IndexFunc(frame.Cities, func(c gameapi.City) bool { return c.ID == "vienna" })
+			if at < 0 || frame.Cities[at].StationName != "Wien Hauptbahnhof" || len(line.AlternateStations) != 0 {
+				t.Fatal("Vienna must be marked once at Hauptbahnhof")
+			}
+			start := line.Paths[0][0]
+			station := frame.Cities[at]
+			if start.Lat != station.StationLat || start.Lon != station.StationLon {
+				t.Fatal("Vienna marker is detached from the route")
+			}
+			for i, id := range []string{"public_vienna__gloggnitz", tunnel, "public_muerzzuschlag__graz"} {
+				at := slices.IndexFunc(frame.Corridors, func(c gameapi.Corridor) bool { return c.ID == id })
+				path := frame.Corridors[at].Alignments[0].Path
+				if !slices.Equal(line.Paths[i], path) {
+					t.Fatal("wrong railway alignment for", id)
+				}
+				mid := path[len(path)/2]
+				camera := mapview.Fit(900, 600, []mapview.Point{mapview.Project(mid.Lat-.3, mid.Lon-.3), mapview.Project(mid.Lat+.3, mid.Lon+.3)})
+				if pick := PickProspect(camera, frame, state, camera.Screen(mapview.Project(mid.Lat, mid.Lon))); pick != tunnel {
+					t.Fatalf("picked %q on %s in %s view", pick, id, view)
+				}
+			}
+		}
+		if !found {
+			t.Fatalf("Vienna–Graz missing in %s view", view)
+		}
 	}
 }

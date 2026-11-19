@@ -359,6 +359,11 @@ func (w World) NetworkReport() gameapi.NetworkReport {
 }
 
 func (w World) networkForecast(q gameapi.ForecastRequest) (gameapi.Forecast, error) {
+	// Construction previews price the selected contract and operate its passenger itinerary.
+	projectID := q.CorridorID
+	if co, ok := w.catalog.find(projectID); ok && q.AlignmentID != "" && !co.Retired && co.OpeningService != "" {
+		q.CorridorID = co.OpeningService
+	}
 	if !w.offered(q.CorridorID) {
 		return gameapi.Forecast{}, errCode("no_route")
 	}
@@ -393,7 +398,7 @@ func (w World) networkForecast(q gameapi.ForecastRequest) (gameapi.Forecast, err
 	if !r.Open {
 		// Independent construction preview: include the proposed line/stations
 		// only in the counterfactual, never mutate the accepted world.
-		co, found := w.catalog.find(q.CorridorID)
+		co, found := w.catalog.find(projectID)
 		if !found || co.PartOf != "" {
 			return result, errCode("line_not_open")
 		}

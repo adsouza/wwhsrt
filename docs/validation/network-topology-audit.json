@@ -3,6 +3,7 @@
   "source_topology_sha256": "ff3a1ace4f58b79879cc31c0cc3e1f610591dc011eab3304391f2074cc72ed40",
   "source_sha256": "c4468a0d23cf3ff6a53ba63fb15ce246152a757bb672037d1fbe95c9f5cced28",
   "connector_source_sha256": "0c78da68031c6bd03e33eb81fa7eb9a2a9d68715dca2c3092ffce2f5cd477743",
+  "operating_additions_sha256": "e75db3666bb1f9c866a736cb5e9ec40b71a00ca1da96f36e87ffa9e3ea06d3a7",
   "network_manifest_sha256": "bcd3b76094642d0149a8bd3b9cabb7c0cc66d706389d51c03f536460e8b326a5",
   "operating_network_checks": [
     {
@@ -203,9 +204,803 @@
       "connected": true,
       "service_id": "network_catalan_hsr_all_stops",
       "ordered_service": true
+    },
+    {
+      "id": "public_munich_hbf__augsburg_hbf",
+      "cities": [
+        "munich",
+        "stop_node_1058668074"
+      ],
+      "source": [
+        "https://ir.deutschebahn.com/fileadmin/Deutsch/2011/Berichte/2011_gb_dbnetz_de.pdf",
+        "https://ir.deutschebahn.com/fileadmin/Deutsch/2006/Berichte/2006_zb_dbkonzern_de.pdf",
+        "https://ir.deutschebahn.com/fileadmin/Deutsch/vor_2000/1998_gb_dbkonzern_de.pdf"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_munich__ingolstadt",
+      "cities": [
+        "munich",
+        "ingolstadt"
+      ],
+      "source": [
+        "https://ir.deutschebahn.com/fileadmin/Deutsch/2011/Berichte/2011_gb_dbnetz_de.pdf",
+        "https://ir.deutschebahn.com/fileadmin/Deutsch/2006/Berichte/2006_zb_dbkonzern_de.pdf",
+        "https://ir.deutschebahn.com/fileadmin/Deutsch/vor_2000/1998_gb_dbkonzern_de.pdf"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_ingolstadt__nuremberg",
+      "cities": [
+        "ingolstadt",
+        "nuremberg"
+      ],
+      "source": [
+        "https://ir.deutschebahn.com/fileadmin/Deutsch/2011/Berichte/2011_gb_dbnetz_de.pdf",
+        "https://ir.deutschebahn.com/fileadmin/Deutsch/2006/Berichte/2006_zb_dbkonzern_de.pdf",
+        "https://ir.deutschebahn.com/fileadmin/Deutsch/vor_2000/1998_gb_dbkonzern_de.pdf"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_berlin__wolfsburg",
+      "cities": [
+        "berlin",
+        "wolfsburg"
+      ],
+      "source": [
+        "https://ir.deutschebahn.com/fileadmin/Deutsch/2011/Berichte/2011_gb_dbnetz_de.pdf",
+        "https://ir.deutschebahn.com/fileadmin/Deutsch/2006/Berichte/2006_zb_dbkonzern_de.pdf",
+        "https://ir.deutschebahn.com/fileadmin/Deutsch/vor_2000/1998_gb_dbkonzern_de.pdf"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_wolfsburg__hannover",
+      "cities": [
+        "wolfsburg",
+        "hannover"
+      ],
+      "source": [
+        "https://ir.deutschebahn.com/fileadmin/Deutsch/2011/Berichte/2011_gb_dbnetz_de.pdf",
+        "https://ir.deutschebahn.com/fileadmin/Deutsch/2006/Berichte/2006_zb_dbkonzern_de.pdf",
+        "https://ir.deutschebahn.com/fileadmin/Deutsch/vor_2000/1998_gb_dbkonzern_de.pdf"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_stop_node_13860287537__subotica",
+      "cities": [
+        "stop_node_13860287537",
+        "subotica"
+      ],
+      "source": [
+        "https://www.srbvoz.rs/wp-content/redvoznje/bgcent_ns_su.pdf"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_beijing__baoding",
+      "cities": [
+        "beijing",
+        "baoding"
+      ],
+      "source": [
+        "https://english.beijing.gov.cn/latest/news/202206/t20220621_2747370.html",
+        "https://www.highspeed.mtr.com.hk/en/ticket/destination.html",
+        "https://www.ehainan.gov.cn/2019-10/28/c_420551.htm"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_baoding__shijiazhuang",
+      "cities": [
+        "baoding",
+        "shijiazhuang"
+      ],
+      "source": [
+        "https://english.beijing.gov.cn/latest/news/202206/t20220621_2747370.html",
+        "https://www.highspeed.mtr.com.hk/en/ticket/destination.html",
+        "https://www.ehainan.gov.cn/2019-10/28/c_420551.htm"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_guangzhou__shenzhen",
+      "cities": [
+        "guangzhou",
+        "shenzhen"
+      ],
+      "source": [
+        "https://english.beijing.gov.cn/latest/news/202206/t20220621_2747370.html",
+        "https://www.highspeed.mtr.com.hk/en/ticket/destination.html",
+        "https://www.ehainan.gov.cn/2019-10/28/c_420551.htm"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_haikou__qionghai",
+      "cities": [
+        "haikou",
+        "qionghai"
+      ],
+      "source": [
+        "https://english.beijing.gov.cn/latest/news/202206/t20220621_2747370.html",
+        "https://www.highspeed.mtr.com.hk/en/ticket/destination.html",
+        "https://www.ehainan.gov.cn/2019-10/28/c_420551.htm"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_qionghai__sanya",
+      "cities": [
+        "qionghai",
+        "sanya"
+      ],
+      "source": [
+        "https://english.beijing.gov.cn/latest/news/202206/t20220621_2747370.html",
+        "https://www.highspeed.mtr.com.hk/en/ticket/destination.html",
+        "https://www.ehainan.gov.cn/2019-10/28/c_420551.htm"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_haikou__dongfang",
+      "cities": [
+        "haikou",
+        "dongfang"
+      ],
+      "source": [
+        "https://english.beijing.gov.cn/latest/news/202206/t20220621_2747370.html",
+        "https://www.highspeed.mtr.com.hk/en/ticket/destination.html",
+        "https://www.ehainan.gov.cn/2019-10/28/c_420551.htm"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_dongfang__sanya",
+      "cities": [
+        "dongfang",
+        "sanya"
+      ],
+      "source": [
+        "https://english.beijing.gov.cn/latest/news/202206/t20220621_2747370.html",
+        "https://www.highspeed.mtr.com.hk/en/ticket/destination.html",
+        "https://www.ehainan.gov.cn/2019-10/28/c_420551.htm"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_fukuoka__kumamoto",
+      "cities": [
+        "fukuoka",
+        "kumamoto"
+      ],
+      "source": [
+        "https://www.jrkyushu.co.jp/english/pdf/jrkyushu_routemap_en.pdf",
+        "https://www.jrkyushu.co.jp/english/train/shinkansen_kamome.html"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_kumamoto__kagoshima",
+      "cities": [
+        "kumamoto",
+        "kagoshima"
+      ],
+      "source": [
+        "https://www.jrkyushu.co.jp/english/pdf/jrkyushu_routemap_en.pdf",
+        "https://www.jrkyushu.co.jp/english/train/shinkansen_kamome.html"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_takeo__nagasaki",
+      "cities": [
+        "takeo",
+        "nagasaki"
+      ],
+      "source": [
+        "https://www.jrkyushu.co.jp/english/pdf/jrkyushu_routemap_en.pdf",
+        "https://www.jrkyushu.co.jp/english/train/shinkansen_kamome.html"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_madrid__segovia",
+      "cities": [
+        "madrid",
+        "segovia"
+      ],
+      "source": [
+        "https://www.adifaltavelocidad.es/sobre-adif-av/red-av"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_segovia__valladolid",
+      "cities": [
+        "segovia",
+        "valladolid"
+      ],
+      "source": [
+        "https://www.adifaltavelocidad.es/sobre-adif-av/red-av"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_cordoba_es__malaga",
+      "cities": [
+        "cordoba_es",
+        "malaga"
+      ],
+      "source": [
+        "https://www.adifaltavelocidad.es/sobre-adif-av/red-av"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_cuenca__albacete",
+      "cities": [
+        "cuenca",
+        "albacete"
+      ],
+      "source": [
+        "https://www.adifaltavelocidad.es/sobre-adif-av/red-av"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_albacete__alicante",
+      "cities": [
+        "albacete",
+        "alicante"
+      ],
+      "source": [
+        "https://www.adifaltavelocidad.es/sobre-adif-av/red-av"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_paris__le_mans",
+      "cities": [
+        "paris",
+        "le_mans"
+      ],
+      "source": [
+        "https://www.pays-de-la-loire.developpement-durable.gouv.fr/inauguration-de-la-ligne-a-grande-vitesse-bretagne-a4164.html"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_le_mans__rennes",
+      "cities": [
+        "le_mans",
+        "rennes"
+      ],
+      "source": [
+        "https://www.pays-de-la-loire.developpement-durable.gouv.fr/inauguration-de-la-ligne-a-grande-vitesse-bretagne-a4164.html"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_milan__brescia",
+      "cities": [
+        "milan",
+        "brescia"
+      ],
+      "source": [
+        "https://www.rfi.it/it/news-e-media/comunicati-stampa-e-news/2024/2/29/polo-infrastrutture-fs---sopralluogo-del-ministro-salvini-al-can.html",
+        "https://normativaesercizio.rfi.it/NormativaEsercizio/detail.xhtml?compartimento=NA&doctype=CT"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_ankara__kirikkale",
+      "cities": [
+        "ankara",
+        "kirikkale"
+      ],
+      "source": [
+        "https://www.tcddtasimacilik.gov.tr/tr/yht_ankara_sivas",
+        "https://www.uab.gov.tr/haberler/karaman-konya-ankara-ve-istanbul-yht-hattinda-rekor"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_kirikkale__yozgat",
+      "cities": [
+        "kirikkale",
+        "yozgat"
+      ],
+      "source": [
+        "https://www.tcddtasimacilik.gov.tr/tr/yht_ankara_sivas",
+        "https://www.uab.gov.tr/haberler/karaman-konya-ankara-ve-istanbul-yht-hattinda-rekor"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_yozgat__sivas",
+      "cities": [
+        "yozgat",
+        "sivas"
+      ],
+      "source": [
+        "https://www.tcddtasimacilik.gov.tr/tr/yht_ankara_sivas",
+        "https://www.uab.gov.tr/haberler/karaman-konya-ankara-ve-istanbul-yht-hattinda-rekor"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_seoul__gangneung",
+      "cities": [
+        "seoul",
+        "gangneung"
+      ],
+      "source": [
+        "https://info.korail.com/infoeng/contents.do?key=1226"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_graz__klagenfurt",
+      "cities": [
+        "graz",
+        "klagenfurt"
+      ],
+      "source": [
+        "https://www.oebb.at/de/neuigkeiten/tickets-neuer-fahrplan"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_copenhagen__koge",
+      "cities": [
+        "copenhagen",
+        "koge"
+      ],
+      "source": [
+        "https://www.banedanmark.dk/Borger/Baneprojekter/Om-Den-nye-bane"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_koge__ringsted",
+      "cities": [
+        "koge",
+        "ringsted"
+      ],
+      "source": [
+        "https://www.banedanmark.dk/Borger/Baneprojekter/Om-Den-nye-bane"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_helsinki__lahti",
+      "cities": [
+        "helsinki",
+        "lahti"
+      ],
+      "source": [
+        "https://www.vr.fi/en/lahti-helsinki"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_lund__landskrona",
+      "cities": [
+        "lund",
+        "landskrona"
+      ],
+      "source": [
+        "https://bransch.trafikverket.se/contentassets/69c4090dadc44e6c95782493337a9e5e/ns-2026-version-2024-12-12.pdf"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_landskrona__helsingborg",
+      "cities": [
+        "landskrona",
+        "helsingborg"
+      ],
+      "source": [
+        "https://bransch.trafikverket.se/contentassets/69c4090dadc44e6c95782493337a9e5e/ns-2026-version-2024-12-12.pdf"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_sodertalje__eskilstuna",
+      "cities": [
+        "sodertalje",
+        "eskilstuna"
+      ],
+      "source": [
+        "https://bransch.trafikverket.se/contentassets/69c4090dadc44e6c95782493337a9e5e/ns-2026-version-2024-12-12.pdf"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_bern__olten",
+      "cities": [
+        "bern",
+        "olten"
+      ],
+      "source": [
+        "https://company.sbb.ch/de/bahnentwicklung/projekte/deutschschweiz/aargau-solothurn/bahn-2000-strecke.html",
+        "https://www.uvek.admin.ch/en/nrla"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_frutigen__visp",
+      "cities": [
+        "frutigen",
+        "visp"
+      ],
+      "source": [
+        "https://company.sbb.ch/de/bahnentwicklung/projekte/deutschschweiz/aargau-solothurn/bahn-2000-strecke.html",
+        "https://www.uvek.admin.ch/en/nrla"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_arth_goldau__bellinzona",
+      "cities": [
+        "arth_goldau",
+        "bellinzona"
+      ],
+      "source": [
+        "https://company.sbb.ch/de/bahnentwicklung/projekte/deutschschweiz/aargau-solothurn/bahn-2000-strecke.html",
+        "https://www.uvek.admin.ch/en/nrla"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_bellinzona__lugano",
+      "cities": [
+        "bellinzona",
+        "lugano"
+      ],
+      "source": [
+        "https://company.sbb.ch/de/bahnentwicklung/projekte/deutschschweiz/aargau-solothurn/bahn-2000-strecke.html",
+        "https://www.uvek.admin.ch/en/nrla"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_oslo__gardermoen",
+      "cities": [
+        "oslo",
+        "gardermoen"
+      ],
+      "source": [
+        "https://orv.banenor.no/strekningsbeskrivelse-for-jernbanenettet/strekningsoversikt/artikler/gardermobanen/"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_gardermoen__eidsvoll",
+      "cities": [
+        "gardermoen",
+        "eidsvoll"
+      ],
+      "source": [
+        "https://orv.banenor.no/strekningsbeskrivelse-for-jernbanenettet/strekningsoversikt/artikler/gardermobanen/"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_warsaw__wloszczowa",
+      "cities": [
+        "warsaw",
+        "wloszczowa"
+      ],
+      "source": [
+        "https://www.plk-sa.pl/o-spolce/biuro-prasowe/informacje-prasowe/szczegoly/prace-na-cmk-dla-szybszych-podrozy-koleja-9473"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_wloszczowa__zawiercie",
+      "cities": [
+        "wloszczowa",
+        "zawiercie"
+      ],
+      "source": [
+        "https://www.plk-sa.pl/o-spolce/biuro-prasowe/informacje-prasowe/szczegoly/prace-na-cmk-dla-szybszych-podrozy-koleja-9473"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_konya__karaman",
+      "cities": [
+        "konya",
+        "karaman"
+      ],
+      "source": [
+        "https://www.tcddtasimacilik.gov.tr/tr/yht_ankara_sivas",
+        "https://www.uab.gov.tr/haberler/karaman-konya-ankara-ve-istanbul-yht-hattinda-rekor"
+      ],
+      "connected": true
+    },
+    {
+      "id": "public_naples__salerno",
+      "cities": [
+        "naples",
+        "salerno"
+      ],
+      "source": [
+        "https://www.rfi.it/it/news-e-media/comunicati-stampa-e-news/2024/2/29/polo-infrastrutture-fs---sopralluogo-del-ministro-salvini-al-can.html",
+        "https://normativaesercizio.rfi.it/NormativaEsercizio/detail.xhtml?compartimento=NA&doctype=CT"
+      ],
+      "connected": true
+    },
+    {
+      "id": "network_belgrade__subotica",
+      "cities": [
+        "belgrade",
+        "petrovaradin",
+        "stop_node_9767449803",
+        "stop_node_13860287537",
+        "subotica"
+      ],
+      "source": [
+        "https://www.srbvoz.rs/wp-content/redvoznje/bgcent_ns_su.pdf"
+      ],
+      "connected": true
+    },
+    {
+      "id": "network_beijing__shijiazhuang",
+      "cities": [
+        "beijing",
+        "baoding",
+        "shijiazhuang"
+      ],
+      "source": [
+        "https://english.beijing.gov.cn/latest/news/202206/t20220621_2747370.html",
+        "https://www.highspeed.mtr.com.hk/en/ticket/destination.html",
+        "https://www.ehainan.gov.cn/2019-10/28/c_420551.htm"
+      ],
+      "connected": true
+    },
+    {
+      "id": "network_guangzhou__hong_kong",
+      "cities": [
+        "guangzhou",
+        "shenzhen",
+        "hong_kong"
+      ],
+      "source": [
+        "https://english.beijing.gov.cn/latest/news/202206/t20220621_2747370.html",
+        "https://www.highspeed.mtr.com.hk/en/ticket/destination.html",
+        "https://www.ehainan.gov.cn/2019-10/28/c_420551.htm"
+      ],
+      "connected": true
+    },
+    {
+      "id": "network_haikou__sanya_east",
+      "cities": [
+        "haikou",
+        "qionghai",
+        "sanya"
+      ],
+      "source": [
+        "https://english.beijing.gov.cn/latest/news/202206/t20220621_2747370.html",
+        "https://www.highspeed.mtr.com.hk/en/ticket/destination.html",
+        "https://www.ehainan.gov.cn/2019-10/28/c_420551.htm"
+      ],
+      "connected": true
+    },
+    {
+      "id": "network_haikou__sanya_west",
+      "cities": [
+        "haikou",
+        "dongfang",
+        "sanya"
+      ],
+      "source": [
+        "https://english.beijing.gov.cn/latest/news/202206/t20220621_2747370.html",
+        "https://www.highspeed.mtr.com.hk/en/ticket/destination.html",
+        "https://www.ehainan.gov.cn/2019-10/28/c_420551.htm"
+      ],
+      "connected": true
+    },
+    {
+      "id": "network_fukuoka__kagoshima",
+      "cities": [
+        "fukuoka",
+        "kumamoto",
+        "kagoshima"
+      ],
+      "source": [
+        "https://www.jrkyushu.co.jp/english/pdf/jrkyushu_routemap_en.pdf",
+        "https://www.jrkyushu.co.jp/english/train/shinkansen_kamome.html"
+      ],
+      "connected": true
+    },
+    {
+      "id": "network_hiroshima__kagoshima",
+      "cities": [
+        "hiroshima",
+        "fukuoka",
+        "kumamoto",
+        "kagoshima"
+      ],
+      "source": [
+        "https://www.jrkyushu.co.jp/english/pdf/jrkyushu_routemap_en.pdf",
+        "https://www.jrkyushu.co.jp/english/train/shinkansen_kamome.html"
+      ],
+      "connected": true
+    },
+    {
+      "id": "network_madrid__valladolid",
+      "cities": [
+        "madrid",
+        "segovia",
+        "valladolid"
+      ],
+      "source": [
+        "https://www.adifaltavelocidad.es/sobre-adif-av/red-av"
+      ],
+      "connected": true
+    },
+    {
+      "id": "network_madrid__malaga",
+      "cities": [
+        "madrid",
+        "cordoba_es",
+        "malaga"
+      ],
+      "source": [
+        "https://www.adifaltavelocidad.es/sobre-adif-av/red-av"
+      ],
+      "connected": true
+    },
+    {
+      "id": "network_madrid__alicante",
+      "cities": [
+        "madrid",
+        "cuenca",
+        "albacete",
+        "alicante"
+      ],
+      "source": [
+        "https://www.adifaltavelocidad.es/sobre-adif-av/red-av"
+      ],
+      "connected": true
+    },
+    {
+      "id": "network_paris__rennes",
+      "cities": [
+        "paris",
+        "le_mans",
+        "rennes"
+      ],
+      "source": [
+        "https://www.pays-de-la-loire.developpement-durable.gouv.fr/inauguration-de-la-ligne-a-grande-vitesse-bretagne-a4164.html"
+      ],
+      "connected": true
+    },
+    {
+      "id": "network_ankara__sivas",
+      "cities": [
+        "ankara",
+        "kirikkale",
+        "yozgat",
+        "sivas"
+      ],
+      "source": [
+        "https://www.tcddtasimacilik.gov.tr/tr/yht_ankara_sivas",
+        "https://www.uab.gov.tr/haberler/karaman-konya-ankara-ve-istanbul-yht-hattinda-rekor"
+      ],
+      "connected": true
+    },
+    {
+      "id": "network_munich__ingolstadt__nuremberg",
+      "cities": [
+        "munich",
+        "ingolstadt",
+        "nuremberg"
+      ],
+      "source": [
+        "https://ir.deutschebahn.com/fileadmin/Deutsch/2011/Berichte/2011_gb_dbnetz_de.pdf",
+        "https://ir.deutschebahn.com/fileadmin/Deutsch/2006/Berichte/2006_zb_dbkonzern_de.pdf",
+        "https://ir.deutschebahn.com/fileadmin/Deutsch/vor_2000/1998_gb_dbkonzern_de.pdf"
+      ],
+      "connected": true
+    },
+    {
+      "id": "network_berlin__wolfsburg__hannover",
+      "cities": [
+        "berlin",
+        "wolfsburg",
+        "hannover"
+      ],
+      "source": [
+        "https://ir.deutschebahn.com/fileadmin/Deutsch/2011/Berichte/2011_gb_dbnetz_de.pdf",
+        "https://ir.deutschebahn.com/fileadmin/Deutsch/2006/Berichte/2006_zb_dbkonzern_de.pdf",
+        "https://ir.deutschebahn.com/fileadmin/Deutsch/vor_2000/1998_gb_dbkonzern_de.pdf"
+      ],
+      "connected": true
+    },
+    {
+      "id": "network_copenhagen__ringsted",
+      "cities": [
+        "copenhagen",
+        "koge",
+        "ringsted"
+      ],
+      "source": [
+        "https://www.banedanmark.dk/Borger/Baneprojekter/Om-Den-nye-bane"
+      ],
+      "connected": true
+    },
+    {
+      "id": "network_lund__helsingborg",
+      "cities": [
+        "lund",
+        "landskrona",
+        "helsingborg"
+      ],
+      "source": [
+        "https://bransch.trafikverket.se/contentassets/69c4090dadc44e6c95782493337a9e5e/ns-2026-version-2024-12-12.pdf"
+      ],
+      "connected": true
+    },
+    {
+      "id": "network_oslo__eidsvoll",
+      "cities": [
+        "oslo",
+        "gardermoen",
+        "eidsvoll"
+      ],
+      "source": [
+        "https://orv.banenor.no/strekningsbeskrivelse-for-jernbanenettet/strekningsoversikt/artikler/gardermobanen/"
+      ],
+      "connected": true
+    },
+    {
+      "id": "network_warsaw__zawiercie",
+      "cities": [
+        "warsaw",
+        "wloszczowa",
+        "zawiercie"
+      ],
+      "source": [
+        "https://www.plk-sa.pl/o-spolce/biuro-prasowe/informacje-prasowe/szczegoly/prace-na-cmk-dla-szybszych-podrozy-koleja-9473"
+      ],
+      "connected": true
+    },
+    {
+      "id": "network_ankara__karaman",
+      "cities": [
+        "ankara",
+        "konya",
+        "karaman"
+      ],
+      "source": [
+        "https://www.tcddtasimacilik.gov.tr/tr/yht_ankara_sivas",
+        "https://www.uab.gov.tr/haberler/karaman-konya-ankara-ve-istanbul-yht-hattinda-rekor"
+      ],
+      "connected": true
+    },
+    {
+      "id": "network_arth_goldau__lugano",
+      "cities": [
+        "arth_goldau",
+        "bellinzona",
+        "lugano"
+      ],
+      "source": [
+        "https://company.sbb.ch/de/bahnentwicklung/projekte/deutschschweiz/aargau-solothurn/bahn-2000-strecke.html",
+        "https://www.uvek.admin.ch/en/nrla"
+      ],
+      "connected": true
     }
   ],
-  "playable_catalog_sha256": "5df44a3b17107ff9dd09379c9ba3d207d0a8976b8c7aeffe9813b60375fb9044",
+  "playable_catalog_sha256": "23c1e1d0119f1fd62deb517a02d588f4be1aa098ef704b70394fb0ffef7adc18",
   "expectations_sha256": "75ff762c7c97725e0eae8949a889911e6141c88615ac38e51881a515bdd43c80",
   "scope": {
     "polylines": 2397,

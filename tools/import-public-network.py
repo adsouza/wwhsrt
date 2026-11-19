@@ -751,6 +751,20 @@ def main(audit=False):
     add_occitanie(read(occitanie_source), cities, market, stations, rows, patterns, superseded, km, rates)
     serbia_source = "data/imports/belgrade-vrbas.v1.json"
     superseded.extend(add_services(read(serbia_source), cities, market, stations, rows, patterns))
+    from operating_hsr import add_operating_hsr
+    operating_hsr_source = "data/imports/operating-hsr-additions.v1.json"
+    from pinned_services import add_hubs
+    from branch_projects import add_branch_projects
+    branch_source = "data/imports/branch-projects.v1.json"
+    branches = read(branch_source)
+    add_hubs(branches, cities, market, stations)
+    add_operating_hsr(read(operating_hsr_source), cities, market, stations, rows, patterns, superseded, km, junction_splits=[("public_wloszczowa__zawiercie", "psary")])
+    add_branch_projects(branches, rows, patterns, rates)
+    from network_expansion import add_expansion, connect_western_vienna
+    expansion_source = "data/imports/network-expansion.v1.json"
+    dwell_minutes = 4
+    add_expansion(read(expansion_source), cities, market, stations, rows, patterns, rates, dwell_minutes)
+    connect_western_vienna(rows, patterns, superseded)
     assert len(patterns) <= 8192, "Future service catalog exceeds route bound"
     ms = list(market.values())
     matrix = []
@@ -766,7 +780,7 @@ def main(audit=False):
         public_paths=16,
         private_paths=12,
         station_calls=64,
-        dwell_minutes=4,
+        dwell_minutes=dwell_minutes,
         transfer_minutes=20,
         distances=[],
         distance_km=matrix,
@@ -785,7 +799,10 @@ def main(audit=False):
         occitanie_sha256=output_hash(occitanie_source),
         hamburg_hamm_sha256=output_hash(hamm_source),
         belgrade_vrbas_sha256=output_hash(serbia_source),
-        id="prototype-world-v10",
+        operating_hsr_sha256=output_hash(operating_hsr_source),
+        branch_projects_sha256=output_hash(branch_source),
+        network_expansion_sha256=output_hash(expansion_source),
+        id="prototype-world-v13",
         cities=cities,
         network=rules,
         corridors=rows,

@@ -64,17 +64,17 @@ func TestLaunchV7UpgradeAndConventionalMoroccoWithdrawal(t *testing.T) {
 				openPublic(t, store).Snapshot().Checkpoint != f.Checkpoint {
 				t.Fatal("historical/new interval cannot reload")
 			}
-			var next serbiaPayload
+			var next viennaPayload
 			json.Unmarshal(store.b, &env)
 			json.Unmarshal(env.Payload, &next)
-			if env.Version != 14 || next.LaunchPriorSHA != launchPriorSHA || next.ConstructionSince != old.Months ||
+			if env.Version != 18 || next.LaunchPriorSHA != launchPriorSHA || next.ConstructionSince != old.Months ||
 				next.PublicSHA != hash(assets.PublicNetwork) {
 				t.Fatal("catalog identity not pinned")
 			}
-			for _, mutate := range []func(*serbiaPayload){
-				func(p *serbiaPayload) { p.LaunchPriorSHA = "unknown" },
-				func(p *serbiaPayload) { p.ConstructionSince = -1 },
-				func(p *serbiaPayload) { p.ConstructionSince = p.Months + 1 },
+			for _, mutate := range []func(*viennaPayload){
+				func(p *viennaPayload) { p.LaunchPriorSHA = "unknown" },
+				func(p *viennaPayload) { p.ConstructionSince = -1 },
+				func(p *viennaPayload) { p.ConstructionSince = p.Months + 1 },
 			} {
 				bad := next
 				mutate(&bad)
@@ -191,7 +191,7 @@ func TestLaunchSeventyFourProspectsAndMoroccoHSRScope(t *testing.T) {
 			t.Fatal("conventional track offered as public HSR")
 		}
 	}
-	if n != 96 {
+	if n != 101 {
 		t.Fatal("missing construction opportunities", n)
 	}
 	for _, r := range f.Routes {

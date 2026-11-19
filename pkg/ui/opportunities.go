@@ -14,6 +14,24 @@ type Prospect struct {
 	Cash      gameapi.Money  `json:"cash"`
 }
 
+func ProspectName(locale, id string, from, to gameapi.CityID) string {
+	key := "projectName_" + id
+	if name := Text(locale, key); name != key {
+		return name
+	}
+	return Text(locale, string(from)) + " – " + Text(locale, string(to))
+}
+
+// ProjectService selects the passenger service a finished contract was built for.
+func ProjectService(f gameapi.Frame, id string) string {
+	for _, co := range f.Corridors {
+		if co.ID == id && co.OpeningService != "" {
+			return co.OpeningService
+		}
+	}
+	return id
+}
+
 func cheapestAlignment(c gameapi.Corridor) gameapi.Alignment {
 	best := c.Alignments[0]
 	for _, a := range c.Alignments[1:] {
@@ -48,6 +66,13 @@ func OperatingSections(f gameapi.Frame) map[string]bool {
 			}
 		}
 	}
+	for _, c := range f.Corridors {
+		if sections[c.ID] {
+			for _, shared := range c.SharedSections {
+				sections[shared] = true
+			}
+		}
+	}
 	return sections
 }
 
@@ -64,8 +89,12 @@ func NextService(f gameapi.Frame) string {
 		return ""
 	}
 	for _, line := range f.IdleLines {
-		if Open(f, line.CorridorID) {
-			return line.CorridorID
+		id := line.CorridorID
+		if !IdleFleetOnly(line) {
+			id = ProjectService(f, id)
+		}
+		if Open(f, id) {
+			return id
 		}
 	}
 	running := OperatingSections(f)

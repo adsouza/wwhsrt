@@ -68,7 +68,7 @@ func TestOccitanieMigrationPreservesWithdrawnServices(t *testing.T) {
 			t.Fatal(e)
 		}
 	}
-	p := stateData(old).(serbiaPayload).germanPayload
+	p := stateData(old).(viennaPayload).germanPayload
 	p.Rules = "network-v12"
 	p.PublicSHA = occitaniePriorSHA
 	b, _ := json.Marshal(p)

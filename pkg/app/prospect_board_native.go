@@ -101,7 +101,7 @@ func (h *host) addProspectBoard(g *Game, root *widget.Container) {
 	}
 	selected, _ := ui.Pair(g.Frame, g.State.FromCity, g.State.ToCity)
 	for i, row := range rows {
-		title := t(string(row.From)) + " – " + t(string(row.To)) + "  ·  " + ui.Cash(row.Cash)
+		title := ui.ProspectName(g.State.Locale, row.ID, row.From, row.To) + "  ·  " + ui.Cash(row.Cash)
 		if row.Cash <= g.Frame.Player.Cash {
 			title += "  ·  " + t("withinBudget")
 		} else if i == 0 {

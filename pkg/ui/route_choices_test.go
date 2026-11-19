@@ -189,3 +189,15 @@ func TestRouteChoicesSearchIntermediateStopsOnLongServices(t *testing.T) {
 		}
 	}
 }
+
+func TestRouteChoicesSearchTheCalledTerminal(t *testing.T) {
+	west := choiceRoute("west", true, "beijing", "baoding", "shijiazhuang")
+	west.StationNames = []string{"Beijing West", "Baoding East", "Shijiazhuang"}
+	f := gameapi.Frame{Cities: []gameapi.City{{ID: "beijing", StationName: "Beijing South"}}, Routes: []gameapi.Route{west, choiceRoute("south", true, "beijing", "tianjin")}}
+	for query, want := range map[string]string{"Beijing West": "west", "Beijing South": "south"} {
+		got := choiceIDs(ServiceRouteChoices(f, State{Locale: "en", ServiceQuery: query}, nil, nil))
+		if len(got) != 1 || got[0] != want {
+			t.Fatalf("%q returned %v", query, got)
+		}
+	}
+}

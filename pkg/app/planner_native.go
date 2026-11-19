@@ -33,7 +33,7 @@ func (h *host) buildPlanner(g *Game, t func(string) string, label nativeLabel, b
 				if project.Ready <= g.Frame.MonthsResolved {
 					status = "readyForService"
 				}
-				button(t(string(co.FromCity))+" – "+t(string(co.ToCity))+" · "+t(status), func() {
+				button(ui.ProspectName(g.State.Locale, co.ID, co.FromCity, co.ToCity)+" · "+t(status), func() {
 					g.State.FromCity = co.FromCity
 					g.State.ToCity = co.ToCity
 					g.State.AlignmentID = project.AlignmentID
@@ -55,7 +55,7 @@ func (h *host) buildPlanner(g *Game, t func(string) string, label nativeLabel, b
 		h.helpSlot(g, "endpoints", label, button)
 		return
 	}
-	label(t(string(co.FromCity))+" – "+t(string(co.ToCity)), 18)
+	label(ui.ProspectName(g.State.Locale, co.ID, co.FromCity, co.ToCity), 18)
 	for _, project := range g.Frame.Projects {
 		if project.CorridorID != co.ID {
 			continue
@@ -63,7 +63,7 @@ func (h *host) buildPlanner(g *Game, t func(string) string, label nativeLabel, b
 		if project.Ready <= g.Frame.MonthsResolved {
 			label(t("readyForService"), 18)
 			button(t("services"), func() {
-				ui.DraftService(&g.State, g.Frame, co.ID)
+				ui.DraftService(&g.State, g.Frame, ui.ProjectService(g.Frame, co.ID))
 				g.State.ServicePane = "plan"
 				g.State.View = "services"
 				h.workspaceChanged(g)
@@ -96,7 +96,11 @@ func (h *host) buildPlanner(g *Game, t func(string) string, label nativeLabel, b
 		return
 	}
 	if co.ConstructionKind != "" {
-		label(t("constructionScope_"+co.ConstructionKind), 14)
+		key := "constructionScope_" + co.ConstructionKind
+		if co.OpeningService != "" {
+			key = "projectScope_" + co.ID
+		}
+		label(t(key), 14)
 	}
 	if g.State.AlignmentID == "" {
 		g.State.AlignmentID = co.Alignments[0].ID
@@ -309,8 +313,12 @@ func (h *host) buildServices(g *Game, t func(string) string, label nativeLabel, 
 		}
 	}
 	h.helpSlot(g, "idle", label, button)
-	if routeOK && len(r.Stops) > 2 && h.disclosure(g, "service-path", t("calledStops"), button) {
-		label(ui.StopNames(r.Stops, g.State.Locale), 14)
+	if routeOK && (len(r.Stops) > 2 || len(r.StationNames) > 0) && h.disclosure(g, "service-path", t("calledStops"), button) {
+		if len(r.StationNames) > 0 {
+			label(strings.Join(r.StationNames, " → "), 14)
+		} else {
+			label(ui.StopNames(r.Stops, g.State.Locale), 14)
+		}
 	}
 	h.helpSlot(g, "through", label, button)
 	h.helpSlot(g, "service-plan", label, button)

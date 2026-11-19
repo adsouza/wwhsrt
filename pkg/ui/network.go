@@ -14,7 +14,7 @@ func ServiceRoute(f gameapi.Frame, id string) (gameapi.Route, bool) {
 	}
 	// Older fixture frames can still inspect a direct service.
 	for _, c := range f.Corridors {
-		if c.ID == id && !c.Retired {
+		if c.ID == id && !c.Retired && !c.ThroughOnly {
 			return gameapi.Route{
 				ID:       id,
 				Sections: []string{id},
@@ -34,7 +34,11 @@ func RouteName(r gameapi.Route, locale string) string {
 	if r.InfrastructureKind != "" {
 		suffix = " · " + Text(locale, "trackKind_"+r.InfrastructureKind)
 	}
-	if len(r.Cities) > 4 {
+	stops := r.Stops
+	if len(stops) < 2 {
+		stops = r.Cities
+	}
+	if len(stops) > 4 {
 		return Text(
 			locale,
 			string(r.Cities[0]),
@@ -47,7 +51,7 @@ func RouteName(r gameapi.Route, locale string) string {
 		) + suffix
 	}
 	parts := []string{}
-	for _, id := range r.Cities {
+	for _, id := range stops {
 		parts = append(parts, Text(locale, string(id)))
 	}
 	name := strings.Join(parts, " → ")

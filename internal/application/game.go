@@ -95,6 +95,26 @@ type connectorPayload struct {
 	ConnectorPriorSHA string `json:"connector_prior_sha256"`
 }
 
+type viennaPayload struct {
+	expansionPayload
+	ViennaSince    int    `json:"vienna_since"`
+	ViennaPriorSHA string `json:"vienna_prior_sha256"`
+}
+type expansionPayload struct {
+	branchPayload
+	ExpansionSince    int    `json:"expansion_since"`
+	ExpansionPriorSHA string `json:"expansion_prior_sha256"`
+}
+type branchPayload struct {
+	operatingPayload
+	BranchSince    int    `json:"branch_since"`
+	BranchPriorSHA string `json:"branch_prior_sha256"`
+}
+type operatingPayload struct {
+	serbiaPayload
+	OperatingSince    int    `json:"operating_since"`
+	OperatingPriorSHA string `json:"operating_prior_sha256"`
+}
 type serbiaPayload struct {
 	occitaniePayload
 	SerbiaSince    int    `json:"serbia_since"`
@@ -308,7 +328,7 @@ func openMode(store Store, log *slog.Logger, expanded bool) (*Game, error) {
 			_ = json.Unmarshal(b, &header)
 			targetVersion := 3
 			if expanded {
-				targetVersion = 14
+				targetVersion = 18
 			}
 			if header.Version < targetVersion {
 				log.Info(
@@ -330,7 +350,7 @@ func openMode(store Store, log *slog.Logger, expanded bool) (*Game, error) {
 	}
 	rules := "network-v3"
 	if expanded {
-		rules = "network-v14"
+		rules = "network-v18"
 	}
 	log.Info(
 		"world.opened",
@@ -373,8 +393,8 @@ func data(w domain.World) payload {
 func stateData(w domain.World) any {
 	p := data(w)
 	if w.Expanded() {
-		p.Rules = "network-v14"
-		return serbiaPayload{occitaniePayload{germanPayload{rhinePayload{connectorPayload{
+		p.Rules = "network-v18"
+		return viennaPayload{expansionPayload{branchPayload{operatingPayload{serbiaPayload{occitaniePayload{germanPayload{rhinePayload{connectorPayload{
 			regionalPayload{
 				constructionPayload{
 					connectivityPayload{
@@ -398,7 +418,7 @@ func stateData(w domain.World) any {
 			},
 			w.ConnectorSince(),
 			connectorPriorSHA,
-		}, w.RhineSince(), rhinePriorSHA}, w.GermanSince(), germanPriorSHA}, w.OccitanieSince(), occitaniePriorSHA}, w.SerbiaSince(), serbiaPriorSHA}
+		}, w.RhineSince(), rhinePriorSHA}, w.GermanSince(), germanPriorSHA}, w.OccitanieSince(), occitaniePriorSHA}, w.SerbiaSince(), serbiaPriorSHA}, w.OperatingSince(), operatingPriorSHA}, w.BranchSince(), branchPriorSHA}, w.ExpansionSince(), osloCentralPinSHA}, w.ViennaSince(), viennaPriorSHA}
 	}
 	return p
 }
@@ -409,7 +429,7 @@ func encode(w domain.World) ([]byte, error) {
 	}
 	version := 3
 	if w.Expanded() {
-		version = 14
+		version = 18
 	}
 	return json.Marshal(envelope{"wwhsrt-first-business", version, hash(b), b})
 }

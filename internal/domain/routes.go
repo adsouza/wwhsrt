@@ -107,7 +107,7 @@ func (c Catalog) WithNetwork(r gameapi.NetworkRules) (Catalog, error) {
 	}
 	c.retired = map[string]bool{}
 	for _, co := range c.corridors {
-		if co.Retired {
+		if co.Retired || co.ThroughOnly {
 			c.retired[co.ID] = true
 		}
 	}
@@ -125,6 +125,7 @@ func (c Catalog) WithNetwork(r gameapi.NetworkRules) (Catalog, error) {
 	for i := range r.Routes {
 		r.Routes[i].Sections = append([]string{}, r.Routes[i].Sections...)
 		r.Routes[i].Cities = append([]gameapi.CityID{}, r.Routes[i].Cities...)
+		r.Routes[i].StationNames = slices.Clone(r.Routes[i].StationNames)
 		r.Routes[i].Stops = append([]gameapi.CityID{}, r.Routes[i].Stops...)
 	}
 	pairs := make([][]gameapi.CityID, len(r.ConventionalPairs))
@@ -181,6 +182,7 @@ func corridorRoute(co gameapi.Corridor) gameapi.Route {
 	return gameapi.Route{
 		InfrastructureKind: co.InfrastructureKind,
 		Via:                slices.Clone(co.Via),
+		StationNames:       co.StationNames,
 		ID:                 co.ID,
 		Sections:           []string{co.ID},
 		Cities:             []gameapi.CityID{co.FromCity, co.ToCity},
@@ -205,6 +207,7 @@ func (w World) resolveRoute(route gameapi.Route) gameapi.Route {
 	route.Sections = append([]string{}, route.Sections...)
 	route.Cities = append([]gameapi.CityID{}, route.Cities...)
 	route.Stops = append([]gameapi.CityID{}, route.Stops...)
+	route.StationNames = slices.Clone(route.StationNames)
 	route.KM, route.Minutes, route.Open = 0, 0, true
 	route.ConnectorKM = 0
 	for _, id := range route.Sections {
@@ -226,7 +229,15 @@ func (w World) resolveRoute(route gameapi.Route) gameapi.Route {
 }
 
 func (w World) offered(id string) bool {
-	return !w.catalog.retired[id] || w.FleetCount(id) > 0 || slices.ContainsFunc(w.services, func(s gameapi.Service) bool { return s.CorridorID == id })
+	if !w.catalog.retired[id] {
+		return true
+	}
+	if co, ok := w.catalog.find(id); ok && !co.ThroughOnly {
+		if _, owned := w.project(id); owned {
+			return true
+		}
+	}
+	return w.FleetCount(id) > 0 || slices.ContainsFunc(w.services, func(s gameapi.Service) bool { return s.CorridorID == id })
 }
 
 // Public approaches can support a named through service without being bookable
@@ -247,7 +258,13 @@ func (w World) DisplayCorridors() []gameapi.Corridor {
 			}
 		}
 	}
-	return slices.DeleteFunc(w.catalog.Corridors(), func(co gameapi.Corridor) bool { return co.Retired && !co.ThroughOnly && !used[co.ID] })
+	return slices.DeleteFunc(w.catalog.Corridors(), func(co gameapi.Corridor) bool {
+		if !co.Retired || co.ThroughOnly || used[co.ID] {
+			return false
+		}
+		_, owned := w.project(co.ID)
+		return !owned
+	})
 }
 
 // Routes resolves every catalog entry directly. Looking each one up by ID
@@ -365,6 +382,18 @@ func (w World) UpgradeConnectivity(c Catalog) (World, error) {
 	)
 }
 func (w World) atMonth(month int) World {
+	if w.catalog.viennaPrior != nil && month < w.viennaSince {
+		w.catalog = *w.catalog.viennaPrior
+	}
+	if w.catalog.expansionPrior != nil && month < w.expansionSince {
+		w.catalog = *w.catalog.expansionPrior
+	}
+	if w.catalog.branchPrior != nil && month < w.branchSince {
+		w.catalog = *w.catalog.branchPrior
+	}
+	if w.catalog.operatingPrior != nil && month < w.operatingSince {
+		w.catalog = *w.catalog.operatingPrior
+	}
 	if w.catalog.serbiaPrior != nil && month < w.serbiaSince {
 		w.catalog = *w.catalog.serbiaPrior
 	}
@@ -478,6 +507,34 @@ func connectorCutover(c Catalog, month int) int {
 		return month
 	}
 	return 0
+}
+func (c Catalog) WithViennaPrior(prior Catalog) Catalog { c.viennaPrior = &prior; return c }
+func (w World) ViennaSince() int                        { return w.viennaSince }
+func (w World) UpgradeVienna(c Catalog) (World, error) {
+	at := w.cutovers()
+	at.Vienna = w.months
+	return Restore(c, w.revision, w.months, w.company, w.reports, w.projects, w.services, w.fleet, w.debt, w.pending, w.nextTrain, at)
+}
+func (c Catalog) WithExpansionPrior(prior Catalog) Catalog { c.expansionPrior = &prior; return c }
+func (w World) ExpansionSince() int                        { return w.expansionSince }
+func (w World) UpgradeExpansion(c Catalog) (World, error) {
+	at := w.cutovers()
+	at.Expansion = w.months
+	return Restore(c, w.revision, w.months, w.company, w.reports, w.projects, w.services, w.fleet, w.debt, w.pending, w.nextTrain, at)
+}
+func (c Catalog) WithBranchPrior(prior Catalog) Catalog { c.branchPrior = &prior; return c }
+func (w World) BranchSince() int                        { return w.branchSince }
+func (w World) UpgradeBranches(c Catalog) (World, error) {
+	at := w.cutovers()
+	at.Branch = w.months
+	return Restore(c, w.revision, w.months, w.company, w.reports, w.projects, w.services, w.fleet, w.debt, w.pending, w.nextTrain, at)
+}
+func (c Catalog) WithOperatingPrior(prior Catalog) Catalog { c.operatingPrior = &prior; return c }
+func (w World) OperatingSince() int                        { return w.operatingSince }
+func (w World) UpgradeOperating(c Catalog) (World, error) {
+	at := w.cutovers()
+	at.Operating = w.months
+	return Restore(c, w.revision, w.months, w.company, w.reports, w.projects, w.services, w.fleet, w.debt, w.pending, w.nextTrain, at)
 }
 func (c Catalog) WithSerbiaPrior(prior Catalog) Catalog { c.serbiaPrior = &prior; return c }
 func (w World) SerbiaSince() int                        { return w.serbiaSince }

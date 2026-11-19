@@ -225,7 +225,7 @@ func Select(s *State, id gameapi.CityID) {
 func Pair(f gameapi.Frame, a, b gameapi.CityID) (gameapi.Corridor, bool) {
 	var public gameapi.Corridor
 	for _, c := range f.Corridors {
-		if c.PartOf != "" || c.Retired {
+		if c.PartOf != "" || c.Retired || (c.Existing && c.ThroughOnly) {
 			continue
 		}
 		if c.FromCity == a && c.ToCity == b || c.FromCity == b && c.ToCity == a {

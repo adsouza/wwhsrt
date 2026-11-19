@@ -314,9 +314,15 @@ func (g *Game) focusSelected() {
 				a = al
 			}
 		}
+		paths := [][]gameapi.GeoPoint{a.Path}
+		if g.State.View == "build" {
+			paths = ui.MapForProspect(g.Frame, co, a).Paths
+		}
 		points := []mapview.Point{}
-		for _, p := range a.Path {
-			points = append(points, mapview.Project(p.Lat, p.Lon))
+		for _, path := range paths {
+			for _, p := range path {
+				points = append(points, mapview.Project(p.Lat, p.Lon))
+			}
 		}
 		g.Camera.Focus(points)
 	}

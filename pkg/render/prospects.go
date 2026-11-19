@@ -10,12 +10,12 @@ import (
 )
 
 type prospectPath struct {
-	id       string
-	path     []gameapi.GeoPoint
+	id string
+	ui.ProspectMap
 	selected bool
 }
 
-// One path per available pair, shared by drawing and picking. Alternative
+// One map entry per available pair, shared by drawing and picking. Alternative
 // alignments are disclosed only after selecting a prospect.
 func prospectPaths(f gameapi.Frame, s ui.State) []prospectPath {
 	if s.View != "map" && s.View != "build" {
@@ -37,7 +37,7 @@ func prospectPaths(f gameapi.Frame, s ui.State) []prospectPath {
 			}
 		}
 		if len(a.Path) >= 2 {
-			out = append(out, prospectPath{co.ID, a.Path, selected})
+			out = append(out, prospectPath{co.ID, ui.MapForProspect(f, co, a), selected})
 		}
 	}
 	return out
@@ -51,39 +51,56 @@ func PickProspect(c mapview.Camera, f gameapi.Frame, s ui.State, at mapview.Poin
 	}
 	best, id := 18.0, ""
 	for _, prospect := range prospectPaths(f, s) {
-		if d := pathDistance(c, prospect.path, at); d < best {
-			best, id = d, prospect.id
+		for _, path := range prospect.Paths {
+			if d := pathDistance(c, path, at); d < best {
+				best, id = d, prospect.id
+			}
 		}
 	}
 	return id
 }
 
-func (m *Map) drawProspects(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s ui.State) {
+func (m *Map) drawProspects(dst *ebiten.Image, c mapview.Camera, f gameapi.Frame, s ui.State) ([]gameapi.CityID, map[gameapi.CityID]gameapi.City) {
+	alternates := map[gameapi.CityID]gameapi.City{}
+	var stops []gameapi.CityID
 	p := ui.PaletteFor(s)
 	for _, prospect := range prospectPaths(f, s) {
+		for _, station := range prospect.AlternateStations {
+			alternates[station.ID] = station
+		}
 		if prospect.selected {
-			m.route(dst, c, prospect.path, p.Draft, p.Outline, false)
-			continue
+			stops = prospect.Stops
 		}
-		// Carry spacing across short source segments, and clip before generating
-		// dots to bound work even when most of an alignment is offscreen.
-		total := 0.0
-		for i := 1; i < len(prospect.path); i++ {
-			a := c.Screen(mapview.Project(prospect.path[i-1].Lat, prospect.path[i-1].Lon))
-			b := c.Screen(mapview.Project(prospect.path[i].Lat, prospect.path[i].Lon))
-			length := math.Hypot(b.X-a.X, b.Y-a.Y)
-			left, right, ok := screenSegment(c, a, b)
-			if ok {
-				visible := math.Hypot(right.X-left.X, right.Y-left.Y)
-				start := math.Mod(12-math.Mod(total+math.Hypot(left.X-a.X, left.Y-a.Y), 12), 12)
-				for d := start; d < visible; d += 12 {
-					u := d / visible
-					x, y := float32(left.X+(right.X-left.X)*u), float32(left.Y+(right.Y-left.Y)*u)
-					m.marks.disc(dst, x, y, 3.5, p.Surface)
-					m.marks.disc(dst, x, y, 2.5, p.Action)
-				}
+		for _, path := range prospect.Paths {
+			if prospect.selected {
+				m.route(dst, c, path, p.Draft, p.Outline, false)
+			} else {
+				m.drawProspectDots(dst, c, path, p)
 			}
-			total += length
 		}
+	}
+	return stops, alternates
+}
+
+func (m *Map) drawProspectDots(dst *ebiten.Image, c mapview.Camera, path []gameapi.GeoPoint, p ui.Palette) {
+	// Carry spacing across short source segments, and clip before generating
+	// dots to bound work even when most of an alignment is offscreen.
+	total := 0.0
+	for i := 1; i < len(path); i++ {
+		a := c.Screen(mapview.Project(path[i-1].Lat, path[i-1].Lon))
+		b := c.Screen(mapview.Project(path[i].Lat, path[i].Lon))
+		length := math.Hypot(b.X-a.X, b.Y-a.Y)
+		left, right, ok := screenSegment(c, a, b)
+		if ok {
+			visible := math.Hypot(right.X-left.X, right.Y-left.Y)
+			start := math.Mod(12-math.Mod(total+math.Hypot(left.X-a.X, left.Y-a.Y), 12), 12)
+			for d := start; d < visible; d += 12 {
+				u := d / visible
+				x, y := float32(left.X+(right.X-left.X)*u), float32(left.Y+(right.Y-left.Y)*u)
+				m.marks.disc(dst, x, y, 3.5, p.Surface)
+				m.marks.disc(dst, x, y, 2.5, p.Action)
+			}
+		}
+		total += length
 	}
 }

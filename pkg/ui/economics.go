@@ -22,7 +22,7 @@ func EconomicsDetails(f gameapi.Forecast, locale string) []Detail {
 		{t("maintenance"), Cash(f.MaintenanceCosts)}}
 }
 func ProspectServicePlan(f gameapi.Frame, id string) (int, gameapi.Money) {
-	if r, ok := ServiceRoute(f, id); ok && r.SuggestedFrequency > 0 {
+	if r, ok := ServiceRoute(f, ProjectService(f, id)); ok && r.SuggestedFrequency > 0 {
 		return r.SuggestedFrequency, r.SuggestedFare
 	}
 	return 6, 9000

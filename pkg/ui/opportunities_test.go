@@ -27,13 +27,13 @@ func TestProspectsRankByMinimumPlayerCash(t *testing.T) {
 }
 
 func TestOperatingSectionsIncludeSharedThroughTrack(t *testing.T) {
-	f := gameapi.Frame{Routes: []gameapi.Route{
+	f := gameapi.Frame{Corridors: []gameapi.Corridor{{ID: "bc", SharedSections: []string{"bx", "xc"}}}, Routes: []gameapi.Route{
 		{ID: "through", Open: true, Sections: []string{"ab", "bc"}},
 		{ID: "ab", Open: true, Sections: []string{"ab"}},
 		{ID: "cd", Open: true, Sections: []string{"cd"}},
 	}, Services: []gameapi.Service{{CorridorID: "through", Frequency: 2}, {CorridorID: "ab", Frequency: 0}}, Fleet: []gameapi.FleetLease{{CorridorID: "cd"}}}
 	running := OperatingSections(f)
-	if len(running) != 2 || !running["ab"] || !running["bc"] || NextService(f) != "cd" {
+	if len(running) != 4 || !running["bx"] || !running["xc"] || !running["ab"] || !running["bc"] || NextService(f) != "cd" {
 		t.Fatal(running, NextService(f))
 	}
 	f.Services[0].Frequency = 0

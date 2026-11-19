@@ -75,7 +75,7 @@ func TestSerbiaMigrationPreservesOperatingCompany(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	p := stateData(old).(serbiaPayload).occitaniePayload
+	p := stateData(old).(viennaPayload).occitaniePayload
 	p.Rules, p.PublicSHA = "network-v13", serbiaPriorSHA
 	b, err := json.Marshal(p)
 	if err != nil {
