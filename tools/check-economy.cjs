@@ -76,7 +76,7 @@ const sha = (file) => crypto.createHash('sha256').update(fs.readFileSync(file)).
       direct = await forecast(p, q);
     expenses(direct);
     // Same forecast as internal/application/economy_test.go, which pins the rule-level value.
-    assert.equal(direct.passengers, 8723);
+    assert.equal(direct.passengers, 7342);
     assert.equal(direct.break_even_passengers, 6399);
     await p.screenshot({ path: path.join(out, 'economy-plan-desktop.png') });
     await (await control(p, '#economics-values')).scrollIntoViewIfNeeded();

@@ -129,6 +129,28 @@ def add_operating_hsr(source, cities, market, stations, rows, patterns, supersed
             patterns.append({**r, "id": r["id"] + "_hbf", "sections": list(sections)})
             offered.add(key)
 
+    # The Gotha track passes Nürnberg Hbf before its archived endpoint at
+    # Dutzendteich. Berlin–Munich uses just the part north of Hauptbahnhof.
+    original = old["public_nuremberg__stop_node_1781376484"]
+    approach = deepcopy(original)
+    approach.update(id="public_nuremberg_hbf__gotha", through_only=True, shared_sections=[original["id"]])
+    alt = approach["alignments"][0]
+    track = LineString(coords(alt["path"]))
+    hbf = oriented(all_rows[restored["public_munich__nuremberg"]], "nuremberg")[0]
+    assert track.distance(Point(hbf)) < .0001
+    cut = track.project(Point(hbf))
+    remaining = [hbf, *list(substring(track, cut, track.length).coords)[1:]]
+    retained = distance(remaining) / distance(list(track.coords))
+    alt.update(path=points(remaining), km=round(alt["km"] * retained), minutes=round(alt["minutes"] * retained))
+    alt["surface_km"] = alt["km"]
+    mark_stations(approach)
+    rows.append(approach)
+    berlin = next(r for r in patterns if r["id"] == "route_berlin__munich")
+    sections = [berlin["sections"][0], approach["id"], restored["public_munich__nuremberg"]]
+    all_rows[approach["id"]] = approach
+    assert continuous(berlin, sections)
+    patterns.append({**berlin, "id": "route_berlin__munich_hbf", "sections": sections})
+
     def divide(id, junction, through_only=False):
         # Keep the released direct service and its timetable. It consumes both
         # physical sections, as do stopping and branching services.

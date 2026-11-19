@@ -133,16 +133,23 @@ func TestConnectivityCompleteServicesCarryEndAndIntermediateRiders(t *testing.T)
 		"network_uzbek_main_all_stops",
 		"network_uzbek_branch_all_stops",
 		"public_kenitra__tangier",
-		"route_frankfurt_am_main__rhine_ruhr",
+		"route_frankfurt_am_main__rhine_ruhr_hsr",
 		"public_ankara__istanbul",
 		"route_moscow__saint_petersburg",
 		"public_lisbon__porto",
-		"public_munich__vienna",
+		"munich__vienna_via_tullnerfeld",
 		"route_beijing__kunming",
 	} {
 		t.Run(id, func(t *testing.T) {
 			store := &memoryStore{}
 			g := openPublic(t, store)
+			if id == "route_frankfurt_am_main__rhine_ruhr_hsr" {
+				publicCommand(t, g, gameapi.Command{Kind: gameapi.TakeLoan, Amount: 3_000_000_000})
+				for _, section := range []string{"upgrade_de_koln__stop_node_1880180223", "upgrade_de_rhine_ruhr__stop_node_1880180223"} {
+					publicCommand(t, g, gameapi.Command{Kind: gameapi.BuildLine, CorridorID: section, AlignmentID: "launch"})
+				}
+				publicCommand(t, g, gameapi.Command{Kind: gameapi.AdvanceYear})
+			}
 			f := g.Snapshot()
 			var route gameapi.Route
 			for _, r := range f.Routes {

@@ -29,6 +29,10 @@ func routeChoiceFrame(t *testing.T) (gameapi.Game, gameapi.Frame) {
 func TestRouteBoxesCoverEveryOpenRouteAndItsSections(t *testing.T) {
 	_, f := routeChoiceFrame(t)
 	boxes := routeBoxes(f)
+	sections := map[string]gameapi.Corridor{}
+	for _, c := range f.Corridors {
+		sections[c.ID] = c
+	}
 	open, through := 0, 0
 	for _, r := range f.Routes {
 		if !r.Open {
@@ -44,9 +48,15 @@ func TestRouteBoxesCoverEveryOpenRouteAndItsSections(t *testing.T) {
 		}
 		through++
 		for _, section := range r.Sections {
-			part, ok := boxes[section]
-			if !ok || !box.Contains(part) {
-				t.Fatal("route box must cover each of its sections", r.ID, section)
+			part, ok := sections[section]
+			if !ok {
+				t.Fatal("missing physical section", r.ID, section)
+			}
+			for _, pin := range part.Alignments[0].Path {
+				point := mapview.Project(pin.Lat, pin.Lon)
+				if !box.Contains(growBox(ui.Box{}, point, true)) {
+					t.Fatal("route box does not enclose its track", r.ID, section, pin)
+				}
 			}
 		}
 	}
@@ -195,7 +205,7 @@ func TestNativeServiceRoutesFollowTheMapView(t *testing.T) {
 		t.Fatal("search must look beyond the view", found.InView, len(found.Routes))
 	}
 	for _, r := range found.Routes {
-		if r.ID != "tokyo-nagoya" && !strings.Contains(strings.ToLower(ui.RouteName(r, "en")), "shanghai") {
+		if r.ID != "tokyo-nagoya" && !strings.Contains(strings.ToLower(ui.StopNames(r.Stops, "en")), "shanghai") {
 			t.Fatal("search listed a route that does not match", r.ID)
 		}
 	}

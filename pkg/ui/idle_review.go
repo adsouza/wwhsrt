@@ -89,6 +89,9 @@ func IdleName(f gameapi.Frame, locale string, line gameapi.IdleLine) string {
 		kind = "idleFleetLabel"
 		if route, ok := ServiceRoute(f, line.CorridorID); ok {
 			name = RouteName(route, locale)
+			if len(route.Stops) < len(route.Cities) && len(route.Cities) > 2 {
+				name += " · " + Text(locale, "viaPlaces") + " " + StopNames(route.Cities[1:len(route.Cities)-1], locale)
+			}
 		}
 	}
 	return Text(locale, kind) + ": " + name

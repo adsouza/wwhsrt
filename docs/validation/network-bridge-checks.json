@@ -1,10 +1,10 @@
 {
   "passed": true,
-  "catalog_sha256": "f83d63f7f10ddbe662718409f8704caf7644a56a1fd81c02d96ea43e9c4f5905",
+  "catalog_sha256": "e0f9d3607d291c6ca0de207c911d11d4c7751ec1e1cd91f0ac94d6de924aa85c",
   "cities": 365,
-  "existing_corridors": 385,
+  "existing_corridors": 386,
   "prospects": 74,
-  "service_templates": 4666,
+  "service_templates": 4667,
   "mapped_stations": 2770,
   "station_inventory": 4380,
   "networks": [

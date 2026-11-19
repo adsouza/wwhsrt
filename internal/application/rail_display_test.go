@@ -1,6 +1,7 @@
 package application
 
 import (
+	"encoding/json"
 	"reflect"
 	"testing"
 	"wwhsrt/assets"
@@ -19,9 +20,37 @@ func TestPublicRailDrawingsConnectMappedStationsWithoutChangingEconomy(t *testin
 		}
 		byCity[c.ID] = gameapi.GeoPoint{Lat: lat, Lon: lon}
 	}
+	// Some city markets use different platforms for different lines.
+	var source struct {
+		Corridors []struct {
+			ID        string
+			Terminals [2]string `json:"terminal_ids"`
+		}
+		Stations []struct {
+			ID string
+			gameapi.GeoPoint
+		}
+	}
+	if err := json.Unmarshal(assets.PublicNetwork, &source); err != nil {
+		t.Fatal(err)
+	}
+	terminals := map[string][2]string{}
+	for _, c := range source.Corridors {
+		terminals[c.ID] = c.Terminals
+	}
+	stations := map[string]gameapi.GeoPoint{}
+	for _, s := range source.Stations {
+		stations[s.ID] = s.GeoPoint
+	}
 	for _, co := range f.Corridors {
+		ends := [2]gameapi.GeoPoint{byCity[co.FromCity], byCity[co.ToCity]}
+		for i, id := range terminals[co.ID] {
+			if id != "" {
+				ends[i] = stations[id]
+			}
+		}
 		for _, a := range co.Alignments {
-			if a.Path[0] != byCity[co.FromCity] || a.Path[len(a.Path)-1] != byCity[co.ToCity] {
+			if a.Path[0] != ends[0] || a.Path[len(a.Path)-1] != ends[1] {
 				t.Fatalf("%s/%s drawing detached from station", co.ID, a.ID)
 			}
 		}
@@ -47,11 +76,14 @@ func TestPublicRailDrawingsConnectMappedStationsWithoutChangingEconomy(t *testin
 			}
 		}
 	}
-	original := g.catalog.Corridors()
-	for i, co := range f.Corridors {
+	original := map[string]gameapi.Corridor{}
+	for _, co := range g.catalog.Corridors() {
+		original[co.ID] = co
+	}
+	for _, co := range f.Corridors {
 		for j, a := range co.Alignments {
 			a.Path = nil
-			b := original[i].Alignments[j]
+			b := original[co.ID].Alignments[j]
 			b.Path = nil
 			if !reflect.DeepEqual(a, b) {
 				t.Fatal("render correction changed rules")

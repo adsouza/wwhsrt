@@ -172,6 +172,7 @@ func TestBasemapKnownPoints(t *testing.T) {
 		{"checker: Laizhou Bay", 119.10184264, 37.29738934, "sea"},
 		{"checker: off Wenzhou", 121.17869533, 28.26677417, "sea"},
 		{"checker: Qiongzhou Strait", 110.48955745, 20.07817143, "sea"},
+		{"Riddarfjärden near Stockholm Central", 18.049, 59.324, "lake"},
 		{"Lake Michigan", -87.0, 43.5, "lake"},
 		{"Lake Biwa", 136.08, 35.25, "lake"},
 		{"Lake Geneva", 6.55, 46.45, "lake"},

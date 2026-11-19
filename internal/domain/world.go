@@ -61,6 +61,13 @@ func NewCatalog(rows []gameapi.Corridor) (Catalog, error) {
 		}
 		seen[r.ID] = true
 		for _, prior := range pairs[pair] {
+			// A through train may use a shorter approach to a different platform
+			// in the same city. It consumes the full section's path capacity.
+			if r.Existing && prior.Existing &&
+				((r.ThroughOnly && slices.Equal(r.SharedSections, []string{prior.ID})) ||
+					(prior.ThroughOnly && slices.Equal(prior.SharedSections, []string{r.ID}))) {
+				continue
+			}
 			if r.Existing && prior.Existing && ((prior.Retired && r.ReplacesCorridor == prior.ID) || (r.Retired && prior.ReplacesCorridor == r.ID)) {
 				continue
 			}

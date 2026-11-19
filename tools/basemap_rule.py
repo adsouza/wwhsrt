@@ -401,6 +401,22 @@ def apply_local_shores(basemap, features):
         rings[touched[0] : touched[0] + 1] = land
 
 
+def apply_lake_shore(basemap, feature):
+    window = box(*feature["properties"]["bounds"])
+    assert any(Polygon(r).covers(window) for r in basemap["land"])
+    assert not any(Polygon(r).intersects(window) for r in basemap["lake_islands"])
+    lakes = basemap["lakes"]
+    touched = [i for i, ring in enumerate(lakes) if Polygon(ring).intersects(window)]
+    outside = unary_union([Polygon(lakes[i]) for i in touched]).difference(window)
+    water = outside.union(window.difference(shape(feature["geometry"])))
+    for i in reversed(touched):
+        del lakes[i]
+    for part in _polygons(water):
+        lakes.extend(_emitted(part.exterior.coords, False))
+        for hole in part.interiors:
+            basemap["lake_islands"].extend(_emitted(hole.coords, True))
+
+
 def drawn_geometry(basemap):
     """The land the renderer draws: land outlines, minus lakes, plus the islands inside those lakes."""
 
