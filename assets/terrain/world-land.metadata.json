@@ -2,16 +2,17 @@
   "role": "Single worldwide land outline with lakes cut out; display only, no political boundaries",
   "source_mask_sha256": "4ce8321410e45877cdf11c8d28e49eb0eb46b77d6662f883df7efdf2b008f91a",
   "local_shorelines": {
-    "data/terrain/oresund-harbors.v1.geojson": "d7568056333c0d6caafd2ae9ce851ecf2c28786d1694cb3a850212e625cc63a0"
+    "data/terrain/oresund-harbors.v1.geojson": "d7568056333c0d6caafd2ae9ce851ecf2c28786d1694cb3a850212e625cc63a0",
+    "data/terrain/stockholm-shore.v1.geojson": "2065593ea8c0a5bf64677e5b15bd4b53d02b4d2791b709fed0341b5703da2539"
   },
   "source_countries_sha256": "239eec57ac17f100a11e2536cffc56752c318b50ae765b0918ff7aab4ce8f255",
   "source_lakes_sha256": "2d036f53dedec578001c5c30c2959ee7d4eebc1306900fa4367c49929ec8f2d9",
   "license": "Natural Earth public domain",
   "local_shoreline_license": "OpenStreetMap contributors, ODbL 1.0",
   "line_sources": {
-    "assets/scenario/playable-rail-map.json": "72eb69292170d23fbe94b7e3bf06d4745d4a3630b3e8c0c91aa1b0a9b84da9a1",
+    "assets/scenario/playable-rail-map.json": "e4d6dc40c0076d8a6488b67163526e3bb23c60427bd8567cec72585a82857a5a",
     "data/construction/compiled-prospects.v1.json": "5beaee43d5c943442bbf22e95b95c281bafee08e986275a61f90e9027e2da7ef",
-    "assets/scenario/public-network.json": "f83d63f7f10ddbe662718409f8704caf7644a56a1fd81c02d96ea43e9c4f5905"
+    "assets/scenario/public-network.json": "e0f9d3607d291c6ca0de207c911d11d4c7751ec1e1cd91f0ac94d6de924aa85c"
   },
   "near_km": 150,
   "fine_degrees": 0.003,
@@ -42,14 +43,14 @@
   "counts": {
     "land": 1575,
     "lakes": 331,
-    "lake_islands": 205,
-    "points": 92466,
+    "lake_islands": 208,
+    "points": 92513,
     "left_out_islands": 2493,
     "left_out_lakes": 1014
   },
   "existing_line_points_off_land": {
-    "sampled": 52168,
-    "off_land": 409
+    "sampled": 52314,
+    "off_land": 407
   },
-  "output_sha256": "a9d94d8d71b5be263e15a109c8f02af93d550606834903e9db2b950642daa9b8"
+  "output_sha256": "ec048acf6b9e186f7c4d44548a7e4109c88a477e5a4d8a977a5cdc8ad4731ea9"
 }

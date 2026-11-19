@@ -63,7 +63,7 @@ async function hint(p, text) {
     // The lease comes from the economy catalog, so the check follows calibration changes.
     const economy = JSON.parse(fs.readFileSync('assets/scenario/economy.json', 'utf8'));
     assert.equal(f.train_family.lease_monthly, economy.lease_monthly);
-    await hint(p, 'passenger income and costs');
+    await hint(p, 'Start with the cheapest construction prospect');
     await act(p, 'advance', trace, { kind: 'advance_month' });
     f = (await snap(p)).frame;
     assert(f.reports[0].revenue > 0);

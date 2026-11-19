@@ -32,6 +32,10 @@ const (
 // route that could have been scheduled before the two-stop service was added.
 const beforeSemmeringStopsSHA = "6fe558152307c3adeb4bfe7f5e944acca7481e5010913d4701a5a60bd358bf10"
 
+// The Berlin–Munich through pattern only uses existing shared track. Previously
+// accepted services, markets and their settlement inputs are identical.
+const beforeBerlinThroughSHA = "f83d63f7f10ddbe662718409f8704caf7644a56a1fd81c02d96ea43e9c4f5905"
+
 // The Warsaw marker correction only changes display coordinates and station names.
 const beforeWarsawCentralnaSHA = "23c1e1d0119f1fd62deb517a02d588f4be1aa098ef704b70394fb0ffef7adc18"
 
@@ -551,8 +555,8 @@ func decodeNetworkVersion(b []byte, env envelope, c domain.Catalog) (domain.Worl
 	if env.Version == 17 && p.PublicSHA == beforeSemmeringStopsSHA {
 		expectedPublic = beforeSemmeringStopsSHA
 	}
-	if env.Version == 18 && p.PublicSHA == beforeWarsawCentralnaSHA {
-		expectedPublic = beforeWarsawCentralnaSHA
+	if env.Version == 18 && (p.PublicSHA == beforeWarsawCentralnaSHA || p.PublicSHA == beforeBerlinThroughSHA) {
+		expectedPublic = p.PublicSHA
 	}
 	if p.PublicSHA != expectedPublic || p.ScenarioSHA != scenarioSHA || p.BusinessSHA != businessSHA ||
 		p.NetworkSHA != networkSHA {

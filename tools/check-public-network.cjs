@@ -74,7 +74,7 @@ function point(c, lat, lon) {
     assert(s.frame.public_network);
     const catalog = JSON.parse(fs.readFileSync('assets/scenario/public-network.json'));
     assert.equal(s.frame.cities.length, catalog.cities.length);
-    assert.equal(s.frame.corridors.length, catalog.corridors.length);
+    assert.deepEqual(s.frame.corridors.map((c) => c.id), catalog.corridors.filter((c) => !c.retired || c.through_only).map((c) => c.id));
     result.catalog_counts = {
       cities: catalog.cities.length,
       corridors: catalog.corridors.length,

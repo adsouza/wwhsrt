@@ -90,7 +90,7 @@ func TestEconomyForecastBreakEvenAndSettlementReconcile(t *testing.T) {
 			t.Fatal("forecast/expense breakdown invalid", f)
 		}
 		// New station markets and cross-border endpoints redistribute the finite demand budget.
-		if !through && (f.BreakEvenPassengers != 6399 || f.Passengers != 8723 || f.LeaseCosts != 12000000) {
+		if !through && (f.BreakEvenPassengers != 6399 || f.Passengers != 7342 || f.LeaseCosts != 12000000) {
 			t.Fatal("regional calibration drift", f)
 		}
 		if through {

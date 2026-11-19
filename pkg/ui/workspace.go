@@ -106,7 +106,8 @@ func workspaceAt100(w, h int, s State) WorkspaceLayout {
 			l.Prospects = image.Rect(0, l.Map.Max.Y, w, l.Map.Max.Y+height)
 			l.Inspector.Min.Y = l.Prospects.Max.Y
 		} else {
-			height := min(202, max(108, l.Map.Dy()/4))
+			// Keep a usable region map and one scrollable prospect row on short windows.
+			height := min(202, max(108, l.Map.Dy()/4), max(70, l.Map.Dy()-150))
 			l.Prospects = image.Rect(l.Map.Min.X, l.Map.Max.Y-height, l.Map.Max.X, l.Map.Max.Y)
 			l.Map.Max.Y = l.Prospects.Min.Y
 		}

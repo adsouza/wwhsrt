@@ -1005,11 +1005,13 @@ async function reviewIdleLine(id) {
 function idleName(line) {
   const fleetOnly = line.maintenance === 0 && line.leases > 0,
     route = frame.routes.find((r) => r.id === line.corridor_id);
-  return (
-    label(fleetOnly ? 'idleFleetLabel' : 'idleLineLabel') +
-    ': ' +
-    (fleetOnly && route ? routeName(route) : corridorName(line))
-  );
+  let name = corridorName(line);
+  if (fleetOnly && route) {
+    name = routeName(route);
+    if (route.stops.length < route.cities.length && route.cities.length > 2)
+      name += ' · ' + label('viaPlaces') + ' ' + route.cities.slice(1, -1).map(label).join(' → ');
+  }
+  return label(fleetOnly ? 'idleFleetLabel' : 'idleLineLabel') + ': ' + name;
 }
 function renderIdleLines() {
   const lines = frame.idle_lines || [],

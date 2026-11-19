@@ -27,6 +27,7 @@ import basemap_rule as rule  # noqa: E402
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 MASK = "data/construction/route-land.v1.json.gz"
 LOCAL_SHORES = "data/terrain/oresund-harbors.v1.geojson"
+STOCKHOLM = "data/terrain/stockholm-shore.v1.geojson"
 EXISTING = "assets/scenario/playable-rail-map.json"
 PROSPECTS = "data/construction/compiled-prospects.v1.json"
 NETWORK = "assets/scenario/public-network.json"
@@ -141,6 +142,9 @@ def main():
     composed, tightened = fit(mask["land"]["coordinates"], index, routes)
     basemap = {k: composed[k] for k in ("land", "lakes", "lake_islands")}
     rule.apply_local_shores(basemap, json.loads((ROOT / LOCAL_SHORES).read_bytes())["features"])
+    # Here the coarse shoreline is the edge of Lake Mälaren inside the mainland.
+    for feature in json.loads((ROOT / STOCKHOLM).read_bytes())["features"]:
+        rule.apply_lake_shore(basemap, feature)
     counts = {k: len(v) for k, v in basemap.items()}
     counts["points"] = sum(len(r) for v in basemap.values() for r in v)
     counts["left_out_islands"] = composed["sources"]["left_out_islands"]
@@ -159,7 +163,7 @@ def main():
     metadata = {
         "role": "Single worldwide land outline with lakes cut out; display only, no political boundaries",
         "source_mask_sha256": sha(MASK),
-        "local_shorelines": {LOCAL_SHORES: sha(LOCAL_SHORES)},
+        "local_shorelines": {p: sha(p) for p in (LOCAL_SHORES, STOCKHOLM)},
         "source_countries_sha256": mask["source_countries_sha256"],
         "source_lakes_sha256": mask["source_lakes_sha256"],
         "license": mask["license"],

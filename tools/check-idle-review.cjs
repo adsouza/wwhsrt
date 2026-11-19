@@ -1,4 +1,4 @@
-const { control, language } = require('./ui-helpers.cjs');
+const { control, language, prospect } = require('./ui-helpers.cjs');
 // Actual controls + Go-rendered pixels: identify every idle built line, not an
 // arbitrary selected service or an unbuilt alignment. Uses isolated browser data.
 const assert = require('node:assert/strict'),
@@ -8,7 +8,19 @@ const assert = require('node:assert/strict'),
 const { chromium } = require('playwright');
 const url = process.argv[2] || 'http://127.0.0.1:8765/',
   out = path.resolve('docs/validation');
-const snap = (p) => p.evaluate(() => railSnapshot());
+// Keep only the inspected lines when crossing the browser/Node boundary.
+const snap = (p, ids = []) => p.evaluate(async (ids) => {
+  const { camera, palette, frame } = await railSnapshot();
+  return {
+    camera, palette,
+    frame: {
+      revision: frame.revision, checkpoint: frame.checkpoint,
+      idle_lines: frame.idle_lines, services: frame.services,
+      projects: frame.projects.filter((project) => ids.includes(project.corridor_id)),
+      corridors: frame.corridors.filter((corridor) => ids.includes(corridor.id)),
+    },
+  };
+}, ids);
 async function command(p, id) {
   const rev = (await snap(p)).frame.revision;
   await (await control(p, '#' + id)).click();
@@ -50,7 +62,7 @@ function samples(s, id) {
   return points;
 }
 async function pixels(p, ids) {
-  const s = await snap(p),
+  const s = await snap(p, ids),
     map = p.frames().find((f) => f.url().includes('map.html')),
     png = await (await control(map, 'canvas')).screenshot(),
     color = s.palette['warning-text'];
@@ -122,7 +134,8 @@ async function reviewAll(p) {
     await command(p, 'borrow');
     for (const id of ['tsuruga-osaka', 'hokkaido-extension']) {
       await (await control(p, '#tab-build')).click();
-      await (await control(p, '[data-corridor="' + id + '"]')).click();
+      await prospect(p, id);
+      await p.locator('#alignments button').filter({ hasText: 'Tunnel route' }).click();
       await command(p, 'build-line');
     }
     for (let i = 0; i < 4; i++) await command(p, 'advance-year');

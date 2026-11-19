@@ -348,29 +348,31 @@ func TestServiceForecastsMatchPlannerAndRemainPinned(t *testing.T) {
 	}
 }
 
-func TestWarsawMarkerCorrectionResumesV18Service(t *testing.T) {
+func TestEarlierV18CatalogsResumeWarsawService(t *testing.T) {
 	g := openPublic(t, nil)
 	const line = "public_warsaw__wloszczowa"
 	publicCommand(t, g, gameapi.Command{Kind: gameapi.LeaseTrain, CorridorID: line})
 	publicCommand(t, g, gameapi.Command{Kind: gameapi.SetService, CorridorID: line, Frequency: 1, Fare: 5000})
 	before := publicCommand(t, g, gameapi.Command{Kind: gameapi.AdvanceMonth})
 	p := stateData(g.w).(viennaPayload)
-	p.PublicSHA = beforeWarsawCentralnaSHA
-	b, err := json.Marshal(p)
-	if err != nil {
-		t.Fatal(err)
-	}
-	store := &memoryStore{}
-	store.b, err = json.Marshal(envelope{"wwhsrt-first-business", 18, hash(b), b})
-	if err != nil {
-		t.Fatal(err)
-	}
-	resumed := openPublic(t, store)
-	if got := resumed.Snapshot(); got.Checkpoint != before.Checkpoint {
-		t.Fatal("saved company changed during station correction")
-	}
-	next := publicCommand(t, resumed, gameapi.Command{Kind: gameapi.AdvanceMonth})
-	if openPublic(t, store).Snapshot().Checkpoint != next.Checkpoint {
-		t.Fatal("continued Warsaw service failed to reload")
+	for _, previous := range []string{beforeWarsawCentralnaSHA, beforeBerlinThroughSHA} {
+		p.PublicSHA = previous
+		b, err := json.Marshal(p)
+		if err != nil {
+			t.Fatal(err)
+		}
+		store := &memoryStore{}
+		store.b, err = json.Marshal(envelope{"wwhsrt-first-business", 18, hash(b), b})
+		if err != nil {
+			t.Fatal(err)
+		}
+		resumed := openPublic(t, store)
+		if got := resumed.Snapshot(); got.Checkpoint != before.Checkpoint {
+			t.Fatal("saved company changed during station correction")
+		}
+		next := publicCommand(t, resumed, gameapi.Command{Kind: gameapi.AdvanceMonth})
+		if openPublic(t, store).Snapshot().Checkpoint != next.Checkpoint {
+			t.Fatal("continued Warsaw service failed to reload")
+		}
 	}
 }
